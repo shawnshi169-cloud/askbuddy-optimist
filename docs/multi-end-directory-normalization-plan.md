@@ -42,8 +42,9 @@ askbuddy-optimist/
 
 ## 3. 当前基线（更新后事实）
 
-- iOS 当前可运行主线：`src + apps/ios`
-- Android 当前可运行主线：`apps/android`
+- iOS/Android Shared Core App：`src/`
+- iOS Native Shell：`apps/ios/`
+- Android Native Shell：`apps/android/`
 - 小程序当前主线：`apps/wechat-miniprogram`
 - 根目录 `ios/` 已迁移收口到 `apps/ios`
 
@@ -56,8 +57,10 @@ askbuddy-optimist/
 3. ✅ iOS 原生工程已归一：`apps/ios`
 
 当前约束：
-- iOS/Android/小程序后续开发统一在 `apps/*` 目录进行。
-- `src` 仍作为 Web/H5 与跨端 UI 基线代码存在（不等于 iOS 原生工程目录）。
+- iOS/Android 共用业务页面和 React 逻辑在 `src/` 开发。
+- iOS/Android 平台专属能力分别在 `apps/ios/`、`apps/android/` 开发。
+- 小程序在 `apps/wechat-miniprogram/` 独立开发并消费 shared contract。
+- `src/` 不等于 iOS 原生工程目录。
 
 ---
 
@@ -128,10 +131,11 @@ cd apps/android && ./gradlew assembleDebug
 
 ## 10. 责任划分建议
 
-- A（后端与共享契约）：裁决路径、更新规则文档、合并结构 PR。  
-- B（iOS）：验证 iOS 构建与路径迁移影响。  
-- C（Android）：验证 Android 构建与路径迁移影响。  
-- D（小程序）：验证小程序路由与资源路径无破坏。  
+- A（后端与共享契约）：裁决字段、状态、RPC 和后端边界。
+- B（Core App）：维护 iOS/Android 共用 React 前端。
+- C（iOS Native）：验证 iOS Shell、签名与构建。
+- D（Android Native）：验证 Android Shell、签名与构建。
+- E（小程序）：验证小程序路由、请求适配与资源路径。
 
 ---
 

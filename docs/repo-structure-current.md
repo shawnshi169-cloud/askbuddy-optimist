@@ -1,34 +1,31 @@
-# 当前仓库结构说明（A 主线）
+# 当前仓库结构说明
 
-日期：2026-04-24  
-状态：Phase 1 Freeze，目录层级已完成同层级收口
+状态：Phase 1 Freeze，多端目录已归一，所有权规则已收口。
 
-## 当前可运行主路径
-- iOS：`src + apps/ios`
-- Android：`apps/android`
-- 微信小程序：`apps/wechat-miniprogram`
-- 后端：`supabase`
-- 共享层：`packages/shared-types`、`packages/shared-api`
+## Source of Truth
 
-## 当前目录结构
-- 三端已同层级放置在 `apps/` 下：
-- iOS：`apps/ios`
-- Android：`apps/android`
-- 微信小程序：`apps/wechat-miniprogram`
-
-## 当前执行策略
-1. 多端开发统一在 `apps/*` 目录下进行。
-2. 后端与跨端契约冲突以 A 主线为准。
-3. Freeze 阶段仅接受 bugfix / 小 patch / cleanup。
-
-## 目标结构（下一阶段）
 ```text
-apps/
-  ios/
-  android/
-  wechat-miniprogram/
-packages/
-  shared-types/
-  shared-api/
-supabase/
+src/                         iOS + Android Shared Core App
+apps/ios/                    iOS Native Shell
+apps/android/                Android Native Shell
+apps/wechat-miniprogram/     WeChat Mini Program
+packages/shared-types/       Business types and state machines
+packages/shared-api/         API/RPC contracts
+supabase/                    Backend schema, RLS, RPC and functions
 ```
+
+## 关键说明
+
+1. `src/` 是 iOS 与 Android 共用的 React 业务前端，不属于 iOS Native。
+2. `apps/ios/`、`apps/android/` 只承载对应平台的 Native Shell。
+3. 小程序有独立 UI，但后端业务规则必须遵循 shared contract。
+4. `dist/` 与 Native Shell 内的 Web bundle 属于生成物，不是业务源码。
+5. A - Backend & Shared Contract 负责契约仲裁；Git `main` 是受保护的集成/发布主干。
+
+## 当前过渡状态
+
+- 现有 worktree/branch 名称保留历史标签，不据此判断长期代码所有权。
+- `worktree/b-ios` 与 `worktree/c-android` 仍可能同时包含 `src/` 和 native shell 修改，合并时必须按职责选择性整合。
+- Android 生成 Web assets 当前仍被 Git 跟踪，本轮不删除。
+
+完整说明见 `docs/architecture-repository-ownership.md`。

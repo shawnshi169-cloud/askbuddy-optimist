@@ -1,5 +1,5 @@
 /**
- * A 主线 RPC 白名单（v1）
+ * A - Backend & Shared Contract RPC 白名单（v1）
  * 规则：
  * - 端侧调用只能从这个白名单选择
  * - 新增/变更 RPC 必须经 A 仲裁后再更新本文件
