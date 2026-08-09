@@ -56,6 +56,8 @@ supabase/                    Backend Source of Truth
 
 人员不足时可以兼任角色，但每个 commit 和 PR 仍必须标明责任域。
 
+当前四个长期 Codex 对话并不与五个 Architecture Roles 同名对应。执行映射及无歧义交接格式以 `docs/codex-workstream-mapping.md` 为准；Architecture Role C 不等于 Codex C，Architecture Role D 不等于 Codex D。
+
 ### Existing task/branch name transition
 
 现有 worktree 名称是历史协作标签，不在本批次强制改名：

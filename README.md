@@ -21,6 +21,8 @@ docs/                        架构、契约、联调与发布文档
 
 详细边界见 [Architecture & Repository Ownership](docs/architecture-repository-ownership.md)，已知风险见 [Architecture Risk Register](docs/architecture-risk-register.md)。
 
+当前五个 Architecture Roles 与四个 Codex 对话的实际映射见 [Codex Workstream Mapping](docs/codex-workstream-mapping.md)。
+
 ## Ownership Roles
 
 - A - Backend & Shared Contract：`supabase/`、`packages/shared-types/`、`packages/shared-api/`
@@ -85,3 +87,7 @@ npm run test:smoke
 - [Contracts Guardrails](docs/contracts-guardrails.md)
 - [Multi-platform Collaboration Rules](docs/multi-end-collaboration-rules.md)
 - [Staging Integration SOP](docs/multi-end-staging-integration-sop.md)
+- [Codex Workstream Mapping](docs/codex-workstream-mapping.md)
+- [Environment and Secret Governance](docs/environment-and-secrets.md)
+- [Runtime Mode Governance](docs/runtime-mode-governance.md)
+- [Main Branch Protection](docs/main-branch-protection.md)

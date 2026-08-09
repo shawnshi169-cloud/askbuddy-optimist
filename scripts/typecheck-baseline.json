@@ -1,0 +1,15 @@
+{
+  "src/components/Navbar.tsx|TS2300": 2,
+  "src/components/Navbar.tsx|TS2345": 2,
+  "src/hooks/useFollowingPosts.ts|TS2345": 1,
+  "src/hooks/useHotTopics.ts|TS2339": 2,
+  "src/hooks/usePosts.ts|TS2345": 2,
+  "src/hooks/useProfileData.ts|TS2345": 1,
+  "src/hooks/useQuestions.ts|TS2769": 2,
+  "src/hooks/useSearch.ts|TS2339": 2,
+  "src/lib/adapters/contentAdapters.ts|TS2339": 6,
+  "src/lib/adapters/contentAdapters.ts|TS2551": 7,
+  "src/pages/DiscoverInteractions.tsx|TS2322": 1,
+  "src/pages/NewQuestion.tsx|TS2322": 1,
+  "src/pages/SkillPublish.tsx|TS2322": 1
+}

@@ -10,6 +10,8 @@
 
 人员可以兼任角色，代码责任边界不能合并。字段、状态机、RPC 和 target/item type 冲突一律回 A 仲裁。
 
+当前四个 Codex 对话的执行映射见 `docs/codex-workstream-mapping.md`。任务和 PR 必须同时写职责域与 Codex workstream，禁止仅写“交给 C/D”。
+
 ## 2. 目录边界（严格执行）
 
 - Shared Core App：`src/`（同时服务 iOS 与 Android，不是 iOS 专属）。

@@ -1,6 +1,7 @@
 ## Scope
 
 - Role: [ ] A Backend/Contract [ ] B Core App [ ] C iOS Native [ ] D Android Native [ ] E Mini Program
+- Codex workstream: [ ] Codex A [ ] Codex B [ ] Codex C [ ] Codex D [ ] Human/Other
 - Change type: [ ] bugfix [ ] small patch [ ] cleanup [ ] contract-approved feature
 - Target environment: [ ] local [ ] staging [ ] production
 
@@ -14,6 +15,7 @@
 
 ## Boundary Check
 
+- [ ] Role/workstream naming follows `docs/codex-workstream-mapping.md`; no ambiguous "C/D" handoff.
 - [ ] `src/` changes are valid for both iOS and Android, or the platform difference is behind an adapter.
 - [ ] iOS-only code is under `apps/ios/`.
 - [ ] Android-only code is under `apps/android/`.

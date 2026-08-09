@@ -4,18 +4,15 @@
  * - 端侧调用只能从这个白名单选择
  * - 新增/变更 RPC 必须经 A 仲裁后再更新本文件
  */
-export type SearchObjectType = "all" | "question" | "expert" | "skill" | "post";
-export type ContentTargetType =
-  | "question"
-  | "answer"
-  | "post"
-  | "skill_offer"
-  | "expert"
-  | "message"
-  | "order"
-  | "user_verification"
-  | "manual"
-  | "call_session";
+import type {
+  ContentTargetType,
+  SearchObjectType,
+} from "../../shared-types/src/contracts";
+
+export type {
+  ContentTargetType,
+  SearchObjectType,
+} from "../../shared-types/src/contracts";
 
 export const RPC_WHITELIST = {
   // Pack 08-A
