@@ -10,7 +10,17 @@ staging
 production
 ```
 
-Core App 使用 `VITE_APP_RUNTIME_MODE`，基础判断位于 `src/config/runtimeMode.ts`。新代码不得自行发明另一套环境布尔值。
+Core App 以 Vite 的 `import.meta.env.MODE` 作为运行模式事实源，基础判断位于 `src/config/runtimeMode.ts`。客户端 `VITE_*` 配置不能覆盖或降低该模式，新代码不得自行发明另一套环境布尔值。
+
+标准命令：
+
+```text
+npm run dev            -> development
+npm run build:staging  -> staging
+npm run build          -> production
+```
+
+未知或非法 mode 统一解析为 `production`，即 fail closed，而不是回退到 development。
 
 ## Development
 
@@ -32,6 +42,8 @@ Core App 使用 `VITE_APP_RUNTIME_MODE`，基础判断位于 `src/config/runtime
 - development manual payment confirmation。
 
 `production` 默认不允许任何 `RuntimeCapability`。新增能力必须先由 Architecture / Backend & Shared Contract 审查。
+
+`.env.local` 中即使遗留 `VITE_APP_RUNTIME_MODE=development` 也不会影响 production build，因为该变量不再被读取。
 
 ## Migration Rule
 

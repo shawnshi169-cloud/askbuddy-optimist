@@ -22,6 +22,7 @@
 | `npm run typecheck:baseline` | Pass | 30 条既有诊断，无新增诊断 |
 | `npm run lint:changed` | Pass | 本轮新增 Core infrastructure 无 lint 回归 |
 | `npm run test:contracts` | Pass | schema/RPC contract check 通过 |
+| `npm run test:runtime-mode` | Pass | 三种 mode 映射及未知值 fail-closed 通过 |
 | `npm run build` | Pass | production build 通过 |
 | `npm run typecheck` | Fail: 30 existing diagnostics | 历史债，保留为非 required 可见报告 |
 | `npm run lint` | Fail: 74 errors, 9 warnings | 历史债，保留为非 required 可见报告 |
@@ -60,3 +61,11 @@
 5. Payment Productionization。
 
 本报告停在 P0.5，不自动开始上述 P1 工作。
+
+## P0.5.1 Hardening
+
+- Runtime Mode 改为直接消费 Vite `MODE`；未知值按 production-safe 处理。
+- changed lint 覆盖 `src/`、`packages/shared-types/` 和 `packages/shared-api/`。
+- Supabase generated type `src/integrations/supabase/types.ts` 被显式排除，由 schema regeneration/contract check 负责，不作为手写源码 lint。
+- typecheck baseline 同时比较 PR base；首次引入时比较仓库中的 bootstrap snapshot，默认禁止 key/count 增长。
+- baseline 增长只允许经过 Architecture / Codex A 显式例外审批，普通 PR 不能自行扩大债务。

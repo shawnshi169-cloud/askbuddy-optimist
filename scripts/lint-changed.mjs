@@ -38,7 +38,11 @@ for (const args of commands) {
     process.exit(result.status ?? 1);
   }
   for (const file of result.stdout.split("\n")) {
-    if (/^src\/.*\.(ts|tsx)$/.test(file.trim())) {
+    if (
+      /^(src|packages\/shared-types|packages\/shared-api)\/.*\.(ts|tsx)$/.test(
+        file.trim(),
+      ) && file.trim() !== "src/integrations/supabase/types.ts"
+    ) {
       changedFiles.add(file.trim());
     }
   }
@@ -47,8 +51,13 @@ for (const args of commands) {
 const files = [...changedFiles].sort();
 
 if (files.length === 0) {
-  console.log("No changed Core App TypeScript files require linting.");
+  console.log("No changed Core App or shared contract TypeScript files require linting.");
   process.exit(0);
+}
+
+console.log(`Linting ${files.length} changed TypeScript file(s):`);
+for (const file of files) {
+  console.log(`- ${file}`);
 }
 
 const eslintPath = join(rootDir, "node_modules", "eslint", "bin", "eslint.js");

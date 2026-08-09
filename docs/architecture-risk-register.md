@@ -36,7 +36,7 @@
 | AR-015 | Controlled | `.env` 停止跟踪，建立 `.env.example`、Secret 分类和轮换规则 |
 | AR-016 | Open | 已提供 `quality-gate` 与人工配置清单；GitHub ruleset 尚需管理员真实确认 |
 | AR-017 | Controlled | 五个 Architecture Roles 与四个 Codex Workstreams 的命名歧义已由 mapping 文档收口 |
-| AR-018 | Controlled / Open debt | CI 已阻止新增 typecheck/lint 回归；历史 30 个 TypeScript diagnostics 和 74 个 lint errors 仍需渐进清理 |
+| AR-018 | Controlled / Open debt | CI 已阻止新增 typecheck/lint 回归，并禁止普通 PR 扩大 baseline；历史 30 个 TypeScript diagnostics 和 74 个 lint errors 仍需渐进清理 |
 | AR-019 | Controlled / Migration pending | 历史 worktree 混合所有权已完成 inventory；Native candidate 尚未选择性迁移 |
 
 新增风险定义：

@@ -9,6 +9,8 @@
 - CI、staging、production：通过 GitHub Environments、Supabase secrets 或受控部署环境注入。
 - 不在 Issue、PR、日志和截图中粘贴 secret 值。
 
+Runtime Mode 不属于可由 `.env.local` 覆盖的配置。它由 Vite 命令的 `MODE` 决定：dev 为 development、staging build 为 staging、默认 production build 为 production。
+
 当前仓库检查到的历史 `.env` 仅包含 Supabase project ref、URL 和 publishable/anon key，没有发现 server-only secret。本次停止跟踪该文件，不据此制造“服务端秘密已泄露”的结论。
 
 ## Client-safe Configuration

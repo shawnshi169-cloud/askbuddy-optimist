@@ -59,6 +59,8 @@ npm run test:contracts
 npm run build
 ```
 
+运行模式由 Vite 命令决定：`npm run dev` 为 development，`npm run build:staging` 为 staging，`npm run build` 为 production。production 不接受本地 `VITE_*` 值降级运行模式。
+
 远端 smoke 需要真实 staging 环境变量：
 
 ```bash
