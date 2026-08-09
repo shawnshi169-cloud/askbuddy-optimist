@@ -1,6 +1,6 @@
-# Contracts Guardrails（A 主线守护）
+# Contracts Guardrails（A - Backend & Shared Contract 守护）
 
-适用范围：B/C/D 所有端侧仓位  
+适用范围：B Core App / C iOS Native / D Android Native / E Mini Program
 目标：防止端侧私自扩展后端语义，降低多端并行冲突。
 
 ---
@@ -11,6 +11,8 @@
 2. 端侧新增状态机值
 3. 端侧新增 target_type/item_type 值
 4. 端侧新增非白名单 RPC 主路径
+5. Native Shell 复制共享业务页面或后端状态机
+6. 直接向 Git `main` 提交普通开发变更
 
 ---
 
@@ -19,6 +21,7 @@
 1. UI 展示字段组合
 2. 前端本地派生字段（不回写后端）
 3. 在白名单字段内做兼容映射
+4. 平台权限、生命周期和媒体能力 adapter
 
 ---
 
@@ -29,4 +32,3 @@
 - `docs/conflict-resolution-process.md`
 
 未仲裁通过前，不得合并端侧语义变更。
-

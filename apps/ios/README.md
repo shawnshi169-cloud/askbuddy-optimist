@@ -1,14 +1,17 @@
-# apps/ios（iOS 主工程路径）
+# apps/ios - iOS Native Shell
 
-当前仓库的 iOS 原生工程主路径为：
+主工程：`apps/ios/App/App.xcodeproj`
 
-- `apps/ios/App/App.xcodeproj`
+本目录仅负责 iOS 平台能力：
 
-说明：
+- Xcode target/scheme、签名、Entitlements；
+- Info.plist、iOS 权限和原生生命周期；
+- Capacitor/native plugins、APNs、Apple 支付、Deep Link；
+- iOS 构建、安装、归档与分发。
 
-- iOS 开发请统一在 `apps/ios` 下进行。
-- 多端目录采用同层级结构：`apps/ios`、`apps/android`、`apps/wechat-miniprogram`。
-- 后端字段、状态机、RPC 命名冲突一律以 A 主线（后端契约与共享层）为准。
+业务页面、React 组件、feature API 和 hooks 位于根目录 `src/`，由 iOS 与 Android 共用。不要在本目录复制业务状态机、Supabase 字段或 RPC contract。
+
+契约冲突回 A - Backend & Shared Contract 仲裁。
 
 ## Call UAT 模拟器准备
 

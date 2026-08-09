@@ -1,5 +1,5 @@
 /**
- * B / C / D 可直接消费的页面接口清单（v1）
+ * Core App / Native adapters / Mini Program 可消费的页面接口清单（v1）
  * 注意：这是“接口与字段白名单”，不是 UI 实现规范。
  */
 export interface PageContract {
