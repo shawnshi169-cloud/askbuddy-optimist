@@ -1,1 +1,0 @@
-import{i as t,j as r,N as c}from"./react-vendor-BP7Uy6yg.js";const i=()=>{const s=t(),e=new URLSearchParams(s.search).get("q"),a=new URLSearchParams;return a.set("channel","education"),e&&a.set("q",e),r.jsx(c,{to:`/search?${a.toString()}`,replace:!0})};export{i as default};

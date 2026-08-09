@@ -1,1 +1,0 @@
-import{j as s}from"./react-vendor-BP7Uy6yg.js";import{d as p}from"./index-BhkFBD_y.js";const o=({children:e,className:a,includeBottomNavPadding:r=!1})=>s.jsx("div",{className:p("app-container app-platform-screen min-h-[100dvh]",r&&"pb-[calc(4rem+env(safe-area-inset-bottom))]",a),children:e});export{o as A};
