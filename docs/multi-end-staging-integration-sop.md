@@ -53,4 +53,4 @@
 1. 不开新 Pack。  
 2. 不做大 cleanup。  
 3. 不做大前端重构。  
-4. 所有契约冲突统一回 A 主线仲裁。
+4. 所有契约冲突统一回 A - Backend & Shared Contract 仲裁。
