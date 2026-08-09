@@ -1,8 +1,8 @@
 /**
- * A 主线唯一契约快照（v1）
+ * A - Backend & Shared Contract 唯一契约快照（v1）
  * 说明：
  * - 端侧不得私自扩展字段语义/状态机语义
- * - 冲突以 A 主线仲裁结果为准
+ * - 冲突以 A - Backend & Shared Contract 仲裁结果为准
  */
 
 export type Id = string;

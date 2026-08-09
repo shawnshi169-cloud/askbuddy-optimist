@@ -1,8 +1,8 @@
-# Contract Snapshot v1（A 主线唯一事实来源）
+# Contract Snapshot v1（A - Backend & Shared Contract 唯一事实来源）
 
 更新时间：2026-04-24  
-适用范围：iOS / Android / 微信小程序（B/C/D）  
-仲裁规则：字段、状态机、RPC 命名冲突一律以 A 主线为准。
+适用范围：B Core App / C iOS Native / D Android Native / E 微信小程序
+仲裁规则：字段、状态机、RPC 命名冲突一律以 A - Backend & Shared Contract 为准。
 
 ---
 
@@ -38,7 +38,7 @@
 
 ## 3. 统一枚举白名单（状态机）
 
-> 新状态值必须先在 A 主线仲裁通过，再允许进入 B/C/D。
+> 新状态值必须先由 A Role 仲裁通过，再允许进入 B/C/D/E。
 
 ### 3.1 问答域
 
@@ -104,7 +104,7 @@
 
 ## 5. RPC 白名单（v1）
 
-> 端侧只允许消费白名单 RPC；新增 RPC 必须先回 A 主线。
+> 端侧只允许消费白名单 RPC；新增 RPC 必须先回 A Role。
 
 ### 5.1 业务收口 RPC（Pack 08-A）
 
@@ -134,7 +134,7 @@
 
 ---
 
-## 6. B/C/D 按页面可消费接口清单（中枢版）
+## 6. Core App / Native adapters / Mini Program 按页面可消费接口清单
 
 ## 6.1 首页
 
@@ -195,7 +195,7 @@
 1. 端侧禁止新增后端字段语义（含“同名不同义”）。
 2. 端侧禁止新增状态值、target/item 类型值。
 3. 端侧禁止新增非白名单 RPC 作为主路径。
-4. 出现冲突必须回 A 主线提报，按 `docs/conflict-resolution-process.md` 执行。
+4. 出现冲突必须回 A Role 提报，按 `docs/conflict-resolution-process.md` 执行。
 
 ---
 
@@ -205,4 +205,4 @@
   - bugfix
   - 小 patch
   - cleanup
-- 任何涉及 schema 语义变化，必须由 A 主线先更新 shared-types/shared-api，再通知 B/C/D 同步。
+- 任何涉及 schema 语义变化，必须由 A Role 先更新 shared-types/shared-api，再通知 B/C/D/E 同步。

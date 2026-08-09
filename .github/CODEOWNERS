@@ -1,18 +1,42 @@
-# Global fallback owner
+# GitHub currently has one repository owner account. The comments below define
+# responsibility boundaries; replace @Devs-hub-pro with real GitHub teams when
+# the team accounts are ready (for example @org/backend-contract).
+
+# Global fallback / release integration owner
 * @Devs-hub-pro
 
-# Backend and shared contracts (A)
+# A - Backend & Shared Contract
 /supabase/** @Devs-hub-pro
 /packages/shared-types/** @Devs-hub-pro
 /packages/shared-api/** @Devs-hub-pro
-/docs/** @Devs-hub-pro
+/docs/contracts-snapshot-v1.md @Devs-hub-pro
+/docs/contracts-guardrails.md @Devs-hub-pro
+/docs/conflict-resolution-process.md @Devs-hub-pro
 
-# iOS (B)
-/apps/ios/** @Devs-hub-pro
+# B - Core App (shared by iOS and Android; not iOS-only)
 /src/** @Devs-hub-pro
+/public/** @Devs-hub-pro
+/index.html @Devs-hub-pro
+/vite.config.ts @Devs-hub-pro
+/tailwind.config.ts @Devs-hub-pro
+/package.json @Devs-hub-pro
+/package-lock.json @Devs-hub-pro
 
-# Android (C)
+# Generated schema type: A owns regeneration; B consumes it in Core App.
+# This appears after /src/** because the last matching CODEOWNERS rule wins.
+/src/integrations/supabase/types.ts @Devs-hub-pro
+
+# C - iOS Native Shell
+/apps/ios/** @Devs-hub-pro
+
+# D - Android Native Shell
 /apps/android/** @Devs-hub-pro
 
-# WeChat Mini Program (D)
+# E - WeChat Mini Program
 /apps/wechat-miniprogram/** @Devs-hub-pro
+
+# Cross-platform architecture and release governance
+/capacitor.config.ts @Devs-hub-pro
+/.github/** @Devs-hub-pro
+/docs/architecture-*.md @Devs-hub-pro
+/docs/multi-end-*.md @Devs-hub-pro

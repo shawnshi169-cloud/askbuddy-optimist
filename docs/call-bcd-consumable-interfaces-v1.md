@@ -1,7 +1,9 @@
 # Call v1 给 B/C/D 的可消费接口清单（按页面）
 
 更新时间：2026-05-15  
-适用对象：B-iOS / C-Android / D-微信小程序
+历史适用对象：B-iOS / C-Android / D-微信小程序
+
+> 角色治理更新：当前职责映射为 B-Core App、C-iOS Native、D-Android Native、E-微信小程序。本文文件名保留历史标签，不再用于定义代码所有权。
 
 ---
 
@@ -139,4 +141,3 @@ Call 相关：
 2. 不得新增 Call RPC 名称
 3. 不得绕过 RPC 直接改 `call_sessions.status`（主路径）
 4. 契约冲突必须回 A 提报：`docs/conflict-resolution-process.md`
-

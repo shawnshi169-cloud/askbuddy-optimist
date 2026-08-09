@@ -1,5 +1,7 @@
 # Call v1 Cross-platform Integration Review
 
+> 历史说明：本文 B-iOS/C-Android/D-小程序是当时的任务标签。当前代码所有权以 `docs/architecture-repository-ownership.md` 的 A-E 模型为准。
+
 审查日期：2026-08-02  
 审查基线：A `9059341` / B `3ecd024` / C `ba5a615` / D `36aa2f4`
 
