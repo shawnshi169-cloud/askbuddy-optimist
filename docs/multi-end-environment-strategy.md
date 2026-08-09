@@ -23,7 +23,7 @@
 1. iOS/Android/小程序开发者均在各自本地开发。  
 2. 需要联调时，统一接入共享 `staging`。  
 3. 真机测试与内测尽量使用 `staging` / `prod-like`，避免连接个人 local。  
-4. 字段、状态机、RPC 命名冲突，以 A 主线为准。
+4. 字段、状态机、RPC 命名冲突，以 A - Backend & Shared Contract 仲裁为准。
 
 ## 4. 配置一致性规则
 

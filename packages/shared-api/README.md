@@ -1,14 +1,13 @@
 # packages/shared-api
 
-跨端共享 API 契约封装（唯一事实来源由 A 主线维护）。
+跨端 API/RPC 名称、参数、返回值和页面数据契约的统一来源，由 A - Backend & Shared Contract 维护。
 
-当前阶段（contract snapshot v1）：
-
-- `src/rpc-whitelist.ts`：RPC 白名单与入参/出参约束。
-- `src/page-contract-map.ts`：B/C/D 按页面可消费的表/RPC/字段清单。
+- `src/rpc-whitelist.ts`：可调用 RPC 白名单与输入输出。
+- `src/page-contract-map.ts`：Core App 与 Mini Program 可消费的表/RPC/字段。
 - `src/index.ts`：统一导出入口。
 
-协作约束：
+规则：
 
-- B/C/D 不应私自扩展后端字段语义；如有冲突，先提报 A 主线仲裁。
-- 端侧新增字段/状态/RPC 语义前，必须先走 `docs/conflict-resolution-process.md`。
+- 客户端不得私自增加非白名单 RPC 主路径。
+- service-role/server-only RPC 必须与普通 client-callable RPC 分开管理。
+- 已存在但尚未纳入白名单的旧 RPC 进入风险清单，按模块渐进收口，不在本轮批量迁移。
