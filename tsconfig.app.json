@@ -27,6 +27,8 @@
     }
   },
   "include": [
-    "src"
+    "src",
+    "packages/shared-types/src",
+    "packages/shared-api/src"
   ]
 }

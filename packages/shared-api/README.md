@@ -6,6 +6,8 @@
 - `src/page-contract-map.ts`：Core App 与 Mini Program 可消费的表/RPC/字段。
 - `src/index.ts`：统一导出入口。
 
+业务枚举/类型由 `packages/shared-types` 定义。本目录只消费并可转导出这些类型，不维护同义副本。
+
 规则：
 
 - 客户端不得私自增加非白名单 RPC 主路径。

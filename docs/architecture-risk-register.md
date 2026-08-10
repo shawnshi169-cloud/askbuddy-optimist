@@ -25,6 +25,26 @@
 | AR-015 | `.env` 当前被 Git 跟踪，虽仅应含 publishable 配置，但容易导致多人环境漂移 | local/staging/prod 配置 | Medium | 是 | 条件性 | P1 | 改用 `.env.example` + 本地/CI 注入；迁移前确认无秘密并制定兼容步骤 |
 | AR-016 | GitHub CODEOWNERS 目前只有单一组织账号，无法真正强制 A-E 分角色审批 | 所有 PR | Medium | 是 | 否 | P1 | 建立 GitHub teams 后替换占位 owner，并为 `main` 开启 branch protection |
 
+## 1.1 P0.5 Status Update
+
+历史风险不删除；以下状态记录本轮治理结果：
+
+| Risk ID | Status | P0.5 result |
+| --- | --- | --- |
+| AR-001 | Controlled | `src/` 已明确为 Shared Core App，CODEOWNERS 与职责文档一致 |
+| AR-003 | Controlled / Partial | `SearchObjectType`、`ContentTargetType` 已由 shared-api 改为消费 shared-types；package/workspace 化延后 |
+| AR-015 | Controlled | `.env` 停止跟踪，建立 `.env.example`、Secret 分类和轮换规则 |
+| AR-016 | Open | 已提供 `quality-gate` 与人工配置清单；GitHub ruleset 尚需管理员真实确认 |
+| AR-017 | Controlled | 五个 Architecture Roles 与四个 Codex Workstreams 的命名歧义已由 mapping 文档收口 |
+| AR-018 | Controlled / Open debt | CI 已阻止新增 typecheck/lint 回归，并禁止普通 PR 扩大 baseline；历史 30 个 TypeScript diagnostics 和 74 个 lint errors 仍需渐进清理 |
+| AR-019 | Controlled / Migration pending | 历史 worktree 混合所有权已完成 inventory；Native candidate 尚未选择性迁移 |
+
+新增风险定义：
+
+- **AR-017**：Codex 对话字母与 Architecture Role 字母不一一对应，可能导致错误派单。
+- **AR-018**：历史全量 typecheck/lint 尚未清零，若无增量 gate 会继续累积。
+- **AR-019**：历史 worktree 同时包含 Core、Native、shared 或生成物，整分支 merge 会破坏当前职责边界。
+
 ## 2. Shared Contract Classification
 
 ### 可继续保留的 UI-only 类型
