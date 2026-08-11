@@ -109,6 +109,16 @@ export type EarningTxDirection = (typeof EARNING_TX_DIRECTION)[number];
 export const EARNING_TX_STATUS = ["pending", "available", "settled", "reversed"] as const;
 export type EarningTxStatus = (typeof EARNING_TX_STATUS)[number];
 
+export const WECHAT_AUTH_ERROR_CODE = [
+  "INVALID_REQUEST",
+  "INVALID_WECHAT_CODE",
+  "WECHAT_UPSTREAM_ERROR",
+  "AUTH_IDENTITY_ERROR",
+  "AUTH_SESSION_ERROR",
+  "RATE_LIMITED",
+] as const;
+export type WechatAuthErrorCode = (typeof WECHAT_AUTH_ERROR_CODE)[number];
+
 /**
  * target_type/item_type 统一白名单
  * 用于 notifications.target_type / messages.target_type /
@@ -325,4 +335,29 @@ export interface EarningTransaction {
   created_at: ISODateTime;
   settled_at: ISODateTime | null;
   updated_at: ISODateTime;
+}
+
+// WeChat Auth v1 intentionally has no refresh token. Expiry requires a new
+// wx.login code exchange through the server-side bootstrap endpoint.
+export interface WechatAuthSession {
+  accessToken: string;
+  expiresAt: number;
+  tokenType: "bearer";
+}
+
+export interface WechatAuthUser {
+  id: Id;
+  nickname: string | null;
+  avatarUrl: string | null;
+}
+
+export interface WechatAuthResponse {
+  session: WechatAuthSession;
+  user: WechatAuthUser;
+}
+
+export interface WechatAuthErrorPayload {
+  code: WechatAuthErrorCode;
+  message: string;
+  requestId: string;
 }
