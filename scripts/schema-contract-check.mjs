@@ -111,6 +111,11 @@ assert.match(edgeCoreText, /claim_wechat_identity_v1/);
 assert.match(edgeFunctionText, /new SignJWT/);
 assert.doesNotMatch(`${edgeFunctionText}\n${edgeCoreText}`, /mock_token/);
 assert.doesNotMatch(`${edgeFunctionText}\n${edgeCoreText}`, /\b(?:email|phone|password)\s*:/);
+assert.ok(
+  edgeFunctionText.indexOf('const userId = await resolveWechatUser')
+    < edgeFunctionText.indexOf('const claims = buildWechatJwtClaims'),
+  'Final Auth user validation must complete before JWT claims are built.',
+);
 
 const {
   WECHAT_AUTH_ERROR_CODES,
@@ -213,6 +218,33 @@ function createMockAuthAdmin() {
   return { client, identities, stats, users };
 }
 
+function createWechatAuthUser(userId, overrides = {}) {
+  return {
+    id: userId,
+    app_metadata: {
+      provider: 'wechat',
+      providers: ['wechat'],
+    },
+    banned_until: null,
+    deleted_at: null,
+    ...overrides,
+  };
+}
+
+async function assertIdentityRejected(admin, openid) {
+  await assert.rejects(
+    () => resolveWechatUser(
+      admin,
+      'wx-test-app',
+      openid,
+      null,
+      identitySecret,
+    ),
+    (error) => error?.code === WECHAT_AUTH_ERROR_CODES.AUTH_IDENTITY_ERROR
+      && error.message === 'Unable to validate the authenticated identity.',
+  );
+}
+
 const mockAdmin = createMockAuthAdmin();
 const firstLoginUserId = await resolveWechatUser(
   mockAdmin.client,
@@ -246,6 +278,48 @@ assert.equal(new Set(concurrentUserIds).size, 1);
 assert.equal(mockAdmin.users.size, 2, 'Concurrent login must not create duplicate auth users.');
 assert.equal(mockAdmin.identities.size, 2, 'Concurrent login must keep one identity row per openid.');
 assert.equal(mockAdmin.stats.successfulUserCreates, 2);
+
+const existingActiveAdmin = createMockAuthAdmin();
+existingActiveAdmin.identities.set('wx-test-app:existing-active-openid', firstLoginUserId);
+existingActiveAdmin.users.set(firstLoginUserId, createWechatAuthUser(firstLoginUserId));
+assert.equal(
+  await resolveWechatUser(
+    existingActiveAdmin.client,
+    'wx-test-app',
+    'existing-active-openid',
+    null,
+    identitySecret,
+  ),
+  firstLoginUserId,
+);
+
+const bannedAdmin = createMockAuthAdmin();
+bannedAdmin.identities.set('wx-test-app:banned-openid', firstLoginUserId);
+bannedAdmin.users.set(firstLoginUserId, createWechatAuthUser(firstLoginUserId, {
+  banned_until: '2999-01-01T00:00:00.000Z',
+}));
+await assertIdentityRejected(bannedAdmin.client, 'banned-openid');
+
+const deletedAdmin = createMockAuthAdmin();
+deletedAdmin.identities.set('wx-test-app:deleted-openid', firstLoginUserId);
+deletedAdmin.users.set(firstLoginUserId, createWechatAuthUser(firstLoginUserId, {
+  deleted_at: '2026-01-01T00:00:00.000Z',
+}));
+await assertIdentityRejected(deletedAdmin.client, 'deleted-openid');
+
+const missingAdmin = createMockAuthAdmin();
+missingAdmin.identities.set('wx-test-app:missing-openid', firstLoginUserId);
+await assertIdentityRejected(missingAdmin.client, 'missing-openid');
+
+const providerMismatchAdmin = createMockAuthAdmin();
+providerMismatchAdmin.identities.set('wx-test-app:provider-mismatch-openid', firstLoginUserId);
+providerMismatchAdmin.users.set(firstLoginUserId, createWechatAuthUser(firstLoginUserId, {
+  app_metadata: {
+    provider: 'email',
+    providers: ['email'],
+  },
+}));
+await assertIdentityRejected(providerMismatchAdmin.client, 'provider-mismatch-openid');
 
 const claims = buildWechatJwtClaims(
   derivedIds[0],

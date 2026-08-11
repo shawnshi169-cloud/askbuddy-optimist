@@ -113,6 +113,42 @@ export async function deriveWechatUserId(appId, openid, namespaceSecret) {
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 
+export function validateWechatAuthUser(user, expectedUserId, nowMs = Date.now()) {
+  const providers = user?.app_metadata?.providers;
+  const bannedUntil = user?.banned_until;
+  const hasBannedUntil = bannedUntil !== null
+    && bannedUntil !== undefined
+    && String(bannedUntil).length > 0;
+  const bannedUntilMs = hasBannedUntil
+    ? Date.parse(String(bannedUntil))
+    : null;
+  const isDeleted = user?.deleted_at !== null
+    && user?.deleted_at !== undefined
+    && String(user.deleted_at).length > 0;
+  const isBanned = bannedUntilMs !== null
+    && (!Number.isFinite(bannedUntilMs) || bannedUntilMs > nowMs);
+  const hasWechatProvider = user?.app_metadata?.provider === 'wechat'
+    && Array.isArray(providers)
+    && providers.includes('wechat');
+
+  if (
+    !user
+    || typeof user.id !== 'string'
+    || user.id !== expectedUserId
+    || isDeleted
+    || isBanned
+    || !hasWechatProvider
+  ) {
+    throw new WechatAuthError(
+      WECHAT_AUTH_ERROR_CODES.AUTH_IDENTITY_ERROR,
+      'Unable to validate the authenticated identity.',
+      401,
+    );
+  }
+
+  return user;
+}
+
 export async function resolveWechatUser(
   admin,
   appId,
@@ -187,6 +223,17 @@ export async function resolveWechatUser(
       500,
     );
   }
+
+  const { data: finalUserData, error: finalUserError } =
+    await admin.auth.admin.getUserById(claimedUserId);
+  if (finalUserError) {
+    throw new WechatAuthError(
+      WECHAT_AUTH_ERROR_CODES.AUTH_IDENTITY_ERROR,
+      'Unable to validate the authenticated identity.',
+      401,
+    );
+  }
+  validateWechatAuthUser(finalUserData.user, claimedUserId);
 
   return claimedUserId;
 }

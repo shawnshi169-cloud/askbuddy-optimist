@@ -100,15 +100,18 @@ WECHAT_AUTH_JWT_TTL_SECONDS=900
 WECHAT_AUTH_RATE_LIMIT_PER_MINUTE=10
 ```
 
-`WECHAT_AUTH_JWT_PRIVATE_JWK` 必须是已导入 Supabase Auth signing keys 并处于 active 状态的 P-256 private JWK，包含匹配的 `kid`。不得把任何真实值提交到仓库。
+`WECHAT_AUTH_JWT_PRIVATE_JWK` 必须是在可信环境中外部生成、已安全保留，并已导入 Supabase Auth signing keys 且处于 active 状态的 P-256 private JWK，包含匹配的 `kid`。不得把任何真实值提交到仓库。
 
 ## Dashboard and Deployment Prerequisites
 
-1. 在目标 Supabase 项目导入或创建 ES256 signing key，并完成 rotation 使其成为 active key。
-2. 将同一私钥 JWK 作为 Edge Function secret `WECHAT_AUTH_JWT_PRIVATE_JWK` 安全注入；私钥不可写入 Git、客户端或日志。
-3. 注入微信 App ID/AppSecret、HMAC secret 和 service role key。
-4. 执行 migration 后部署 `wechat-auth` Edge Function。
-5. 使用真实小程序 App ID 和临时 code 完成 first-login、repeat-login 和 RLS UAT。
+1. 在可信环境外部生成 ES256 private JWK，例如使用 `supabase gen signing-key --algorithm ES256`，并立即存入受控 secret manager。
+2. 将该 private key 导入目标 Supabase Auth Signing Keys，先保持为 standby key，确认 JWKS 已发布对应 public key 后再 rotate 为 active。
+3. 将安全保留的同一份 private JWK 配置为 Edge Function secret `WECHAT_AUTH_JWT_PRIVATE_JWK`。不得采用“由 Supabase 创建 key 后再导出 private key”的流程，因为平台不会提供 private key 导出能力。
+4. 注入微信 App ID/AppSecret、HMAC secret 和 service role key。
+5. 执行 migration 后部署 `wechat-auth` Edge Function。
+6. 使用真实小程序 App ID 和临时 code 完成 first-login、repeat-login 和 RLS UAT。
+
+Signing key rotation 必须协调执行：先生成并安全保存新 private JWK，将其作为 standby key 导入 Supabase Auth，再更新 Edge Function secret 和部署函数，最后按 Supabase signing-key rotation 流程切换 active key。切换期间必须确保 Edge Function 使用的 `kid` 与 Supabase JWKS 中可验证的 key 一致，不能单独轮换任一侧。
 
 未完成以上 Dashboard 配置前，代码可以通过 mock-upstream contract test，但不能声明真实微信 UAT 通过。
 

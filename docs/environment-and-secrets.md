@@ -46,11 +46,13 @@ Client-safe 不等于可以跨 dev/staging/prod 混用。每次发布必须确�
 - `WECHAT_APP_ID`：服务端 code exchange 使用；它本身可公开，但与 AppSecret 一起在服务端集中配置。
 - `WECHAT_APP_SECRET`：微信 code exchange secret。
 - `WECHAT_IDENTITY_HMAC_SECRET`：确定性派生稳定 `auth.users.id`，至少 32 个随机字符。
-- `WECHAT_AUTH_JWT_PRIVATE_JWK`：与 Supabase Auth 当前 active ES256 signing key 匹配的 private JWK。
+- `WECHAT_AUTH_JWT_PRIVATE_JWK`：在可信环境外部生成并安全保留、与 Supabase Auth 当前 active ES256 signing key 匹配的 private JWK。Supabase 平台内创建的 signing key 不提供 private key 导出能力，因此不能依赖“平台创建后导出”的部署流程。
 - `SUPABASE_SERVICE_ROLE_KEY`：创建 Auth user 和写入敏感 identity mapping。
 - `SUPABASE_URL`：目标 Supabase 环境地址。
 
 可选的非秘密运行参数为 `WECHAT_AUTH_JWT_TTL_SECONDS` 和 `WECHAT_AUTH_RATE_LIMIT_PER_MINUTE`。任何上述 server-only 值均不得加入 `.env.example` 的 `VITE_*`、小程序配置或客户端构建。
+
+ES256 rotation 必须同时协调 Supabase Auth Signing Keys 与 Edge Function secret：新 key 应先在可信环境生成并保存，再以 standby 导入，更新 `WECHAT_AUTH_JWT_PRIVATE_JWK` 并部署函数，最后 rotate 为 active。任何一侧单独更新都可能导致新签发 JWT 无法被 Supabase 验证。
 
 ## Incident Rule
 
