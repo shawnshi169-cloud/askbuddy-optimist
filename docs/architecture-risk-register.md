@@ -18,16 +18,16 @@
 | AR-008 | Search/Channel/Home 会把 demo 数据合并或作为 fallback，后端异常时可能展示演示内容 | Search、频道首页、Discover | High | 是 | 是 | P1 | mock 仅显式 development mode；production 错误态不得静默返回 demo |
 | AR-009 | 业务规则在多处重复：订单/Call/技能状态映射、target/item type，moderation 仍使用 `discussion/profile` 等非当前白名单值 | Core App、Mini Program、Admin | High | 是 | 条件性 | P1 | 共享枚举为唯一输入；UI-only label map 可本地保留；冲突回 A 仲裁 |
 | AR-010 | 状态机和关键系统字段仍存在客户端直写尝试，例如 view count、部分内容状态/计数 | Questions、Posts、Messages | High | 是 | 条件性 | P1 | 计数和受控状态迁移到 RPC；普通 owner 内容字段可继续 RLS 写入 |
-| AR-011 | `main` 尚未整合 Native Shell 可构建修复；候选修复已分别存在于历史 `worktree/b-ios`（iOS scheme）和 `worktree/c-android`（完整 Gradle shell） | Native Shell / UAT / branch integration | Critical | 是 | 是（对应端发布） | P0 | 按新所有权选择性整合到 C/D 平台分支，完成原生构建、安装和签名 UAT 后再进入发布 |
+| AR-011 | 历史风险：`main` 曾缺少稳定的 iOS/Android Native Shell baseline；P0.6 已完成选择性整合与模拟器验证 | Native Shell / UAT / branch integration | Low | 否 | 否（baseline 风险已关闭） | P0 Controlled | 维护已验证 baseline；production signing、商店发布、Push/Deep Link/Call Media 继续按独立发布任务验证 |
 | AR-012 | Android `app/src/main/assets/public/` 跟踪大量构建产物，PR 容易包含噪音并产生跨端冲突 | Android PR/merge | Medium | 是 | 否 | P2 | 观察现有发布流程；后续改为 CI/Capacitor sync 生成或独立构建 commit |
 | AR-013 | Supabase generated types 与 legacy 兼容列同时存在，局部大量 `(supabase as any)` 绕过类型检查 | Hooks、Admin、Payments | Medium | 是 | 否 | P2 | schema 稳定后再生成 types；按高风险写路径优先消除 `any` |
 | AR-014 | 客户端调用的 RPC 数量明显多于 shared-api 白名单，admin/支付/消息/频道契约未纳入统一目录 | Core App API surface | High | 是 | 条件性 | P1 | 建立 client-callable/server-only/deprecated 三类 RPC 清单 |
 | AR-015 | `.env` 当前被 Git 跟踪，虽仅应含 publishable 配置，但容易导致多人环境漂移 | local/staging/prod 配置 | Medium | 是 | 条件性 | P1 | 改用 `.env.example` + 本地/CI 注入；迁移前确认无秘密并制定兼容步骤 |
-| AR-016 | GitHub CODEOWNERS 目前只有单一组织账号，无法真正强制 A-E 分角色审批 | 所有 PR | Medium | 是 | 否 | P1 | 建立 GitHub teams 后替换占位 owner，并为 `main` 开启 branch protection |
+| AR-016 | `main` branch protection/ruleset 已启用并强制 PR + `quality-gate`；但 CODEOWNERS 仍只有单一账号，尚未形成 A-E GitHub teams 审批体系 | 所有 PR | Medium | 是 | 否 | P1 Controlled / Partial | 保持 protected-main 流程；多人协作成熟后建立 GitHub teams 并替换占位 owner |
 
 ## 1.1 P0.5 Status Update
 
-历史风险不删除；以下状态记录本轮治理结果：
+以下内容是 P0.5 完成时的历史快照；后续状态以 P0.6 Status Update 为准：
 
 | Risk ID | Status | P0.5 result |
 | --- | --- | --- |
@@ -44,6 +44,17 @@
 - **AR-017**：Codex 对话字母与 Architecture Role 字母不一一对应，可能导致错误派单。
 - **AR-018**：历史全量 typecheck/lint 尚未清零，若无增量 gate 会继续累积。
 - **AR-019**：历史 worktree 同时包含 Core、Native、shared 或生成物，整分支 merge 会破坏当前职责边界。
+
+## 1.2 P0.6 Status Update
+
+历史状态继续保留；以下内容记录 P0.6 Native Baseline closeout 后的当前状态：
+
+| Risk ID | Status | P0.6 result |
+| --- | --- | --- |
+| AR-011 | Controlled / Native Baseline Complete | iOS Native Shell baseline 已通过 PR #4 选择性整合至 `main`，Shared Xcode scheme 已纳入版本控制，Simulator build/install/launch 与 Capacitor WebView 已验证；Android Gradle shell 已通过 PR #3 选择性整合至 `main`，Gradle Wrapper、`assembleDebug`、APK、Emulator install/launch 与 Capacitor WebView 已验证；最终 `main` 的 `quality-gate` 再次通过。此状态不代表 production signing、TestFlight/App Store、Android release signing/Play Store、Push、Deep Link 或 Call Media 已完成。 |
+| AR-016 | Controlled / Partial | `main` protection/ruleset 已真实启用：必须通过 PR、required check 为 `quality-gate`、分支必须保持最新、禁止 force push；PR #3 与 PR #4 已实际按该流程合并。A-E GitHub teams 与 team-based CODEOWNERS 审批仍待多人协作阶段完善。 |
+| AR-019 | Controlled / Partial | `worktree/b-ios` 与 `worktree/c-android` 的 Native candidate 已按文件职责选择性审阅和迁移，未整分支 merge，也未把历史 Core App/shared-contract 修改带入 Native PR；Mini Program、其他旧 feature 与 generated assets 仍按候选素材管理。 |
+| AR-012 | Open / Deferred | Android generated web assets 的版本控制策略未在 P0.6 改动，继续观察现有 Capacitor/发布流程后再治理。 |
 
 ## 2. Shared Contract Classification
 
@@ -129,15 +140,15 @@ accepted answer、order/payment/call status、审核状态、系统计数。必�
 1. AR-005：生产环境 RPC fallback 可能绕过契约和受控写路径。
 2. AR-006：小程序真实登录/JWT 尚未落地。
 3. AR-007：支付仍含 mock/legacy/manual confirm 路径。
-4. AR-011：iOS/Android Native Shell 尚未形成稳定可构建基线。
-5. AR-002/AR-009：共享契约采用不完整并存在跨端规则重复。
+4. AR-008：Search/Home/Channel 在后端异常时仍可能静默展示 demo fallback。
+5. AR-002/AR-009/AR-014：共享契约采用不完整、跨端规则重复且 RPC catalog 尚未覆盖完整客户端调用面。
 
 ## 8. Action Decision
 
 ### 必须现在解决
 
 - 已在本批次解决 AR-001：`src/` 所有权与角色边界。
-- 在继续双端 Call UAT 前，选择性整合 AR-011 已有的 Native Shell 修复并完成原生构建/安装 UAT。
+- P0.6 已完成 AR-011 Native baseline 的选择性整合和双端模拟器构建/安装/启动验证；Native baseline 不再阻塞下一阶段。
 - 在小程序真实联调前，由 A 先解决 AR-006 的 WeChat Auth v1 契约和服务端交换链路。
 
 ### 只登记，暂不修改
@@ -153,11 +164,11 @@ accepted answer、order/payment/call status、审核状态、系统计数。必�
 - 支付 mock gateway、legacy recharge fallback、development manual confirm。
 - production 中写型 RPC fallback。
 - Search/Home/Channel 静默 demo fallback。
-- 对应平台 Native Shell 无法稳定构建、签名或安装。
+- iOS production signing、TestFlight/App Store 发布，以及 Android release signing、Play Store 发布尚未验证；这些是独立 release-readiness 工作，不再属于 AR-011 baseline 缺失风险。
 
 ## 9. Recommended Contract First Pilots
 
-1. **WeChat Auth v1**：最明确的服务端敏感边界，可验证 Edge Function + shared API + 小程序消费流程。
+1. **WeChat Auth v1**：P0.6 后推荐的下一项 Contract First Pilot；它具有最明确的服务端敏感边界，可验证 Edge Function + shared API + 小程序消费流程。
 2. **Questions/Answers publish path**：统一 legacy/new 字段并移除 secure RPC 缺失后的直写 fallback。
 3. **Messages/Notifications**：统一 client-callable RPC、实体类型和未读/已读动作，减少页面直连。
 
