@@ -27,6 +27,11 @@ function configurationError(message) {
 }
 
 function validateClientConfig(source = getClientConfig()) {
+  const knownEnvVersions = new Set(['develop', 'trial', 'release']);
+  if (!source || !knownEnvVersions.has(source.envVersion)) {
+    throw configurationError('Mini Program runtime environment is unknown.');
+  }
+
   const supabaseUrl = typeof source.supabaseUrl === 'string'
     ? source.supabaseUrl.trim().replace(/\/+$/, '')
     : '';
@@ -165,8 +170,7 @@ async function callWechatAuth(code, options = {}) {
     timeout: options.timeout || 10000,
     header: {
       'Content-Type': 'application/json',
-      apikey: config.supabasePublishableKey,
-      Authorization: `Bearer ${config.supabasePublishableKey}`
+      apikey: config.supabasePublishableKey
     },
     data: { code }
   }, options.requestImpl);

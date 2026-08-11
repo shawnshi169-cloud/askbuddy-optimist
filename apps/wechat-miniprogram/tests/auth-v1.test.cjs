@@ -4,6 +4,8 @@ const path = require('node:path');
 
 const miniProgramRoot = path.resolve(__dirname, '..');
 const authPath = require.resolve('../utils/auth');
+const clientConfig = require('../config/client');
+const businessRequest = require('../utils/request');
 const transport = require('../utils/auth-transport');
 const originalCallWechatAuth = transport.callWechatAuth;
 const storage = new Map();
@@ -37,13 +39,21 @@ function validResponse(overrides = {}) {
   };
 }
 
-function installWx({ login, request, getUserProfile } = {}) {
+function installWx({
+  login,
+  request,
+  getUserProfile,
+  envVersion = 'develop',
+  getAccountInfoSync,
+  getStorageSync
+} = {}) {
   global.wx = {
     login: login || ((options) => options.success({ code: 'temporary-code' })),
     request: request || ((options) => options.success({ statusCode: 200, data: validResponse() })),
     getUserProfile,
-    getAccountInfoSync: () => ({ miniProgram: { envVersion: 'develop' } }),
-    getStorageSync: (key) => storage.get(key),
+    getAccountInfoSync: getAccountInfoSync
+      || (() => ({ miniProgram: { envVersion } })),
+    getStorageSync: getStorageSync || ((key) => storage.get(key)),
     setStorageSync: (key, value) => storage.set(key, value),
     removeStorageSync: (key) => storage.delete(key)
   };
@@ -107,6 +117,43 @@ function backendErrorResponse(code, statusCode, retryAfter = '') {
     assert.equal(result.user.nickname, null);
   });
 
+  await run('wechat-auth bootstrap sends apikey without Authorization', async () => {
+    let requestHeaders = null;
+    await transport.callWechatAuth('temporary-code', {
+      config: TEST_CONFIG,
+      requestImpl: (options) => {
+        requestHeaders = options.header;
+        options.success({ statusCode: 200, data: validResponse() });
+      }
+    });
+    assert.equal(requestHeaders.apikey, TEST_CONFIG.supabasePublishableKey);
+    assert.equal(
+      Object.keys(requestHeaders).some((key) => key.toLowerCase() === 'authorization'),
+      false
+    );
+  });
+
+  await run('authenticated request sends apikey and user JWT Authorization', async () => {
+    let requestHeaders = null;
+    const response = await transport.requestAuthenticated({
+      url: 'https://example.supabase.co/rest/v1/profiles'
+    }, {
+      config: TEST_CONFIG,
+      ensureSession: async () => ({ session: validResponse().session }),
+      reauthenticate: async () => assert.fail('reauthentication must not run'),
+      requestImpl: (options) => {
+        requestHeaders = options.header;
+        options.success({ statusCode: 200, data: { ok: true } });
+      }
+    });
+    assert.deepEqual(response, { ok: true });
+    assert.equal(requestHeaders.apikey, TEST_CONFIG.supabasePublishableKey);
+    assert.equal(
+      requestHeaders.Authorization,
+      `Bearer ${validResponse().session.accessToken}`
+    );
+  });
+
   await run('valid stored session restores authenticated', async () => {
     const seed = freshAuth();
     const response = validResponse();
@@ -157,6 +204,90 @@ function backendErrorResponse(code, statusCode, retryAfter = '') {
       }),
       (error) => error.code === 'RATE_LIMITED' && error.retryAfterSeconds === 7
     );
+  });
+
+  await run('develop runtime allows development override and legacy mock', async () => {
+    storage.set(clientConfig.DEVELOPMENT_CONFIG_STORAGE_KEY, TEST_CONFIG);
+    installWx({ envVersion: 'develop' });
+    const config = clientConfig.getClientConfig();
+    assert.equal(config.envVersion, 'develop');
+    assert.equal(config.supabaseUrl, TEST_CONFIG.supabaseUrl);
+    assert.equal(config.supabasePublishableKey, TEST_CONFIG.supabasePublishableKey);
+    assert.equal(config.legacyDataMode, 'mock');
+  });
+
+  await run('release runtime ignores development override', async () => {
+    storage.set(clientConfig.DEVELOPMENT_CONFIG_STORAGE_KEY, TEST_CONFIG);
+    installWx({ envVersion: 'release' });
+    const config = clientConfig.getClientConfig();
+    assert.equal(config.envVersion, 'release');
+    assert.equal(config.supabaseUrl, '');
+    assert.equal(config.supabasePublishableKey, '');
+    assert.equal(config.legacyDataMode, 'disabled');
+  });
+
+  await run('trial runtime ignores development override', async () => {
+    storage.set(clientConfig.DEVELOPMENT_CONFIG_STORAGE_KEY, TEST_CONFIG);
+    installWx({ envVersion: 'trial' });
+    const config = clientConfig.getClientConfig();
+    assert.equal(config.envVersion, 'trial');
+    assert.equal(config.supabaseUrl, '');
+    assert.equal(config.supabasePublishableKey, '');
+    assert.equal(config.legacyDataMode, 'disabled');
+  });
+
+  await run('unknown envVersion fails closed without reading development override', async () => {
+    let storageReadCount = 0;
+    installWx({
+      envVersion: 'unexpected',
+      getStorageSync: () => {
+        storageReadCount += 1;
+        return TEST_CONFIG;
+      }
+    });
+    const config = clientConfig.getClientConfig();
+    assert.equal(config.envVersion, 'unknown');
+    assert.equal(config.legacyDataMode, 'disabled');
+    assert.equal(storageReadCount, 0);
+    await assert.rejects(
+      transport.callWechatAuth('code', {
+        requestImpl: () => assert.fail('request must not start')
+      }),
+      (error) => error.kind === 'configuration'
+    );
+  });
+
+  await run('getAccountInfoSync failure fails closed', async () => {
+    let storageReadCount = 0;
+    installWx({
+      getAccountInfoSync: () => {
+        throw new Error('runtime unavailable');
+      },
+      getStorageSync: () => {
+        storageReadCount += 1;
+        return TEST_CONFIG;
+      }
+    });
+    const config = clientConfig.getClientConfig();
+    assert.equal(config.envVersion, 'unknown');
+    assert.equal(config.legacyDataMode, 'disabled');
+    assert.equal(storageReadCount, 0);
+    await assert.rejects(
+      transport.callWechatAuth('code', {
+        requestImpl: () => assert.fail('request must not start')
+      }),
+      (error) => error.kind === 'configuration'
+    );
+  });
+
+  await run('trial release and unknown runtimes cannot use legacy business mock', async () => {
+    for (const envVersion of ['trial', 'release', 'unexpected']) {
+      installWx({ envVersion });
+      await assert.rejects(
+        businessRequest.callRpc('fetchHomeFeed'),
+        /Legacy business API is disabled/
+      );
+    }
   });
 
   await run('network failure never falls back to mock login', async () => {

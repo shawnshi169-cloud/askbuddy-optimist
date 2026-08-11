@@ -1,4 +1,5 @@
 const auth = require('./utils/auth');
+const { getRuntimePolicy } = require('./config/client');
 
 App({
   globalData: {
@@ -11,7 +12,8 @@ App({
       colorBorder: '#E5E7EB'
     },
     authMode: 'real',
-    legacyDataMode: 'mock',
+    legacyDataMode: 'disabled',
+    runtimeEnvVersion: 'unknown',
     authState: 'unknown',
     authSession: null,
     authToken: '',
@@ -21,6 +23,10 @@ App({
   },
 
   onLaunch() {
+    const runtimePolicy = getRuntimePolicy();
+    this.globalData.authMode = runtimePolicy.authMode;
+    this.globalData.legacyDataMode = runtimePolicy.legacyDataMode;
+    this.globalData.runtimeEnvVersion = runtimePolicy.envVersion;
     this.initSafeArea();
     auth.restoreSession();
   },

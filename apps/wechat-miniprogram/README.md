@@ -5,7 +5,8 @@
 ## Runtime Boundary
 
 - `authMode: real`：登录固定执行 `wx.login -> POST /functions/v1/wechat-auth`，不生成或回退到 `mock_token`。
-- `legacyDataMode: mock`：尚未迁移的 Questions、Search、Experts 等业务数据继续显式使用旧 Mock，与身份认证完全分离。
+- `develop` 使用 `legacyDataMode: mock`，尚未迁移的 Questions、Search、Experts 等业务数据可继续使用旧 Mock。
+- `trial`、`release` 与无法识别的 runtime 使用 `legacyDataMode: disabled`，未迁移业务会明确失败，不会回退 Mock。
 - 后端 Auth 失败会显示真实归一化错误，绝不模拟登录成功。
 
 ## WeChat Auth v1
@@ -30,8 +31,11 @@ Auth 由 `utils/auth.js` 集中管理，页面不直接管理 code、JWT、过�
 - `develop` -> development
 - `trial` -> staging
 - `release` -> production
+- unknown / missing / runtime API exception -> unknown，Auth 配置校验失败并 fail closed
 
-客户端只允许持有 Supabase URL 与 publishable key。配置缺失时 Auth fail closed，不会回退 Mock。开发者工具可临时设置 development 配置后重启小程序：
+客户端只允许持有 Supabase URL 与 publishable key。配置缺失时 Auth fail closed，不会回退 Mock。`wechat-auth` bootstrap 只发送 `Content-Type` 和 `apikey`；已有 user JWT 的 authenticated request 才发送 `Authorization: Bearer <accessToken>`。
+
+仅当 `envVersion === 'develop'` 时，开发者工具可临时设置 development 配置后重启小程序：
 
 ```js
 wx.setStorageSync('ab_client_config_v1', {
