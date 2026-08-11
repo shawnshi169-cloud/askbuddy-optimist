@@ -1,11 +1,12 @@
 <view class="container safe-bottom">
   <view class="card profile-header">
-    <view wx:if="{{user}}" class="row">
+    <view wx:if="{{authState === 'authenticated' && user}}" class="row">
       <view class="row" style="justify-content: flex-start; gap: 18rpx;">
-        <image class="avatar" src="{{user.avatarUrl}}" mode="aspectFill" />
+        <image wx:if="{{user.avatarUrl}}" class="avatar" src="{{user.avatarUrl}}" mode="aspectFill" />
+        <view wx:else class="avatar avatar-placeholder">用</view>
         <view>
-          <view class="title" style="font-size: 32rpx;">{{user.nickName}}</view>
-          <view class="subtitle">已登录 · Token 已写入全局状态</view>
+          <view class="title" style="font-size: 32rpx;">{{user.nickname || '已登录用户'}}</view>
+          <view class="subtitle">已登录 · Token 已就绪</view>
         </view>
       </view>
       <button size="mini" bindtap="logout">退出</button>
@@ -13,14 +14,16 @@
 
     <view wx:else>
       <view class="title" style="font-size: 32rpx;">未登录</view>
-      <view class="subtitle" style="margin-top: 8rpx;">先完成微信授权，后续进入真实接口联调。</view>
-      <button class="button-primary" style="margin-top: 18rpx;" bindtap="login">微信登录授权</button>
+      <view class="subtitle" style="margin-top: 8rpx;">使用微信身份安全登录，无需授权头像或昵称。</view>
+      <view wx:if="{{authError}}" class="auth-error">{{authError}}</view>
+      <button class="button-primary" style="margin-top: 18rpx;" loading="{{loginLoading}}" disabled="{{loginLoading}}" bindtap="login">微信登录</button>
     </view>
   </view>
 
   <view class="card" style="margin-top: 20rpx;">
     <view class="title" style="font-size: 30rpx;">主链路状态</view>
-    <view class="subtitle" style="margin-top: 10rpx;">Token：{{authToken ? '已就绪' : '未就绪'}}</view>
+    <view class="subtitle" style="margin-top: 10rpx;">登录状态：{{authState}}</view>
+    <view class="subtitle" style="margin-top: 6rpx;">Token：{{tokenReady ? '已就绪' : '未就绪'}}</view>
     <view class="subtitle" style="margin-top: 6rpx;">字段/状态/RPC 冲突策略：A</view>
   </view>
 </view>

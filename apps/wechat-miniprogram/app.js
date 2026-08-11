@@ -1,4 +1,4 @@
-const STORAGE_TOKEN_KEY = 'ab_auth_token';
+const auth = require('./utils/auth');
 
 App({
   globalData: {
@@ -10,16 +10,19 @@ App({
       colorTextMuted: '#6B7280',
       colorBorder: '#E5E7EB'
     },
+    authMode: 'real',
+    legacyDataMode: 'mock',
+    authState: 'unknown',
+    authSession: null,
     authToken: '',
     currentUser: null,
     safeAreaBottom: 0,
-    useMock: true,
     conflictPolicy: 'A'
   },
 
   onLaunch() {
     this.initSafeArea();
-    this.restoreToken();
+    auth.restoreSession();
   },
 
   initSafeArea() {
@@ -27,27 +30,5 @@ App({
     const safeArea = systemInfo.safeArea || null;
     const safeAreaBottom = safeArea ? Math.max(0, systemInfo.screenHeight - safeArea.bottom) : 0;
     this.globalData.safeAreaBottom = safeAreaBottom;
-  },
-
-  restoreToken() {
-    const token = wx.getStorageSync(STORAGE_TOKEN_KEY);
-    if (token) {
-      this.globalData.authToken = token;
-    }
-  },
-
-  setAuthToken(token) {
-    this.globalData.authToken = token;
-    wx.setStorageSync(STORAGE_TOKEN_KEY, token);
-  },
-
-  clearAuthToken() {
-    this.globalData.authToken = '';
-    this.globalData.currentUser = null;
-    wx.removeStorageSync(STORAGE_TOKEN_KEY);
-  },
-
-  setCurrentUser(user) {
-    this.globalData.currentUser = user;
   }
 });
