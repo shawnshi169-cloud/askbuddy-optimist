@@ -1,4 +1,7 @@
 project_id = "fslpvtlavhrnxsygkpvi"
 
+[functions.payment-webhook]
+verify_jwt = false
+
 [functions.wechat-auth]
 verify_jwt = false
