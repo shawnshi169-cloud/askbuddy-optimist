@@ -1,22 +1,39 @@
-<view class="container safe-bottom">
-  <view class="row">
-    <view>
-      <view class="title">首页</view>
-      <view class="subtitle">先用 Mock 跑通主链路，再切真实接口</view>
+<view class="page-shell home-page">
+  <view class="app-header home-header">
+    <view class="app-header-bar" style="{{navLayout.headerStyle}}">
+      <view>
+        <view class="app-header-title">问问</view>
+        <view class="app-header-subtitle">分享经验，解决具体问题</view>
+      </view>
+      <view class="header-chip" style="{{navLayout.actionStyle}}">经验互助</view>
     </view>
-    <button class="button-primary" size="mini" bindtap="goAsk">去提问</button>
+    <view class="header-search" bindtap="goSearch" hover-class="header-control-pressed" aria-role="button" aria-label="搜索问题和关键词">
+      <view class="search-glyph" />
+      <text>搜索问题 / 关键词</text>
+    </view>
   </view>
 
-  <state-card wx:if="{{loading}}" title="加载中" desc="正在拉取首页内容" />
-  <state-card wx:elif="{{error}}" title="加载失败" desc="{{error}}" actionText="重试" bind:action="loadData" />
+  <view class="page-content tab-page-content home-content">
+    <view class="home-intro rise-in">
+      <view>
+        <view class="section-title">今日问题</view>
+        <view class="section-caption">先完成可用主链路，再逐步接入真实业务数据。</view>
+      </view>
+      <button class="button-primary ask-button" bindtap="goAsk">去提问</button>
+    </view>
 
-  <view wx:else>
-    <view wx:for="{{list}}" wx:key="id" class="card" style="margin-top: 20rpx;" bindtap="goDetail" data-id="{{item.id}}">
-      <view class="title" style="font-size: 32rpx;">{{item.title}}</view>
-      <view class="subtitle" style="margin-top: 10rpx;">{{item.content}}</view>
-      <view class="row" style="margin-top: 14rpx;">
-        <text class="subtitle">{{item.authorName}} · {{item.createdAt}}</text>
-        <text class="subtitle">{{item.answerCount}} 回答</text>
+    <state-card wx:if="{{loading}}" type="loading" title="正在加载" desc="正在寻找值得回答的问题" />
+    <state-card wx:elif="{{error}}" type="error" title="加载失败" desc="{{error}}" actionText="重试" bind:action="loadData" />
+    <state-card wx:elif="{{!list.length}}" type="empty" title="还没有新问题" desc="下拉刷新，或者发布第一个问题" />
+
+    <view wx:else class="feed-list">
+      <view wx:for="{{list}}" wx:key="id" class="card question-card rise-in" bindtap="goDetail" data-id="{{item.id}}">
+        <view class="question-title line-clamp-2">{{item.title}}</view>
+        <view class="question-content line-clamp-2">{{item.content || '这位用户正在等待一份有帮助的回答。'}}</view>
+        <view class="question-footer">
+          <text>{{item.authorName || '问问用户'}} · {{item.createdAt || '刚刚'}}</text>
+          <text class="answer-count">{{item.answerCount || 0}} 回答</text>
+        </view>
       </view>
     </view>
   </view>

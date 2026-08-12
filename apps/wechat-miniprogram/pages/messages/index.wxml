@@ -2,8 +2,8 @@
   <view class="title">消息</view>
   <view class="subtitle">会话列表（联调前使用 Mock）</view>
 
-  <state-card wx:if="{{loading}}" title="加载中" desc="正在拉取会话" />
-  <state-card wx:elif="{{error}}" title="加载失败" desc="{{error}}" actionText="重试" bind:action="loadData" />
+  <state-card wx:if="{{loading}}" type="loading" title="加载中" desc="正在拉取会话" />
+  <state-card wx:elif="{{error}}" type="error" title="加载失败" desc="{{error}}" actionText="重试" bind:action="loadData" />
 
   <view wx:else>
     <view wx:for="{{list}}" wx:key="id" class="card" style="margin-top: 20rpx;">

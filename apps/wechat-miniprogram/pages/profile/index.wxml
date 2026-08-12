@@ -1,29 +1,98 @@
-<view class="container safe-bottom">
-  <view class="card profile-header">
-    <view wx:if="{{authState === 'authenticated' && user}}" class="row">
-      <view class="row" style="justify-content: flex-start; gap: 18rpx;">
-        <image wx:if="{{user.avatarUrl}}" class="avatar" src="{{user.avatarUrl}}" mode="aspectFill" />
-        <view wx:else class="avatar avatar-placeholder">用</view>
-        <view>
-          <view class="title" style="font-size: 32rpx;">{{user.nickname || '已登录用户'}}</view>
-          <view class="subtitle">已登录 · Token 已就绪</view>
-        </view>
+<view class="page-shell profile-page">
+  <view class="app-header profile-sticky-header">
+    <view class="app-header-bar profile-title-bar" style="{{navLayout.headerStyle}}">
+      <view>
+        <view class="app-header-title">个人中心</view>
+        <view class="app-header-subtitle">管理你的身份与使用记录</view>
       </view>
-      <button size="mini" bindtap="logout">退出</button>
-    </view>
-
-    <view wx:else>
-      <view class="title" style="font-size: 32rpx;">未登录</view>
-      <view class="subtitle" style="margin-top: 8rpx;">使用微信身份安全登录，无需授权头像或昵称。</view>
-      <view wx:if="{{authError}}" class="auth-error">{{authError}}</view>
-      <button class="button-primary" style="margin-top: 18rpx;" loading="{{loginLoading}}" disabled="{{loginLoading}}" bindtap="login">微信登录</button>
+      <view class="header-chip" style="{{navLayout.actionStyle}}">Auth v1</view>
     </view>
   </view>
 
-  <view class="card" style="margin-top: 20rpx;">
-    <view class="title" style="font-size: 30rpx;">主链路状态</view>
-    <view class="subtitle" style="margin-top: 10rpx;">登录状态：{{authState}}</view>
-    <view class="subtitle" style="margin-top: 6rpx;">Token：{{tokenReady ? '已就绪' : '未就绪'}}</view>
-    <view class="subtitle" style="margin-top: 6rpx;">字段/状态/RPC 冲突策略：A</view>
+  <view class="profile-hero-art">
+    <view class="hero-orb orb-left" />
+    <view class="hero-orb orb-right" />
+  </view>
+
+  <view class="page-content tab-page-content profile-content">
+    <view class="card identity-card rise-in">
+      <view wx:if="{{authState === 'authenticated' && user}}" class="identity-row">
+        <image wx:if="{{user.avatarUrl}}" class="profile-avatar" src="{{user.avatarUrl}}" mode="aspectFill" />
+        <view wx:else class="profile-avatar placeholder-avatar">
+          <view class="profile-head" />
+          <view class="profile-body" />
+        </view>
+        <view class="identity-copy">
+          <view class="identity-name">{{user.nickname || '已登录用户'}}</view>
+          <view class="identity-desc">微信身份已验证，登录会话已就绪。</view>
+        </view>
+        <button class="logout-button" bindtap="logout">退出</button>
+      </view>
+
+      <view wx:elif="{{authState === 'unknown' || authState === 'authenticating' || authState === 'reauthenticating'}}" class="identity-row logged-out">
+        <view class="profile-avatar placeholder-avatar auth-pending-avatar">
+          <view class="pending-dot" />
+          <view class="pending-dot" />
+          <view class="pending-dot" />
+        </view>
+        <view class="identity-copy">
+          <view class="identity-name">{{authState === 'reauthenticating' ? '正在重新认证' : '正在确认登录状态'}}</view>
+          <view class="identity-desc">请稍候，正在安全处理微信身份会话。</view>
+        </view>
+        <button class="login-button button-primary" loading="{{true}}" disabled="{{true}}">处理中</button>
+      </view>
+
+      <view wx:else class="identity-row logged-out">
+        <view class="profile-avatar placeholder-avatar">
+          <view class="profile-head" />
+          <view class="profile-body" />
+        </view>
+        <view class="identity-copy">
+          <view class="identity-name">欢迎来到问问</view>
+          <view class="identity-desc">使用微信身份安全登录，无需授权头像或昵称。</view>
+          <view wx:if="{{authError}}" class="auth-error">{{authError}}</view>
+        </view>
+        <button class="login-button button-primary" loading="{{loginLoading}}" disabled="{{loginLoading}}" bindtap="login">微信登录</button>
+      </view>
+    </view>
+
+    <view class="session-strip rise-in">
+      <view><text>登录状态</text><text>{{authState}}</text></view>
+      <view><text>会话凭证</text><text>{{tokenReady ? '已就绪' : '未就绪'}}</text></view>
+      <view><text>契约策略</text><text>A</text></view>
+    </view>
+
+    <view class="stats-card rise-in">
+      <view wx:for="{{stats}}" wx:key="key" class="stat-item" data-label="我的{{item.label}}" bindtap="openEntry">
+        <view class="stat-value">{{item.value}}</view>
+        <view class="stat-label">{{item.label}}</view>
+      </view>
+    </view>
+
+    <view class="card menu-card rise-in">
+      <view class="menu-title-row">
+        <view class="menu-title-icon">☆</view>
+        <view class="section-title">常用功能</view>
+      </view>
+      <view class="common-grid">
+        <view wx:for="{{commonActions}}" wx:key="key" class="common-item" data-label="{{item.label}}" bindtap="openEntry">
+          <view class="common-icon common-{{item.tone}}">{{item.short}}</view>
+          <view class="common-label">{{item.label}}</view>
+        </view>
+      </view>
+      <view class="entry-note">以上业务入口仅展示信息架构，后端能力将在对应阶段接入。</view>
+    </view>
+
+    <view class="card help-card rise-in">
+      <view class="section-title help-title">帮助与信息</view>
+      <view wx:for="{{helpItems}}" wx:key="key" class="help-row" data-label="{{item.title}}" bindtap="openPublicEntry">
+        <view class="help-icon">{{item.short}}</view>
+        <view class="help-copy">
+          <view class="help-name">{{item.title}}</view>
+          <view class="help-desc">{{item.desc}}</view>
+        </view>
+        <view class="help-chevron">›</view>
+      </view>
+    </view>
   </view>
 </view>

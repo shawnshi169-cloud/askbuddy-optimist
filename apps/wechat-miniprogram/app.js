@@ -4,12 +4,14 @@ const { getRuntimePolicy } = require('./config/client');
 App({
   globalData: {
     designTokens: {
-      colorBg: '#F7FAF8',
+      colorBg: '#F8FDFB',
       colorCard: '#FFFFFF',
-      colorPrimary: '#18A058',
-      colorText: '#1F2937',
-      colorTextMuted: '#6B7280',
-      colorBorder: '#E5E7EB'
+      colorPrimary: '#79D5C7',
+      colorPrimaryStrong: '#49AA9B',
+      colorPrimarySoft: '#ECFBF7',
+      colorText: '#1E293B',
+      colorTextMuted: '#64748B',
+      colorBorder: '#CDEFE7'
     },
     authMode: 'real',
     legacyDataMode: 'disabled',
@@ -19,6 +21,8 @@ App({
     authToken: '',
     currentUser: null,
     safeAreaBottom: 0,
+    statusBarHeight: 0,
+    platform: '',
     conflictPolicy: 'A'
   },
 
@@ -32,9 +36,13 @@ App({
   },
 
   initSafeArea() {
-    const systemInfo = wx.getSystemInfoSync();
-    const safeArea = systemInfo.safeArea || null;
-    const safeAreaBottom = safeArea ? Math.max(0, systemInfo.screenHeight - safeArea.bottom) : 0;
+    const windowInfo = typeof wx.getWindowInfo === 'function' ? wx.getWindowInfo() : {};
+    const deviceInfo = typeof wx.getDeviceInfo === 'function' ? wx.getDeviceInfo() : {};
+    const safeArea = windowInfo.safeArea || null;
+    const screenHeight = windowInfo.screenHeight || windowInfo.windowHeight || 0;
+    const safeAreaBottom = safeArea ? Math.max(0, screenHeight - safeArea.bottom) : 0;
     this.globalData.safeAreaBottom = safeAreaBottom;
+    this.globalData.statusBarHeight = windowInfo.statusBarHeight || 0;
+    this.globalData.platform = deviceInfo.platform || '';
   }
 });
