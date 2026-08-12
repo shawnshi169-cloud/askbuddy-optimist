@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test:auth": "node tests/auth-v1.test.cjs"
+  }
+}
