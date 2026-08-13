@@ -47,7 +47,6 @@ page {
   position: sticky;
   top: 0;
   z-index: 90;
-  padding-top: env(safe-area-inset-top);
   color: #ffffff;
   background: linear-gradient(135deg, #75cfc1 0%, #98dfd4 100%);
   box-shadow: 0 8rpx 26rpx rgba(73, 170, 155, 0.1);
@@ -357,6 +356,17 @@ image.avatar {
   background: rgba(255, 255, 255, 0.96);
   border-top: 1px solid var(--ab-border);
   box-shadow: 0 -10rpx 28rpx rgba(15, 23, 42, 0.05);
+}
+
+.preview-banner {
+  margin: 0 0 20rpx;
+  padding: 16rpx 20rpx;
+  border: 1px solid #f0d89b;
+  border-radius: 18rpx;
+  color: #8a6522;
+  background: #fff9e8;
+  font-size: 20rpx;
+  line-height: 1.55;
 }
 
 .rise-in {

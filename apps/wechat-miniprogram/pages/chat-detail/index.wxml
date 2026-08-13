@@ -1,0 +1,12 @@
+<view class="page-shell chat-page">
+  <view class="app-header chat-header">
+    <view class="chat-header-bar" style="{{navLayout.headerStyle}}"><view class="back-button" bindtap="goBack" hover-class="header-control-pressed" hover-stay-time="80" aria-role="button" aria-label="返回">‹</view><view class="chat-user" bindtap="openExpert" aria-role="button" aria-label="查看{{expert.name}}的主页"><view class="chat-avatar">{{expert.initial}}</view><view class="chat-identity"><view class="chat-name">{{expert.name}}</view><view class="chat-status">体验会话 · 回复状态以实际服务为准</view></view></view><view class="chat-call" bindtap="goCall" hover-class="header-control-pressed" hover-stay-time="80" aria-role="button" aria-label="发起通话">通话</view></view>
+  </view>
+  <scroll-view class="chat-scroll" scroll-y scroll-with-animation>
+    <view class="chat-date">今天</view>
+    <view wx:for="{{messages}}" wx:key="id" class="message-row {{item.mine ? 'mine' : 'theirs'}}"><view wx:if="{{!item.mine}}" class="bubble-avatar">{{expert.initial}}</view><view><view class="message-bubble">{{item.content}}</view><view class="message-time">{{item.time}}</view></view></view>
+    <view wx:if="{{presentationEnabled}}" class="demo-note">Development presentation preview：以上内容不是真实私信。</view>
+    <view wx:else class="demo-note">暂无正式私信数据；发送按钮不会模拟成功。</view>
+  </scroll-view>
+  <view class="chat-composer"><input value="{{inputValue}}" placeholder="输入消息…" bindinput="onInput" /><button bindtap="sendMessage">发送</button></view>
+</view>

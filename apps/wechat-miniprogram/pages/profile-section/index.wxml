@@ -1,0 +1,24 @@
+<view class="page-shell section-page">
+  <view class="app-header section-header">
+    <view class="section-header-bar" style="{{navLayout.headerStyle}}"><view class="back-button" bindtap="goBack">‹</view><view class="section-header-title">{{section.title}}</view></view>
+  </view>
+  <view class="section-content">
+    <view class="section-intro rise-in"><view class="section-icon">{{section.icon}}</view><view><view class="section-title">{{section.title}}</view><view class="section-subtitle">{{section.subtitle}}</view></view></view>
+    <view wx:if="{{section.items}}" class="card section-list rise-in">
+      <view wx:for="{{section.items}}" wx:key="*this" class="section-row {{sectionKey === 'feedback' && feedbackCategory === item ? 'selected' : ''}}" data-label="{{item}}" bindtap="openItem"><view class="row-dot" /><view class="row-label">{{item}}</view><view class="row-arrow">{{sectionKey === 'feedback' && feedbackCategory === item ? '✓' : '›'}}</view></view>
+    </view>
+    <view wx:if="{{sectionKey === 'feedback'}}" class="card feedback-card rise-in">
+      <view class="feedback-label">反馈内容</view>
+      <textarea value="{{feedbackContent}}" maxlength="1000" placeholder="请描述遇到的问题、期望的体验或改进建议…" bindinput="onFeedbackInput" />
+      <view class="feedback-footer"><text>仅保存在当前设备</text><text>{{feedbackContent.length}}/1000</text></view>
+      <button class="button-primary feedback-save" bindtap="saveFeedbackDraft">保存反馈草稿</button>
+    </view>
+    <view wx:if="{{!section.items && drafts.length}}" class="draft-list">
+      <view wx:for="{{drafts}}" wx:key="key" class="card draft-card rise-in" data-key="{{item.key}}" bindtap="openDraft">
+        <view class="draft-label">{{item.type}}</view><view class="draft-title">{{item.title}}</view><view class="draft-desc line-clamp-2">{{item.desc}}</view><view class="draft-actions"><view>仅保存在当前设备</view><view class="delete-draft" data-key="{{item.key}}" catchtap="clearDraft">删除</view></view>
+      </view>
+    </view>
+    <view wx:if="{{!section.items && !drafts.length}}" class="empty-section rise-in"><view class="empty-illustration">{{section.icon}}</view><view class="empty-title">{{section.emptyTitle}}</view><view class="empty-desc">{{section.emptyDesc}}</view></view>
+    <view wx:if="{{showAccountTip}}" class="contract-tip">页面结构与 iOS 保持一致；需要账号数据的功能会在服务开放后显示。</view>
+  </view>
+</view>

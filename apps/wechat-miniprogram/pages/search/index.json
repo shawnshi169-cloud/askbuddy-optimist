@@ -3,5 +3,6 @@
     "state-card": "/components/state-card/index"
   },
   "enablePullDownRefresh": true,
-  "navigationBarTitleText": "搜索"
+  "navigationStyle": "custom",
+  "backgroundColor": "#F8FDFB"
 }

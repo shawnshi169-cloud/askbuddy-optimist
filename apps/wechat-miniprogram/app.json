@@ -6,7 +6,17 @@
     "pages/discover/index",
     "pages/messages/index",
     "pages/profile/index",
-    "pages/question-detail/index"
+    "pages/question-detail/index",
+    "pages/channel/index",
+    "pages/topic-detail/index",
+    "pages/city-selector/index",
+    "pages/expert-detail/index",
+    "pages/skill-publish/index",
+    "pages/chat-detail/index",
+    "pages/profile-section/index",
+    "pages/post-editor/index",
+    "pages/discover-interactions/index",
+    "pages/call/index"
   ],
   "window": {
     "navigationBarTitleText": "问问",

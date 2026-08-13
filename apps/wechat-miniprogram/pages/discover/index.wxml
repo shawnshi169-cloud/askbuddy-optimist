@@ -1,17 +1,108 @@
-<view class="container safe-bottom">
-  <view class="title">发现</view>
-  <view class="subtitle">热点话题与内容推荐（Mock 版）</view>
-
-  <state-card wx:if="{{loading}}" type="loading" title="加载中" desc="正在获取发现内容" />
-  <state-card wx:elif="{{error}}" type="error" title="加载失败" desc="{{error}}" actionText="重试" bind:action="loadData" />
-
-  <view wx:else>
-    <view wx:for="{{list}}" wx:key="id" class="card" style="margin-top: 20rpx;">
-      <view class="row">
-        <view class="title" style="font-size: 30rpx;">{{item.title}}</view>
-        <text wx:if="{{item.hot}}" style="color: #ef4444; font-size: 24rpx;">HOT</text>
+<view class="page-shell discover-page">
+  <view class="app-header discover-header">
+    <view class="discover-channel-bar" style="{{navLayout.headerStyle}}">
+      <view class="discover-tabs">
+        <view class="channel-item {{activeChannel === 'following' ? 'active' : ''}}" data-channel="following" bindtap="switchChannel">关注</view>
+        <view class="channel-item {{activeChannel === 'recommended' ? 'active' : ''}}" data-channel="recommended" bindtap="switchChannel">推荐</view>
+        <view class="channel-item {{activeChannel === 'nearby' ? 'active' : ''}}" data-channel="nearby" bindtap="switchChannel">同城</view>
       </view>
-      <view class="subtitle" style="margin-top: 8rpx;">{{item.participants}} 人参与</view>
+      <view class="discover-header-actions">
+        <view class="discover-header-button" bindtap="goAsk" hover-class="discover-header-button-pressed" hover-stay-time="80" aria-role="button" aria-label="发布内容"><view class="header-plus"></view></view>
+        <view class="discover-header-button notice-button" bindtap="goInteractions" hover-class="discover-header-button-pressed" hover-stay-time="80" aria-role="button" aria-label="查看互动提醒"><view class="discover-bell-cap"></view><view class="discover-bell-body"></view><view class="discover-bell-clapper"></view><view class="notice-dot"></view></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="page-content tab-page-content discover-content">
+    <view wx:if="{{previewMode}}" class="preview-banner">发现页当前展示体验内容，不代表你的真实账号动态。</view>
+    <view class="composer-card rise-in">
+      <view class="composer-title-row">
+        <view class="composer-icon">↗</view>
+        <view>
+          <view class="composer-title">经验广场</view>
+          <view class="composer-subtitle">推荐广场</view>
+        </view>
+      </view>
+      <view class="composer-input-row" bindtap="goAsk">
+        <view class="composer-avatar">发</view>
+        <view class="composer-placeholder">分享你的真实经验或近况</view>
+      </view>
+      <view class="composer-actions">
+        <view class="composer-action" bindtap="goAsk">▣ 图片</view>
+        <view class="composer-action" bindtap="goAsk"># 话题</view>
+        <view class="composer-action" bindtap="goAsk">⌖ 同城</view>
+        <view class="composer-count">{{list.length}} 条动态</view>
+      </view>
+      <scroll-view class="composer-tags-scroll" scroll-x show-scrollbar="false">
+        <view class="composer-tags">
+          <view wx:for="{{topicTags}}" wx:key="*this" class="composer-tag">#{{item}}</view>
+        </view>
+      </scroll-view>
+      <view class="composer-note">记录可复用经验，帮助他人更快做决策。</view>
+    </view>
+
+    <view class="discover-list-header">
+      <view>
+        <view class="section-title">广场动态</view>
+        <view class="section-caption">围绕真实经历与可执行建议的经验流</view>
+      </view>
+      <view class="sort-switch">
+        <view class="sort-item {{activeSort === 'latest' ? 'active' : ''}}" data-sort="latest" bindtap="switchSort">最新</view>
+        <view class="sort-item {{activeSort === 'popular' ? 'active' : ''}}" data-sort="popular" bindtap="switchSort">最热</view>
+      </view>
+    </view>
+
+    <state-card wx:if="{{loading}}" type="loading" title="加载中" desc="正在获取发现内容" />
+    <state-card wx:elif="{{error}}" type="error" title="加载失败" desc="{{error}}" actionText="重试" bind:action="loadData" />
+    <state-card wx:elif="{{activeChannel === 'following' && !displayList.length}}" type="empty" title="关注流暂未开放" desc="关注关系读取完成后，达人动态会优先显示在这里" />
+    <state-card wx:elif="{{!displayList.length}}" type="empty" title="还没有动态" desc="切换推荐频道，或成为第一个分享经验的人" />
+
+    <view wx:else class="post-list">
+      <view wx:for="{{displayList}}" wx:key="id" class="card post-card rise-in" data-id="{{item.id}}" bindtap="openPost" hover-class="post-card-pressed">
+        <view class="post-author-row">
+          <view class="avatar post-avatar">{{item.author_initial || '问'}}</view>
+          <view class="post-author-copy">
+            <view class="post-author-name">{{item.author_name || '问问用户'}}</view>
+            <view class="post-time">{{item.created_at_text || '刚刚'}}</view>
+          </view>
+          <view wx:if="{{item.hot}}" class="hot-pill">热门</view>
+        </view>
+        <view class="post-content">{{item.content || item.title}}</view>
+        <view class="post-tags">
+          <text wx:for="{{item.tags}}" wx:key="*this">#{{item}}</text>
+        </view>
+        <view class="post-actions">
+          <view class="post-action" data-action="喜欢" catchtap="interact">♡ {{item.likes_count || 0}}</view>
+          <view class="post-action" data-action="评论" catchtap="interact">○ {{item.comments_count || 0}}</view>
+          <button class="post-action share-action" open-type="share" data-id="{{item.id}}" catchtap="prepareShare">↗ {{item.shares_count || 0}}</button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{postDetailVisible && selectedPost}}" class="post-detail-mask" catchtap="closePostDetail">
+    <view class="post-detail-sheet" catchtap="keepPostDetail">
+      <view class="post-detail-handle" />
+      <view class="post-detail-heading">
+        <view class="post-author-row">
+          <view class="avatar post-avatar">{{selectedPost.author_initial || '问'}}</view>
+          <view class="post-author-copy">
+            <view class="post-author-name">{{selectedPost.author_name || selectedPost.nickname || '问问用户'}}</view>
+            <view class="post-time">{{selectedPost.created_at_text || '最近发布'}}</view>
+          </view>
+        </view>
+        <view class="post-detail-close" bindtap="closePostDetail">×</view>
+      </view>
+      <scroll-view class="post-detail-scroll" scroll-y>
+        <view class="post-detail-content">{{selectedPost.content || selectedPost.title}}</view>
+        <view class="post-tags"><text wx:for="{{selectedPost.tags}}" wx:key="*this">#{{item}}</text></view>
+        <view class="post-detail-stats">
+          <text>{{selectedPost.likes_count || 0}} 人喜欢</text>
+          <text>{{selectedPost.comments_count || 0}} 条评论</text>
+          <text>{{selectedPost.shares_count || 0}} 次分享</text>
+        </view>
+      </scroll-view>
+      <button class="button-primary post-detail-share" open-type="share" data-id="{{selectedPost.id}}" bindtap="prepareShare">分享这条经验</button>
     </view>
   </view>
 </view>

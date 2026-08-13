@@ -1,0 +1,278 @@
+page {
+  background: #f8fdfb;
+}
+
+.topic-page {
+  background: linear-gradient(180deg, #effbf8 0, #f8fdfb 380rpx, #ffffff 100%);
+}
+
+.topic-header {
+  background: linear-gradient(135deg, #75cfc1, #8bd9cd);
+}
+
+.topic-header-bar {
+  min-height: 88rpx;
+  padding: 0 22rpx;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.topic-header-title {
+  flex: 1;
+  min-width: 0;
+  margin-left: 4rpx;
+  overflow: hidden;
+  color: #ffffff;
+  font-size: 28rpx;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topic-content {
+  padding: 30rpx;
+}
+
+.topic-hero,
+.article-card,
+.discussion-card {
+  overflow: hidden;
+  padding: 0;
+  border-radius: 36rpx;
+}
+
+.topic-visual {
+  position: relative;
+  height: 292rpx;
+  overflow: hidden;
+}
+
+.topic-indigo { background: linear-gradient(135deg, #334ca0, #5577df 55%, #82d8cf); }
+.topic-teal { background: linear-gradient(135deg, #176b68, #4fc0ae 58%, #b4eadf); }
+.topic-amber { background: linear-gradient(135deg, #8d4d24, #e29a44 58%, #f7d68b); }
+.topic-rose { background: linear-gradient(135deg, #9b355c, #e56a91 58%, #fac3d4); }
+
+.topic-visual-short {
+  position: absolute;
+  right: 36rpx;
+  bottom: -12rpx;
+  color: rgba(255, 255, 255, 0.22);
+  font-size: 150rpx;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.topic-visual-ring {
+  position: absolute;
+  border: 3rpx solid rgba(255, 255, 255, 0.28);
+  border-radius: 50%;
+}
+
+.ring-one {
+  left: 70rpx;
+  top: 56rpx;
+  width: 210rpx;
+  height: 210rpx;
+}
+
+.ring-two {
+  left: 150rpx;
+  top: 100rpx;
+  width: 330rpx;
+  height: 130rpx;
+  transform: rotate(-18deg);
+}
+
+.topic-hero-body {
+  padding: 38rpx;
+}
+
+.topic-badge,
+.read-chip,
+.article-chip,
+.sort-chip {
+  display: inline-flex;
+  padding: 8rpx 18rpx;
+  border-radius: 999rpx;
+  font-size: 21rpx;
+}
+
+.topic-badge {
+  color: #3d8f84;
+  background: #ecfbf7;
+}
+
+.topic-title {
+  margin-top: 24rpx;
+  color: #1e293b;
+  font-size: 38rpx;
+  font-weight: 700;
+  line-height: 1.42;
+}
+
+.topic-description {
+  margin-top: 18rpx;
+  color: #526176;
+  font-size: 26rpx;
+  line-height: 1.78;
+}
+
+.topic-meta {
+  margin-top: 24rpx;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18rpx;
+  color: #7c8aa0;
+  font-size: 21rpx;
+}
+
+.read-chip,
+.article-chip,
+.sort-chip {
+  margin-top: 20rpx;
+  color: #64748b;
+  background: #f3f7f6;
+}
+
+.article-card,
+.discussion-card {
+  margin-top: 26rpx;
+  padding: 34rpx;
+}
+
+.article-heading,
+.discussion-heading,
+.discussion-author-row,
+.discussion-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.article-chip,
+.sort-chip {
+  margin-top: 0;
+}
+
+.article-paragraph {
+  margin-top: 24rpx;
+  color: #475569;
+  font-size: 25rpx;
+  line-height: 1.9;
+}
+
+.article-note {
+  margin-top: 28rpx;
+  padding: 28rpx;
+  border-radius: 26rpx;
+  background: #f6f9f8;
+}
+
+.article-note-title {
+  color: #334155;
+  font-weight: 700;
+}
+
+.article-note-copy {
+  margin-top: 12rpx;
+  color: #64748b;
+  font-size: 23rpx;
+  line-height: 1.7;
+}
+
+.related-tags {
+  margin-top: 22rpx;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  color: #4b9c90;
+  font-size: 21rpx;
+}
+
+.discussion-caption,
+.discussion-time {
+  margin-top: 5rpx;
+  color: #94a3b8;
+  font-size: 20rpx;
+}
+
+.discussion-item {
+  padding: 30rpx 0;
+  border-bottom: 1px solid #edf3f1;
+}
+
+.discussion-item:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.discussion-author-row {
+  justify-content: flex-start;
+}
+
+.topic-avatar {
+  background: linear-gradient(135deg, #f5d553, #ffe99b);
+  color: #60783c;
+}
+
+.discussion-author-copy {
+  flex: 1;
+}
+
+.discussion-author {
+  color: #334155;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.discussion-content {
+  margin-top: 18rpx;
+  color: #475569;
+  font-size: 25rpx;
+  line-height: 1.75;
+}
+
+.discussion-actions {
+  margin-top: 16rpx;
+  justify-content: flex-end;
+  color: #7aafa7;
+  font-size: 21rpx;
+}
+
+.topic-action-bar {
+  position: fixed;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 16rpx 24rpx calc(env(safe-area-inset-bottom) + 14rpx);
+  display: flex;
+  gap: 14rpx;
+  background: rgba(255, 255, 255, 0.97);
+  border-top: 1px solid #dcefeb;
+  box-sizing: border-box;
+}
+
+.comment-input {
+  flex: 1;
+  height: 72rpx;
+  padding: 0 24rpx;
+  border-radius: 999rpx;
+  background: #f5f8f7;
+  box-sizing: border-box;
+  font-size: 24rpx;
+}
+
+.comment-submit {
+  width: 118rpx;
+  min-width: 0;
+  height: 72rpx;
+  margin: 0;
+  padding: 0;
+  line-height: 72rpx;
+  color: #255c54;
+  background: linear-gradient(135deg, #82d9cc, #b1eee4);
+  font-size: 23rpx;
+}

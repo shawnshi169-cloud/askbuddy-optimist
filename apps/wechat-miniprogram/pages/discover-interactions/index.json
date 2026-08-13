@@ -1,0 +1,7 @@
+{
+  "usingComponents": {
+    "state-card": "/components/state-card/index"
+  },
+  "navigationStyle": "custom",
+  "backgroundColor": "#F8FDFB"
+}

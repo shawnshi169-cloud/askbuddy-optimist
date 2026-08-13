@@ -36,6 +36,7 @@ function getNavigationLayout() {
     : statusBarHeight + 6;
   const verticalGap = Math.max(4, capsuleTop - statusBarHeight);
   const barHeight = Math.max(44, capsuleHeight + verticalGap * 2);
+  const headerHeight = statusBarHeight + barHeight;
   const rightInset = Math.max(104, windowWidth - capsuleLeft + 10);
 
   return {
@@ -43,9 +44,10 @@ function getNavigationLayout() {
     statusBarHeight,
     capsuleHeight,
     barHeight,
+    headerHeight,
     rightInset,
     compact: windowWidth <= 360,
-    headerStyle: `height:${barHeight}px;min-height:${barHeight}px;padding-right:${rightInset}px;`,
+    headerStyle: `height:${headerHeight}px;min-height:${headerHeight}px;padding-top:${statusBarHeight}px;padding-right:${rightInset}px;`,
     actionStyle: `height:${capsuleHeight}px;`
   };
 }

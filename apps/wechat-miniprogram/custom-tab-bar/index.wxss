@@ -391,7 +391,7 @@
   color: #aa6f25;
 }
 
-.publish-option-arrow text {
+.publish-option-chevron {
   margin-left: 5rpx;
   font-size: 29rpx;
 }
