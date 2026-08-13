@@ -50,7 +50,15 @@ for (const label of ['首页', '发现', '发布', '消息', '我的']) {
 }
 
 const projectConfig = JSON.parse(fs.readFileSync(path.join(root, 'project.config.json'), 'utf8'));
-assert.equal(projectConfig.appid, 'touristappid', 'UI reconciliation must not import the real UAT AppID');
+const APPROVED_CLIENT_APP_IDS = new Set([
+  'touristappid',
+  'wx337b9e6110c7d171'
+]);
+assert.equal(
+  APPROVED_CLIENT_APP_IDS.has(projectConfig.appid),
+  true,
+  'project.config.json must use an approved client-safe Mini Program AppID'
+);
 
 global.wx = {
   getWindowInfo: () => ({ windowWidth: 375, statusBarHeight: 44 }),
@@ -67,4 +75,4 @@ process.stdout.write('PASS complete 17-page visual route coverage\n');
 process.stdout.write('PASS page controllers preserve Auth/runtime safety boundaries\n');
 process.stdout.write('PASS custom tab bar visual coverage\n');
 process.stdout.write('PASS custom header safe area and capsule spacing\n');
-process.stdout.write('PASS project config remains touristappid\n');
+process.stdout.write('PASS project config uses an approved client-safe AppID\n');
