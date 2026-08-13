@@ -11,6 +11,11 @@ Page({
     this.loadData();
   },
 
+  onShow() {
+    const tabBar = typeof this.getTabBar === 'function' ? this.getTabBar() : null;
+    if (tabBar) tabBar.setData({ selected: 3 });
+  },
+
   onPullDownRefresh() {
     this.loadData().finally(() => wx.stopPullDownRefresh());
   },

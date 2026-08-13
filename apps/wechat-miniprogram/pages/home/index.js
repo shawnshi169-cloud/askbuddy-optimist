@@ -1,7 +1,9 @@
 const { callRpc } = require('../../utils/request');
+const { getNavigationLayout } = require('../../utils/navigation');
 
 Page({
   data: {
+    navLayout: getNavigationLayout(),
     loading: true,
     list: [],
     error: ''
@@ -9,6 +11,11 @@ Page({
 
   onLoad() {
     this.loadData();
+  },
+
+  onShow() {
+    const tabBar = typeof this.getTabBar === 'function' ? this.getTabBar() : null;
+    if (tabBar) tabBar.setData({ selected: 0 });
   },
 
   onPullDownRefresh() {
@@ -34,6 +41,10 @@ Page({
 
   goAsk() {
     wx.navigateTo({ url: '/pages/ask/index' });
+  },
+
+  goSearch() {
+    wx.navigateTo({ url: '/pages/search/index' });
   },
 
   goDetail(event) {

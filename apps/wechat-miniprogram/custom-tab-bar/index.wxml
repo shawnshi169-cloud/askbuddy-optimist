@@ -1,0 +1,51 @@
+<view wx:if="{{!hidden}}" class="tabbar-shell">
+  <view class="tabbar-surface">
+    <view
+      wx:for="{{list}}"
+      wx:key="pagePath"
+      class="tab-item {{selected === index ? 'active' : ''}} {{item.icon === 'publish' ? 'publish-item' : ''}}"
+      data-index="{{index}}"
+      bindtap="switchTab"
+      hover-class="tab-item-pressed"
+      hover-stay-time="80"
+      aria-role="button"
+      aria-label="{{item.text}}"
+    >
+      <view wx:if="{{item.icon === 'publish'}}" class="publish-button"><view class="publish-plus"></view></view>
+      <view wx:else class="tab-icon-well">
+        <view class="tab-icon {{item.icon}}">
+          <view class="icon-part part-one"></view>
+          <view class="icon-part part-two"></view>
+          <view wx:if="{{item.icon === 'discover'}}" class="icon-part part-three"></view>
+        </view>
+        <view wx:if="{{item.icon === 'message' && unreadCount > 0}}" class="tab-badge">{{unreadCount > 99 ? '99+' : unreadCount}}</view>
+      </view>
+      <view class="tab-label">{{item.text}}</view>
+    </view>
+  </view>
+
+  <view wx:if="{{publishMenuVisible}}" class="publish-mask" catchtap="closePublishMenu">
+    <view class="publish-sheet sheet-rise" catchtap="keepPublishMenu">
+      <view class="sheet-handle"></view>
+      <view class="sheet-title-row">
+        <view><view class="sheet-title">想分享什么？</view><view class="sheet-subtitle">选择一种发布方式</view></view>
+        <view class="sheet-close" catchtap="closePublishMenu">×</view>
+      </view>
+      <view class="publish-options">
+        <view class="publish-option demand-option" data-type="demand" catchtap="choosePublish" hover-class="publish-option-pressed">
+          <view class="publish-option-icon"><view class="demand-glyph">?</view></view>
+          <view class="publish-option-title">我有需求</view>
+          <view class="publish-option-desc">提问题，找经验</view>
+          <view class="publish-option-arrow">开始提问 <text>›</text></view>
+        </view>
+        <view class="publish-option skill-option" data-type="skill" catchtap="choosePublish" hover-class="publish-option-pressed">
+          <view class="publish-option-icon"><view class="skill-glyph">☆</view></view>
+          <view class="publish-option-title">我有技能</view>
+          <view class="publish-option-desc">技能发布将在后续阶段接入</view>
+          <view class="publish-option-arrow">查看状态 <text>›</text></view>
+        </view>
+      </view>
+      <view class="sheet-safe-tip">真实、具体的经验更容易获得回应</view>
+    </view>
+  </view>
+</view>
