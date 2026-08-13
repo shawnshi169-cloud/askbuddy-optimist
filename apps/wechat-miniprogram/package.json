@@ -2,6 +2,8 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
-    "test:auth": "node tests/auth-v1.test.cjs"
+    "test:auth": "node tests/auth-v1.test.cjs",
+    "test:presentation": "node tests/presentation-fixtures.test.cjs",
+    "test:ui-coverage": "node tests/ui-coverage.test.cjs"
   }
 }

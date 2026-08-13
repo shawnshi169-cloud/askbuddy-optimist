@@ -1,0 +1,22 @@
+<view class="page-shell interaction-page">
+  <view class="app-header interaction-header">
+    <view class="interaction-header-bar" style="{{navLayout.headerStyle}}">
+      <view class="back-button" bindtap="goBack">‹</view>
+      <view class="interaction-title">互动通知</view>
+    </view>
+  </view>
+  <view class="interaction-content">
+    <view class="interaction-summary">发现页互动</view>
+    <view wx:if="{{presentationEnabled}}" class="preview-banner">Development presentation preview：以下卡片不代表真实账号互动。</view>
+    <state-card wx:if="{{!interactions.length}}" type="empty" title="互动通知准备中" desc="正式互动读取契约接入后将在这里展示" />
+    <view wx:for="{{interactions}}" wx:key="id" class="card interaction-card rise-in">
+      <view class="interaction-avatar">{{item.initial}}</view>
+      <view class="interaction-copy">
+        <view><text class="interaction-name">{{item.name}}</text><text class="interaction-action"> {{item.action}}</text></view>
+        <view class="interaction-message line-clamp-2">{{item.content}}</view>
+        <view class="interaction-time">{{item.time}}</view>
+      </view>
+    </view>
+    <view class="interaction-note">互动写入与读取尚未接入正式契约，不会模拟业务成功。</view>
+  </view>
+</view>

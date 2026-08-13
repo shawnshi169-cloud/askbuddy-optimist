@@ -1,0 +1,32 @@
+<view class="page-shell city-page">
+  <view class="app-header city-header">
+    <view class="city-header-bar" style="{{navLayout.headerStyle}}">
+      <view class="back-button" bindtap="goBack">‹</view>
+      <view class="city-header-title">选择城市</view>
+    </view>
+  </view>
+  <view class="city-content">
+    <view class="current-location-card">
+      <view class="location-pin">⌖</view>
+      <view>
+        <view class="current-label">当前城市</view>
+        <view class="current-city">{{currentCity}}</view>
+      </view>
+      <view class="location-status">当前选择</view>
+    </view>
+    <view class="city-search"><view class="city-search-icon"></view><input value="{{keyword}}" placeholder="搜索城市" bindinput="onSearchInput" /></view>
+    <view class="segmented city-segmented">
+      <view class="segment-item {{activeRegion === 'mainland' ? 'active' : ''}}" data-region="mainland" bindtap="switchRegion">中国大陆</view>
+      <view class="segment-item {{activeRegion === 'overseas' ? 'active' : ''}}" data-region="overseas" bindtap="switchRegion">海外城市</view>
+    </view>
+    <view class="city-section-title">热门城市</view>
+    <view class="city-grid" wx:if="{{activeRegion === 'mainland'}}">
+      <view wx:for="{{filteredMainland}}" wx:key="*this" class="city-item {{currentCity === item ? 'active' : ''}}" data-city="{{item}}" bindtap="chooseCity">{{item}}</view>
+    </view>
+    <view class="city-grid" wx:else>
+      <view wx:for="{{filteredOverseas}}" wx:key="*this" class="city-item {{currentCity === item ? 'active' : ''}}" data-city="{{item}}" bindtap="chooseCity">{{item}}</view>
+    </view>
+    <view wx:if="{{activeRegion === 'mainland' && !filteredMainland.length || activeRegion === 'overseas' && !filteredOverseas.length}}" class="city-empty">没有找到匹配的城市</view>
+    <view class="city-tip">城市选择会影响同城内容展示，不会改变账号资料所在地。</view>
+  </view>
+</view>

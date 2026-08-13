@@ -1,0 +1,64 @@
+<view class="call-page">
+  <view class="call-header">
+    <view class="call-header-bar" style="{{navLayout.headerStyle}}">
+      <view class="back-button call-back" bindtap="goBack" hover-class="header-control-pressed" hover-stay-time="80" aria-role="button" aria-label="返回">‹</view>
+      <view class="call-header-title">通话</view>
+      <view class="permission-link" bindtap="openPermissionSettings" hover-class="header-control-pressed" hover-stay-time="80" aria-role="button" aria-label="打开权限设置">权限</view>
+    </view>
+  </view>
+
+  <view class="call-stage">
+    <view wx:if="{{presentationEnabled}}" class="call-preview-panel">
+      <view class="call-preview-title">Development visual states</view>
+      <view class="call-preview-options">
+        <view wx:for="{{previewStates}}" wx:key="*this" class="call-preview-chip {{visualState === item ? 'active' : ''}}" data-status="{{item}}" bindtap="previewStatus">{{item}}</view>
+      </view>
+      <view class="session-note">仅切换视觉状态，不创建、接听、拒绝或结束真实会话。</view>
+    </view>
+    <view class="call-mode-switch">
+      <view class="mode-item {{mode === 'voice' ? 'active' : ''}}" bindtap="setVoice">语音优先</view>
+      <view class="mode-item {{mode === 'video' ? 'active' : ''}}" bindtap="setVideo">视频可选</view>
+    </view>
+
+    <view class="call-avatar-shell status-{{visualState}}">
+      <view class="call-avatar">{{mode === 'voice' ? '音' : '视'}}</view>
+      <view class="pulse-ring pulse-one" />
+      <view class="pulse-ring pulse-two" />
+    </view>
+
+    <view class="call-status-label">{{visualStateLabel}}</view>
+    <view class="call-status-desc" wx:if="{{visualState === 'idle'}}">准备向{{calleeName || '联系人'}}发起{{mode === 'voice' ? '语音' : '视频'}}通话</view>
+    <view class="call-status-desc" wx:elif="{{visualState === 'initiated' || visualState === 'ringing'}}">视觉预览：等待接听状态</view>
+    <view class="call-status-desc" wx:elif="{{visualState === 'answered'}}">视觉预览：已接听布局</view>
+    <view class="call-status-desc" wx:else>{{visualStateLabel}}</view>
+
+    <view class="callee-card">
+      <block wx:if="{{calleeName}}">
+        <view class="callee-profile-mark">{{calleeInitial}}</view>
+        <view class="callee-profile-copy"><view class="callee-label">通话联系人</view><view class="callee-name">{{calleeName}}</view></view>
+      </block>
+      <block wx:else>
+        <view class="callee-input-copy">
+          <view class="callee-label">联系人标识</view>
+          <input class="callee-input" placeholder="输入联系人标识" value="{{calleeId}}" bindinput="onCalleeInput" disabled="{{!canInitiate}}" />
+        </view>
+      </block>
+    </view>
+
+    <view class="session-card">
+      <view class="session-row"><text>视觉状态</text><text class="session-value">{{visualStateLabel}}</text></view>
+      <view class="session-row"><text>通话编号</text><text class="session-id">{{callSessionId || '尚未创建'}}</text></view>
+      <view class="session-note">当前仅提供 UI 壳层；Call RPC/transport 需经 A 契约复核。</view>
+    </view>
+
+    <view class="call-error" wx:if="{{errorMessage}}">{{errorMessage}}</view>
+    <view class="call-warning" wx:if="{{pollMessage}}">状态刷新：{{pollMessage}}</view>
+  </view>
+
+  <view class="call-actions">
+    <button wx:if="{{canInitiate}}" class="call-action primary-action" loading="{{loadingAction === 'initiate'}}" bindtap="onInitiate" disabled="{{loadingAction}}"><view class="action-symbol">↗</view><text>发起</text></button>
+    <button wx:if="{{canAccept}}" class="call-action accept-action" loading="{{loadingAction === 'accept'}}" bindtap="onAccept" disabled="{{loadingAction}}"><view class="action-symbol">✓</view><text>接听</text></button>
+    <button wx:if="{{canReject}}" class="call-action reject-action" loading="{{loadingAction === 'reject'}}" bindtap="onReject" disabled="{{loadingAction}}"><view class="action-symbol">×</view><text>拒绝</text></button>
+    <button wx:if="{{canHangup}}" class="call-action hangup-action" loading="{{loadingAction === 'hangup'}}" bindtap="onHangup" disabled="{{loadingAction}}"><view class="action-symbol">×</view><text>挂断</text></button>
+  </view>
+</view>

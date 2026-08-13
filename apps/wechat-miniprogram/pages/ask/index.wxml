@@ -1,16 +1,79 @@
-<view class="container safe-bottom">
-  <view class="card">
-    <view class="title" style="font-size: 32rpx;">发布你的问题</view>
-    <view class="subtitle" style="margin-top: 8rpx;">结构和文案保持 iOS 基线，先走 Mock 提交链路。</view>
+<view class="page-shell ask-page">
+  <view class="app-header">
+    <view class="app-header-bar ask-title-bar" style="{{navLayout.headerStyle}}">
+      <view class="back-button" bindtap="goBack">‹</view>
+      <view class="app-header-title">发布问题</view>
+      <view class="draft-chip" bindtap="saveDraft">存草稿</view>
+    </view>
+  </view>
 
-    <view style="margin-top: 20rpx;">
-      <input class="input" placeholder="问题标题" maxlength="80" bindinput="onTitleInput" value="{{title}}" />
+  <view class="page-content ask-content detail-page-content">
+    <view wx:if="{{selectedExpert || selectedCategory}}" class="ask-context-card rise-in">
+      <view class="context-dot" />
+      <view>
+        <view class="context-title">{{selectedExpert ? '向 ' + selectedExpert + ' 提问' : '已选择 ' + selectedCategoryLabel}}</view>
+        <view class="context-desc">{{selectedExpert ? (selectedCategoryLabel ? selectedCategoryLabel + ' · 问题发布后可邀请该达人回答' : '问题发布后可邀请该达人回答') : '发布内容将沿用所选频道语境'}}</view>
+      </view>
+    </view>
+    <view class="card publish-tip rise-in">
+      <view>
+        <view class="tip-title">发布提示</view>
+        <view class="tip-copy">标题清楚、描述具体，通常更容易获得有效回答。</view>
+      </view>
+      <view class="tip-badge">发布前检查</view>
     </view>
 
-    <view style="margin-top: 16rpx;">
-      <textarea class="textarea" placeholder="详细描述你的问题" maxlength="1000" auto-height bindinput="onContentInput" value="{{content}}" />
+    <view class="form-section">
+      <view class="form-eyebrow">基础信息</view>
+      <view class="card form-card rise-in">
+        <view class="field-title">问题标题 <text class="required">*</text></view>
+        <view class="field-helper">简洁明了的标题更容易获得回答（20 字以内更佳）</view>
+        <view class="input-shell">
+          <input
+            class="question-input"
+            placeholder="如何申请英国留学？"
+            maxlength="40"
+            bindinput="onTitleInput"
+            value="{{title}}"
+          />
+          <view class="counter">{{titleCount}}/40</view>
+        </view>
+      </view>
     </view>
 
-    <button class="button-primary" style="margin-top: 20rpx;" loading="{{submitting}}" bindtap="submitQuestion">提交问题</button>
+    <view class="form-section">
+      <view class="form-eyebrow">详细描述</view>
+      <view class="card form-card rise-in">
+        <view class="field-title-row">
+          <view>
+            <view class="field-title">问题详情</view>
+            <view class="field-helper">补充背景信息，帮助他人更好地理解你的问题</view>
+          </view>
+          <view class="example-link" bindtap="fillExample">填入示例</view>
+        </view>
+        <view class="textarea-shell">
+          <textarea
+            class="question-textarea"
+            placeholder="提供背景信息，如：我的 GPA 是 3.5，想申请英国硕士，如何选校？"
+            maxlength="1000"
+            bindinput="onContentInput"
+            value="{{content}}"
+          />
+          <view class="counter textarea-counter">{{contentCount}}/1000</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="card quality-card rise-in">
+      <view class="quality-mark">✓</view>
+      <view>
+        <view class="quality-title">让回答更有价值</view>
+        <view class="quality-copy">说明目标、时间和限制条件，避免填写手机号等隐私信息。</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="fixed-action-bar ask-action-bar">
+    <button class="button-primary publish-button" loading="{{submitting}}" bindtap="submitQuestion">立即发布问题</button>
   </view>
 </view>

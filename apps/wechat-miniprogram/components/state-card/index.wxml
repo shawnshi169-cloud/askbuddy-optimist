@@ -1,4 +1,11 @@
-<view class="state-card card">
+<view class="state-card card state-{{type}}">
+  <view class="state-visual" wx:if="{{type === 'loading'}}">
+    <view class="state-dot" />
+    <view class="state-dot" />
+    <view class="state-dot" />
+  </view>
+  <view class="state-visual state-symbol" wx:elif="{{type === 'error'}}">!</view>
+  <view class="state-visual state-symbol" wx:else>○</view>
   <view class="title">{{title}}</view>
   <view class="subtitle">{{desc}}</view>
   <button wx:if="{{actionText}}" class="button-primary action-btn" bindtap="onTapAction">{{actionText}}</button>

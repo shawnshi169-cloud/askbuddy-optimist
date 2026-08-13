@@ -1,0 +1,14 @@
+<view class="page-shell post-editor-page">
+  <view class="app-header post-editor-header"><view class="post-editor-bar" style="{{navLayout.headerStyle}}"><view class="back-button" bindtap="goBack">‹</view><view class="post-editor-title">发布动态</view><view class="publish-link" bindtap="publish">发布</view></view></view>
+  <view class="post-editor-content detail-page-content">
+    <view class="card editor-card"><textarea value="{{content}}" maxlength="1000" placeholder="分享你的想法、经验或近况…" bindinput="onInput" /><view class="editor-count">{{count}}/1000</view></view>
+    <view wx:if="{{mediaFiles.length}}" class="media-preview-grid">
+      <view wx:for="{{mediaFiles}}" wx:key="*this" class="media-preview-item"><image src="{{item}}" mode="aspectFill" /><view class="media-remove" data-index="{{index}}" catchtap="removeImage">×</view></view>
+    </view>
+    <view class="card media-card" bindtap="chooseImage"><view class="media-icon">图</view><view><view class="media-title">添加图片</view><view class="media-desc">最多选择 9 张图片</view></view><view class="media-arrow">›</view></view>
+    <view class="card tag-card"><view class="section-title">添加话题</view><view class="tag-list"><view wx:for="{{tags}}" wx:key="name" class="tag-item {{item.active ? 'active' : ''}}" data-tag="{{item.name}}" bindtap="toggleTag">#{{item.name}}</view></view></view>
+    <view class="card city-card" bindtap="toggleCity"><view><view class="media-title">展示同城位置</view><view class="media-desc">让附近的人发现这条经验</view></view><switch checked="{{cityEnabled}}" color="#79D5C7" /></view>
+    <view class="editor-contract">内容可保存为本机草稿；发布服务开放前不会提交到线上。</view>
+  </view>
+  <view class="fixed-action-bar"><button class="button-primary editor-submit" bindtap="publish">发布动态</button></view>
+</view>

@@ -1,4 +1,5 @@
 const auth = require('../../utils/auth');
+const { getNavigationLayout } = require('../../utils/navigation');
 
 const AUTH_ERROR_MESSAGES = {
   INVALID_REQUEST: '登录请求无效，请重试',
@@ -21,11 +22,30 @@ function getErrorMessage(error) {
 
 Page({
   data: {
+    navLayout: getNavigationLayout(),
     user: null,
     authState: 'unknown',
     tokenReady: false,
     loginLoading: false,
-    authError: ''
+    authError: '',
+    stats: [
+      { key: 'orders', label: '订单', value: 0 },
+      { key: 'answers', label: '回答', value: 0 },
+      { key: 'favorites', label: '收藏', value: 0 },
+      { key: 'following', label: '关注', value: 0 }
+    ],
+    commonActions: [
+      { key: 'earnings', label: '我的收益', short: '益', tone: 'gold' },
+      { key: 'community', label: '我的社群', short: '群', tone: 'blue' },
+      { key: 'drafts', label: '草稿箱', short: '稿', tone: 'mint' },
+      { key: 'verify', label: '达人认证', short: '认', tone: 'orange' }
+    ],
+    helpItems: [
+      { key: 'help', title: '帮助中心', desc: '常见问题和使用说明', short: '?' },
+      { key: 'rules', title: '问问规范', desc: '查看发帖和互动规则', short: '规' },
+      { key: 'feedback', title: '产品反馈', desc: '告诉我们你的建议', short: '信' },
+      { key: 'about', title: '关于问问', desc: '版本信息与服务说明', short: '问' }
+    ]
   },
 
   onLoad() {
@@ -33,6 +53,8 @@ Page({
   },
 
   onShow() {
+    const tabBar = typeof this.getTabBar === 'function' ? this.getTabBar() : null;
+    if (tabBar) tabBar.setData({ selected: 4 });
     this.syncUser();
   },
 
@@ -53,7 +75,9 @@ Page({
     this.setData({
       user: snapshot.user,
       authState: snapshot.authState,
-      tokenReady: Boolean(auth.getAccessToken())
+      tokenReady: Boolean(auth.getAccessToken()),
+      loginLoading: snapshot.authState === 'authenticating'
+        || snapshot.authState === 'reauthenticating'
     });
   },
 
@@ -79,5 +103,23 @@ Page({
     this.setData({ authError: '' });
     this.syncUser();
     wx.showToast({ title: '已退出登录', icon: 'none' });
+  },
+
+  openEntry(event) {
+    const { key, label } = event.currentTarget.dataset;
+    if (this.data.authState !== 'authenticated') {
+      wx.showToast({ title: '请先完成微信登录', icon: 'none' });
+      return;
+    }
+    wx.navigateTo({
+      url: `/pages/profile-section/index?key=${encodeURIComponent(key || '')}&title=${encodeURIComponent(label || '')}`
+    });
+  },
+
+  openPublicEntry(event) {
+    const { key, label } = event.currentTarget.dataset;
+    wx.navigateTo({
+      url: `/pages/profile-section/index?key=${encodeURIComponent(key || '')}&title=${encodeURIComponent(label || '')}`
+    });
   }
 });
