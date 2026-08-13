@@ -1,38 +1,135 @@
-<view class="page-shell home-page">
+<view class="page-shell">
   <view class="app-header home-header">
     <view class="app-header-bar" style="{{navLayout.headerStyle}}">
-      <view>
-        <view class="app-header-title">问问</view>
-        <view class="app-header-subtitle">分享经验，解决具体问题</view>
+      <view class="app-header-title">问问</view>
+      <view class="home-header-actions" style="{{navLayout.actionStyle}}">
+        <view class="city-chip" bindtap="goCitySelector" hover-class="home-action-pressed" hover-stay-time="80" aria-role="button" aria-label="选择城市，当前{{currentCity}}">
+          <view class="location-glyph"></view>
+          <text>{{currentCity}}</text>
+          <view class="city-chevron"></view>
+        </view>
+        <view class="home-action-divider"></view>
+        <view class="home-bell" bindtap="goNotifications" hover-class="home-action-pressed" hover-stay-time="80" aria-role="button" aria-label="查看提醒">
+          <view class="home-bell-cap"></view>
+          <view class="home-bell-body"></view>
+          <view class="home-bell-clapper"></view>
+        </view>
       </view>
-      <view class="header-chip" style="{{navLayout.actionStyle}}">经验互助</view>
     </view>
-    <view class="header-search" bindtap="goSearch" hover-class="header-control-pressed" aria-role="button" aria-label="搜索问题和关键词">
+    <view class="header-search" bindtap="goSearch" hover-class="header-control-pressed" hover-stay-time="80" aria-role="button" aria-label="搜索问题、达人和话题">
       <view class="search-glyph" />
-      <text>搜索问题 / 关键词</text>
+      <text>搜索问题 / 达人 / 话题</text>
     </view>
   </view>
 
   <view class="page-content tab-page-content home-content">
-    <view class="home-intro rise-in">
-      <view>
-        <view class="section-title">今日问题</view>
-        <view class="section-caption">先完成可用主链路，再逐步接入真实业务数据。</view>
+    <view wx:if="{{presentationEnabled}}" class="preview-banner">热榜与达人卡片为 development 视觉预览，不代表真实业务数据。</view>
+    <view class="category-grid rise-in">
+      <view
+        wx:for="{{categories}}"
+        wx:key="id"
+        class="category-item"
+        bindtap="openCategory"
+        data-id="{{item.id}}"
+        hover-class="category-item-pressed"
+      >
+        <view class="category-icon tone-{{item.tone}}">{{item.short}}</view>
+        <view class="category-name">{{item.name}}</view>
       </view>
-      <button class="button-primary ask-button" bindtap="goAsk">去提问</button>
     </view>
 
-    <state-card wx:if="{{loading}}" type="loading" title="正在加载" desc="正在寻找值得回答的问题" />
-    <state-card wx:elif="{{error}}" type="error" title="加载失败" desc="{{error}}" actionText="重试" bind:action="loadData" />
-    <state-card wx:elif="{{!list.length}}" type="empty" title="还没有新问题" desc="下拉刷新，或者发布第一个问题" />
+    <view class="section-block hot-section">
+      <view class="section-heading">
+        <view>
+          <view class="section-heading-main">
+            <view class="section-mark">✦</view>
+            <view class="section-title">问问热榜</view>
+          </view>
+          <view class="section-caption">左右滑动浏览专题，快速获取高质量经验。</view>
+        </view>
+        <view class="text-link" bindtap="openFirstTopic">进入专题</view>
+      </view>
 
-    <view wx:else class="feed-list">
-      <view wx:for="{{list}}" wx:key="id" class="card question-card rise-in" bindtap="goDetail" data-id="{{item.id}}">
-        <view class="question-title line-clamp-2">{{item.title}}</view>
-        <view class="question-content line-clamp-2">{{item.content || '这位用户正在等待一份有帮助的回答。'}}</view>
-        <view class="question-footer">
-          <text>{{item.authorName || '问问用户'}} · {{item.createdAt || '刚刚'}}</text>
-          <text class="answer-count">{{item.answerCount || 0}} 回答</text>
+      <state-card wx:if="{{!hotTopics.length}}" type="empty" title="专题能力准备中" desc="正式专题读取契约接入后将在这里展示" />
+      <scroll-view wx:else class="topic-scroll" scroll-x enhanced show-scrollbar="false">
+        <view class="topic-track">
+          <view
+            wx:for="{{hotTopics}}"
+            wx:key="id"
+            class="topic-card rise-in"
+            bindtap="openTopic"
+            data-id="{{item.id}}"
+            hover-class="topic-card-pressed"
+          >
+            <view class="topic-cover topic-{{item.tone}}">
+              <view class="topic-short">{{item.short}}</view>
+              <view class="topic-eyebrow">{{item.eyebrow}}</view>
+              <view class="topic-comment">{{item.comments}} 讨论</view>
+              <view class="topic-orbit orbit-one" />
+              <view class="topic-orbit orbit-two" />
+            </view>
+            <view class="topic-body">
+              <view class="topic-title line-clamp-2">{{item.title}}</view>
+              <view class="topic-desc line-clamp-2">{{item.desc}}</view>
+              <view class="topic-footer">
+                <text>{{item.watching}} 人正在围观</text>
+                <text class="topic-link">点进查看 ↗</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <view class="section-block feed-section">
+      <view class="segmented home-segmented">
+        <view class="segment-item {{activeFeed === 'questions' ? 'active' : ''}}" data-feed="questions" bindtap="switchFeed">大家都在问</view>
+        <view class="segment-item {{activeFeed === 'experts' ? 'active' : ''}}" data-feed="experts" bindtap="switchFeed">找TA问问</view>
+      </view>
+
+      <state-card wx:if="{{activeFeed === 'questions' && loading}}" type="loading" title="正在加载" desc="正在寻找值得回答的问题" />
+      <state-card wx:elif="{{activeFeed === 'questions' && error}}" type="error" title="加载失败" desc="{{error}}" actionText="重试" bind:action="loadData" />
+      <state-card wx:elif="{{activeFeed === 'questions' && !list.length}}" type="empty" title="还没有新问题" desc="下拉刷新，或者发布第一个问题" />
+
+      <view wx:if="{{activeFeed === 'questions' && !loading && !error && list.length}}" class="feed-list">
+        <view wx:for="{{list}}" wx:key="id" class="card question-card rise-in" bindtap="goDetail" data-id="{{item.id}}">
+          <view class="question-topline">
+            <view class="question-title line-clamp-2">{{item.title}}</view>
+            <view class="view-count">◉ {{item.view_count_text}}</view>
+          </view>
+          <view class="question-content line-clamp-2">{{item.content || '这位用户正在等待一份有帮助的回答。'}}</view>
+          <view class="author-row">
+            <view class="author-info">
+              <view class="avatar">{{item.asker_initial}}</view>
+              <view>
+                <view class="author-name">{{item.asker_name}}</view>
+                <view class="author-time">{{item.created_at_text}}</view>
+              </view>
+            </view>
+            <view class="points-pill">◇ {{item.reward_points_text}} 积分</view>
+          </view>
+          <view class="question-footer">
+            <view class="question-tag">#{{item.category_label}}</view>
+            <button class="answer-button" catchtap="goDetail" data-id="{{item.id}}">回答</button>
+          </view>
+        </view>
+      </view>
+
+      <view wx:if="{{activeFeed === 'experts'}}" class="expert-list">
+        <state-card wx:if="{{!experts.length}}" type="empty" title="达人能力准备中" desc="正式达人资料契约接入后将在这里展示" />
+        <view wx:for="{{experts}}" wx:key="id" class="card expert-card rise-in" bindtap="openExpert" data-id="{{item.id}}">
+          <view class="expert-main">
+            <view class="avatar expert-avatar">{{item.initial}}</view>
+            <view class="expert-copy">
+              <view class="expert-name">{{item.name}}</view>
+              <view class="expert-role">{{item.role}}</view>
+              <view class="expert-tags">
+                <text wx:for="{{item.tags}}" wx:key="*this">#{{item}}</text>
+              </view>
+            </view>
+            <view class="response-rate">回复率 {{item.response}}</view>
+          </view>
+          <button class="ask-expert-button" catchtap="goAsk" data-expert-name="{{item.name}}">向TA提问</button>
         </view>
       </view>
     </view>

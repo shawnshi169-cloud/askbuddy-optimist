@@ -36,13 +36,13 @@
           <view class="publish-option-icon"><view class="demand-glyph">?</view></view>
           <view class="publish-option-title">我有需求</view>
           <view class="publish-option-desc">提问题，找经验</view>
-          <view class="publish-option-arrow">开始提问 <text>›</text></view>
+          <view class="publish-option-arrow">开始提问 <text class="publish-option-chevron">›</text></view>
         </view>
         <view class="publish-option skill-option" data-type="skill" catchtap="choosePublish" hover-class="publish-option-pressed">
           <view class="publish-option-icon"><view class="skill-glyph">☆</view></view>
           <view class="publish-option-title">我有技能</view>
-          <view class="publish-option-desc">技能发布将在后续阶段接入</view>
-          <view class="publish-option-arrow">查看状态 <text>›</text></view>
+          <view class="publish-option-desc">填写内容并保存本机草稿</view>
+          <view class="publish-option-arrow">开始填写 <text class="publish-option-chevron">›</text></view>
         </view>
       </view>
       <view class="sheet-safe-tip">真实、具体的经验更容易获得回应</view>

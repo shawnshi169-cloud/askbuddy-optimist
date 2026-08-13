@@ -1,0 +1,14 @@
+page { background: #f8fdfb; }
+.interaction-header { background: linear-gradient(135deg,#75cfc1,#8bd9cd); }
+.interaction-header-bar { height: 88rpx; padding: 0 22rpx; display: flex; align-items: center; box-sizing: border-box; }
+.interaction-title { margin-left: 4rpx; color: #fff; font-size: 30rpx; font-weight: 600; }
+.interaction-content { padding: 30rpx; }
+.interaction-summary { margin: 4rpx 8rpx 20rpx; color: #64748b; font-size: 22rpx; font-weight: 600; }
+.interaction-card { margin-bottom: 20rpx; display: flex; align-items: flex-start; gap: 17rpx; border-radius: 30rpx; }
+.interaction-avatar { width: 72rpx; height: 72rpx; display: flex; align-items: center; justify-content: center; flex: none; border-radius: 50%; color: #4c716b; background: #f7dc69; font-weight: 700; }
+.interaction-copy { flex: 1; }
+.interaction-name { color: #334155; font-size: 24rpx; font-weight: 700; }
+.interaction-action { color: #64748b; font-size: 22rpx; }
+.interaction-message { margin-top: 9rpx; color: #475569; font-size: 22rpx; }
+.interaction-time { margin-top: 8rpx; color: #94a3b8; font-size: 18rpx; }
+.interaction-note { margin-top: 26rpx; color: #94a3b8; font-size: 19rpx; text-align: center; }

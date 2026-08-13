@@ -1,0 +1,29 @@
+<view class="page-shell skill-page">
+  <view class="app-header skill-header">
+    <view class="skill-header-bar" style="{{navLayout.headerStyle}}">
+      <view class="back-button" bindtap="goBack">‹</view>
+      <view class="skill-header-title">发布技能</view>
+      <view class="draft-link" bindtap="saveDraft">存草稿</view>
+    </view>
+  </view>
+  <view class="skill-content detail-page-content">
+    <view class="publish-tip">
+      <view class="tip-icon">技</view>
+      <view><view class="tip-title">把你擅长的经验介绍清楚</view><view class="tip-desc">明确你能帮助谁、解决什么问题，以及你的经验依据。</view></view>
+    </view>
+    <view class="card form-card">
+      <view class="form-label">技能标题</view>
+      <input class="title-input" value="{{title}}" maxlength="40" placeholder="例如：英国硕士申请时间线梳理" bindinput="onTitleInput" />
+    </view>
+    <view class="card form-card">
+      <view class="form-label">所属分类</view>
+      <view class="category-options"><view wx:for="{{categories}}" wx:key="id" class="category-option {{category === item.id ? 'active' : ''}}" data-id="{{item.id}}" bindtap="chooseCategory">{{item.name}}</view></view>
+    </view>
+    <view class="card form-card">
+      <view class="form-label">服务介绍</view>
+      <textarea class="description-input" value="{{description}}" maxlength="500" placeholder="介绍你的经历、可提供的帮助和适合咨询的人群" bindinput="onDescriptionInput" />
+    </view>
+    <view class="contract-note">填写内容可保存为本机草稿；发布服务开放前不会提交到线上。</view>
+  </view>
+  <view class="fixed-action-bar"><button class="button-primary skill-submit" bindtap="submitSkill">发布技能</button></view>
+</view>

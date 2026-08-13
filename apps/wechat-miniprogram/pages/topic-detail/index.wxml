@@ -1,0 +1,80 @@
+<view class="page-shell topic-page">
+  <view class="app-header topic-header">
+    <view class="topic-header-bar" style="{{navLayout.headerStyle}}">
+      <view class="back-button" bindtap="goBack" hover-class="header-control-pressed" hover-stay-time="80" aria-role="button" aria-label="返回">‹</view>
+      <view class="topic-header-title line-clamp-2">{{topic.title}}</view>
+    </view>
+  </view>
+
+  <view wx:if="{{!topic}}" class="topic-content detail-page-content">
+    <state-card type="empty" title="专题能力准备中" desc="当前环境没有正式专题数据，且不会使用 presentation fixture 冒充真实结果" />
+  </view>
+
+  <view wx:else class="topic-content detail-page-content">
+    <view class="preview-banner">Development presentation preview：本页内容不代表真实专题或互动数据。</view>
+    <view class="card topic-hero rise-in">
+      <view class="topic-visual topic-{{topic.tone}}">
+        <view class="topic-visual-short">{{topic.short}}</view>
+        <view class="topic-visual-ring ring-one" />
+        <view class="topic-visual-ring ring-two" />
+      </view>
+      <view class="topic-hero-body">
+        <view class="topic-badge">问问热榜专题</view>
+        <view class="topic-title">{{topic.title}}</view>
+        <view class="topic-description">{{topic.description}}</view>
+        <view class="topic-meta">
+          <text>○ {{topic.discussionsCount}} 条讨论</text>
+          <text>♙ {{topic.participants}} 人参与</text>
+          <text>{{topic.updatedText}}</text>
+        </view>
+        <view class="read-chip">阅读 2 分钟</view>
+      </view>
+    </view>
+
+    <view class="card article-card rise-in">
+      <view class="article-heading">
+        <view class="section-title">专题正文</view>
+        <view class="article-chip">沉浸阅读</view>
+      </view>
+      <view class="article-paragraph" wx:for="{{topic.body}}" wx:key="index">{{item}}</view>
+      <view class="article-note">
+        <view class="article-note-title">继续阅读</view>
+        <view class="article-note-copy">浏览正文后，继续往下看评论区，快速了解不同观点和补充经验。</view>
+      </view>
+      <view class="related-tags">
+        <text>#真实经验</text>
+        <text>#效率提升</text>
+        <text>#行动清单</text>
+      </view>
+    </view>
+
+    <view class="card discussion-card rise-in">
+      <view class="discussion-heading">
+        <view>
+          <view class="section-title">评论讨论 ({{topic.discussions.length}})</view>
+          <view class="discussion-caption">正文在上面，评论区在下面。</view>
+        </view>
+        <view class="sort-chip">按热度</view>
+      </view>
+      <view class="discussion-item" wx:for="{{topic.discussions}}" wx:key="id">
+        <view class="discussion-author-row">
+          <view class="avatar topic-avatar">{{item.initial}}</view>
+          <view class="discussion-author-copy">
+            <view class="discussion-author">{{item.name}}</view>
+            <view class="discussion-time">{{item.time}}</view>
+          </view>
+        </view>
+        <view class="discussion-content">{{item.content}}</view>
+        <view class="discussion-actions">
+          <view data-author="{{item.name}}" bindtap="replyDiscussion">回复</view>
+          <view data-id="{{item.id}}" bindtap="likeDiscussion">♡ {{item.likes}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{topic}}" class="topic-action-bar">
+    <input class="comment-input" value="{{comment}}" placeholder="写下你的观点…" bindinput="onCommentInput" />
+    <button class="comment-submit" bindtap="submitComment">发送</button>
+  </view>
+</view>

@@ -51,7 +51,7 @@ Component({
       this.setData({ publishMenuVisible: false });
       lightHaptic();
       if (type === 'skill') {
-        wx.showToast({ title: '技能发布将在后续阶段接入', icon: 'none' });
+        wx.navigateTo({ url: '/pages/skill-publish/index' });
         return;
       }
       wx.navigateTo({ url: '/pages/ask/index' });

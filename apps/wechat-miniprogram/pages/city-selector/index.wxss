@@ -1,0 +1,22 @@
+page { background: #f8fdfb; }
+.city-header { background: linear-gradient(135deg, #75cfc1, #8bd9cd); }
+.city-header-bar { height: 88rpx; padding: 0 22rpx; display: flex; align-items: center; box-sizing: border-box; }
+.city-header-title { margin-left: 4rpx; color: #fff; font-size: 31rpx; font-weight: 600; }
+.city-content { padding: 30rpx; }
+.current-location-card { padding: 30rpx; display: flex; align-items: center; gap: 20rpx; border: 1px solid #cdefe7; border-radius: 34rpx; background: linear-gradient(135deg, #ecfbf7, #fff); box-shadow: 0 12rpx 30rpx rgba(15, 23, 42, .05); }
+.location-pin { width: 76rpx; height: 76rpx; display: flex; align-items: center; justify-content: center; border-radius: 24rpx; color: #fff; background: linear-gradient(135deg, #70d0c1, #4daa9d); font-size: 36rpx; }
+.current-label { color: #7b8799; font-size: 21rpx; }
+.current-city { margin-top: 3rpx; color: #1e293b; font-size: 31rpx; font-weight: 700; }
+.location-status { margin-left: auto; padding: 7rpx 15rpx; border-radius: 999rpx; color: #3f9185; background: #fff; font-size: 20rpx; }
+.city-search { height: 78rpx; margin-top: 24rpx; padding: 0 24rpx; display: flex; align-items: center; gap: 18rpx; border: 1px solid #dcefeb; border-radius: 26rpx; background: #fff; box-sizing: border-box; }
+.city-search input { flex: 1; height: 100%; color: #334155; font-size: 23rpx; }
+.city-search-icon { width: 24rpx; height: 24rpx; position: relative; border: 3rpx solid #77aaa2; border-radius: 50%; box-sizing: border-box; }
+.city-search-icon::after { position: absolute; right: -8rpx; bottom: -5rpx; width: 10rpx; height: 3rpx; border-radius: 999rpx; background: #77aaa2; transform: rotate(45deg); content: ""; }
+.city-segmented { margin-top: 32rpx; gap: 46rpx; }
+.city-section-title { margin-top: 34rpx; color: #334155; font-size: 28rpx; font-weight: 700; }
+.city-grid { margin-top: 22rpx; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18rpx; }
+.city-item { height: 82rpx; display: flex; align-items: center; justify-content: center; border: 1px solid #dcefeb; border-radius: 24rpx; color: #475569; background: #fff; font-size: 24rpx; transition: transform 120ms ease; }
+.city-item:active { transform: scale(.97); }
+.city-item.active { color: #2f7d72; border-color: #92dcd0; background: #ecfbf7; font-weight: 700; }
+.city-empty { padding: 70rpx 0 30rpx; color: #94a3b8; font-size: 22rpx; text-align: center; }
+.city-tip { margin-top: 30rpx; color: #94a3b8; font-size: 21rpx; line-height: 1.7; }

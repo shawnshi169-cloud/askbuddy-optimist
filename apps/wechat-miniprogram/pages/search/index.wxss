@@ -1,6 +1,282 @@
-input {
-  background: #fff;
-  border: 1px solid var(--ab-border);
-  border-radius: 16rpx;
-  padding: 18rpx;
+.search-page {
+  background: #f8fdfb;
+}
+
+.search-header {
+  padding-bottom: 22rpx;
+}
+
+.search-title-bar {
+  justify-content: flex-start;
+  gap: 8rpx;
+}
+
+.search-notice {
+  position: relative;
+  margin-left: auto;
+  flex: none;
+  width: 54rpx;
+  height: 54rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.search-bell-cap {
+  position: absolute;
+  left: 24rpx;
+  top: 9rpx;
+  width: 6rpx;
+  height: 6rpx;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.search-bell-body {
+  position: absolute;
+  left: 13rpx;
+  top: 13rpx;
+  width: 28rpx;
+  height: 28rpx;
+  border: 3rpx solid #ffffff;
+  border-radius: 15rpx 15rpx 8rpx 8rpx;
+  box-sizing: border-box;
+}
+
+.search-bell-clapper {
+  position: absolute;
+  left: 23rpx;
+  top: 44rpx;
+  width: 8rpx;
+  height: 4rpx;
+  border-radius: 0 0 8rpx 8rpx;
+  background: #ffffff;
+}
+
+.search-box {
+  height: 84rpx;
+  margin: 4rpx 30rpx 0;
+  padding: 0 16rpx 0 26rpx;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  border-radius: 28rpx;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 10rpx 24rpx rgba(45, 105, 96, 0.1);
+}
+
+.search-icon,
+.hot-search-icon {
+  position: relative;
+  width: 26rpx;
+  height: 26rpx;
+  flex: none;
+  border: 4rpx solid #334155;
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+
+.search-icon::after,
+.hot-search-icon::after {
+  position: absolute;
+  right: -9rpx;
+  bottom: -5rpx;
+  width: 11rpx;
+  height: 4rpx;
+  border-radius: 4rpx;
+  background: #334155;
+  transform: rotate(45deg);
+  content: "";
+}
+
+.search-input {
+  flex: 1;
+  min-width: 0;
+  height: 72rpx;
+  color: #1e293b;
+  font-size: 27rpx;
+}
+
+.search-submit {
+  padding: 12rpx 18rpx;
+  color: #398f83;
+  font-size: 23rpx;
+  font-weight: 600;
+}
+
+.search-content {
+  padding-top: 34rpx;
+}
+
+.hot-title-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.hot-search-icon {
+  width: 24rpx;
+  height: 24rpx;
+  border-width: 3rpx;
+}
+
+.hot-keywords {
+  margin-top: 26rpx;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.hot-chip {
+  min-width: 92rpx;
+}
+
+.result-tabs {
+  justify-content: space-between;
+  gap: 0;
+}
+
+.result-tabs .segment-item {
+  width: 20%;
+  text-align: center;
+  font-size: 23rpx;
+}
+
+.result-list {
+  margin-top: 24rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.result-card {
+  border-radius: 30rpx;
+}
+
+.result-group-title-row {
+  margin: 12rpx 8rpx 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.result-group-title {
+  color: #475569;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.group-more {
+  color: #4a9e92;
+  font-size: 20rpx;
+}
+
+.result-card-pressed {
+  opacity: 0.84;
+  transform: scale(0.99);
+}
+
+.result-title {
+  font-size: 29rpx;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.5;
+}
+
+.result-desc {
+  margin-top: 8rpx;
+  font-size: 23rpx;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.result-meta {
+  margin-top: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #94a3b8;
+  font-size: 20rpx;
+}
+
+.result-tag {
+  color: #55a99d;
+}
+
+.expert-result,
+.skill-result {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+}
+
+.result-avatar,
+.skill-mark {
+  width: 82rpx;
+  height: 82rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  border-radius: 26rpx;
+  color: #ffffff;
+  background: linear-gradient(135deg, #6bc6b7, #a3e6db);
+}
+
+.result-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.verified-pill {
+  padding: 6rpx 12rpx;
+  border-radius: 999rpx;
+  color: #4e9e92;
+  background: #ecfbf7;
+  font-size: 19rpx;
+}
+
+.skill-mark {
+  color: #9a6525;
+  background: linear-gradient(135deg, #fff1c9, #ffe0a0);
+  font-weight: 700;
+}
+
+.price-text {
+  color: #e28c3f;
+  font-size: 25rpx;
+  font-weight: 700;
+}
+
+.post-author-row {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+}
+
+.post-avatar {
+  width: 62rpx;
+  height: 62rpx;
+  color: #ffffff;
+  background: linear-gradient(135deg, #75cfc1, #a8e9de);
+}
+
+.post-author {
+  color: #334155;
+  font-size: 23rpx;
+  font-weight: 600;
+}
+
+.post-time {
+  color: #94a3b8;
+  font-size: 19rpx;
+}
+
+.post-content {
+  margin-top: 20rpx;
+  color: #334155;
 }

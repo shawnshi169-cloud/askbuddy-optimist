@@ -106,16 +106,20 @@ Page({
   },
 
   openEntry(event) {
-    const { label } = event.currentTarget.dataset;
+    const { key, label } = event.currentTarget.dataset;
     if (this.data.authState !== 'authenticated') {
       wx.showToast({ title: '请先完成微信登录', icon: 'none' });
       return;
     }
-    wx.showToast({ title: `${label}将在后续阶段接入`, icon: 'none' });
+    wx.navigateTo({
+      url: `/pages/profile-section/index?key=${encodeURIComponent(key || '')}&title=${encodeURIComponent(label || '')}`
+    });
   },
 
   openPublicEntry(event) {
-    const { label } = event.currentTarget.dataset;
-    wx.showToast({ title: `${label}将在后续阶段接入`, icon: 'none' });
+    const { key, label } = event.currentTarget.dataset;
+    wx.navigateTo({
+      url: `/pages/profile-section/index?key=${encodeURIComponent(key || '')}&title=${encodeURIComponent(label || '')}`
+    });
   }
 });

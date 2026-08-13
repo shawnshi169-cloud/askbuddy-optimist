@@ -1,0 +1,61 @@
+<view class="page-shell expert-page">
+  <view class="expert-sticky-header">
+    <view class="expert-header-bar" style="{{navLayout.headerStyle}}">
+      <view class="back-button" bindtap="goBack">‹</view>
+      <view class="expert-header-title">达人主页</view>
+      <button class="expert-share" open-type="share">分享</button>
+    </view>
+  </view>
+  <view wx:if="{{!expert}}" class="expert-content detail-page-content">
+    <state-card type="empty" title="达人资料准备中" desc="当前环境没有正式达人资料，且不会使用 presentation fixture 冒充真实结果" />
+  </view>
+  <block wx:else>
+  <view class="preview-banner">Development presentation preview：价格、认证、订单和回复率不作为真实业务数据展示。</view>
+  <view class="expert-hero">
+    <view class="expert-identity">
+      <view class="expert-avatar-large">{{expert.initial}}</view>
+      <view class="expert-name-row">
+        <view class="expert-name">{{expert.name}}</view>
+        <view wx:if="{{expert.verified}}" class="verified">已认证</view>
+      </view>
+      <view class="expert-title">{{expert.title}}</view>
+      <view class="expert-location">⌖ {{expert.location}} · {{expert.experience}}</view>
+      <button class="follow-button" bindtap="toggleFollow">{{followed ? '已关注' : '+ 关注'}}</button>
+    </view>
+  </view>
+
+  <view class="expert-content detail-page-content">
+    <view class="expert-stats card">
+      <view><text>{{expert.rating}}</text><text>评分</text></view>
+      <view><text>{{expert.responseRate}}</text><text>回复率</text></view>
+      <view><text>{{expert.consultationCount}}</text><text>咨询</text></view>
+      <view><text>{{expert.followersCount}}</text><text>关注者</text></view>
+    </view>
+    <view wx:if="{{!expert.fromSearch || expert.price}}" class="card expert-section">
+      <view class="section-title">关于 TA</view>
+      <view class="expert-bio">{{expert.bio}}</view>
+      <view class="expert-tags"><text wx:for="{{expert.tags}}" wx:key="*this">#{{item}}</text></view>
+    </view>
+    <view class="card expert-section">
+      <view class="section-heading-row">
+        <view class="section-title">咨询服务</view>
+        <view wx:if="{{expert.price}}" class="service-price">¥{{expert.price}} 起</view>
+      </view>
+      <view class="service-card">
+        <view class="service-title">1 对 1 经验咨询</view>
+        <view class="service-desc">围绕你的具体目标梳理问题，给出可执行的下一步建议。</view>
+        <view class="service-meta"><text>{{expert.experience}}</text><text wx:if="{{expert.orderCount}}">{{expert.orderCount}} 人咨询过</text></view>
+      </view>
+    </view>
+    <view class="card expert-section">
+      <view class="section-title">用户评价</view>
+      <view class="expert-bio">评价读取契约尚未接入，当前不展示模拟评价。</view>
+    </view>
+  </view>
+
+  <view class="fixed-action-bar expert-actions">
+    <button class="button-secondary message-button" bindtap="goCall">语音咨询</button>
+    <button class="button-primary consult-button" bindtap="goAsk">{{expert.sourceType === 'skill' ? '咨询这项技能' : '向 TA 提问'}}</button>
+  </view>
+  </block>
+</view>

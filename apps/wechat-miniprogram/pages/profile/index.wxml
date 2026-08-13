@@ -5,7 +5,7 @@
         <view class="app-header-title">个人中心</view>
         <view class="app-header-subtitle">管理你的身份与使用记录</view>
       </view>
-      <view class="header-chip" style="{{navLayout.actionStyle}}">Auth v1</view>
+      <view class="header-chip" style="{{navLayout.actionStyle}}" data-key="settings" data-label="设置" bindtap="openEntry">设置</view>
     </view>
   </view>
 
@@ -63,7 +63,7 @@
     </view>
 
     <view class="stats-card rise-in">
-      <view wx:for="{{stats}}" wx:key="key" class="stat-item" data-label="我的{{item.label}}" bindtap="openEntry">
+      <view wx:for="{{stats}}" wx:key="key" class="stat-item" data-key="{{item.key}}" data-label="我的{{item.label}}" bindtap="openEntry">
         <view class="stat-value">{{item.value}}</view>
         <view class="stat-label">{{item.label}}</view>
       </view>
@@ -75,7 +75,7 @@
         <view class="section-title">常用功能</view>
       </view>
       <view class="common-grid">
-        <view wx:for="{{commonActions}}" wx:key="key" class="common-item" data-label="{{item.label}}" bindtap="openEntry">
+        <view wx:for="{{commonActions}}" wx:key="key" class="common-item" data-key="{{item.key}}" data-label="{{item.label}}" bindtap="openEntry">
           <view class="common-icon common-{{item.tone}}">{{item.short}}</view>
           <view class="common-label">{{item.label}}</view>
         </view>
@@ -85,7 +85,7 @@
 
     <view class="card help-card rise-in">
       <view class="section-title help-title">帮助与信息</view>
-      <view wx:for="{{helpItems}}" wx:key="key" class="help-row" data-label="{{item.title}}" bindtap="openPublicEntry">
+      <view wx:for="{{helpItems}}" wx:key="key" class="help-row" data-key="{{item.key}}" data-label="{{item.title}}" bindtap="openPublicEntry">
         <view class="help-icon">{{item.short}}</view>
         <view class="help-copy">
           <view class="help-name">{{item.title}}</view>
