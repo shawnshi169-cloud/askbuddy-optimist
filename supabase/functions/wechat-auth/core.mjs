@@ -113,8 +113,26 @@ export async function deriveWechatUserId(appId, openid, namespaceSecret) {
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 
-export function validateWechatAuthUser(user, expectedUserId, nowMs = Date.now()) {
-  const providers = user?.app_metadata?.providers;
+const WECHAT_USER_ID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export function buildWechatSyntheticEmail(candidateUserId) {
+  if (typeof candidateUserId !== 'string' || !WECHAT_USER_ID_PATTERN.test(candidateUserId)) {
+    throw new WechatAuthError(
+      WECHAT_AUTH_ERROR_CODES.AUTH_IDENTITY_ERROR,
+      'Unable to create the authenticated identity.',
+      500,
+    );
+  }
+
+  return `${candidateUserId.toLowerCase()}@wechat.askbuddy.invalid`;
+}
+
+export function isUserNotFoundError(error) {
+  return error?.status === 404 && error?.code === 'user_not_found';
+}
+
+function isDisabledAuthUser(user, nowMs = Date.now()) {
   const bannedUntil = user?.banned_until;
   const hasBannedUntil = bannedUntil !== null
     && bannedUntil !== undefined
@@ -127,6 +145,30 @@ export function validateWechatAuthUser(user, expectedUserId, nowMs = Date.now())
     && String(user.deleted_at).length > 0;
   const isBanned = bannedUntilMs !== null
     && (!Number.isFinite(bannedUntilMs) || bannedUntilMs > nowMs);
+
+  return isDeleted || isBanned;
+}
+
+export function isRecoverableWechatBootstrapUser(user, expectedUserId, nowMs = Date.now()) {
+  const providers = user?.app_metadata?.providers;
+
+  // Normal client sign-up cannot choose auth.users.id. The deterministic UUID
+  // plus its exact non-deliverable email marks a server-created partial user.
+  return Boolean(
+    user
+    && user.id === expectedUserId
+    && !isDisabledAuthUser(user, nowMs)
+    && typeof user.email === 'string'
+    && user.email.toLowerCase() === buildWechatSyntheticEmail(expectedUserId)
+    && user.app_metadata?.provider === 'email'
+    && Array.isArray(providers)
+    && providers.length === 1
+    && providers[0] === 'email'
+  );
+}
+
+export function validateWechatAuthUser(user, expectedUserId, nowMs = Date.now()) {
+  const providers = user?.app_metadata?.providers;
   const hasWechatProvider = user?.app_metadata?.provider === 'wechat'
     && Array.isArray(providers)
     && providers.includes('wechat');
@@ -135,8 +177,7 @@ export function validateWechatAuthUser(user, expectedUserId, nowMs = Date.now())
     !user
     || typeof user.id !== 'string'
     || user.id !== expectedUserId
-    || isDeleted
-    || isBanned
+    || isDisabledAuthUser(user, nowMs)
     || !hasWechatProvider
   ) {
     throw new WechatAuthError(
@@ -147,6 +188,52 @@ export function validateWechatAuthUser(user, expectedUserId, nowMs = Date.now())
   }
 
   return user;
+}
+
+async function finalizeWechatBootstrapUser(
+  admin,
+  user,
+  expectedUserId,
+  forceMetadataUpdate = false,
+) {
+  if (!forceMetadataUpdate) {
+    try {
+      return validateWechatAuthUser(user, expectedUserId);
+    } catch (error) {
+      if (!isRecoverableWechatBootstrapUser(user, expectedUserId)) {
+        throw error;
+      }
+    }
+  } else if (
+    !user
+    || user.id !== expectedUserId
+    || isDisabledAuthUser(user)
+    || typeof user.email !== 'string'
+    || user.email.toLowerCase() !== buildWechatSyntheticEmail(expectedUserId)
+  ) {
+    throw new WechatAuthError(
+      WECHAT_AUTH_ERROR_CODES.AUTH_IDENTITY_ERROR,
+      'Unable to validate the authenticated identity.',
+      401,
+    );
+  }
+
+  const { data: updatedUser, error: updateUserError } =
+    await admin.auth.admin.updateUserById(expectedUserId, {
+      app_metadata: {
+        provider: 'wechat',
+        providers: ['wechat'],
+      },
+    });
+  if (updateUserError || !updatedUser.user) {
+    throw new WechatAuthError(
+      WECHAT_AUTH_ERROR_CODES.AUTH_IDENTITY_ERROR,
+      'Unable to create the authenticated identity.',
+      500,
+    );
+  }
+
+  return validateWechatAuthUser(updatedUser.user, expectedUserId);
 }
 
 export async function resolveWechatUser(
@@ -175,35 +262,69 @@ export async function resolveWechatUser(
     ?? await deriveWechatUserId(appId, openid, namespaceSecret);
 
   if (!existingIdentity) {
-    const { data: existingUser } = await admin.auth.admin.getUserById(candidateUserId);
-    if (!existingUser.user) {
-      const { error: createUserError } = await admin.auth.admin.createUser({
-        id: candidateUserId,
-        role: 'authenticated',
-        app_metadata: {
-          provider: 'wechat',
-          providers: ['wechat'],
-        },
-        user_metadata: {},
-      });
+    const { data: existingUser, error: existingUserError } =
+      await admin.auth.admin.getUserById(candidateUserId);
+    if (existingUserError && !isUserNotFoundError(existingUserError)) {
+      throw new WechatAuthError(
+        WECHAT_AUTH_ERROR_CODES.AUTH_IDENTITY_ERROR,
+        'Unable to resolve the authenticated identity.',
+        500,
+      );
+    }
+
+    if (!existingUserError && !existingUser?.user) {
+      throw new WechatAuthError(
+        WECHAT_AUTH_ERROR_CODES.AUTH_IDENTITY_ERROR,
+        'Unable to resolve the authenticated identity.',
+        500,
+      );
+    }
+
+    let resolvedUser = existingUserError ? null : existingUser.user;
+    let forceMetadataUpdate = false;
+    if (!resolvedUser) {
+      const { data: createdUser, error: createUserError } =
+        await admin.auth.admin.createUser({
+          id: candidateUserId,
+          email: buildWechatSyntheticEmail(candidateUserId),
+          role: 'authenticated',
+          app_metadata: {
+            provider: 'wechat',
+            providers: ['wechat'],
+          },
+          user_metadata: {},
+        });
 
       if (createUserError) {
-        const { data: racedUser } = await admin.auth.admin.getUserById(candidateUserId);
-        if (!racedUser.user || racedUser.user.app_metadata?.provider !== 'wechat') {
+        const { data: racedUser, error: racedUserError } =
+          await admin.auth.admin.getUserById(candidateUserId);
+        if (racedUserError || !racedUser.user) {
           throw new WechatAuthError(
             WECHAT_AUTH_ERROR_CODES.AUTH_IDENTITY_ERROR,
             'Unable to create the authenticated identity.',
             500,
           );
         }
+        resolvedUser = racedUser.user;
+      } else {
+        if (!createdUser?.user) {
+          throw new WechatAuthError(
+            WECHAT_AUTH_ERROR_CODES.AUTH_IDENTITY_ERROR,
+            'Unable to create the authenticated identity.',
+            500,
+          );
+        }
+        resolvedUser = createdUser.user;
+        forceMetadataUpdate = true;
       }
-    } else if (existingUser.user.app_metadata?.provider !== 'wechat') {
-      throw new WechatAuthError(
-        WECHAT_AUTH_ERROR_CODES.AUTH_IDENTITY_ERROR,
-        'Unable to create the authenticated identity.',
-        500,
-      );
     }
+
+    await finalizeWechatBootstrapUser(
+      admin,
+      resolvedUser,
+      candidateUserId,
+      forceMetadataUpdate,
+    );
   }
 
   const { data: claimedUserId, error: claimError } = await admin.rpc(
