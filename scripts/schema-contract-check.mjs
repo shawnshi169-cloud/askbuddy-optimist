@@ -76,12 +76,54 @@ const sharedApiPath = join(root, 'packages', 'shared-api', 'src', 'wechat-auth-v
 const edgeFunctionPath = join(root, 'supabase', 'functions', 'wechat-auth', 'index.ts');
 const edgeCorePath = join(root, 'supabase', 'functions', 'wechat-auth', 'core.mjs');
 const supabaseConfigPath = join(root, 'supabase', 'config.toml');
+const serviceRoleFixPath = join(
+  migrationsDir,
+  '20260814053306_fix_service_role_claim_detection.sql',
+);
+const wechatIdentityMigrationPath = join(
+  migrationsDir,
+  '20260811160000_wechat_auth_v1_identities.sql',
+);
 
 const sharedTypesText = readFileSync(sharedTypesPath, 'utf8');
 const sharedApiText = readFileSync(sharedApiPath, 'utf8');
 const edgeFunctionText = readFileSync(edgeFunctionPath, 'utf8');
 const edgeCoreText = readFileSync(edgeCorePath, 'utf8');
 const supabaseConfigText = readFileSync(supabaseConfigPath, 'utf8');
+const serviceRoleFixText = readFileSync(serviceRoleFixPath, 'utf8');
+const wechatIdentityMigrationText = readFileSync(wechatIdentityMigrationPath, 'utf8');
+
+assert.match(
+  serviceRoleFixText,
+  /CREATE OR REPLACE FUNCTION public\.is_service_role\(\)[\s\S]*coalesce\(auth\.role\(\), ''\) = 'service_role'/,
+  'Service-role detection must use the Supabase Auth role helper.',
+);
+assert.match(serviceRoleFixText, /SET search_path = ''/);
+assert.doesNotMatch(
+  serviceRoleFixText,
+  /request\.jwt\.claim\.role|current_user|current_role|session_user/,
+  'Service-role detection must not rely on incomplete claims or execution identity.',
+);
+assert.match(
+  wechatIdentityMigrationText,
+  /IF NOT public\.is_service_role\(\) THEN[\s\S]*RAISE EXCEPTION 'service role required'/,
+  'WeChat identity claim must retain its service-role guard.',
+);
+assert.match(
+  wechatIdentityMigrationText,
+  /REVOKE ALL ON FUNCTION public\.claim_wechat_identity_v1\(text, text, text, uuid\)[\s\S]*FROM PUBLIC, anon, authenticated/,
+  'WeChat identity claim must remain unavailable to public client roles.',
+);
+assert.match(
+  wechatIdentityMigrationText,
+  /GRANT EXECUTE ON FUNCTION public\.claim_wechat_identity_v1\(text, text, text, uuid\)[\s\S]*TO service_role/,
+  'WeChat identity claim must remain executable by service_role.',
+);
+assert.match(
+  migrationText,
+  /CREATE OR REPLACE FUNCTION public\.confirm_recharge_payment\([\s\S]*IF NOT \(public\.is_service_role\(\) OR public\.has_role\(auth\.uid\(\), 'admin'\)\) THEN/,
+  'Recharge confirmation must retain its controlled server/admin authorization guard.',
+);
 
 for (const pattern of [
   'WechatAuthResponse',
