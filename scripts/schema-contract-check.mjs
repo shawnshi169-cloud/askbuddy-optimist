@@ -128,6 +128,8 @@ const {
   buildWechatSyntheticEmail,
   consumeRateLimit,
   deriveWechatUserId,
+  isRecoverableWechatBootstrapUser,
+  isUserNotFoundError,
   normalizeRateLimit,
   normalizeWechatExchange,
   resolveWechatUser,
@@ -181,14 +183,36 @@ assert.throws(
   () => buildWechatSyntheticEmail('not-a-uuid'),
   (error) => error?.code === WECHAT_AUTH_ERROR_CODES.AUTH_IDENTITY_ERROR,
 );
+assert.equal(isUserNotFoundError({ status: 404, code: 'user_not_found' }), true);
+assert.equal(isUserNotFoundError({ status: 404, code: 'other_error' }), false);
+assert.equal(isUserNotFoundError({ status: 500, code: 'user_not_found' }), false);
+assert.equal(
+  isRecoverableWechatBootstrapUser({
+    id: derivedIds[0],
+    email: syntheticEmail,
+    app_metadata: { provider: 'email', providers: ['email'] },
+  }, derivedIds[0]),
+  true,
+);
+assert.equal(
+  isRecoverableWechatBootstrapUser({
+    id: derivedIds[0],
+    email: 'unrelated@example.com',
+    app_metadata: { provider: 'email', providers: ['email'] },
+  }, derivedIds[0]),
+  false,
+);
 
 function createMockAuthAdmin(options = {}) {
   const users = new Map();
   const identities = new Map();
   const stats = {
     createUserAttributes: [],
+    getUserByIdCalls: 0,
     metadataUpdates: 0,
+    metadataUpdateAttempts: 0,
     successfulUserCreates: 0,
+    userNotFoundLookups: 0,
   };
 
   const client = {
@@ -212,20 +236,45 @@ function createMockAuthAdmin(options = {}) {
     auth: {
       admin: {
         async getUserById(userId) {
-          return { data: { user: users.get(userId) ?? null }, error: null };
+          stats.getUserByIdCalls += 1;
+          const user = users.get(userId) ?? null;
+          if (!user) {
+            if (options.lookupError) {
+              return { data: { user: null }, error: options.lookupError };
+            }
+            stats.userNotFoundLookups += 1;
+            return {
+              data: { user: null },
+              error: {
+                status: 404,
+                code: 'user_not_found',
+              },
+            };
+          }
+          return { data: { user }, error: null };
         },
         async createUser(attributes) {
           stats.createUserAttributes.push(structuredClone(attributes));
-          if (options.forceApprovedRace) {
-            users.set(attributes.id, createWechatAuthUser(attributes.id));
-            return { data: { user: null }, error: new Error('duplicate') };
+          if (options.forceRaceTransition) {
+            users.set(attributes.id, {
+              id: attributes.id,
+              email: attributes.email,
+              app_metadata: { provider: 'email', providers: ['email'] },
+            });
+            return {
+              data: { user: null },
+              error: { status: 422, code: 'user_already_exists' },
+            };
           }
           if (users.has(attributes.id)) {
-            return { data: { user: null }, error: new Error('duplicate') };
+            return {
+              data: { user: null },
+              error: { status: 422, code: 'user_already_exists' },
+            };
           }
-          const appMetadata = options.createProvider === 'email'
-            ? { provider: 'email', providers: ['email'] }
-            : attributes.app_metadata;
+          const appMetadata = options.createProvider === 'wechat'
+            ? attributes.app_metadata
+            : { provider: 'email', providers: ['email'] };
           const user = {
             id: attributes.id,
             email: attributes.email,
@@ -236,9 +285,16 @@ function createMockAuthAdmin(options = {}) {
           return { data: { user }, error: null };
         },
         async updateUserById(userId, attributes) {
+          stats.metadataUpdateAttempts += 1;
           const user = users.get(userId);
           if (!user) {
             return { data: { user: null }, error: new Error('missing user') };
+          }
+          if (options.failMetadataUpdateOnce && stats.metadataUpdateAttempts === 1) {
+            return {
+              data: { user: null },
+              error: { status: 500, code: 'unexpected_failure' },
+            };
           }
           const updatedUser = {
             ...user,
@@ -290,6 +346,24 @@ async function assertIdentityRejected(admin, openid) {
   );
 }
 
+const lookupFailureAdmin = createMockAuthAdmin({
+  lookupError: { status: 500, code: 'unexpected_failure' },
+});
+await assert.rejects(
+  () => resolveWechatUser(
+    lookupFailureAdmin.client,
+    'wx-test-app',
+    'lookup-failure-openid',
+    null,
+    identitySecret,
+  ),
+  (error) => error?.code === WECHAT_AUTH_ERROR_CODES.AUTH_IDENTITY_ERROR
+    && error.message === 'Unable to resolve the authenticated identity.',
+);
+assert.equal(lookupFailureAdmin.stats.createUserAttributes.length, 0);
+assert.equal(lookupFailureAdmin.users.size, 0);
+assert.equal(lookupFailureAdmin.identities.size, 0);
+
 const mockAdmin = createMockAuthAdmin();
 const firstLoginUserId = await resolveWechatUser(
   mockAdmin.client,
@@ -315,6 +389,7 @@ assert.equal(mockAdmin.users.size, 1);
 assert.equal(mockAdmin.identities.size, 1);
 assert.equal(mockAdmin.stats.successfulUserCreates, 1);
 assert.equal(mockAdmin.stats.metadataUpdates, 1);
+assert.equal(mockAdmin.stats.userNotFoundLookups, 1);
 assert.equal(mockAdmin.stats.createUserAttributes.length, 1);
 assert.equal(
   mockAdmin.stats.createUserAttributes[0].email,
@@ -353,16 +428,65 @@ assert.deepEqual(
 );
 assert.equal(metadataOverrideAdmin.stats.metadataUpdates, 1);
 
-const approvedRaceAdmin = createMockAuthAdmin({ forceApprovedRace: true });
-const approvedRaceUserId = await resolveWechatUser(
-  approvedRaceAdmin.client,
+const raceTransitionAdmin = createMockAuthAdmin({ forceRaceTransition: true });
+const raceTransitionUserId = await resolveWechatUser(
+  raceTransitionAdmin.client,
   'wx-test-app',
-  'approved-race-openid',
+  'race-transition-openid',
   null,
   identitySecret,
 );
-assert.equal(approvedRaceAdmin.users.get(approvedRaceUserId).app_metadata.provider, 'wechat');
-assert.equal(approvedRaceAdmin.identities.size, 1);
+assert.equal(
+  raceTransitionAdmin.users.get(raceTransitionUserId).app_metadata.provider,
+  'wechat',
+);
+assert.equal(raceTransitionAdmin.stats.createUserAttributes.length, 1);
+assert.equal(raceTransitionAdmin.stats.metadataUpdateAttempts, 1);
+assert.equal(raceTransitionAdmin.identities.size, 1);
+
+const partialRecoveryAdmin = createMockAuthAdmin({ failMetadataUpdateOnce: true });
+const partialRecoveryOpenid = 'partial-recovery-openid';
+const partialRecoveryUserId = await deriveWechatUserId(
+  'wx-test-app',
+  partialRecoveryOpenid,
+  identitySecret,
+);
+await assert.rejects(
+  () => resolveWechatUser(
+    partialRecoveryAdmin.client,
+    'wx-test-app',
+    partialRecoveryOpenid,
+    null,
+    identitySecret,
+  ),
+  (error) => error?.code === WECHAT_AUTH_ERROR_CODES.AUTH_IDENTITY_ERROR,
+);
+assert.equal(
+  partialRecoveryAdmin.users.get(partialRecoveryUserId).app_metadata.provider,
+  'email',
+);
+assert.equal(partialRecoveryAdmin.identities.size, 0);
+assert.equal(
+  partialRecoveryAdmin.users.get(partialRecoveryUserId).email,
+  buildWechatSyntheticEmail(partialRecoveryUserId),
+);
+assert.equal(
+  await resolveWechatUser(
+    partialRecoveryAdmin.client,
+    'wx-test-app',
+    partialRecoveryOpenid,
+    null,
+    identitySecret,
+  ),
+  partialRecoveryUserId,
+);
+assert.equal(
+  partialRecoveryAdmin.users.get(partialRecoveryUserId).app_metadata.provider,
+  'wechat',
+);
+assert.equal(partialRecoveryAdmin.stats.createUserAttributes.length, 1);
+assert.equal(partialRecoveryAdmin.stats.metadataUpdateAttempts, 2);
+assert.equal(partialRecoveryAdmin.identities.size, 1);
 
 const existingActiveAdmin = createMockAuthAdmin();
 existingActiveAdmin.identities.set('wx-test-app:existing-active-openid', firstLoginUserId);
@@ -415,6 +539,7 @@ const conflictingUserId = await deriveWechatUserId(
 );
 conflictingUserAdmin.users.set(conflictingUserId, {
   id: conflictingUserId,
+  email: 'unrelated@example.com',
   app_metadata: { provider: 'email', providers: ['email'] },
 });
 await assert.rejects(
@@ -428,6 +553,32 @@ await assert.rejects(
   (error) => error?.code === WECHAT_AUTH_ERROR_CODES.AUTH_IDENTITY_ERROR,
 );
 assert.equal(conflictingUserAdmin.identities.size, 0);
+assert.equal(conflictingUserAdmin.stats.metadataUpdateAttempts, 0);
+
+const conflictingProviderAdmin = createMockAuthAdmin();
+const conflictingProviderOpenid = 'conflicting-provider-openid';
+const conflictingProviderUserId = await deriveWechatUserId(
+  'wx-test-app',
+  conflictingProviderOpenid,
+  identitySecret,
+);
+conflictingProviderAdmin.users.set(conflictingProviderUserId, {
+  id: conflictingProviderUserId,
+  email: buildWechatSyntheticEmail(conflictingProviderUserId),
+  app_metadata: { provider: 'google', providers: ['google'] },
+});
+await assert.rejects(
+  () => resolveWechatUser(
+    conflictingProviderAdmin.client,
+    'wx-test-app',
+    conflictingProviderOpenid,
+    null,
+    identitySecret,
+  ),
+  (error) => error?.code === WECHAT_AUTH_ERROR_CODES.AUTH_IDENTITY_ERROR,
+);
+assert.equal(conflictingProviderAdmin.identities.size, 0);
+assert.equal(conflictingProviderAdmin.stats.metadataUpdateAttempts, 0);
 
 const claims = buildWechatJwtClaims(
   derivedIds[0],
