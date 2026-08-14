@@ -9,6 +9,7 @@ import {
   normalizeJwtTtl,
   normalizeRateLimit,
   normalizeWechatExchange,
+  parsePrivateJwk,
   resolveWechatUser,
   validateWechatLoginRequest,
 } from './core.mjs';
@@ -20,13 +21,6 @@ const corsHeaders = {
 };
 
 const rateLimitBuckets = new Map<string, { count: number; resetAt: number }>();
-
-type PrivateEcJwk = JsonWebKey & {
-  kid: string;
-  d: string;
-  crv: 'P-256';
-  kty: 'EC';
-};
 
 type AuthErrorShape = {
   code: string;
@@ -68,29 +62,6 @@ const requiredEnv = (name: string) => {
     );
   }
   return value;
-};
-
-const parsePrivateJwk = (rawValue: string): PrivateEcJwk => {
-  try {
-    const value = JSON.parse(rawValue) as PrivateEcJwk;
-    if (
-      value.kty !== 'EC'
-      || value.crv !== 'P-256'
-      || typeof value.kid !== 'string'
-      || value.kid.length < 1
-      || typeof value.d !== 'string'
-      || value.d.length < 1
-    ) {
-      throw new Error('Invalid private JWK');
-    }
-    return value;
-  } catch {
-    throw new WechatAuthError(
-      WECHAT_AUTH_ERROR_CODES.AUTH_SESSION_ERROR,
-      'Authentication signing configuration is unavailable.',
-      500,
-    );
-  }
 };
 
 const exchangeWechatCode = async (appId: string, appSecret: string, code: string) => {

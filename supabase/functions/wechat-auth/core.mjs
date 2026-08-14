@@ -16,6 +16,47 @@ export class WechatAuthError extends Error {
   }
 }
 
+export function parsePrivateJwk(rawValue) {
+  try {
+    const value = JSON.parse(rawValue);
+    const hasValidKeyOps = value?.key_ops === undefined
+      || (
+        Array.isArray(value.key_ops)
+        && value.key_ops.length === 1
+        && value.key_ops[0] === 'sign'
+      );
+    const hasValidUse = value?.use === undefined || value.use === 'sig';
+    const hasValidAlgorithm = value?.alg === undefined || value.alg === 'ES256';
+    const isNonEmptyString = (candidate) =>
+      typeof candidate === 'string' && candidate.trim().length > 0;
+
+    if (
+      !value
+      || typeof value !== 'object'
+      || Array.isArray(value)
+      || value.kty !== 'EC'
+      || value.crv !== 'P-256'
+      || !isNonEmptyString(value.kid)
+      || !isNonEmptyString(value.d)
+      || !isNonEmptyString(value.x)
+      || !isNonEmptyString(value.y)
+      || !hasValidKeyOps
+      || !hasValidUse
+      || !hasValidAlgorithm
+    ) {
+      throw new Error('Invalid private JWK');
+    }
+
+    return value;
+  } catch {
+    throw new WechatAuthError(
+      WECHAT_AUTH_ERROR_CODES.AUTH_SESSION_ERROR,
+      'Authentication signing configuration is unavailable.',
+      500,
+    );
+  }
+}
+
 export function validateWechatLoginRequest(payload) {
   if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
     throw new WechatAuthError(
