@@ -9,8 +9,8 @@
 
 1. 端侧新增后端字段语义（同名不同义也算）
 2. 端侧新增状态机值
-3. 端侧新增 target_type/item_type 值
-4. 端侧新增非白名单 RPC 主路径
+3. 端侧新增 target_type/item_type 值，或混用 moderation 与通用 target vocabulary
+4. 端侧新增非 `RPC_CATALOG` canonical RPC 主路径
 5. Native Shell 复制共享业务页面或后端状态机
 6. 直接向 Git `main` 提交普通开发变更
 
