@@ -132,13 +132,18 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     pageId: "topic-detail",
     page: "Topic Detail",
     readContracts: ["table:hot_topics", "table:topic_discussions"],
-    writeContracts: ["rpc:create_topic_discussion_secure"],
+    writeContracts: ["capability:topic-discussion-publish"],
     implementationStatus: "legacy",
     currentReadContracts: ["table:hot_topics", "table:topic_discussions", "fixture:topics"],
     currentWriteContracts: [
       "rpc:create_topic_discussion_secure", "fallback:table:topic_discussions",
     ],
-    notes: ["The create RPC remains compatibility-only until moderation vocabulary is aligned."],
+    notes: [
+      "create_topic_discussion_secure remains compatibility-only.",
+      "Canonical publishing is blocked until moderation vocabulary is aligned.",
+      "P1.4b will decide whether to upgrade or replace the create RPC.",
+      "Direct table fallback is not canonical because it bypasses the intended server-side moderation and rate-limit boundary.",
+    ],
   },
   {
     pageId: "expert-detail",

@@ -225,6 +225,18 @@ try {
     pageMap.PAGE_CONTRACT_MAP.map((entry) => entry.pageId),
     requiredPages,
   );
+  for (const page of pageMap.PAGE_CONTRACT_MAP) {
+    for (const contract of [...page.readContracts, ...page.writeContracts]) {
+      if (!contract.startsWith("rpc:")) continue;
+      const rpcName = contract.slice("rpc:".length);
+      assert.ok(catalog[rpcName], `${page.pageId} references unknown RPC ${rpcName}`);
+      assert.equal(
+        catalog[rpcName].status,
+        "canonical",
+        `${page.pageId} canonical contract references noncanonical RPC ${rpcName}`,
+      );
+    }
+  }
   const questionDetail = pageMap.PAGE_CONTRACT_MAP.find(
     (entry) => entry.pageId === "question-detail",
   );
@@ -236,6 +248,16 @@ try {
     pageMap.PAGE_CONTRACT_MAP.find((entry) => entry.pageId === "skill-publish")
       .implementationStatus,
     "blocked",
+  );
+  const topicDetail = pageMap.PAGE_CONTRACT_MAP.find(
+    (entry) => entry.pageId === "topic-detail",
+  );
+  assert.deepEqual(topicDetail.writeContracts, ["capability:topic-discussion-publish"]);
+  assert.ok(
+    topicDetail.currentWriteContracts.includes("rpc:create_topic_discussion_secure"),
+  );
+  assert.ok(
+    topicDetail.currentWriteContracts.includes("fallback:table:topic_discussions"),
   );
 
   const migrations = readFileSync(
