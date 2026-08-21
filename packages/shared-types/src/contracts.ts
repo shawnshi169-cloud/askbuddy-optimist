@@ -12,15 +12,22 @@ export type ISODateTime = string;
 // Unified enum whitelists
 // -----------------------------
 
+/** Persisted values accepted by production public.questions.status. */
 export const QUESTION_STATUS = [
-  "draft",
   "open",
-  "matched",
-  "solved",
+  "pending_payment",
+  "paid",
   "closed",
-  "hidden",
+  "solved",
 ] as const;
 export type QuestionStatus = (typeof QUESTION_STATUS)[number];
+
+/**
+ * Question drafts are separate public.question_drafts rows, not a
+ * public.questions.status value. Visibility is persisted by is_hidden.
+ */
+export const QUESTION_DRAFT_STORAGE = "question_drafts" as const;
+export const QUESTION_VISIBILITY_FIELD = "is_hidden" as const;
 
 export const ANSWER_STATUS = ["active", "accepted", "hidden", "rejected"] as const;
 export type AnswerStatus = (typeof ANSWER_STATUS)[number];
@@ -119,6 +126,33 @@ export const WECHAT_AUTH_ERROR_CODE = [
 ] as const;
 export type WechatAuthErrorCode = (typeof WECHAT_AUTH_ERROR_CODE)[number];
 
+export const MODERATION_TARGET_TYPE = [
+  "question",
+  "answer",
+  "post",
+  "skill_offer",
+  "expert",
+  "message",
+  "user_verifications",
+] as const;
+export type ModerationTargetType = (typeof MODERATION_TARGET_TYPE)[number];
+
+export const MODERATION_REPORT_STATUS = [
+  "pending",
+  "in_review",
+  "resolved",
+  "rejected",
+] as const;
+export type ModerationReportStatus = (typeof MODERATION_REPORT_STATUS)[number];
+
+export const MODERATION_QUEUE_STATUS = [
+  "pending",
+  "in_review",
+  "processed",
+  "closed",
+] as const;
+export type ModerationQueueStatus = (typeof MODERATION_QUEUE_STATUS)[number];
+
 /**
  * target_type/item_type 统一白名单
  * 用于 notifications.target_type / messages.target_type /
@@ -137,6 +171,7 @@ export const CONTENT_TARGET_TYPE = [
   "call_session",
 ] as const;
 export type ContentTargetType = (typeof CONTENT_TARGET_TYPE)[number];
+export type NotificationTargetType = ContentTargetType | ModerationTargetType;
 
 // -----------------------------
 // Core entities (Phase 1)
@@ -246,18 +281,41 @@ export interface Message {
   updated_at: ISODateTime;
 }
 
-export interface NotificationItem {
+/** Storage shape during the Pack 05 legacy-column compatibility window. */
+export interface NotificationRow {
   id: Id;
   user_id: Id;
   type: string;
   title: string;
+  content: string | null;
+  related_type: string | null;
+  related_id: Id | null;
+  sender_id: Id | null;
   body: string | null;
-  target_type: ContentTargetType | null;
+  target_type: string | null;
   target_id: Id | null;
-  is_read: boolean;
-  created_at: ISODateTime;
+  is_read: boolean | null;
+  created_at: ISODateTime | null;
   updated_at: ISODateTime;
 }
+
+/** Canonical application notification after storage normalization. */
+export interface Notification {
+  id: Id;
+  userId: Id;
+  type: string;
+  title: string;
+  body: string | null;
+  targetType: NotificationTargetType | null;
+  targetId: Id | null;
+  senderId: Id | null;
+  isRead: boolean;
+  createdAt: ISODateTime | null;
+  updatedAt: ISODateTime;
+}
+
+/** @deprecated Use Notification. */
+export type NotificationItem = Notification;
 
 export interface CallSession {
   id: Id;

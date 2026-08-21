@@ -4,6 +4,12 @@
 
 当前覆盖用户、问题、回答、专家、技能、消息、通知、订单、积分、收益与 Call v1；导出入口为 `src/index.ts`。
 
+P1.4a truth rules：
+
+- `QuestionStatus` 只表示 production `questions.status` 的持久化值；草稿使用 `question_drafts`，隐藏使用 `is_hidden`。
+- `ModerationTargetType` 独立匹配 Pack07 举报/审核白名单，不与通知/Call 的宽泛 target type 混用。
+- 通知区分 `NotificationRow`（storage）和 `Notification`（domain）。
+
 规则：
 
 - B Core App、C/D Native adapter、E Mini Program 遇到契约冲突时必须先提报 A。
