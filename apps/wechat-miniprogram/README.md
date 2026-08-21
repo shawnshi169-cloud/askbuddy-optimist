@@ -39,10 +39,12 @@ Auth 由 `utils/auth.js` 集中管理，页面不直接管理 code、JWT、过�
 
 ```js
 wx.setStorageSync('ab_client_config_v1', {
-  supabaseUrl: 'https://your-project.supabase.co',
+  supabaseUrl: 'https://fslpvtlavhrnxsygkpvi.supabase.co',
   supabasePublishableKey: 'your-client-safe-publishable-key'
 })
 ```
+
+该 override 不会在 `trial`、`release` 或 unknown runtime 中读取，且不应提交真实值。真实 Auth 请求的客户端 host 为 `fslpvtlavhrnxsygkpvi.supabase.co`；微信公众平台的 **request 合法域名**需配置为 `https://fslpvtlavhrnxsygkpvi.supabase.co`。`api.weixin.qq.com` 由 Edge Function 服务端访问，不属于小程序客户端合法域名。
 
 AppSecret、service-role key、identity HMAC secret、private JWK 及微信 identity 原始字段禁止进入小程序、日志或构建产物。
 
@@ -63,6 +65,16 @@ find apps/wechat-miniprogram -name '*.js' -print0 \
 
 微信开发者工具需验证 compile、app launch、未登录 Profile、登录错误、logout 与 session restore，且控制台无 fatal error。
 
-## Real UAT Status
+## Real WeChat UAT Passed
 
-`REAL WECHAT UAT BLOCKED`：仓库当前仍使用 `touristappid`，client-safe Supabase 配置为空；目标环境的 migration、Edge Function deployment、ES256 signing key、函数 secrets、真实小程序 AppID 与 request domain 状态也尚未在本工作流确认。满足这些前提后才能声明真实 `wx.login -> user JWT -> RLS` 链路通过。
+真实手机 Preview 已完成 `wx.login -> wechat-auth -> user JWT -> authenticated RLS read` 验收：
+
+- real-device Preview 与真实 `wx.login`：PASS；`wechat-auth` 返回 HTTP 200。
+- 退出并重新进入小程序后 session restore：PASS；恢复期间没有第二次 Auth bootstrap。
+- 使用当前用户 JWT 执行无副作用 authenticated RLS read：PASS。
+- logout 清理 `ab_auth_session_v1` 与 `ab_auth_user_v1`：PASS。
+- 再次登录与微信 identity 复用：PASS；identity 数量保持为 1，没有重复 identity。
+
+真实设备的 develop Preview 曾保留过期的 `ab_client_config_v1` publishable key，导致请求在 Gateway 层被拒绝。该问题通过更新真机本地的 develop-only runtime override 修复；这不是 tracked 配置或 Auth contract 变更。
+
+本仓库不跟踪 Production Supabase publishable key。`ab_client_config_v1` 仅供 `envVersion === 'develop'` 的本地验证使用；`trial` 与 `release` 不读取、也不依赖该 override。AppSecret、service-role key、identity HMAC secret、private JWK、微信 identity 原始字段与用户 JWT 均不得写入仓库。
