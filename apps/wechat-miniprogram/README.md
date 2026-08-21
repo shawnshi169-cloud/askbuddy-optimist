@@ -65,21 +65,16 @@ find apps/wechat-miniprogram -name '*.js' -print0 \
 
 微信开发者工具需验证 compile、app launch、未登录 Profile、登录错误、logout 与 session restore，且控制台无 fatal error。
 
-## Real UAT Status
+## Real WeChat UAT Passed
 
-`REAL WECHAT UAT READY`：生产 Edge Function、Auth secrets、identity migration、ES256 current signing key、invalid-code backend smoke test 与真实小程序 AppID 已准备完成。本仓库仍有意不跟踪 Production Supabase publishable key。
+真实手机 Preview 已完成 `wx.login -> wechat-auth -> user JWT -> authenticated RLS read` 验收：
 
-人工 UAT：
+- real-device Preview 与真实 `wx.login`：PASS；`wechat-auth` 返回 HTTP 200。
+- 退出并重新进入小程序后 session restore：PASS；恢复期间没有第二次 Auth bootstrap。
+- 使用当前用户 JWT 执行无副作用 authenticated RLS read：PASS。
+- logout 清理 `ab_auth_session_v1` 与 `ab_auth_user_v1`：PASS。
+- 再次登录与微信 identity 复用：PASS；identity 数量保持为 1，没有重复 identity。
 
-1. 在微信公众平台确认 request 合法域名为 `https://fslpvtlavhrnxsygkpvi.supabase.co`。
-2. 使用真实 AppID 打开项目并确认 `envVersion === 'develop'`。
-3. 在 Console 设置只含 Supabase URL 与 client-safe publishable key 的 `ab_client_config_v1`，然后重新编译。
-4. 从“我的”执行真实微信登录，确认 `wechat-auth` 返回 HTTP 200。
-5. 仅确认 session 的 `tokenType === 'bearer'`、token 非空、`expiresAt` 未过期；不要打印完整 token。需要时最多检查 JWT header 的 `alg === 'ES256'` 且存在 `kid`。
-6. 由后端人工确认 `auth.users` 与 `wechat_identities` identity 对应，不在小程序加入 service-role 调试代码。
-7. 使用现有无副作用 authenticated read/RPC 验证 publishable `apikey`、用户 Bearer JWT 与 RLS / `auth.uid()`。
-8. 重新编译或重启，确认有效 session 恢复。
-9. 执行 logout，确认 `ab_auth_session_v1` 与 `ab_auth_user_v1` 被清理。
-10. 清理开发者工具中的本地 `ab_client_config_v1`（如不再需要）。
+真实设备的 develop Preview 曾保留过期的 `ab_client_config_v1` publishable key，导致请求在 Gateway 层被拒绝。该问题通过更新真机本地的 develop-only runtime override 修复；这不是 tracked 配置或 Auth contract 变更。
 
-完成上述人工检查前，不得声明真实 `wx.login -> user JWT -> RLS` UAT 已通过。
+本仓库不跟踪 Production Supabase publishable key。`ab_client_config_v1` 仅供 `envVersion === 'develop'` 的本地验证使用；`trial` 与 `release` 不读取、也不依赖该 override。AppSecret、service-role key、identity HMAC secret、private JWK、微信 identity 原始字段与用户 JWT 均不得写入仓库。
