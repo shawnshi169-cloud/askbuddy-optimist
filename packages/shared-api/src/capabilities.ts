@@ -9,9 +9,14 @@ export interface ProductCapability {
 
 export const PAYMENT_CAPABILITIES = {
   wechatPrepay: {
+    availability: "unavailable",
+    productionReady: false,
+    reason: "real WeChat payment is not implemented and production must fail closed",
+  },
+  wechatPrepayDevelopmentMock: {
     availability: "mock",
     productionReady: false,
-    reason: "wechat-prepay currently returns a mock gateway payload",
+    reason: "available only when server runtime is development/test and gateway mode is explicitly mock",
   },
   rechargeOrder: {
     availability: "unavailable",
@@ -31,13 +36,26 @@ export const CONSULTATION_CAPABILITY = {
   reason: "create_consultation_order is incompatible with Pack06 orders and ledger paths",
 } as const satisfies ProductCapability;
 
+export const TOPIC_DISCUSSION_CAPABILITY = {
+  publishAction: {
+    availability: "unavailable",
+    productionReady: false,
+    reason: "no canonical publish RPC exists with the Pack07 moderation vocabulary",
+  },
+} as const satisfies Record<string, ProductCapability>;
+
 export const SKILL_OFFER_CAPABILITY = {
   storage: {
     availability: "real",
     productionReady: true,
     reason: "public.skill_offers is the canonical persisted skill offer model",
   },
-  publishAction: {
+  publishBackendPath: {
+    availability: "real",
+    productionReady: true,
+    reason: "owner-scoped INSERT/UPDATE RLS supports canonical skill_offers persistence",
+  },
+  currentClientAction: {
     availability: "unavailable",
     productionReady: false,
     reason: "current Skill Publish UI writes experts instead of skill_offers",
