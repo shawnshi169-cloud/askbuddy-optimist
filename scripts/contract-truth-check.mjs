@@ -207,12 +207,24 @@ try {
     assert.equal(catalog[name].authentication, "service_role");
   }
 
-  assert.equal(capabilities.PAYMENT_CAPABILITIES.wechatPrepay.availability, "mock");
+  assert.equal(capabilities.PAYMENT_CAPABILITIES.wechatPrepay.availability, "unavailable");
   assert.equal(capabilities.PAYMENT_CAPABILITIES.wechatPrepay.productionReady, false);
+  assert.equal(
+    capabilities.PAYMENT_CAPABILITIES.wechatPrepayDevelopmentMock.availability,
+    "mock",
+  );
   assert.equal(capabilities.CONSULTATION_CAPABILITY.availability, "unavailable");
+  assert.equal(
+    capabilities.TOPIC_DISCUSSION_CAPABILITY.publishAction.availability,
+    "unavailable",
+  );
   assert.equal(capabilities.SKILL_OFFER_CAPABILITY.storage.availability, "real");
   assert.equal(
-    capabilities.SKILL_OFFER_CAPABILITY.publishAction.availability,
+    capabilities.SKILL_OFFER_CAPABILITY.publishBackendPath.availability,
+    "real",
+  );
+  assert.equal(
+    capabilities.SKILL_OFFER_CAPABILITY.currentClientAction.availability,
     "unavailable",
   );
 

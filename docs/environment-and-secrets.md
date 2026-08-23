@@ -54,6 +54,15 @@ Client-safe 不等于可以跨 dev/staging/prod 混用。每次发布必须确�
 
 ES256 rotation 必须同时协调 Supabase Auth Signing Keys 与 Edge Function secret：新 key 应先在可信环境生成并保存，再以 standby 导入，更新 `WECHAT_AUTH_JWT_PRIVATE_JWK` 并部署函数，最后 rotate 为 active。任何一侧单独更新都可能导致新签发 JWT 无法被 Supabase 验证。
 
+## Payment Runtime Policy
+
+`wechat-prepay` 使用服务端配置，而不是客户端 `VITE_*` 值：
+
+- `APP_RUNTIME_MODE`：`development`、`test`、`staging` 或 `production`。
+- `PAYMENT_GATEWAY_MODE`：当前只识别显式值 `mock`。
+
+仅当 `APP_RUNTIME_MODE` 为 `development` 或 `test`，且 `PAYMENT_GATEWAY_MODE=mock` 时允许 mock payment。Production、staging、配置缺失和未知值均 fail closed，返回 `PAYMENT_UNAVAILABLE`。这两个变量只控制服务端行为；支付凭证仍属于 server-only secret。
+
 ## Incident Rule
 
 若任何 server-only secret 被提交：
