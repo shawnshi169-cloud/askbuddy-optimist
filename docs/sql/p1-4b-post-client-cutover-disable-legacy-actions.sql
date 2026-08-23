@@ -1,6 +1,12 @@
--- P1.4b POST-P1.4c ACTIVATION ONLY.
--- Apply only after Core and Mini Program clients have removed legacy/fake-success calls.
--- Functions are retained for migration history and controlled server reconciliation.
+-- NOT A MIGRATION
+-- DO NOT APPLY BEFORE P1.4c
+-- REFERENCE SQL ONLY
+--
+-- 本文件不是 migration。
+-- P1.4c 完成并验证客户端切换之前不得执行。
+-- 仅作为后续生成正式 migration 的审核基线。
+-- Post-P1.4c, Architecture A must recheck production dependencies and create a
+-- newly timestamped migration. Do not move the old 20260821153846 file back.
 
 -- Deprecated or compatibility-only client actions become server-only.
 REVOKE EXECUTE ON FUNCTION public.accept_answer_and_transfer_points(uuid, uuid) FROM PUBLIC, anon, authenticated, service_role;

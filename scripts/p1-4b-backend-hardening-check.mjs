@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   buildDevelopmentMockPayment,
@@ -13,9 +13,10 @@ const safeNow = readFileSync(
   "utf8",
 );
 const postCutover = readFileSync(
-  join(root, "supabase/migrations/20260821153846_p1_4b_post_client_cutover_disable_legacy_actions.sql"),
+  join(root, "docs/sql/p1-4b-post-client-cutover-disable-legacy-actions.sql"),
   "utf8",
 );
+const migrationNames = readdirSync(join(root, "supabase/migrations"));
 const prepayIndex = readFileSync(
   join(root, "supabase/functions/wechat-prepay/index.ts"),
   "utf8",
@@ -78,6 +79,30 @@ for (const signature of serviceRpcSignatures) {
   assertGrant(safeNow, signature, "service_role");
 }
 
+const p14bMigrationNames = migrationNames.filter((name) => name.includes("p1_4b"));
+assert.deepEqual(p14bMigrationNames, [
+  "20260821153836_p1_4b_normalize_canonical_rpc_grants.sql",
+]);
+assert.equal(
+  migrationNames.some((name) => /post.*client.*cutover|disable.*legacy/i.test(name)),
+  false,
+  "Post-P1.4c legacy-disable SQL must not be an active migration",
+);
+
+for (const signature of [
+  "accept_answer_and_transfer_points(uuid, uuid)",
+  "recharge_points(integer, text)",
+  "create_recharge_payment_order(integer, text)",
+  "create_consultation_order(uuid, text)",
+  "create_topic_discussion_secure(uuid, text)",
+]) {
+  assert.equal(
+    safeNow.includes(`REVOKE EXECUTE ON FUNCTION public.${signature}`),
+    false,
+    `SAFE_NOW migration must not revoke ${signature}`,
+  );
+}
+
 for (const signature of [
   "accept_answer_and_transfer_points(uuid, uuid)",
   "recharge_points(integer, text)",
@@ -96,7 +121,9 @@ for (const signature of [
   assertGrant(postCutover, signature, "authenticated, service_role");
 }
 
-assert.match(postCutover, /POST-P1\.4c ACTIVATION ONLY/);
+assert.match(postCutover, /NOT A MIGRATION/);
+assert.match(postCutover, /DO NOT APPLY BEFORE P1\.4c/);
+assert.match(postCutover, /REFERENCE SQL ONLY/);
 assert.match(rpcCatalog, /accept_answer_and_transfer_points[\s\S]*?"deprecated"/);
 assert.match(rpcCatalog, /create_consultation_order[\s\S]*?"blocked"/);
 assert.match(rpcCatalog, /create_topic_discussion_secure[\s\S]*?"compatibility-only"/);

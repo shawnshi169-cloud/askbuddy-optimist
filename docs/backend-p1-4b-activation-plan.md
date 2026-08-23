@@ -59,11 +59,11 @@ This privilege-only migration normalizes every canonical RPC in `RPC_CATALOG`:
 
 It does not change function bodies, rows, RLS, or business state. Deployment still requires normal staging validation and an explicit Architecture A deployment task.
 
-## ACTIVATE AFTER P1.4c
+## POST-P1.4c REFERENCE SQL
 
-Migration: `20260821153846_p1_4b_post_client_cutover_disable_legacy_actions.sql`
+Reference: `docs/sql/p1-4b-post-client-cutover-disable-legacy-actions.sql`
 
-Do not apply this migration until P1.4c has removed and validated all client calls to the legacy paths. It revokes ordinary-client EXECUTE from:
+This file is not a migration and is intentionally outside `supabase/migrations`. A normal `supabase db push` cannot apply it. It records the reviewed plan to revoke ordinary-client EXECUTE from:
 
 - `accept_answer_and_transfer_points`
 - `recharge_points`
@@ -79,6 +79,8 @@ Current dependency findings:
 - `payment-webhook` legitimately calls `confirm_recharge_payment` with service role.
 - Core clients still call legacy answer, recharge, consultation, and topic actions; P1.4c must remove or fail-close those calls first.
 - `create_consultation_order` has no legitimate server-side caller and is safe to disable after P1.4c.
+
+After P1.4c is merged and validated, Architecture A must recheck production dependencies, generate a new timestamped migration from this reference, review it, and then apply it. The retired `20260821153846` timestamp must never be moved back into `supabase/migrations`.
 
 ## Edge Function Activation
 
@@ -100,12 +102,12 @@ Do not deploy this source before P1.4c removes client fake-success and fallback 
 
 ## Activation Order
 
-1. Merge P1.4b source artifacts; do not deploy them yet.
-2. Complete and merge P1.4c client fail-closed changes.
-3. Validate staging has no calls to blocked/deprecated client paths.
-4. Confirm a linked migration dry-run lists exactly the SAFE NOW migration followed by the POST-P1.4c migration.
-5. Apply both migrations in that timestamp order, then run canonical and reconciliation RPC smoke tests.
-6. Deploy fail-closed `wechat-prepay` with production runtime configuration.
-7. Monitor denied legacy calls before production rollout expansion.
-
-Because both migration artifacts are tracked in the normal migration directory, they must be activated together only after P1.4c. The SAFE NOW label describes the first migration's behavior; it is not permission to run an unreviewed partial production push.
+1. Merge P1.4b backend source and contract artifacts.
+2. Independently deploy the SAFE NOW grant migration after its normal staging/dry-run review.
+3. Keep the fail-closed `wechat-prepay` source undeployed until P1.4c.
+4. Complete P1.4c client removal of legacy and fake-success paths.
+5. Validate staging has no blocked legacy client calls.
+6. Recheck production dependencies against the reference SQL.
+7. Generate and review a newly timestamped cutover migration; do not reuse `20260821153846`.
+8. Apply the new cutover migration and deploy fail-closed `wechat-prepay`.
+9. Run canonical/reconciliation/payment-unavailable smoke tests and monitor denied legacy calls.
