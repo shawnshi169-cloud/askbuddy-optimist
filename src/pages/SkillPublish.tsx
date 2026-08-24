@@ -29,7 +29,12 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { useMyLatestSkillOffer, useSaveSkillOffer, useSkillCategories } from '@/hooks/useSkillOffers';
+import {
+  EXPERT_PROFILE_REQUIRED_MESSAGE,
+  useCreateSkillOffer,
+  useExpertProfilePrerequisite,
+  useSkillCategories,
+} from '@/hooks/useSkillOffers';
 import { navigateBackOr, navigateToAuthWithReturn } from '@/utils/navigation';
 import SubPageHeader from '@/components/layout/SubPageHeader';
 import PageStateCard from '@/components/common/PageStateCard';
@@ -62,9 +67,14 @@ const SkillPublish = () => {
   const location = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
-  const { data: existingOffer, isLoading: loadingOffer } = useMyLatestSkillOffer();
+  const {
+    data: hasExpertProfile,
+    isLoading: checkingExpertProfile,
+    isError: expertProfileCheckFailed,
+    refetch: retryExpertProfileCheck,
+  } = useExpertProfilePrerequisite();
   const { data: skillCategories = [], isLoading: loadingCategories } = useSkillCategories();
-  const saveSkillOffer = useSaveSkillOffer();
+  const createSkillOffer = useCreateSkillOffer();
   const [step, setStep] = useState(1);
   const [hydratedDraft, setHydratedDraft] = useState(false);
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
@@ -76,19 +86,6 @@ const SkillPublish = () => {
   });
 
   useEffect(() => {
-    if (!existingOffer) return;
-
-    form.reset({
-      title: existingOffer.title,
-      categoryId: existingOffer.category_id || '',
-      description: existingOffer.description || '',
-      price: existingOffer.price_amount == null ? '' : String(existingOffer.price_amount),
-    });
-    setHydratedDraft(true);
-  }, [existingOffer, form]);
-
-  useEffect(() => {
-    if (existingOffer) return;
     const raw = localStorage.getItem(draftKey);
     if (!raw) {
       setHydratedDraft(true);
@@ -114,20 +111,20 @@ const SkillPublish = () => {
     } finally {
       setHydratedDraft(true);
     }
-  }, [draftKey, existingOffer, form, toast]);
+  }, [draftKey, form, toast]);
 
   const formValues = form.watch();
-  const isSaving = saveSkillOffer.isPending;
+  const isSaving = createSkillOffer.isPending;
   const hasPendingContent = Boolean(
     formValues.title?.trim() || formValues.description?.trim() || formValues.categoryId || formValues.price?.trim()
   );
 
   useEffect(() => {
-    if (!hydratedDraft || existingOffer) return;
+    if (!hydratedDraft) return;
     const payload: SkillDraft = { formValues, step, savedAt: new Date().toISOString() };
     const timer = window.setTimeout(() => localStorage.setItem(draftKey, JSON.stringify(payload)), 400);
     return () => window.clearTimeout(timer);
-  }, [draftKey, existingOffer, formValues, hydratedDraft, step]);
+  }, [draftKey, formValues, hydratedDraft, step]);
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -148,7 +145,6 @@ const SkillPublish = () => {
   }, [hasPendingContent, isSaving]);
 
   const saveDraft = (options?: { silent?: boolean }) => {
-    if (existingOffer) return;
     if (!hasPendingContent) {
       localStorage.removeItem(draftKey);
       if (!options?.silent) toast({ title: '暂无可保存内容', description: '填写一些技能信息后再保存草稿。' });
@@ -167,9 +163,13 @@ const SkillPublish = () => {
       return;
     }
 
+    if (!hasExpertProfile) {
+      toast({ title: '暂时无法发布技能', description: EXPERT_PROFILE_REQUIRED_MESSAGE, variant: 'destructive' });
+      return;
+    }
+
     try {
-      await saveSkillOffer.mutateAsync({
-        offerId: existingOffer?.id,
+      await createSkillOffer.mutateAsync({
         categoryId: values.categoryId || null,
         title: values.title,
         description: values.description,
@@ -178,7 +178,7 @@ const SkillPublish = () => {
       localStorage.removeItem(draftKey);
       navigate('/profile');
     } catch {
-      // useSaveSkillOffer displays the database error and keeps the form intact.
+      // useCreateSkillOffer displays the prerequisite/database error and keeps the draft intact.
     }
   };
 
@@ -195,18 +195,19 @@ const SkillPublish = () => {
     setShowLeaveDialog(true);
   };
 
-  const isLoading = loadingOffer || loadingCategories;
+  const isLoading = loadingCategories || (!!user && checkingExpertProfile);
+  const missingExpertProfile = !!user && !expertProfileCheckFailed && hasExpertProfile === false;
 
   return (
     <div className="min-h-[100dvh] bg-slate-50 pb-8">
       <SubPageHeader
-        title={existingOffer ? '编辑专业技能' : '发布您的专业技能'}
+        title="发布您的专业技能"
         onBack={handleBack}
-        right={!existingOffer ? (
+        right={(
           <button type="button" onClick={() => saveDraft()} className="rounded-full bg-white/20 px-3 py-1 text-xs text-white hover:bg-white/25">
             存草稿
           </button>
-        ) : undefined}
+        )}
       />
 
       <div className="px-4 py-4">
@@ -224,6 +225,20 @@ const SkillPublish = () => {
 
         {isLoading ? (
           <PageStateCard variant="loading" title="正在加载技能信息…" />
+        ) : expertProfileCheckFailed ? (
+          <PageStateCard
+            variant="error"
+            title="暂时无法确认发布资格"
+            description="无法确认你的专家/达人资料，请稍后重试。"
+            actionLabel="重新检查"
+            onAction={() => void retryExpertProfileCheck()}
+          />
+        ) : missingExpertProfile ? (
+          <PageStateCard
+            variant="error"
+            title="需要先完成专家/达人资料"
+            description={EXPERT_PROFILE_REQUIRED_MESSAGE}
+          />
         ) : (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
@@ -309,9 +324,9 @@ const SkillPublish = () => {
 
                   <div className="flex gap-4">
                     <Button type="button" onClick={() => setStep(1)} className="w-1/3 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200">返回</Button>
-                    <Button type="submit" disabled={isSaving} className="w-2/3 rounded-full">
+                    <Button type="submit" disabled={isSaving || (!!user && !hasExpertProfile)} className="w-2/3 rounded-full">
                       {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      {isSaving ? '保存中...' : existingOffer ? '更新技能' : '发布技能'}
+                      {isSaving ? '发布中...' : '发布技能'}
                     </Button>
                   </div>
                 </>
@@ -326,29 +341,27 @@ const SkillPublish = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>离开当前编辑？</AlertDialogTitle>
             <AlertDialogDescription>
-              {existingOffer ? '你有未保存的修改，离开后本次修改不会生效。' : '可以先保存草稿，稍后回来继续编辑技能信息。'}
+              可以先保存草稿，稍后回来继续编辑技能信息。
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2 sm:gap-2">
             <AlertDialogCancel className="rounded-full">继续编辑</AlertDialogCancel>
-            {!existingOffer && (
-              <Button
-                type="button"
-                variant="outline"
-                className="rounded-full"
-                onClick={() => {
-                  saveDraft({ silent: true });
-                  setShowLeaveDialog(false);
-                  navigateBackOr(navigate, '/profile', { location });
-                }}
-              >
-                保存并离开
-              </Button>
-            )}
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-full"
+              onClick={() => {
+                saveDraft({ silent: true });
+                setShowLeaveDialog(false);
+                navigateBackOr(navigate, '/profile', { location });
+              }}
+            >
+              保存并离开
+            </Button>
             <AlertDialogAction
               className="rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => {
-                if (!existingOffer) localStorage.removeItem(draftKey);
+                localStorage.removeItem(draftKey);
                 setShowLeaveDialog(false);
                 navigateBackOr(navigate, '/profile', { location });
               }}

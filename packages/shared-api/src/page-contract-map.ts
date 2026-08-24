@@ -153,12 +153,12 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
   {
     pageId: "skill-publish",
     page: "Skill Publish",
-    readContracts: ["table:skill_categories", "table:skill_offers"],
+    readContracts: ["table:skill_categories", "table:experts"],
     writeContracts: ["table:skill_offers"],
     implementationStatus: "canonical",
-    currentReadContracts: ["table:skill_categories", "table:skill_offers"],
+    currentReadContracts: ["table:skill_categories", "table:experts"],
     currentWriteContracts: ["table:skill_offers"],
-    notes: ["Owner-scoped skill offer writes use the canonical storage model and RLS."],
+    notes: ["Default /skill-publish is create-only and requires the authenticated user to already have an expert profile; no experts write occurs."],
   },
   {
     pageId: "chat-detail",

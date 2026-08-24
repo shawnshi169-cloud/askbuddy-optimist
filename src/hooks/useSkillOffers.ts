@@ -7,13 +7,35 @@ import type { Database } from '@/integrations/supabase/types';
 export type SkillOffer = Database['public']['Tables']['skill_offers']['Row'];
 export type SkillCategory = Database['public']['Tables']['skill_categories']['Row'];
 
-interface SaveSkillOfferInput {
-  offerId?: string;
+interface CreateSkillOfferInput {
   categoryId?: string | null;
   title: string;
   description: string;
   priceAmount: number;
 }
+
+export const EXPERT_PROFILE_REQUIRED = 'EXPERT_PROFILE_REQUIRED';
+export const EXPERT_PROFILE_REQUIRED_MESSAGE = '需要先完成专家/达人资料后才能发布技能';
+
+class ExpertProfileRequiredError extends Error {
+  readonly code = EXPERT_PROFILE_REQUIRED;
+
+  constructor() {
+    super(EXPERT_PROFILE_REQUIRED_MESSAGE);
+    this.name = EXPERT_PROFILE_REQUIRED;
+  }
+}
+
+const hasExpertProfile = async (userId: string): Promise<boolean> => {
+  const { data, error } = await supabase
+    .from('experts')
+    .select('user_id')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data !== null;
+};
 
 export const useSkillCategories = () =>
   useQuery({
@@ -31,37 +53,29 @@ export const useSkillCategories = () =>
     staleTime: 5 * 60_000,
   });
 
-export const useMyLatestSkillOffer = () => {
+export const useExpertProfilePrerequisite = () => {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: ['my-latest-skill-offer', user?.id],
-    queryFn: async (): Promise<SkillOffer | null> => {
-      if (!user) return null;
-
-      const { data, error } = await supabase
-        .from('skill_offers')
-        .select('*')
-        .eq('expert_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (error) throw error;
-      return data;
-    },
+    queryKey: ['expert-profile-prerequisite', user?.id],
+    queryFn: async () => (user ? hasExpertProfile(user.id) : false),
     enabled: !!user,
+    staleTime: 60_000,
   });
 };
 
-export const useSaveSkillOffer = () => {
+export const useCreateSkillOffer = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (input: SaveSkillOfferInput): Promise<SkillOffer> => {
+    mutationFn: async (input: CreateSkillOfferInput): Promise<SkillOffer> => {
       if (!user) throw new Error('请先登录');
+
+      if (!(await hasExpertProfile(user.id))) {
+        throw new ExpertProfileRequiredError();
+      }
 
       const payload = {
         category_id: input.categoryId || null,
@@ -75,19 +89,6 @@ export const useSaveSkillOffer = () => {
         delivery_mode: 'online',
       } as const;
 
-      if (input.offerId) {
-        const { data, error } = await supabase
-          .from('skill_offers')
-          .update(payload)
-          .eq('id', input.offerId)
-          .eq('expert_id', user.id)
-          .select()
-          .single();
-
-        if (error) throw error;
-        return data;
-      }
-
       const { data, error } = await supabase
         .from('skill_offers')
         .insert({ expert_id: user.id, ...payload })
@@ -97,12 +98,11 @@ export const useSaveSkillOffer = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['my-latest-skill-offer', user?.id] });
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['skill-offers'] });
       queryClient.invalidateQueries({ queryKey: ['experts'] });
       toast({
-        title: variables.offerId ? '技能已更新' : '技能已发布',
+        title: '技能已发布',
         description: '服务信息已保存到技能供给列表。',
       });
     },

@@ -53,11 +53,11 @@ export const SKILL_OFFER_CAPABILITY = {
   publishBackendPath: {
     availability: "real",
     productionReady: true,
-    reason: "owner-scoped INSERT/UPDATE RLS supports canonical skill_offers persistence",
+    reason: "owner-scoped RLS supports canonical skill_offers persistence when the user has an existing expert profile",
   },
   currentClientAction: {
     availability: "real",
     productionReady: true,
-    reason: "Skill Publish persists owner-scoped canonical skill_offers rows",
+    reason: "Skill Publish creates an owner-scoped skill_offers row after confirming the authenticated user has an existing expert profile",
   },
 } as const satisfies Record<string, ProductCapability>;

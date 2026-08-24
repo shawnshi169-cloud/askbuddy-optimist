@@ -64,11 +64,23 @@ assert.doesNotMatch(topics, /from\('topic_discussions'\)[\s\S]{0,240}\.insert\(/
 
 const skillPublish = read('src/pages/SkillPublish.tsx');
 const skillOffers = read('src/hooks/useSkillOffers.ts');
+const appRoutes = read('src/App.tsx');
+const capabilities = read('packages/shared-api/src/capabilities.ts');
+const pageContracts = read('packages/shared-api/src/page-contract-map.ts');
 assert.doesNotMatch(skillPublish, /useSaveExpertProfile|from\('experts'\)|\.from\("experts"\)/);
+assert.doesNotMatch(skillPublish, /useMyLatestSkillOffer|existingOffer|offerId|useParams|URLSearchParams/);
+assert.doesNotMatch(skillOffers, /useMyLatestSkillOffer|offerId|\.update\(|\.upsert\(/);
+assert.doesNotMatch(skillOffers, /from\('experts'\)\s*\.\s*(?:insert|update|upsert)\(/);
+assert.match(appRoutes, /Route path="\/skill-publish" element=\{<SkillPublish \/>\}/);
+assert.doesNotMatch(appRoutes, /skill-publish\/:|skill-publish\/edit/);
 assert.match(skillOffers, /from\('skill_offers'\)/);
 assert.match(skillOffers, /\.insert\(\{ expert_id: user\.id, \.\.\.payload \}\)/);
-assert.match(skillOffers, /\.update\(payload\)/);
-assert.match(skillOffers, /\.eq\('expert_id', user\.id\)/);
+assert.match(skillOffers, /from\('experts'\)[\s\S]{0,180}\.select\('user_id'\)[\s\S]{0,180}\.eq\('user_id', userId\)/);
+assert.match(skillOffers, /EXPERT_PROFILE_REQUIRED/);
+assert.match(skillOffers, /if \(!\(await hasExpertProfile\(user\.id\)\)\)/);
+assert.match(skillPublish, /await createSkillOffer\.mutateAsync\([\s\S]{0,320}localStorage\.removeItem\(draftKey\)/);
+assert.match(capabilities, /currentClientAction:[\s\S]{0,240}existing expert profile/);
+assert.match(pageContracts, /pageId: "skill-publish"[\s\S]{0,500}create-only[\s\S]{0,180}no experts write occurs/);
 
 const chat = read('src/pages/ChatDetail.tsx');
 const demoSendBranch = chat.match(/if \(isDemoChat\) \{([\s\S]*?)\n\s*\}/)?.[1] || '';
