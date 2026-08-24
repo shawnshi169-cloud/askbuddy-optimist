@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { CheckCircle, Clock, Loader2, PenSquare, Star, Tags, Upload } from 'lucide-react';
+import { CheckCircle, Loader2 } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Form,
   FormControl,
@@ -30,59 +27,38 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { uploadExpertCoverImage, useExpertByUserId, useSaveExpertProfile } from '@/hooks/useExperts';
+import {
+  EXPERT_PROFILE_REQUIRED_MESSAGE,
+  useCreateSkillOffer,
+  useExpertProfilePrerequisite,
+  useSkillCategories,
+} from '@/hooks/useSkillOffers';
 import { navigateBackOr, navigateToAuthWithReturn } from '@/utils/navigation';
 import SubPageHeader from '@/components/layout/SubPageHeader';
 import PageStateCard from '@/components/common/PageStateCard';
 
 const skillFormSchema = z.object({
-  title: z.string().min(5, { message: '标题至少需要5个字符' }).max(100),
-  category: z.string({ required_error: '请选择一个类别' }),
-  subCategory: z.string({ required_error: '请选择一个子类别' }),
-  description: z.string().min(20, { message: '描述至少需要20个字符' }).max(500),
+  title: z.string().trim().min(5, { message: '标题至少需要5个字符' }).max(100),
+  categoryId: z.string().optional(),
+  description: z.string().trim().min(20, { message: '描述至少需要20个字符' }).max(500),
   price: z
     .string()
     .trim()
-    .min(1, { message: '请输入咨询价格' })
+    .min(1, { message: '请输入服务价格' })
     .refine((value) => Number.isFinite(Number(value)) && Number(value) > 0, {
       message: '价格必须大于 0',
     }),
-  experience: z.string({ required_error: '请选择您的经验水平' }),
-  responseTime: z.string({ required_error: '请选择您的响应时间' }),
-  tags: z.string().trim().min(1, { message: '请至少填写一个标签' }),
 });
 
-const categories = [
-  {
-    name: '教育学习',
-    subcategories: ['考研辅导', '高考指导', '留学申请', '语言学习', '学科补习', '升学规划'],
-  },
-  {
-    name: '职业发展',
-    subcategories: ['简历优化', '面试技巧', '职业规划', '求职策略', '行业分析', '创业指导'],
-  },
-  {
-    name: '生活服务',
-    subcategories: ['心理咨询', '情感问题', '健康饮食', '生活指南', '美妆时尚', '旅行建议'],
-  },
-  {
-    name: '兴趣技能',
-    subcategories: ['音乐培训', '绘画设计', '摄影技巧', '写作指导', '编程学习', '手工艺术'],
-  },
-];
+type SkillFormValues = z.infer<typeof skillFormSchema>;
 
-const SKILL_DRAFT_KEY = 'skill-publish-draft-v1';
+const SKILL_DRAFT_KEY = 'skill-publish-draft-v2';
 
 interface SkillDraft {
-  formValues: Partial<z.infer<typeof skillFormSchema>>;
+  formValues: Partial<SkillFormValues>;
   step: number;
-  selectedCategory: string;
-  coverImage: string | null;
   savedAt: string;
 }
 
@@ -91,119 +67,64 @@ const SkillPublish = () => {
   const location = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
-  const saveExpertProfile = useSaveExpertProfile();
-  const { data: existingExpert, isLoading: loadingExisting } = useExpertByUserId(user?.id || '');
-
-  const [coverImage, setCoverImage] = useState<string | null>(null);
-  const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [step, setStep] = useState<number>(1);
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [subcategories, setSubcategories] = useState<string[]>([]);
+  const {
+    data: hasExpertProfile,
+    isLoading: checkingExpertProfile,
+    isError: expertProfileCheckFailed,
+    refetch: retryExpertProfileCheck,
+  } = useExpertProfilePrerequisite();
+  const { data: skillCategories = [], isLoading: loadingCategories } = useSkillCategories();
+  const createSkillOffer = useCreateSkillOffer();
+  const [step, setStep] = useState(1);
   const [hydratedDraft, setHydratedDraft] = useState(false);
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
   const draftKey = user ? `${SKILL_DRAFT_KEY}:${user.id}` : `${SKILL_DRAFT_KEY}:guest`;
 
-  const form = useForm<z.infer<typeof skillFormSchema>>({
+  const form = useForm<SkillFormValues>({
     resolver: zodResolver(skillFormSchema),
-    defaultValues: {
-      title: '',
-      category: '',
-      subCategory: '',
-      description: '',
-      price: '',
-      experience: '',
-      responseTime: '',
-      tags: '',
-    },
+    defaultValues: { title: '', categoryId: '', description: '', price: '' },
   });
 
   useEffect(() => {
-    if (!existingExpert) return;
-
-    const matchedCategory = categories.find((item) => item.name === existingExpert.category);
-    setSelectedCategory(existingExpert.category || '');
-    setSubcategories(matchedCategory?.subcategories || []);
-    setCoverImage(existingExpert.cover_image || null);
-
-    form.reset({
-      title: existingExpert.title || '',
-      category: existingExpert.category || '',
-      subCategory: existingExpert.subcategory || '',
-      description: existingExpert.bio || '',
-      price: existingExpert.consultation_price ? String(existingExpert.consultation_price) : '',
-      experience: existingExpert.experience_level || '',
-      responseTime: existingExpert.response_time || '',
-      tags: (existingExpert.tags || []).join(','),
-    });
-    setHydratedDraft(true);
-  }, [existingExpert, form]);
-
-  useEffect(() => {
-    if (existingExpert) return;
     const raw = localStorage.getItem(draftKey);
     if (!raw) {
       setHydratedDraft(true);
       return;
     }
+
     try {
       const draft = JSON.parse(raw) as SkillDraft;
       form.reset({
         title: draft.formValues.title || '',
-        category: draft.formValues.category || '',
-        subCategory: draft.formValues.subCategory || '',
+        categoryId: draft.formValues.categoryId || '',
         description: draft.formValues.description || '',
         price: draft.formValues.price || '',
-        experience: draft.formValues.experience || '',
-        responseTime: draft.formValues.responseTime || '',
-        tags: draft.formValues.tags || '',
       });
       setStep(draft.step === 2 ? 2 : 1);
-      setSelectedCategory(draft.selectedCategory || '');
-      const matched = categories.find((item) => item.name === draft.selectedCategory);
-      setSubcategories(matched?.subcategories || []);
-      setCoverImage(draft.coverImage || null);
       if (draft.savedAt) {
         const savedDate = new Date(draft.savedAt);
         const label = Number.isNaN(savedDate.getTime()) ? '' : `（${savedDate.toLocaleString('zh-CN')}）`;
-        toast({
-          title: '已恢复本地草稿',
-          description: `你上次编辑的技能信息已恢复${label}`,
-        });
+        toast({ title: '已恢复本地草稿', description: `你上次编辑的技能信息已恢复${label}` });
       }
     } catch {
       localStorage.removeItem(draftKey);
     } finally {
       setHydratedDraft(true);
     }
-  }, [draftKey, existingExpert, form]);
+  }, [draftKey, form, toast]);
 
   const formValues = form.watch();
-  const isSaving = saveExpertProfile.isPending;
+  const isSaving = createSkillOffer.isPending;
   const hasPendingContent = Boolean(
-    formValues.title?.trim() ||
-      formValues.description?.trim() ||
-      formValues.category ||
-      formValues.tags?.trim() ||
-      coverImage
+    formValues.title?.trim() || formValues.description?.trim() || formValues.categoryId || formValues.price?.trim()
   );
 
   useEffect(() => {
-    if (!hydratedDraft || existingExpert) return;
-
-    const payload: SkillDraft = {
-      formValues,
-      step,
-      selectedCategory,
-      coverImage,
-      savedAt: new Date().toISOString(),
-    };
-
-    const timer = window.setTimeout(() => {
-      localStorage.setItem(draftKey, JSON.stringify(payload));
-    }, 400);
-
+    if (!hydratedDraft) return;
+    const payload: SkillDraft = { formValues, step, savedAt: new Date().toISOString() };
+    const timer = window.setTimeout(() => localStorage.setItem(draftKey, JSON.stringify(payload)), 400);
     return () => window.clearTimeout(timer);
-  }, [hydratedDraft, existingExpert, draftKey, formValues, step, selectedCategory, coverImage]);
+  }, [draftKey, formValues, hydratedDraft, step]);
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -216,7 +137,6 @@ const SkillPublish = () => {
   }, [hasPendingContent, isSaving]);
 
   useEffect(() => {
-    if (typeof document === 'undefined') return;
     const shouldDisableSwipeBack = hasPendingContent && !isSaving;
     document.body.dataset.swipeBackDisabled = shouldDisableSwipeBack ? 'true' : 'false';
     return () => {
@@ -224,100 +144,47 @@ const SkillPublish = () => {
     };
   }, [hasPendingContent, isSaving]);
 
-  const handleCategoryChange = (value: string) => {
-    const category = categories.find((item) => item.name === value);
-    setSelectedCategory(value);
-    setSubcategories(category?.subcategories || []);
-    form.setValue('category', value, { shouldValidate: true });
-    form.setValue('subCategory', '', { shouldValidate: false });
+  const saveDraft = (options?: { silent?: boolean }) => {
+    if (!hasPendingContent) {
+      localStorage.removeItem(draftKey);
+      if (!options?.silent) toast({ title: '暂无可保存内容', description: '填写一些技能信息后再保存草稿。' });
+      return;
+    }
+
+    const payload: SkillDraft = { formValues, step, savedAt: new Date().toISOString() };
+    localStorage.setItem(draftKey, JSON.stringify(payload));
+    if (!options?.silent) toast({ title: '草稿已保存', description: '下次进入可继续编辑技能信息。' });
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setCoverFile(file);
-    const reader = new FileReader();
-    reader.onload = () => {
-      setCoverImage(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const onSubmit = async (values: z.infer<typeof skillFormSchema>) => {
+  const onSubmit = async (values: SkillFormValues) => {
     if (!user) {
-      toast({
-        title: '请先登录',
-        description: '登录后才可以发布技能',
-        variant: 'destructive',
-      });
+      toast({ title: '请先登录', description: '登录后才可以发布技能', variant: 'destructive' });
       navigateToAuthWithReturn(navigate, location);
       return;
     }
 
+    if (!hasExpertProfile) {
+      toast({ title: '暂时无法发布技能', description: EXPERT_PROFILE_REQUIRED_MESSAGE, variant: 'destructive' });
+      return;
+    }
+
     try {
-      let coverImageUrl = coverFile ? null : coverImage;
-      if (coverFile) {
-        coverImageUrl = await uploadExpertCoverImage(user.id, coverFile);
-      }
-
-      const tags = values.tags
-        .split(',')
-        .map((tag) => tag.trim())
-        .filter(Boolean);
-
-      await saveExpertProfile.mutateAsync({
-        title: values.title.trim(),
-        bio: values.description.trim(),
-        category: values.category,
-        subcategory: values.subCategory,
-        consultation_price: Number(values.price),
-        experience_level: values.experience,
-        response_time: values.responseTime,
-        tags,
-        cover_image: coverImageUrl,
+      await createSkillOffer.mutateAsync({
+        categoryId: values.categoryId || null,
+        title: values.title,
+        description: values.description,
+        priceAmount: Number(values.price),
       });
-
       localStorage.removeItem(draftKey);
-
-      navigate(existingExpert ? '/profile' : '/');
+      navigate('/profile');
     } catch {
-      // useSaveExpertProfile already shows the error toast.
+      // useCreateSkillOffer displays the prerequisite/database error and keeps the draft intact.
     }
   };
 
   const nextStep = async () => {
-    const currentStepFields: Array<keyof z.infer<typeof skillFormSchema>> = ['title', 'category', 'subCategory', 'description'];
-    const isValid = await form.trigger(currentStepFields);
-    if (isValid) {
-      setStep(2);
-    }
-  };
-
-  const prevStep = () => {
-    setStep(1);
-  };
-
-  const saveDraft = (options?: { silent?: boolean }) => {
-    if (existingExpert) return;
-    if (!hasPendingContent) {
-      localStorage.removeItem(draftKey);
-      if (!options?.silent) {
-        toast({ title: '暂无可保存内容', description: '填写一些技能信息后再保存草稿。' });
-      }
-      return;
-    }
-    const payload: SkillDraft = {
-      formValues,
-      step,
-      selectedCategory,
-      coverImage,
-      savedAt: new Date().toISOString(),
-    };
-    localStorage.setItem(draftKey, JSON.stringify(payload));
-    if (!options?.silent) {
-      toast({ title: '草稿已保存', description: '下次进入可继续编辑技能信息。' });
-    }
+    const isValid = await form.trigger(['title', 'description']);
+    if (isValid) setStep(2);
   };
 
   const handleBack = () => {
@@ -328,22 +195,19 @@ const SkillPublish = () => {
     setShowLeaveDialog(true);
   };
 
+  const isLoading = loadingCategories || (!!user && checkingExpertProfile);
+  const missingExpertProfile = !!user && !expertProfileCheckFailed && hasExpertProfile === false;
+
   return (
-    <div className="bg-slate-50 min-h-[100dvh] pb-8">
+    <div className="min-h-[100dvh] bg-slate-50 pb-8">
       <SubPageHeader
-        title={existingExpert ? '编辑专业技能' : '发布您的专业技能'}
+        title="发布您的专业技能"
         onBack={handleBack}
-        right={
-          !existingExpert ? (
-            <button
-              type="button"
-              onClick={saveDraft}
-              className="rounded-full bg-white/20 px-3 py-1 text-xs text-white hover:bg-white/25"
-            >
-              存草稿
-            </button>
-          ) : undefined
-        }
+        right={(
+          <button type="button" onClick={() => saveDraft()} className="rounded-full bg-white/20 px-3 py-1 text-xs text-white hover:bg-white/25">
+            存草稿
+          </button>
+        )}
       />
 
       <div className="px-4 py-4">
@@ -356,17 +220,25 @@ const SkillPublish = () => {
             </div>
             <div className="text-sm text-gray-500">{step === 1 ? '基础信息' : '服务设置'}</div>
           </div>
-          <p className="text-xs leading-5 text-slate-500">
-            {step === 1
-              ? '先补充你的专业背景和服务方向，再进入后续定价与响应设置。'
-              : '完成价格、经验、响应时间和标签后，就可以发布到平台。'}
-          </p>
+          <p className="text-xs leading-5 text-slate-500">技能信息将保存到平台技能供给列表，不会修改专家档案。</p>
         </div>
 
-        {loadingExisting ? (
-          <div className="py-6">
-            <PageStateCard variant="loading" compact title="正在加载已发布信息…" />
-          </div>
+        {isLoading ? (
+          <PageStateCard variant="loading" title="正在加载技能信息…" />
+        ) : expertProfileCheckFailed ? (
+          <PageStateCard
+            variant="error"
+            title="暂时无法确认发布资格"
+            description="无法确认你的专家/达人资料，请稍后重试。"
+            actionLabel="重新检查"
+            onAction={() => void retryExpertProfileCheck()}
+          />
+        ) : missingExpertProfile ? (
+          <PageStateCard
+            variant="error"
+            title="需要先完成专家/达人资料"
+            description={EXPERT_PROFILE_REQUIRED_MESSAGE}
+          />
         ) : (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
@@ -378,11 +250,9 @@ const SkillPublish = () => {
                       name="title"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-base font-semibold">技能标题</FormLabel>
-                          <FormControl>
-                            <Input placeholder="例如：北大硕士提供考研英语复习规划" {...field} />
-                          </FormControl>
-                          <FormDescription>一个好的标题能够吸引更多人咨询</FormDescription>
+                          <FormLabel>技能标题</FormLabel>
+                          <FormControl><Input placeholder="例如：一对一简历优化" {...field} /></FormControl>
+                          <FormDescription>用清晰标题说明你提供的服务。</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -390,49 +260,19 @@ const SkillPublish = () => {
 
                     <FormField
                       control={form.control}
-                      name="category"
-                      render={() => (
-                        <FormItem>
-                          <FormLabel className="text-base font-semibold">选择类别</FormLabel>
-                          <Select onValueChange={handleCategoryChange} value={selectedCategory}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="选择技能所属类别" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {categories.map((category) => (
-                                <SelectItem key={category.name} value={category.name}>
-                                  {category.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="subCategory"
+                      name="categoryId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-base font-semibold">选择子类别</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCategory}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder={selectedCategory ? '选择子类别' : '请先选择类别'} />
-                              </SelectTrigger>
-                            </FormControl>
+                          <FormLabel>技能分类</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value || undefined}>
+                            <FormControl><SelectTrigger><SelectValue placeholder="选择平台分类（可选）" /></SelectTrigger></FormControl>
                             <SelectContent>
-                              {subcategories.map((subcat) => (
-                                <SelectItem key={subcat} value={subcat}>
-                                  {subcat}
-                                </SelectItem>
+                              {skillCategories.map((category) => (
+                                <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
+                          <FormDescription>分类来自平台当前启用的技能分类。</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -443,50 +283,14 @@ const SkillPublish = () => {
                       name="description"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-base font-semibold">技能描述</FormLabel>
-                          <FormControl>
-                            <Textarea placeholder="详细描述您的专业背景、技能特点和能够提供的帮助" rows={5} {...field} />
-                          </FormControl>
-                          <FormDescription>详细而专业的描述能增加用户的信任度</FormDescription>
+                          <FormLabel>服务说明</FormLabel>
+                          <FormControl><Textarea rows={8} placeholder="说明服务内容、适用人群和交付方式" {...field} /></FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-
-                    <div className="space-y-3">
-                      <p className="text-base font-semibold">上传封面图 (选填)</p>
-                      <div className="rounded-3xl border-2 border-dashed border-gray-300 p-4 text-center">
-                        {coverImage ? (
-                          <div className="relative">
-                            <img src={coverImage} alt="Cover preview" className="h-32 w-full rounded-2xl object-cover" />
-                            <button
-                              onClick={() => {
-                                setCoverImage(null);
-                                setCoverFile(null);
-                              }}
-                              className="absolute top-2 right-2 bg-white/80 rounded-full p-1"
-                              type="button"
-                            >
-                              <PenSquare size={16} />
-                            </button>
-                          </div>
-                        ) : (
-                          <label className="cursor-pointer block">
-                            <div className="flex flex-col items-center py-4">
-                              <Upload size={24} className="text-gray-400 mb-2" />
-                              <p className="text-gray-500 text-sm">点击上传封面图，或拖拽文件到此处</p>
-                              <p className="text-gray-400 text-xs mt-1">支持JPG、PNG格式，建议尺寸1200x800</p>
-                            </div>
-                            <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
-                          </label>
-                        )}
-                      </div>
-                    </div>
                   </div>
-
-                  <Button type="button" onClick={nextStep} className="h-12 w-full rounded-full text-base">
-                    下一步
-                  </Button>
+                  <Button type="button" onClick={nextStep} className="w-full rounded-full">下一步</Button>
                 </>
               ) : (
                 <>
@@ -496,136 +300,33 @@ const SkillPublish = () => {
                       name="price"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-base font-semibold">咨询定价</FormLabel>
+                          <FormLabel>每次服务价格</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <Input type="number" placeholder="设置每次咨询的价格" {...field} className="pl-8" />
+                              <Input type="number" min="0.01" step="0.01" placeholder="设置每次服务的价格" {...field} className="pl-8" />
                               <span className="absolute left-3 top-2.5 text-gray-500">￥</span>
                             </div>
                           </FormControl>
-                          <FormDescription>合理的价格能够吸引更多用户，同时体现您的专业价值</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="experience"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-base font-semibold">
-                            <div className="flex items-center gap-1">
-                              <Star size={18} className="text-yellow-500" />
-                              <span>经验水平</span>
-                            </div>
-                          </FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="选择您的经验水平" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="entry">入门级 (1年以下经验)</SelectItem>
-                              <SelectItem value="intermediate">中级 (1-3年经验)</SelectItem>
-                              <SelectItem value="advanced">高级 (3-5年经验)</SelectItem>
-                              <SelectItem value="expert">专家 (5年以上经验)</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="responseTime"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-base font-semibold">
-                            <div className="flex items-center gap-1">
-                              <Clock size={18} className="text-blue-500" />
-                              <span>响应时间</span>
-                            </div>
-                          </FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="选择您的响应时间" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="1h">1小时内</SelectItem>
-                              <SelectItem value="4h">4小时内</SelectItem>
-                              <SelectItem value="12h">12小时内</SelectItem>
-                              <SelectItem value="24h">24小时内</SelectItem>
-                              <SelectItem value="48h">48小时内</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormDescription>更快的响应时间通常能获得更多咨询机会</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="tags"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-base">
-                            <div className="flex items-center gap-1">
-                              <Tags size={18} className="text-green-500" />
-                              <span>技能标签</span>
-                            </div>
-                          </FormLabel>
-                          <FormControl>
-                            <Input placeholder="用逗号分隔多个标签，如：英语四六级,考研英语,学术写作" {...field} />
-                          </FormControl>
-                          <FormDescription>添加准确的标签有助于用户更容易找到您</FormDescription>
+                          <FormDescription>当前按次计价，币种为人民币，交付方式为线上。</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
 
                     <div className="rounded-2xl bg-blue-50 p-4">
-                      <h3 className="text-sm font-medium flex items-center mb-2">
-                        <CheckCircle size={16} className="text-blue-500 mr-1" />
+                      <h3 className="mb-2 flex items-center text-sm font-medium">
+                        <CheckCircle size={16} className="mr-1 text-blue-500" />
                         提交前确认
                       </h3>
-                      <ul className="text-xs space-y-1 text-gray-600">
-                        <li className="flex items-start">
-                          <div className="min-w-4 mt-1 mr-1">•</div>
-                          <div>您的技能信息将展示在公共平台，请确保内容真实可靠</div>
-                        </li>
-                        <li className="flex items-start">
-                          <div className="min-w-4 mt-1 mr-1">•</div>
-                          <div>平台将抽取10%作为服务费，实际收入将在完成咨询后到账</div>
-                        </li>
-                        <li className="flex items-start">
-                          <div className="min-w-4 mt-1 mr-1">•</div>
-                          <div>请保持高质量的回复，用户满意度将影响您的排名</div>
-                        </li>
-                      </ul>
+                      <p className="text-xs leading-5 text-gray-600">发布成功仅以数据库返回的技能供给记录为准；失败时表单会保留并显示真实错误。</p>
                     </div>
                   </div>
 
                   <div className="flex gap-4">
-                    <Button type="button" onClick={prevStep} className="w-1/3 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200">
-                      返回
-                    </Button>
-                    <Button type="submit" disabled={isSaving} className="w-2/3 rounded-full">
-                      {isSaving ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                          保存中...
-                        </>
-                      ) : existingExpert ? (
-                        '更新技能'
-                      ) : (
-                        '发布技能'
-                      )}
+                    <Button type="button" onClick={() => setStep(1)} className="w-1/3 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200">返回</Button>
+                    <Button type="submit" disabled={isSaving || (!!user && !hasExpertProfile)} className="w-2/3 rounded-full">
+                      {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {isSaving ? '发布中...' : '发布技能'}
                     </Button>
                   </div>
                 </>
@@ -640,29 +341,27 @@ const SkillPublish = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>离开当前编辑？</AlertDialogTitle>
             <AlertDialogDescription>
-              {existingExpert ? '你有未保存的修改，离开后本次修改不会生效。' : '可以先保存草稿，稍后回来继续编辑技能信息。'}
+              可以先保存草稿，稍后回来继续编辑技能信息。
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2 sm:gap-2">
             <AlertDialogCancel className="rounded-full">继续编辑</AlertDialogCancel>
-            {!existingExpert ? (
-              <Button
-                type="button"
-                variant="outline"
-                className="rounded-full"
-                onClick={() => {
-                  saveDraft({ silent: true });
-                  setShowLeaveDialog(false);
-                  navigateBackOr(navigate, '/profile', { location });
-                }}
-              >
-                保存并离开
-              </Button>
-            ) : null}
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-full"
+              onClick={() => {
+                saveDraft({ silent: true });
+                setShowLeaveDialog(false);
+                navigateBackOr(navigate, '/profile', { location });
+              }}
+            >
+              保存并离开
+            </Button>
             <AlertDialogAction
               className="rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => {
-                if (!existingExpert) localStorage.removeItem(draftKey);
+                localStorage.removeItem(draftKey);
                 setShowLeaveDialog(false);
                 navigateBackOr(navigate, '/profile', { location });
               }}

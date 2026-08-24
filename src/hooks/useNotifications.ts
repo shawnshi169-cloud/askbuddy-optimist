@@ -3,16 +3,15 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-const isMissingRpcError = (error: unknown, functionName: string) => {
-  const message = error instanceof Error ? error.message : String(error || '');
-  return message.includes(`public.${functionName}`) || message.includes('schema cache');
-};
-
 export interface Notification {
   id: string;
   user_id: string;
   type: string;
   title: string;
+  body: string | null;
+  target_id: string | null;
+  target_type: string | null;
+  // Compatibility aliases are normalized only at this adapter boundary.
   content: string | null;
   related_id: string | null;
   related_type: string | null;
@@ -65,6 +64,14 @@ export const useNotifications = () => {
 
       return data.map((notification) => ({
         ...notification,
+        body: notification.body ?? notification.content,
+        target_id: notification.target_id ?? notification.related_id,
+        target_type: notification.target_type ?? notification.related_type,
+        content: notification.body ?? notification.content,
+        related_id: notification.target_id ?? notification.related_id,
+        related_type: notification.target_type ?? notification.related_type,
+        created_at: notification.created_at || notification.updated_at,
+        is_read: notification.is_read ?? false,
         sender_nickname: notification.sender_id ? profileMap.get(notification.sender_id)?.nickname || null : null,
         sender_avatar: notification.sender_id ? profileMap.get(notification.sender_id)?.avatar_url || null : null,
       }));
@@ -131,20 +138,8 @@ export const useMarkAsRead = () => {
         p_notification_ids: [notificationId],
       });
 
-      if (!rpcResult.error) return rpcResult.data;
-
-      if (!isMissingRpcError(rpcResult.error, 'mark_notifications_read')) {
-        throw rpcResult.error;
-      }
-
-      const { error } = await supabase
-        .from('notifications')
-        .update({ is_read: true })
-        .eq('id', notificationId)
-        .eq('user_id', user?.id || '');
-
-      if (error) throw error;
-      return 1;
+      if (rpcResult.error) throw rpcResult.error;
+      return rpcResult.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });
@@ -163,20 +158,8 @@ export const useMarkAllAsRead = () => {
         p_notification_ids: null,
       });
 
-      if (!rpcResult.error) return rpcResult.data;
-
-      if (!isMissingRpcError(rpcResult.error, 'mark_notifications_read')) {
-        throw rpcResult.error;
-      }
-
-      const { error } = await supabase
-        .from('notifications')
-        .update({ is_read: true })
-        .eq('user_id', user?.id || '')
-        .eq('is_read', false);
-
-      if (error) throw error;
-      return 1;
+      if (rpcResult.error) throw rpcResult.error;
+      return rpcResult.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });

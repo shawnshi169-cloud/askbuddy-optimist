@@ -220,27 +220,9 @@ export const useSendMessage = () => {
         p_message_type: data.message_type || 'text',
       });
 
-      if (!rpcResult.error) {
-        return rpcResult.data;
-      }
-
-      if (!isMissingRpcError(rpcResult.error, 'send_direct_message')) {
-        throw rpcResult.error;
-      }
-
-      const { data: message, error } = await supabase
-        .from('messages')
-        .insert({
-          sender_id: user.id,
-          receiver_id: data.receiver_id,
-          content: data.content,
-          message_type: data.message_type || 'text',
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return message.id;
+      if (rpcResult.error) throw rpcResult.error;
+      if (!rpcResult.data) throw new Error('发送失败：服务端未返回消息 ID');
+      return rpcResult.data;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['messages', user?.id, variables.receiver_id] });

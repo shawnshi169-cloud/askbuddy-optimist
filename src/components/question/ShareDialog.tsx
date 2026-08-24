@@ -7,6 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Award, Copy, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { copyTextToClipboard } from "@/utils/clipboard";
 
 interface Option {
   id: string;
@@ -17,7 +18,7 @@ interface ShareDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   options: Option[];
-  onShare: (optionId: string) => void;
+  onShare: (optionId: string) => void | Promise<void>;
 }
 
 const ShareDialog: React.FC<ShareDialogProps> = ({
@@ -51,8 +52,7 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
                   key={option.id}
                   className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity"
                   onClick={() => {
-                    onShare(option.id);
-                    toast({ title: `通过${option.name}分享成功！` });
+                    void onShare(option.id);
                   }}
                   aria-label={`通过${option.name}邀请`}
                   tabIndex={0}
@@ -75,9 +75,17 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
                 size="sm"
                 className="text-xs h-8"
                 aria-label="复制链接"
-                onClick={() => {
-                  navigator.clipboard.writeText(window.location.href);
-                  toast({ title: "链接已复制到剪贴板" });
+                onClick={async () => {
+                  try {
+                    await copyTextToClipboard(window.location.href);
+                    toast({ title: "链接已复制到剪贴板" });
+                  } catch (copyError) {
+                    toast({
+                      title: '复制失败',
+                      description: copyError instanceof Error ? copyError.message : '无法复制链接',
+                      variant: 'destructive',
+                    });
+                  }
                 }}
               >
                 <Copy size={14} className="mr-1" />

@@ -18,6 +18,7 @@ import { useSubmitContentReport } from '@/hooks/useModeration';
 import { demoQuestionDetails } from '@/lib/demoData';
 import PageStateCard from "@/components/common/PageStateCard";
 import { buildFromState, navigateBackOr, navigateToAuthWithReturn } from '@/utils/navigation';
+import { copyTextToClipboard } from '@/utils/clipboard';
 
 // 分享选项
 const SHARE_OPTIONS = [
@@ -148,9 +149,18 @@ const QuestionDetail = () => {
   const handleShareDialog = () => setIsShareDialogOpen(true);
 
   // 分享
-  const handleShareQuestion = (optionId: string) => {
-    setIsShareDialogOpen(false);
-    toast({ title: "分享链接已复制" });
+  const handleShareQuestion = async (_optionId: string) => {
+    try {
+      await copyTextToClipboard(window.location.href);
+      setIsShareDialogOpen(false);
+      toast({ title: '分享链接已复制' });
+    } catch (shareError) {
+      toast({
+        title: '分享失败',
+        description: shareError instanceof Error ? shareError.message : '无法复制分享链接',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleReportQuestion = () => {

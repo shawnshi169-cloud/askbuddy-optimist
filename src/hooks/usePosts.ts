@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { copyTextToClipboard } from '@/utils/clipboard';
 
 export interface PostWithProfile {
   id: string;
@@ -38,7 +39,7 @@ export const usePosts = () => {
     queryKey: ['posts', user?.id],
     queryFn: async (): Promise<PostWithProfile[]> => {
       // Fetch posts
-      const { data: posts, error } = await (supabase as any)
+      const { data: posts, error } = await supabase
         .from('posts')
         .select('*')
         .order('created_at', { ascending: false });
@@ -47,7 +48,7 @@ export const usePosts = () => {
       if (!posts || posts.length === 0) return [];
 
       // Fetch profiles for post authors
-      const userIds = [...new Set(posts.map((p: any) => p.author_id ?? p.user_id))];
+      const userIds = [...new Set(posts.map((post) => post.author_id ?? post.user_id))];
       const { data: profiles } = await supabase
         .from('profiles')
         .select('user_id, nickname, avatar_url')
@@ -67,7 +68,7 @@ export const usePosts = () => {
         likedPostIds = new Set((likes || []).map(l => l.post_id));
       }
 
-      return posts.map((post: any) => {
+      return posts.map((post) => {
         const authorId = post.author_id ?? post.user_id;
         const profile = profileMap.get(authorId);
         return {
@@ -92,7 +93,7 @@ export const usePostComments = (postId: string | null) => {
     queryKey: ['post-comments', postId],
     enabled: !!postId,
     queryFn: async (): Promise<CommentWithProfile[]> => {
-      const { data: comments, error } = await (supabase as any)
+      const { data: comments, error } = await supabase
         .from('post_comments')
         .select('*')
         .eq('post_id', postId!)
@@ -101,7 +102,7 @@ export const usePostComments = (postId: string | null) => {
       if (error) throw error;
       if (!comments || comments.length === 0) return [];
 
-      const userIds = [...new Set(comments.map((c: any) => c.author_id ?? c.user_id))];
+      const userIds = [...new Set(comments.map((comment) => comment.author_id ?? comment.user_id))];
       const { data: profiles } = await supabase
         .from('profiles')
         .select('user_id, nickname, avatar_url')
@@ -111,13 +112,13 @@ export const usePostComments = (postId: string | null) => {
         (profiles || []).map(p => [p.user_id, p])
       );
 
-      return comments.map((comment: any) => {
+      return comments.map((comment) => {
         const authorId = comment.author_id ?? comment.user_id;
         const profile = profileMap.get(authorId);
         return {
           ...comment,
           user_id: authorId,
-          likes_count: comment.like_count ?? comment.likes_count ?? 0,
+          likes_count: comment.likes_count ?? 0,
           profile_nickname: profile?.nickname || '匿名用户',
           profile_avatar: profile?.avatar_url || null,
         };
@@ -169,10 +170,11 @@ export const useCreatePost = () => {
     mutationFn: async (data: { content: string; topics?: string[]; images?: string[] }) => {
       if (!user) throw new Error('请先登录');
 
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('posts')
         .insert({
           author_id: user.id,
+          user_id: user.id,
           content: data.content,
           topics: data.topics || [],
           images: data.images || [],
@@ -199,11 +201,12 @@ export const useAddComment = () => {
     mutationFn: async ({ postId, content }: { postId: string; content: string }) => {
       if (!user) throw new Error('请先登录');
 
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('post_comments')
         .insert({
           post_id: postId,
           author_id: user.id,
+          user_id: user.id,
           content,
         });
       if (error) throw error;
@@ -227,7 +230,7 @@ export const useDeletePost = () => {
   return useMutation({
     mutationFn: async (postId: string) => {
       if (!user) throw new Error('请先登录');
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('posts')
         .delete()
         .eq('id', postId)
@@ -251,12 +254,15 @@ export const useSharePost = () => {
 
   return useMutation({
     mutationFn: async (postId: string) => {
+      await copyTextToClipboard(window.location.href);
+
       // Get current count and increment
-      const { data } = await supabase
+      const { data, error: readError } = await supabase
         .from('posts')
         .select('shares_count')
         .eq('id', postId)
         .single();
+      if (readError) throw readError;
       
       const { error } = await supabase
         .from('posts')
@@ -266,8 +272,10 @@ export const useSharePost = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
-      navigator.clipboard.writeText(window.location.href);
       toast({ title: '链接已复制，分享成功' });
+    },
+    onError: (error: Error) => {
+      toast({ title: '分享失败', description: error.message, variant: 'destructive' });
     },
   });
 };

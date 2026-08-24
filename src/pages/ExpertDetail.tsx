@@ -8,31 +8,30 @@ import {
   Package, 
   MapPin, 
   ChevronDown, 
-  ChevronUp, 
-  Loader2
+    ChevronUp
 } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import { useExpertDetail } from '@/hooks/useExperts';
 import { useAuth } from '@/contexts/AuthContext';
-import { getConsultationAmount, useCreateConsultationOrder } from '@/hooks/useConsultationOrders';
+import { CONSULTATION_UNAVAILABLE_MESSAGE, getConsultationAmount } from '@/hooks/useConsultationOrders';
 import { demoExperts } from '@/lib/demoData';
 import PageStateCard from '@/components/common/PageStateCard';
 import { buildFromState, navigateBackOr, navigateToAuthWithReturn } from '@/utils/navigation';
 import SubPageHeader from '@/components/layout/SubPageHeader';
 import { isNativeApp } from '@/utils/platform';
+import { useToast } from '@/hooks/use-toast';
+import { CONSULTATION_CAPABILITY } from '../../packages/shared-api/src/capabilities';
 
 const ExpertDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [selectedConsultType, setSelectedConsultType] = useState<'text' | 'voice' | 'video'>('text');
-  const [showOrderDialog, setShowOrderDialog] = useState(false);
-  const createOrder = useCreateConsultationOrder();
   const isDemoExpert = !!id?.startsWith('demo-expert-');
   const nativeMode = isNativeApp();
 
@@ -210,7 +209,13 @@ const ExpertDetail = () => {
           className="flex-1 rounded-full"
           onClick={() => {
             if (!user) { navigateToAuthWithReturn(navigate, location); return; }
-            setShowOrderDialog(true);
+            if (CONSULTATION_CAPABILITY.availability === 'unavailable') {
+              toast({
+                title: CONSULTATION_UNAVAILABLE_MESSAGE,
+                description: '当前不会创建咨询订单或扣除积分。',
+                variant: 'destructive',
+              });
+            }
           }}
         >
           预约咨询
@@ -227,53 +232,6 @@ const ExpertDetail = () => {
         </Button>
       </div>
 
-      {/* Order Dialog */}
-      <Dialog open={showOrderDialog} onOpenChange={setShowOrderDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>确认预约咨询</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3 py-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">咨询专家</span>
-              <span className="font-medium text-foreground">{displayName}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">咨询方式</span>
-              <span className="font-medium text-foreground">
-                {selectedConsultType === 'text' ? '文本咨询' : selectedConsultType === 'voice' ? '语音咨询' : '视频咨询'}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">费用</span>
-              <span className="font-medium text-primary">{amounts[selectedConsultType]} 积分</span>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowOrderDialog(false)}>取消</Button>
-            <Button
-              onClick={() => {
-                if (isDemoExpert) {
-                  setShowOrderDialog(false);
-                  return;
-                }
-                createOrder.mutate(
-                  { expertId: resolvedExpert.id, consultType: selectedConsultType },
-                  {
-                    onSuccess: () => {
-                      setShowOrderDialog(false);
-                    },
-                  }
-                );
-              }}
-              disabled={createOrder.isPending}
-            >
-              {!isDemoExpert && createOrder.isPending && <Loader2 size={16} className="animate-spin mr-1" />}
-              确认预约
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

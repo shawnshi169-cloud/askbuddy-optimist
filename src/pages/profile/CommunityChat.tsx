@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import SubPageHeader from '@/components/layout/SubPageHeader';
 import { isNativeApp } from '@/utils/platform';
 import { buildFromState } from '@/utils/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 interface CommunityGroupState {
   id: string;
@@ -37,6 +38,7 @@ const CommunityChat = () => {
   const location = useLocation();
   const { groupId } = useParams();
   const nativeMode = isNativeApp();
+  const { toast } = useToast();
   const messageEndRef = useRef<HTMLDivElement | null>(null);
   const [draft, setDraft] = useState('');
   const groupFromState = (location.state as { group?: CommunityGroupState } | null)?.group;
@@ -58,7 +60,7 @@ const CommunityChat = () => {
     };
   }, [groupFromState, groupId]);
 
-  const [messages, setMessages] = useState<GroupMessage[]>([
+  const [messages] = useState<GroupMessage[]>([
     { id: 'n-1', sender: '群公告', content: '本群禁止广告与引流，优先讨论申请、求职与经验分享。', time: '今天 09:20', type: 'notice' },
     { id: 'm-1', sender: '群主', content: `欢迎来到 ${group.name}，先看公告和资料区。`, time: '09:31' },
     { id: 'm-2', sender: group.lastSender || '讨论区', content: group.lastMessage || '今天大家在讨论留学时间线。', time: '09:42' },
@@ -72,17 +74,11 @@ const CommunityChat = () => {
   const sendMessage = () => {
     const text = draft.trim();
     if (!text) return;
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: `local-${Date.now()}`,
-        sender: '你',
-        content: text,
-        time: '刚刚',
-        mine: true,
-      },
-    ]);
-    setDraft('');
+    toast({
+      title: '当前不可发送',
+      description: '社群聊天功能暂未开放，消息不会在本地伪造。',
+      variant: 'destructive',
+    });
   };
 
   return (
@@ -180,7 +176,7 @@ const CommunityChat = () => {
             className="h-11 rounded-2xl px-4"
           >
             <Send size={16} className="mr-1.5" />
-            发送
+            暂不可发送
           </Button>
         </div>
       </div>
