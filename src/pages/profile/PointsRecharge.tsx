@@ -1,21 +1,16 @@
 
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Coins, CheckCircle2, Loader2 } from 'lucide-react';
+import { Coins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePointAccountBalance } from '@/hooks/useProfileData';
 import { useToast } from '@/hooks/use-toast';
-import {
-  useCreateRechargePayment,
-  useSimulateRechargeCallback,
-  type RechargePaymentIntent,
-  type RechargeProvider,
-} from '@/hooks/usePayments';
-import { useIsAdmin } from '@/hooks/useHotTopics';
+import { PAYMENT_UNAVAILABLE_MESSAGE, type RechargeProvider } from '@/hooks/usePayments';
 import SubPageHeader from '@/components/layout/SubPageHeader';
 import { navigateBackOr, navigateToAuthWithReturn } from '@/utils/navigation';
+import { PAYMENT_CAPABILITIES } from '../../../packages/shared-api/src/capabilities';
 
 const RECHARGE_OPTIONS = [
   { amount: 10, price: '¥1', label: '10积分', popular: false },
@@ -38,13 +33,8 @@ const PointsRecharge = () => {
   const { user } = useAuth();
   const { data: availableBalance = 0 } = usePointAccountBalance();
   const { toast } = useToast();
-  const { data: isAdmin } = useIsAdmin();
-  const createRechargePayment = useCreateRechargePayment();
-  const simulateRechargeCallback = useSimulateRechargeCallback();
   const [selected, setSelected] = useState<number>(100);
   const [selectedProvider, setSelectedProvider] = useState<RechargeProvider>('wechat');
-  const [success, setSuccess] = useState(false);
-  const [paymentIntent, setPaymentIntent] = useState<RechargePaymentIntent | null>(null);
 
   const handleRecharge = async () => {
     if (!user) {
@@ -52,45 +42,16 @@ const PointsRecharge = () => {
       return;
     }
 
-    try {
-      const intent = await createRechargePayment.mutateAsync({
-        points: selected,
-        provider: selectedProvider,
+    if (!PAYMENT_CAPABILITIES.wechatPrepay.productionReady) {
+      toast({
+        title: PAYMENT_UNAVAILABLE_MESSAGE,
+        description: '当前不会创建支付单、扣款或修改积分。',
+        variant: 'destructive',
       });
-
-      setPaymentIntent(intent);
-      if (intent.status === 'completed') {
-        setSuccess(true);
-        toast({
-          title: '充值成功',
-          description: intent.legacy_mode ? '当前远端仍为旧版，已自动按旧流程直接到账' : '积分已到账',
-        });
-        setTimeout(() => setSuccess(false), 2000);
-      } else {
-        toast({
-          title: '支付单已创建',
-          description: '请调起第三方支付，到账将由服务端回调确认',
-        });
-      }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : '请稍后重试';
-      toast({ title: '充值失败', description: message, variant: 'destructive' });
-    }
-  };
-
-  const handleDevelopmentConfirm = async () => {
-    if (!paymentIntent) {
       return;
     }
 
-    await simulateRechargeCallback.mutateAsync({
-      orderId: paymentIntent.order_id,
-      providerTransactionId: `DEV-${Date.now()}`,
-      paidCash: paymentIntent.cash_amount,
-    });
-
-    setSuccess(true);
-    setTimeout(() => setSuccess(false), 2000);
+    toast({ title: '支付能力配置异常', variant: 'destructive' });
   };
 
   const selectedOption = RECHARGE_OPTIONS.find(o => o.amount === selected);
@@ -180,54 +141,13 @@ const PointsRecharge = () => {
         <Button
           className="h-12 w-full rounded-2xl text-base font-semibold shadow-md"
           onClick={handleRecharge}
-          disabled={createRechargePayment.isPending || success}
         >
-          {createRechargePayment.isPending ? (
-            <Loader2 className="animate-spin mr-2" size={18} />
-          ) : success ? (
-            <CheckCircle2 className="mr-2" size={18} />
-          ) : null}
-          {success ? '充值成功！' : `创建支付单 ${selectedOption?.price} → ${selected}积分`}
+          {`${PAYMENT_UNAVAILABLE_MESSAGE}（${selectedOption?.price} → ${selected}积分）`}
         </Button>
+        <p className="mt-2 text-center text-xs text-muted-foreground">
+          当前不会创建订单、调用旧充值接口或修改积分。
+        </p>
       </div>
-
-      {paymentIntent && paymentIntent.status === 'pending' && (
-        <div className="px-4 mt-4">
-          <Card className="border-border">
-            <CardContent className="p-4 space-y-2">
-              <div className="text-sm font-semibold text-foreground">待支付订单</div>
-              <div className="text-xs text-muted-foreground">订单号：{paymentIntent.provider_order_id}</div>
-              <div className="text-sm text-foreground">
-                待支付金额：¥{Number(paymentIntent.cash_amount).toFixed(2)}
-              </div>
-              {paymentIntent.provider === 'wechat' && paymentIntent.payment_payload?.sign && (
-                <div className="rounded-lg bg-muted p-3 text-xs text-muted-foreground">
-                  已生成微信预下单参数，可直接用于原生端拉起支付。
-                  <div className="mt-1 break-all">prepayid: {paymentIntent.payment_payload.prepayid}</div>
-                  <div className="mt-1">signType: {paymentIntent.payment_payload.signType}</div>
-                  {paymentIntent.payment_payload.is_mock_gateway && (
-                    <div className="mt-1 text-amber-600">当前为开发联调签名，不会连接真实微信网关。</div>
-                  )}
-                </div>
-              )}
-              <div className="text-xs text-muted-foreground">
-                当前状态：{paymentIntent.status}，请在第三方支付完成后等待回调确认。
-              </div>
-              {import.meta.env.DEV && isAdmin && (
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={handleDevelopmentConfirm}
-                  disabled={simulateRechargeCallback.isPending}
-                >
-                  {simulateRechargeCallback.isPending && <Loader2 className="animate-spin mr-2" size={16} />}
-                  开发环境模拟支付回调
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   );
 };

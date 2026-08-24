@@ -11,12 +11,14 @@ import { zhCN } from 'date-fns/locale';
 import { demoConversations, demoMessagesByPartner } from '@/lib/demoData';
 import PageStateCard from '@/components/common/PageStateCard';
 import { navigateBackOr, navigateToAuthWithReturn } from '@/utils/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 const ChatDetail: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { chatId } = useParams<{ chatId: string }>();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -107,16 +109,23 @@ const ChatDetail: React.FC = () => {
   const handleSend = () => {
     if (!inputValue.trim() || !chatId) return;
     if (isDemoChat) {
-      setInputValue('');
-      inputRef.current?.focus();
+      toast({
+        title: '当前不可发送',
+        description: '这是演示会话，没有可用的消息写入服务。',
+        variant: 'destructive',
+      });
       return;
     }
+    const content = inputValue.trim();
     sendMessage.mutate({
       receiver_id: chatId,
-      content: inputValue.trim(),
+      content,
+    }, {
+      onSuccess: () => {
+        setInputValue('');
+        inputRef.current?.focus();
+      },
     });
-    setInputValue('');
-    inputRef.current?.focus();
   };
 
   const partnerName = demoConversation?.partner_nickname || partnerProfile?.nickname || '用户';

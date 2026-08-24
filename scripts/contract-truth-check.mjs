@@ -225,7 +225,7 @@ try {
   );
   assert.equal(
     capabilities.SKILL_OFFER_CAPABILITY.currentClientAction.availability,
-    "unavailable",
+    "real",
   );
 
   const requiredPages = [
@@ -253,24 +253,18 @@ try {
     (entry) => entry.pageId === "question-detail",
   );
   assert.ok(questionDetail.writeContracts.includes("rpc:accept_answer_v2"));
-  assert.ok(
-    questionDetail.currentWriteContracts.includes("rpc:accept_answer_and_transfer_points"),
-  );
+  assert.ok(questionDetail.currentWriteContracts.includes("rpc:accept_answer_v2"));
+  assert.ok(!questionDetail.currentWriteContracts.includes("rpc:accept_answer_and_transfer_points"));
   assert.equal(
     pageMap.PAGE_CONTRACT_MAP.find((entry) => entry.pageId === "skill-publish")
       .implementationStatus,
-    "blocked",
+    "canonical",
   );
   const topicDetail = pageMap.PAGE_CONTRACT_MAP.find(
     (entry) => entry.pageId === "topic-detail",
   );
   assert.deepEqual(topicDetail.writeContracts, ["capability:topic-discussion-publish"]);
-  assert.ok(
-    topicDetail.currentWriteContracts.includes("rpc:create_topic_discussion_secure"),
-  );
-  assert.ok(
-    topicDetail.currentWriteContracts.includes("fallback:table:topic_discussions"),
-  );
+  assert.deepEqual(topicDetail.currentWriteContracts, ["capability:unavailable"]);
 
   const migrations = readFileSync(
     join(root, "supabase/migrations/20260418014000_pack_07_patch_preflight_safety.sql"),

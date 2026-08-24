@@ -14,7 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useTopicDetail, useCreateDiscussion, useToggleDiscussionLike, useDeleteDiscussion } from '@/hooks/useHotTopics';
+import { TOPIC_PUBLISH_UNAVAILABLE_MESSAGE, useTopicDetail, useCreateDiscussion, useToggleDiscussionLike, useDeleteDiscussion } from '@/hooks/useHotTopics';
 import { useIsFollowingTopic, useToggleTopicFollow } from '@/hooks/useTopicFollowers';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
@@ -55,11 +55,15 @@ const TopicDetail = () => {
   const handleSubmitComment = async () => {
     if (!newComment.trim() || !topicId) return;
 
-    await createDiscussion.mutateAsync({
-      topic_id: topicId,
-      content: newComment.trim()
-    });
-    setNewComment('');
+    try {
+      await createDiscussion.mutateAsync({
+        topic_id: topicId,
+        content: newComment.trim()
+      });
+      setNewComment('');
+    } catch {
+      // The mutation renders the canonical unavailable/error state and keeps the draft.
+    }
   };
 
   const handleLike = (discussionId: string) => {
@@ -304,7 +308,7 @@ const TopicDetail = () => {
             <Textarea
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              placeholder="发表你的观点..."
+              placeholder={TOPIC_PUBLISH_UNAVAILABLE_MESSAGE}
               className="flex-1 min-h-[40px] max-h-[120px] resize-none"
               rows={1}
             />

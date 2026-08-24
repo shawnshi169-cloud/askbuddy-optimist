@@ -3,11 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { demoTopicDetails, demoTopics } from '@/lib/demoData';
+import { TOPIC_DISCUSSION_CAPABILITY } from '../../packages/shared-api/src/capabilities';
 
-const isMissingRpcError = (error: unknown, functionName: string) => {
-  const message = error instanceof Error ? error.message : String(error || '');
-  return message.includes(`public.${functionName}`) || message.includes('schema cache');
-};
+export const TOPIC_PUBLISH_UNAVAILABLE_MESSAGE = '讨论发布功能暂未开放';
 
 export interface HotTopic {
   id: string;
@@ -106,7 +104,7 @@ export const useTopicDetail = (topicId: string) => {
       if (topicError) throw topicError;
       if (!topic) throw new Error('话题不存在');
 
-      const discussionsResult = await (supabase as any)
+      const discussionsResult = await supabase
         .from('topic_discussions')
         .select('*')
         .eq('topic_id', topicId)
@@ -116,7 +114,7 @@ export const useTopicDetail = (topicId: string) => {
 
       const discussions = discussionsResult.error
         ? await (async () => {
-            const fallbackResult = await (supabase as any)
+            const fallbackResult = await supabase
               .from('topic_discussions')
               .select('*')
               .eq('topic_id', topicId)
@@ -127,27 +125,32 @@ export const useTopicDetail = (topicId: string) => {
           })()
         : (discussionsResult.data || []);
 
-      const userIds = [...new Set((discussions || []).map((d: any) => d.user_id))] as string[];
-      const discussionIds = (discussions || []).map((d: any) => d.id);
+      const userIds = [...new Set(discussions.map((discussion) => discussion.user_id))];
+      const discussionIds = discussions.map((discussion) => discussion.id);
 
-      const [profilesResult, likesResult] = await Promise.all([
-        userIds.length > 0
-          ? supabase
-              .from('profiles')
-              .select('user_id, nickname, avatar_url')
-              .in('user_id', userIds)
-          : Promise.resolve({ data: [], error: null } as any),
-        user && discussionIds.length > 0
-          ? supabase
-              .from('discussion_likes')
-              .select('discussion_id')
-              .eq('user_id', user.id)
-              .in('discussion_id', discussionIds)
-          : Promise.resolve({ data: [], error: null } as any),
-      ]);
+      let profiles: Array<{ user_id: string; nickname: string | null; avatar_url: string | null }> = [];
+      if (userIds.length > 0) {
+        const profilesResult = await supabase
+          .from('profiles')
+          .select('user_id, nickname, avatar_url')
+          .in('user_id', userIds);
+        if (profilesResult.error) throw profilesResult.error;
+        profiles = profilesResult.data || [];
+      }
 
-      const profilesMap = new Map((profilesResult.data || []).map((p: any) => [p.user_id, p]));
-      const userLikes = new Set((likesResult.data || []).map((l: any) => l.discussion_id));
+      let likes: Array<{ discussion_id: string }> = [];
+      if (user && discussionIds.length > 0) {
+        const likesResult = await supabase
+          .from('discussion_likes')
+          .select('discussion_id')
+          .eq('user_id', user.id)
+          .in('discussion_id', discussionIds);
+        if (likesResult.error) throw likesResult.error;
+        likes = likesResult.data || [];
+      }
+
+      const profilesMap = new Map(profiles.map((profile) => [profile.user_id, profile]));
+      const userLikes = new Set(likes.map((like) => like.discussion_id));
 
       const discussionsWithProfiles: TopicDiscussion[] = (discussions || []).map(d => ({
         ...d,
@@ -172,44 +175,17 @@ export const useTopicDetail = (topicId: string) => {
 
 // Create a discussion
 export const useCreateDiscussion = () => {
-  const queryClient = useQueryClient();
   const { user } = useAuth();
   const { toast } = useToast();
 
   return useMutation({
     mutationFn: async (data: { topic_id: string; content: string }) => {
       if (!user) throw new Error('请先登录');
-
-      const rpcResult = await (supabase as any).rpc('create_topic_discussion_secure', {
-        p_topic_id: data.topic_id,
-        p_content: data.content,
-      });
-
-      if (!rpcResult.error) {
-        return rpcResult.data as string;
+      if (TOPIC_DISCUSSION_CAPABILITY.publishAction.availability === 'unavailable') {
+        throw new Error(TOPIC_PUBLISH_UNAVAILABLE_MESSAGE);
       }
 
-      if (!isMissingRpcError(rpcResult.error, 'create_topic_discussion_secure')) {
-        throw rpcResult.error;
-      }
-
-      const { data: discussion, error } = await supabase
-        .from('topic_discussions')
-        .insert({
-          topic_id: data.topic_id,
-          user_id: user.id,
-          content: data.content,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return discussion.id as string;
-    },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['topic', variables.topic_id] });
-      queryClient.invalidateQueries({ queryKey: ['hot-topics'] });
-      toast({ title: '发布成功', description: '您的讨论已发布' });
+      throw new Error('讨论发布能力配置异常');
     },
     onError: (error: Error) => {
       toast({

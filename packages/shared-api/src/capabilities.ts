@@ -56,8 +56,8 @@ export const SKILL_OFFER_CAPABILITY = {
     reason: "owner-scoped INSERT/UPDATE RLS supports canonical skill_offers persistence",
   },
   currentClientAction: {
-    availability: "unavailable",
-    productionReady: false,
-    reason: "current Skill Publish UI writes experts instead of skill_offers",
+    availability: "real",
+    productionReady: true,
+    reason: "Skill Publish persists owner-scoped canonical skill_offers rows",
   },
 } as const satisfies Record<string, ProductCapability>;

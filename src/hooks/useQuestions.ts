@@ -2,11 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-
-const isMissingRpcError = (error: unknown, functionName: string) => {
-  const message = error instanceof Error ? error.message : String(error || '');
-  return message.includes(`public.${functionName}`) || message.includes('schema cache');
-};
+import type { QuestionStatus } from '../../packages/shared-types/src/contracts';
 
 export interface Question {
   id: string;
@@ -15,7 +11,7 @@ export interface Question {
   category: string | null;
   tags: string[] | null;
   bounty_points: number;
-  status: string;
+  status: QuestionStatus;
   view_count: number;
   user_id: string;
   created_at: string;
@@ -114,11 +110,6 @@ export const useQuestionDetail = (questionId: string) => {
       if (questionError) throw questionError;
       if (!question) throw new Error('问题不存在');
 
-      await supabase
-        .from('questions')
-        .update({ view_count: (question.view_count || 0) + 1 })
-        .eq('id', questionId);
-
       const { data: answers, error: answersError } = await supabase
         .from('answers')
         .select('*')
@@ -157,7 +148,7 @@ export const useQuestionDetail = (questionId: string) => {
           profile_nickname: profileMap.get(question.user_id)?.nickname || '匿名用户',
           profile_avatar: profileMap.get(question.user_id)?.avatar_url,
           answers_count: answersWithProfiles.length,
-          view_count: (question.view_count || 0) + 1,
+          view_count: question.view_count || 0,
         } as Question,
         answers: answersWithProfiles,
       };
@@ -181,7 +172,7 @@ export const useCreateQuestion = () => {
     }) => {
       if (!user) throw new Error('请先登录');
 
-      const rpcResult = await (supabase as any).rpc('create_question_secure', {
+      const rpcResult = await supabase.rpc('create_question_secure', {
         p_title: data.title,
         p_content: data.content || null,
         p_category: data.category || null,
@@ -189,29 +180,9 @@ export const useCreateQuestion = () => {
         p_bounty_points: data.bounty_points || 0,
       });
 
-      if (!rpcResult.error) {
-        return rpcResult.data as string;
-      }
-
-      if (!isMissingRpcError(rpcResult.error, 'create_question_secure')) {
-        throw rpcResult.error;
-      }
-
-      const { data: question, error } = await supabase
-        .from('questions')
-        .insert({
-          title: data.title,
-          content: data.content || null,
-          category: data.category || null,
-          tags: data.tags || null,
-          bounty_points: data.bounty_points || 0,
-          user_id: user.id,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return question.id as string;
+      if (rpcResult.error) throw rpcResult.error;
+      if (!rpcResult.data) throw new Error('发布失败：服务端未返回问题 ID');
+      return rpcResult.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['questions'] });
@@ -239,31 +210,14 @@ export const useCreateAnswer = () => {
     }) => {
       if (!user) throw new Error('请先登录');
 
-      const rpcResult = await (supabase as any).rpc('create_answer_secure', {
+      const rpcResult = await supabase.rpc('create_answer_secure', {
         p_question_id: data.question_id,
         p_content: data.content,
       });
 
-      if (!rpcResult.error) {
-        return rpcResult.data as string;
-      }
-
-      if (!isMissingRpcError(rpcResult.error, 'create_answer_secure')) {
-        throw rpcResult.error;
-      }
-
-      const { data: answer, error } = await supabase
-        .from('answers')
-        .insert({
-          question_id: data.question_id,
-          content: data.content,
-          user_id: user.id,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return answer.id as string;
+      if (rpcResult.error) throw rpcResult.error;
+      if (!rpcResult.data) throw new Error('回答失败：服务端未返回回答 ID');
+      return rpcResult.data;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['question', variables.question_id] });
