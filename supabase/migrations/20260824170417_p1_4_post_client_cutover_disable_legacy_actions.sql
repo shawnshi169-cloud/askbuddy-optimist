@@ -1,16 +1,6 @@
--- NOT A MIGRATION
--- DO NOT APPLY BEFORE P1.4c
--- REFERENCE SQL ONLY
---
--- 本文件不是 migration。
--- P1.4c 完成并验证客户端切换之前不得执行。
--- 仅作为后续生成正式 migration 的审核基线。
---
--- P1.4c merged at canonical main c099ebd620135fdb9e13774c031618ca24dedb13.
--- Architecture A re-audited production dependencies and generated the formal
--- migration 20260824170417_p1_4_post_client_cutover_disable_legacy_actions.sql.
--- This reference remains non-deployable review history. Never move it into
--- supabase/migrations and never restore the retired 20260821153846 timestamp.
+-- P1.4 post-client cutover: remove ordinary-client access to legacy actions.
+-- P1.4c has removed these client call paths. This migration changes EXECUTE
+-- privileges only; function bodies, RLS, and business data remain untouched.
 
 -- Deprecated or compatibility-only client actions become server-only.
 REVOKE EXECUTE ON FUNCTION public.accept_answer_and_transfer_points(uuid, uuid) FROM PUBLIC, anon, authenticated, service_role;
@@ -28,11 +18,11 @@ GRANT EXECUTE ON FUNCTION public.create_consultation_order(uuid, text) TO servic
 REVOKE EXECUTE ON FUNCTION public.create_topic_discussion_secure(uuid, text) FROM PUBLIC, anon, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.create_topic_discussion_secure(uuid, text) TO service_role;
 
--- Payment webhook reconciliation remains service-only.
+-- Signed payment-webhook reconciliation remains service-only.
 REVOKE EXECUTE ON FUNCTION public.confirm_recharge_payment(uuid, text, numeric, jsonb) FROM PUBLIC, anon, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.confirm_recharge_payment(uuid, text, numeric, jsonb) TO service_role;
 
--- Existing server-guarded admin reconciliation remains available to authenticated admins.
+-- Authenticated callers must still pass each function's server-side admin guard.
 REVOKE EXECUTE ON FUNCTION public.admin_confirm_recharge_order(uuid, text) FROM PUBLIC, anon, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.admin_confirm_recharge_order(uuid, text) TO authenticated, service_role;
 

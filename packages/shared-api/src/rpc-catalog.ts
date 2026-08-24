@@ -297,9 +297,9 @@ export const RPC_CATALOG = {
     "Production currently grants anon EXECUTE; function auth guard remains effective.",
   ),
   accept_answer_and_transfer_points: rpc<AcceptAnswerLegacyParams, void>()(
-    "accept_answer_and_transfer_points", "deprecated", "authenticated", "questions",
+    "accept_answer_and_transfer_points", "deprecated", "service_role", "questions",
     "AcceptAnswerLegacyParams", "void", "overbroad",
-    "Uses deprecated profile balance and points_transactions paths.",
+    "Post-P1.4c server-only compatibility path using deprecated balance and ledger models.",
   ),
   create_question_secure: rpc<CreateQuestionSecureParams, string>()(
     "create_question_secure", "canonical", "authenticated", "questions",
@@ -310,9 +310,9 @@ export const RPC_CATALOG = {
     "CreateAnswerSecureParams", "UUID", "overbroad",
   ),
   create_topic_discussion_secure: rpc<CreateTopicDiscussionSecureParams, string>()(
-    "create_topic_discussion_secure", "compatibility-only", "authenticated", "topics",
+    "create_topic_discussion_secure", "compatibility-only", "service_role", "topics",
     "CreateTopicDiscussionSecureParams", "UUID", "overbroad",
-    "Topic discussion moderation still uses the legacy discussion vocabulary.",
+    "Post-P1.4c server-only compatibility path using legacy discussion moderation vocabulary.",
   ),
   send_direct_message: rpc<SendDirectMessageParams, string>()(
     "send_direct_message", "canonical", "authenticated", "messages",
@@ -399,19 +399,19 @@ export const RPC_CATALOG = {
     "TransitionOrderStatusV2Params", "TransitionOrderStatusV2Result", "aligned",
   ),
   recharge_points: rpc<RechargePointsParams, void>()(
-    "recharge_points", "deprecated", "authenticated", "payments",
+    "recharge_points", "deprecated", "service_role", "payments",
     "RechargePointsParams", "void", "overbroad",
-    "Deprecated profile balance and points_transactions compatibility path.",
+    "Post-P1.4c server-only compatibility path using deprecated balance and ledger models.",
   ),
   create_recharge_payment_order: rpc<CreateRechargePaymentOrderParams, JsonObject>()(
-    "create_recharge_payment_order", "blocked", "authenticated", "payments",
+    "create_recharge_payment_order", "blocked", "service_role", "payments",
     "CreateRechargePaymentOrderParams", "LegacyRechargeOrderResult", "overbroad",
-    "Uses pre-Pack06 order_type/status vocabulary.",
+    "Post-P1.4c server-only blocked path using pre-Pack06 order vocabulary.",
   ),
   confirm_recharge_payment: rpc<ConfirmRechargePaymentParams, boolean>()(
-    "confirm_recharge_payment", "blocked", "service_role_or_admin", "payments",
+    "confirm_recharge_payment", "blocked", "service_role", "payments",
     "ConfirmRechargePaymentParams", "boolean", "server-guarded",
-    "Bound to the blocked legacy recharge order contract.",
+    "Service-only payment-webhook reconciliation for the blocked legacy recharge contract.",
   ),
   admin_confirm_recharge_order: rpc<AdminConfirmRechargeOrderParams, boolean>()(
     "admin_confirm_recharge_order", "blocked", "admin", "payments",
@@ -422,9 +422,9 @@ export const RPC_CATALOG = {
     "EmptyParams", "PendingRechargeOrderList", "server-guarded",
   ),
   create_consultation_order: rpc<CreateConsultationOrderParams, string>()(
-    "create_consultation_order", "blocked", "authenticated", "orders",
+    "create_consultation_order", "blocked", "service_role", "orders",
     "CreateConsultationOrderParams", "UUID", "overbroad",
-    "Uses legacy balance paths and an order_type rejected by Pack06.",
+    "Post-P1.4c server-only blocked path using legacy balances and invalid Pack06 order vocabulary.",
   ),
   get_nearby_experts: rpc<GetNearbyExpertsParams, JsonValue[]>()(
     "get_nearby_experts", "canonical", "anon", "experts",

@@ -1,9 +1,10 @@
 # P1.4b Backend Hardening Activation Plan
 
-Status: Prepared, not deployed
+Status: P1.4c merged - production cutover prepared, not deployed
 
 Architecture owner: A - Backend & Shared Contract
 Codex workstream: Codex A
+Canonical main: `c099ebd620135fdb9e13774c031618ca24dedb13`
 
 ## Production Grant Audit
 
@@ -59,7 +60,26 @@ This privilege-only migration normalizes every canonical RPC in `RPC_CATALOG`:
 
 It does not change function bodies, rows, RLS, or business state. Deployment still requires normal staging validation and an explicit Architecture A deployment task.
 
-## POST-P1.4c REFERENCE SQL
+## Production Dependency Re-audit
+
+The post-P1.4c production inspection was read-only. It confirmed:
+
+- Core production source no longer calls `accept_answer_and_transfer_points`, `recharge_points`, `create_recharge_payment_order`, `create_consultation_order`, or `create_topic_discussion_secure`.
+- Database function definitions contain no additional server-side caller for those five actions.
+- `payment-webhook` legitimately uses service role to call `confirm_recharge_payment` after its provider HMAC verification succeeds.
+- `admin_confirm_recharge_order` and `list_pending_recharge_orders` retain their server-side admin/moderator guards and still require `authenticated` plus `service_role` EXECUTE.
+- The deployed `wechat-prepay` v12 is the only observed server dependency on `create_recharge_payment_order`; it is the obsolete mock implementation that this activation replaces, not a reason to retain client access.
+- API and Edge logs returned no recent invocation evidence during the inspection window. This is supporting evidence, not a substitute for source and privilege checks.
+
+## Post-P1.4c Cutover Migration
+
+Formal migration: `20260824170417_p1_4_post_client_cutover_disable_legacy_actions.sql`
+
+This new privilege-only migration was generated after P1.4c merged and after the production dependency re-audit. It removes ordinary-client EXECUTE from the five deprecated/compatibility actions, keeps `confirm_recharge_payment` service-role-only, and keeps the guarded admin reconciliation RPCs available to `authenticated` and `service_role`.
+
+It is prepared in the repository and has not been applied to Production.
+
+## Reviewed Reference SQL
 
 Reference: `docs/sql/p1-4b-post-client-cutover-disable-legacy-actions.sql`
 
@@ -73,14 +93,7 @@ This file is not a migration and is intentionally outside `supabase/migrations`.
 
 It keeps `confirm_recharge_payment` service-role-only for signed webhook reconciliation. `admin_confirm_recharge_order` and `list_pending_recharge_orders` remain callable by authenticated users but retain their server-side admin/moderator guards.
 
-Current dependency findings:
-
-- No server-side code calls `accept_answer_and_transfer_points`.
-- `payment-webhook` legitimately calls `confirm_recharge_payment` with service role.
-- Core clients still call legacy answer, recharge, consultation, and topic actions; P1.4c must remove or fail-close those calls first.
-- `create_consultation_order` has no legitimate server-side caller and is safe to disable after P1.4c.
-
-After P1.4c is merged and validated, Architecture A must recheck production dependencies, generate a new timestamped migration from this reference, review it, and then apply it. The retired `20260821153846` timestamp must never be moved back into `supabase/migrations`.
+P1.4c is now merged and the new formal migration has been generated. This reference remains non-deployable review history. The retired `20260821153846` timestamp must never be reused or moved back into `supabase/migrations`.
 
 ## Edge Function Activation
 
@@ -90,7 +103,7 @@ The repository `wechat-prepay` source now follows this policy:
 - development/test: mock is allowed only with `PAYMENT_GATEWAY_MODE=mock`
 - explicit mock validates the user but creates no database order and emits only visibly mock data
 
-Do not deploy this source before P1.4c removes client fake-success and fallback behavior. No real WeChat payment capability is established by this change.
+P1.4c has removed the client fake-success and fallback behavior. The source is ready for a separate reviewed Production activation, but remains undeployed. No real WeChat payment capability is established by this change.
 
 ## Capability Decisions
 
@@ -102,12 +115,23 @@ Do not deploy this source before P1.4c removes client fake-success and fallback 
 
 ## Activation Order
 
-1. Merge P1.4b backend source and contract artifacts.
-2. Independently deploy the SAFE NOW grant migration after its normal staging/dry-run review.
-3. Keep the fail-closed `wechat-prepay` source undeployed until P1.4c.
-4. Complete P1.4c client removal of legacy and fake-success paths.
-5. Validate staging has no blocked legacy client calls.
-6. Recheck production dependencies against the reference SQL.
-7. Generate and review a newly timestamped cutover migration; do not reuse `20260821153846`.
-8. Apply the new cutover migration and deploy fail-closed `wechat-prepay`.
-9. Run canonical/reconciliation/payment-unavailable smoke tests and monitor denied legacy calls.
+1. Review and merge the post-P1.4c cutover preparation PR; do not deploy from its feature branch.
+2. Deploy the merged fail-closed `wechat-prepay` from canonical `main` before revoking `create_recharge_payment_order` client access.
+3. Verify an authenticated Production prepay request returns HTTP 503 `PAYMENT_UNAVAILABLE` and creates no order.
+4. Run linked migration list and dry-run stop gates; the plan must include only the pending SAFE NOW migration and the new post-P1.4c cutover migration in order.
+5. Apply `20260821153836_p1_4b_normalize_canonical_rpc_grants.sql`.
+6. Apply `20260824170417_p1_4_post_client_cutover_disable_legacy_actions.sql`.
+7. Verify canonical RPC grants, legacy client EXECUTE revocations, service-role-only `confirm_recharge_payment`, and guarded admin reconciliation grants.
+8. Run a signed payment-webhook reconciliation smoke that proves service-role execution still works without exposing or logging secrets.
+9. Monitor denied legacy RPC calls, prepay 503 responses, payment-webhook errors, and unexpected order creation. Roll back only with a separately reviewed privilege restoration migration or a prior known-good Edge deployment.
+
+The Edge-first order removes the only deployed caller of `create_recharge_payment_order` before the cutover migration revokes its authenticated access. It also prevents the old mock endpoint from creating apparently payable orders during the migration window.
+
+## Deployment State
+
+- SAFE NOW migration in repository: yes
+- SAFE NOW applied to Production: no
+- Post-P1.4c migration in repository: yes
+- Post-P1.4c migration applied to Production: no
+- Fail-closed `wechat-prepay` source in repository: yes
+- Fail-closed `wechat-prepay` deployed to Production: no
