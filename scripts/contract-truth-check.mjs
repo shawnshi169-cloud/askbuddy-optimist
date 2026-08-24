@@ -192,6 +192,16 @@ try {
   assert.equal(catalog.search_app_content.status, "deprecated");
   assert.equal(catalog.create_consultation_order.status, "blocked");
   assert.equal(catalog.create_recharge_payment_order.status, "blocked");
+  for (const name of [
+    "accept_answer_and_transfer_points",
+    "recharge_points",
+    "create_recharge_payment_order",
+    "create_consultation_order",
+    "create_topic_discussion_secure",
+    "confirm_recharge_payment",
+  ]) {
+    assert.equal(catalog[name].authentication, "service_role");
+  }
   assert.equal(catalog.claim_wechat_identity_v1.authentication, "service_role");
   assert.equal(catalog.create_system_notification_v2.authentication, "service_role");
   assert.equal(catalog.transition_order_status_v2.authentication, "service_role");
