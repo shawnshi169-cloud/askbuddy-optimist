@@ -110,8 +110,11 @@ P1.4c removed the client fake-success and fallback behavior. Production now runs
 - Real payment: unavailable.
 - Consultation: unavailable; safe to disable after P1.4c.
 - Canonical topic-discussion publish: unavailable; no v2 RPC was created.
-- `skill_offers` storage and owner-scoped INSERT/UPDATE RLS: real.
-- Skill Offer backend direct-write path: real, but the current client publish action remains unavailable because it writes `experts`.
+- `skill_offers` storage and owner-scoped write path: real.
+- Skill Publish is a production-capable, create-only path for authenticated users whose `auth.uid()` already has a corresponding `experts.user_id` profile.
+- A missing expert profile fails closed with `EXPERT_PROFILE_REQUIRED`; the UI directs the user to complete their expert profile first.
+- Skill Publish creates a new `skill_offers` row and does not create or update `experts`.
+- Explicit Skill Offer editing is not part of the current client contract.
 
 ## Completed Activation And Verification
 
