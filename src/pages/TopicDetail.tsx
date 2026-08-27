@@ -109,13 +109,7 @@ const TopicDetail = () => {
 
   const { topic, discussions } = data;
   const articleBody = topic.description?.split(/\n+/).filter(Boolean) || [];
-  const contentBlocks = articleBody.length > 0
-    ? articleBody
-    : [
-        `这是「${topic.title}」专题页，你可以把它当作一篇会持续更新的内容推文来阅读。`,
-        '上方是本期主题摘要，下方则是所有用户围绕这个主题发起的评论和讨论。',
-        '如果你也有经验、观点或补充材料，可以直接在底部输入框继续参与。',
-      ];
+  const estimatedReadMinutes = Math.max(1, Math.ceil((topic.description?.length || 0) / 400));
 
   return (
     <div className="app-container min-h-[100dvh] bg-gradient-to-b from-white via-slate-50/80 to-slate-50 pb-24">
@@ -141,7 +135,7 @@ const TopicDetail = () => {
           </span>
           <h2 className="mt-4 text-[21px] font-semibold leading-8 text-slate-900">{topic.title}</h2>
           <p className="mt-3 text-[15px] leading-7 text-slate-600">
-            {topic.description || '这是一篇围绕某个热点主题持续更新的内容推文，欢迎你阅读后在下方继续评论讨论。'}
+            {topic.description || '该专题暂未提供正文摘要。'}
           </p>
 
           <div className="mt-5 flex flex-wrap items-center gap-3 text-sm text-slate-500">
@@ -177,9 +171,11 @@ const TopicDetail = () => {
                 {isFollowing ? '已关注专题' : '关注专题'}
               </Button>
             ) : null}
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-500">
-              阅读 2 分钟
-            </span>
+            {topic.description ? (
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-500">
+                预计阅读 {estimatedReadMinutes} 分钟
+              </span>
+            ) : null}
           </div>
           </div>
         </div>
@@ -194,27 +190,11 @@ const TopicDetail = () => {
             </span>
           </div>
           <div className="mt-4 space-y-4 text-[15px] leading-8 text-slate-700">
-            {contentBlocks.map((block, index) => (
+            {articleBody.length > 0 ? articleBody.map((block, index) => (
               <p key={`${topic.id}-block-${index}`}>{block}</p>
-            ))}
-          </div>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <div className="text-sm font-medium text-slate-900">继续阅读</div>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                浏览专题正文后，继续往下看评论区，快速了解不同观点和补充经验。
-              </p>
-            </div>
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <div className="text-sm font-medium text-slate-900">相关话题</div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {['申请经验', '效率提升', '真实分享'].map((item) => (
-                  <span key={item} className="rounded-full bg-white px-3 py-1 text-xs text-slate-600 border border-slate-200">
-                    #{item}
-                  </span>
-                ))}
-              </div>
-            </div>
+            )) : (
+              <PageStateCard compact title="专题正文暂为空" description="当前没有可展示的真实正文内容。" />
+            )}
           </div>
         </div>
       </div>

@@ -16,12 +16,14 @@ import { usePageScrollMemory } from '@/hooks/usePageScrollMemory';
 import { isNativeApp } from '@/utils/platform';
 import { buildFromState } from '@/utils/navigation';
 import { mapConversationToUIModel, mergeUniqueById } from '@/lib/adapters/contentAdapters';
+import { isPresentationFixtureAllowed } from '@/config/runtimeMode';
 
 const Messages = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
   const nativeMode = isNativeApp();
+  const presentationFixturesEnabled = isPresentationFixtureAllowed();
   const [activeTab, setActiveTab] = useState<'chats' | 'notifications'>(() => {
     const cached = sessionStorage.getItem('tab:messages');
     return cached === 'notifications' ? 'notifications' : 'chats';
@@ -69,10 +71,10 @@ const Messages = () => {
   };
 
   // Filter chats
-  const allConversations = mergeUniqueById(
-    (conversations || []).map((item) => mapConversationToUIModel(item)),
-    demoConversations.map((item) => mapConversationToUIModel(item))
-  );
+  const realConversations = (conversations || []).map((item) => mapConversationToUIModel(item));
+  const allConversations = presentationFixturesEnabled
+    ? mergeUniqueById(realConversations, demoConversations.map((item) => mapConversationToUIModel(item)))
+    : realConversations;
 
   const filteredChats = searchQuery
     ? allConversations.filter(c =>

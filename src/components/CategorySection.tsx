@@ -4,6 +4,8 @@ import { GraduationCap, Briefcase, Home, Camera, Plane, Heart, TrendingUp, Smart
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useCategories } from '@/hooks/useCategories';
 import { buildFromState } from '@/utils/navigation';
+import PageStateCard from '@/components/common/PageStateCard';
+import { isPresentationFixtureAllowed } from '@/config/runtimeMode';
 
 // Map icon names from DB to actual Lucide components
 const iconMap: Record<string, LucideIcon> = {
@@ -39,8 +41,7 @@ const gradients = [
   'from-gray-400 to-slate-500',
 ];
 
-// Fallback hardcoded categories
-const fallbackCategories = [
+const presentationCategoryFixtures = [
   { id: 'education', name: '教育学习', icon: 'GraduationCap', gradient: 'from-blue-400 to-indigo-500', path: '/education' },
   { id: 'career', name: '职业发展', icon: 'Briefcase', gradient: 'from-green-400 to-teal-500', path: '/career' },
   { id: 'lifestyle', name: '生活服务', icon: 'Home', gradient: 'from-orange-400 to-amber-500', path: '/lifestyle' },
@@ -50,7 +51,8 @@ const fallbackCategories = [
 const CategorySection: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { data: dbCategories, isLoading } = useCategories();
+  const { data: dbCategories, isLoading, isError, error, refetch } = useCategories();
+  const presentationFixturesEnabled = isPresentationFixtureAllowed();
 
   // Use first 4 categories for home page grid
   const categories = dbCategories && dbCategories.length > 0
@@ -61,11 +63,35 @@ const CategorySection: React.FC = () => {
         gradient: gradients[index] || gradients[0],
         path: routeMap[cat.name] || `/search?category=${encodeURIComponent(cat.name)}`,
       }))
-    : fallbackCategories;
+    : presentationFixturesEnabled
+      ? presentationCategoryFixtures
+      : [];
 
   const handleCategoryClick = (path: string) => {
     navigate(path, { state: buildFromState(location) });
   };
+
+  if (isLoading) {
+    return <PageStateCard compact variant="loading" title="正在加载分类…" className="mx-4 my-4" />;
+  }
+
+  if (isError) {
+    return (
+      <PageStateCard
+        compact
+        variant="error"
+        title="分类加载失败"
+        description={error instanceof Error ? error.message : '请稍后重试'}
+        actionLabel="重试"
+        onAction={() => void refetch()}
+        className="mx-4 my-4"
+      />
+    );
+  }
+
+  if (categories.length === 0) {
+    return <PageStateCard compact title="暂无可用分类" className="mx-4 my-4" />;
+  }
 
   return (
     <div className="px-4 pb-5 pt-4 animate-fade-in animate-delay-1">

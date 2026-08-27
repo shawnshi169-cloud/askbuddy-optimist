@@ -9,6 +9,7 @@ import SubPageHeader from '@/components/layout/SubPageHeader';
 import PageStateCard from '@/components/common/PageStateCard';
 import { buildFromState } from '@/utils/navigation';
 import { usePageScrollMemory } from '@/hooks/usePageScrollMemory';
+import { isPresentationFixtureAllowed } from '@/config/runtimeMode';
 
 interface FollowingProfile {
   nickname: string | null;
@@ -44,9 +45,11 @@ const MyCommunity = () => {
   const { data: following, isLoading, error, refetch } = useMyFollowing();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<GroupFilter>('all');
+  const presentationFixturesEnabled = isPresentationFixtureAllowed();
   usePageScrollMemory('profile-community');
 
   const groups = useMemo(() => {
+    if (!presentationFixturesEnabled) return [];
     const baseGroups: CommunityGroup[] = ((following || []) as FollowingRecordWithProfile[]).slice(0, 8).map((item, index: number) => ({
       id: item.id,
       name: `${item.profile?.nickname || '问友'}交流群`,
@@ -122,7 +125,7 @@ const MyCommunity = () => {
         if (filter === 'mention') return group.mentionCount > 0;
         return true;
       });
-  }, [following, search, filter]);
+  }, [following, search, filter, presentationFixturesEnabled]);
 
   const unreadCount = groups.reduce((sum, group) => sum + group.unread, 0);
   const mentionCount = groups.reduce((sum, group) => sum + group.mentionCount, 0);
@@ -131,11 +134,11 @@ const MyCommunity = () => {
     <div className="min-h-[100dvh] bg-muted pb-8">
       <SubPageHeader title="我的社群" />
 
-      {isLoading ? (
+      {presentationFixturesEnabled && isLoading ? (
         <div className="px-4 pt-5">
           <PageStateCard variant="loading" compact title="正在加载群聊会话…" />
         </div>
-      ) : error ? (
+      ) : presentationFixturesEnabled && error ? (
         <div className="px-4 pt-5">
           <PageStateCard
             variant="error"
@@ -250,8 +253,8 @@ const MyCommunity = () => {
           ) : (
             <PageStateCard
               compact
-              title="没有匹配的群聊"
-              description="试试切换筛选条件或搜索其他关键词。"
+              title={presentationFixturesEnabled ? '没有匹配的群聊' : '社群功能暂未开放'}
+              description={presentationFixturesEnabled ? '试试切换筛选条件或搜索其他关键词。' : '当前没有可用的真实社群数据。'}
             />
           )}
         </div>

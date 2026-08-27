@@ -9,10 +9,11 @@ import { formatTime } from '@/utils/format';
 import PageStateCard from '@/components/common/PageStateCard';
 import { buildFromState, navigateBackOr } from '@/utils/navigation';
 import SubPageHeader from '@/components/layout/SubPageHeader';
+import { isPresentationFixtureAllowed } from '@/config/runtimeMode';
 
 const socialTypes = new Set(['new_like', 'new_comment', 'comment_reply', 'new_answer']);
 
-const demoInteractions = [
+const presentationInteractionFixtures = [
   {
     id: 'demo-interaction-1',
     title: '测试留学顾问 赞了你的动态',
@@ -69,25 +70,31 @@ const DiscoverInteractions = () => {
   } = useNotifications();
   const markAsRead = useMarkAsRead();
   const markAllAsRead = useMarkAllAsRead();
-  const [demoState, setDemoState] = useState(demoInteractions);
+  const presentationFixturesEnabled = isPresentationFixtureAllowed();
+  const [presentationFixtureState, setPresentationFixtureState] = useState(presentationInteractionFixtures);
 
   const realInteractions = useMemo(() => {
     const filtered = notifications.filter((item) => socialTypes.has(item.type) || item.sender_id);
     return filtered;
   }, [notifications]);
-  const usingDemo = realInteractions.length === 0;
-  const interactions: InteractionItem[] = usingDemo ? demoState : realInteractions;
+  const usingPresentationFixtures = presentationFixturesEnabled
+    && !isLoading
+    && !isError
+    && realInteractions.length === 0;
+  const interactions: InteractionItem[] = usingPresentationFixtures
+    ? presentationFixtureState
+    : realInteractions;
 
   useEffect(() => {
-    if (usingDemo) setDemoState(demoInteractions);
-  }, [usingDemo]);
+    if (usingPresentationFixtures) setPresentationFixtureState(presentationInteractionFixtures);
+  }, [usingPresentationFixtures]);
 
   const unreadCount = interactions.filter((item) => !item.is_read).length;
 
   const handleClick = (item: InteractionItem) => {
     if (!item.is_read) {
-      if (item.id.startsWith('demo-')) {
-        setDemoState((prev) => prev.map((entry) => (entry.id === item.id ? { ...entry, is_read: true } : entry)));
+      if (usingPresentationFixtures) {
+        setPresentationFixtureState((prev) => prev.map((entry) => (entry.id === item.id ? { ...entry, is_read: true } : entry)));
       } else {
         markAsRead.mutate(item.id);
       }
@@ -113,8 +120,8 @@ const DiscoverInteractions = () => {
               variant="ghost"
               size="sm"
               onClick={() => {
-                if (usingDemo) {
-                  setDemoState((prev) => prev.map((entry) => ({ ...entry, is_read: true })));
+                if (usingPresentationFixtures) {
+                  setPresentationFixtureState((prev) => prev.map((entry) => ({ ...entry, is_read: true })));
                   return;
                 }
                 markAllAsRead.mutate();

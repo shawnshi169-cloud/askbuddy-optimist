@@ -26,6 +26,11 @@ npm run build          -> production
 
 可以显式启用：mock data、demo data、manual test helper，以及已登记的 legacy fallback。任何 mock/fallback 必须在代码或配置中可识别，不能伪装成真实成功结果。
 
+Core App 的 presentation fixture 只有在 Vite mode 为 `development` 且显式设置
+`VITE_PRESENTATION_FIXTURES=true` 时可用。统一入口为
+`isPresentationFixtureAllowed()`；页面、hook 和 adapter 不得自行读取环境变量。
+即使显式设置该变量，staging、production 和未知 mode 仍会 fail closed。
+
 ## Staging
 
 默认使用真实 backend、真实 auth 和真实 RPC。仅允许已登记的只读兼容 fallback；使用时必须产生可观测 warning。写 RPC 失败后不得静默直写表或返回 mock 成功。
@@ -47,6 +52,6 @@ npm run build          -> production
 
 ## Migration Rule
 
-本轮只建立统一 helper 和规则，不批量改造既有 Questions、Search、Messages、Payments 或小程序页面。现有高风险路径继续在 Architecture Risk Register 中作为 Production Blocker，按 Contract First 单模块退役。
+既有高风险路径继续按 Contract First 逐模块退役；P1.4d 已将 Core App 的 presentation fixture 收口到统一 development-only gate。
 
 新功能必须在首次实现时使用统一 Runtime Mode；不得新增无法在 production 中关闭的 mock 或 fallback。

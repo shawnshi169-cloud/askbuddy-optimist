@@ -34,3 +34,13 @@ export function isRuntimeCapabilityAllowedForMode(
 ): boolean {
   return MODE_CAPABILITIES[mode].has(capability);
 }
+
+export function isPresentationFixtureAllowedForMode(
+  mode: RuntimeMode,
+  explicitlyRequested: boolean,
+): boolean {
+  return explicitlyRequested
+    && mode === "development"
+    && isRuntimeCapabilityAllowedForMode("mockData", mode)
+    && isRuntimeCapabilityAllowedForMode("demoFallback", mode);
+}

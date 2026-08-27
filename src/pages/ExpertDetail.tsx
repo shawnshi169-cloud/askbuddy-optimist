@@ -23,6 +23,7 @@ import SubPageHeader from '@/components/layout/SubPageHeader';
 import { isNativeApp } from '@/utils/platform';
 import { useToast } from '@/hooks/use-toast';
 import { CONSULTATION_CAPABILITY } from '../../packages/shared-api/src/capabilities';
+import { isPresentationFixtureAllowed } from '@/config/runtimeMode';
 
 const ExpertDetail = () => {
   const { id } = useParams();
@@ -32,14 +33,24 @@ const ExpertDetail = () => {
   const { toast } = useToast();
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [selectedConsultType, setSelectedConsultType] = useState<'text' | 'voice' | 'video'>('text');
-  const isDemoExpert = !!id?.startsWith('demo-expert-');
+  const presentationFixturesEnabled = isPresentationFixtureAllowed();
+  const requestedDemoExpert = !!id?.startsWith('demo-expert-');
+  const isDemoExpert = presentationFixturesEnabled && requestedDemoExpert;
   const nativeMode = isNativeApp();
 
-  const { data: expert, isLoading } = useExpertDetail(isDemoExpert ? '' : id || '');
+  const { data: expert, isLoading } = useExpertDetail(requestedDemoExpert ? '' : id || '');
 
   const resolvedExpert = isDemoExpert ? demoExperts.find((item) => item.id === id) : expert;
 
-  if (!isDemoExpert && isLoading) {
+  if (requestedDemoExpert && !presentationFixturesEnabled) {
+    return (
+      <div className="min-h-[100dvh] flex items-center justify-center bg-gradient-to-b from-white via-slate-50/80 to-slate-50 p-4">
+        <PageStateCard variant="error" title="演示达人不可用" description="当前运行环境未启用展示数据。" />
+      </div>
+    );
+  }
+
+  if (!requestedDemoExpert && isLoading) {
     return (
       <div className="min-h-[100dvh] flex items-center justify-center bg-gradient-to-b from-white via-slate-50/80 to-slate-50 p-4">
         <PageStateCard variant="loading" title="正在加载达人信息…" />

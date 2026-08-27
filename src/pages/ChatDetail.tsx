@@ -12,6 +12,7 @@ import { demoConversations, demoMessagesByPartner } from '@/lib/demoData';
 import PageStateCard from '@/components/common/PageStateCard';
 import { navigateBackOr, navigateToAuthWithReturn } from '@/utils/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { isPresentationFixtureAllowed } from '@/config/runtimeMode';
 
 const ChatDetail: React.FC = () => {
   const navigate = useNavigate();
@@ -22,7 +23,9 @@ const ChatDetail: React.FC = () => {
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const isDemoChat = !!chatId?.startsWith('demo-user-');
+  const presentationFixturesEnabled = isPresentationFixtureAllowed();
+  const requestedDemoChat = !!chatId?.startsWith('demo-user-');
+  const isDemoChat = presentationFixturesEnabled && requestedDemoChat;
 
   // Fetch partner profile
   const { data: partnerProfile } = useQuery({
@@ -36,20 +39,20 @@ const ChatDetail: React.FC = () => {
         .maybeSingle();
       return data;
     },
-    enabled: !!chatId && !isDemoChat,
+    enabled: !!chatId && !requestedDemoChat,
   });
 
   // Real messages from database
-  const { data: messages, isLoading } = useMessagesWithUser(isDemoChat ? '' : chatId || '');
+  const { data: messages, isLoading } = useMessagesWithUser(requestedDemoChat ? '' : chatId || '');
   const sendMessage = useSendMessage();
   const { mutate: markMessagesAsRead } = useMarkMessagesAsRead();
 
   // Mark messages as read on mount
   useEffect(() => {
-    if (chatId && user && !isDemoChat) {
+    if (chatId && user && !requestedDemoChat) {
       markMessagesAsRead(chatId);
     }
-  }, [chatId, user, isDemoChat, markMessagesAsRead]);
+  }, [chatId, user, requestedDemoChat, markMessagesAsRead]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -130,6 +133,14 @@ const ChatDetail: React.FC = () => {
 
   const partnerName = demoConversation?.partner_nickname || partnerProfile?.nickname || '用户';
   const partnerAvatar = demoConversation?.partner_avatar || partnerProfile?.avatar_url || undefined;
+
+  if (requestedDemoChat && !presentationFixturesEnabled) {
+    return (
+      <div className="min-h-[100dvh] flex items-center justify-center p-4">
+        <PageStateCard variant="error" title="演示会话不可用" description="当前运行环境未启用展示数据。" />
+      </div>
+    );
+  }
 
   if (!user) {
     return (

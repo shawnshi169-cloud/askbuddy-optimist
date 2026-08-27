@@ -32,16 +32,7 @@ import ChannelExpertCard from '@/components/channel/ChannelExpertCard';
 import ChannelQuestionSkeleton from '@/components/channel/ChannelQuestionSkeleton';
 import ChannelExpertSkeleton from '@/components/channel/ChannelExpertSkeleton';
 import ChannelFloatingActionButton from '@/components/channel/ChannelFloatingActionButton';
-import { demoExperts, demoQuestions } from '@/lib/demoData';
 import PageStateCard from '@/components/common/PageStateCard';
-import {
-  filterExpertsByCategory,
-  filterQuestionsByCategory,
-  mapDemoExpertsByChannel,
-  mapDemoQuestionsByChannel,
-  mapExpertToUIModel,
-  mergeUniqueById,
-} from '@/lib/adapters/contentAdapters';
 import { buildFromState, navigateBackOr } from '@/utils/navigation';
 import { usePageScrollMemory } from '@/hooks/usePageScrollMemory';
 
@@ -115,86 +106,6 @@ const CareerDevelopment = () => {
     startup: ['创业', '融资', 'BP', '商业计划'],
   };
 
-  const allExperts = [
-    {
-      id: '1',
-      name: '李明',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Oliver',
-      title: '阿里巴巴HR',
-      description: '5年大厂招聘经验，擅长简历优化和面试辅导',
-      tags: ['简历', '面试', 'HR'],
-      keywords: ['简历优化', '面试技巧', '大厂招聘', 'HR视角', '求职策略'],
-      category: 'job',
-      rating: 4.8,
-      responseRate: '98%',
-      orderCount: '126单'
-    },
-    {
-      id: '2',
-      name: '王芳',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Emily',
-      title: '腾讯猎头',
-      description: '7年猎头经验，专注IT/互联网高端人才定向招聘',
-      tags: ['猎头', '高薪', '跳槽'],
-      keywords: ['猎头顾问', '薪资谈判', '职业发展', '高端招聘', 'offer比较'],
-      category: 'job',
-      rating: 4.9,
-      responseRate: '95%',
-      orderCount: '210单'
-    },
-    {
-      id: '3',
-      name: '张伟',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=James',
-      title: '字节跳动技术经理',
-      description: '4年技术面试官经验，帮助数百人成功入职大厂',
-      tags: ['技术面试', '算法', '项目经验'],
-      keywords: ['技术面试', '编程算法', '系统设计', '项目经验', '技术选型'],
-      category: 'interview',
-      rating: 4.7,
-      responseRate: '90%',
-      orderCount: '98单'
-    },
-    {
-      id: '4',
-      name: '陈晓',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Olivia',
-      title: '资深职业规划师',
-      description: '10年职业生涯规划经验，帮助客户明确职业发展方向',
-      tags: ['职业规划', '转行', '发展方向'],
-      keywords: ['职业规划', '职业测评', '能力分析', '转行指导', '明确方向'],
-      category: 'job',
-      rating: 4.6,
-      responseRate: '92%',
-      orderCount: '156单'
-    },
-    {
-      id: '5',
-      name: '刘强',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=William',
-      title: '创业导师 | 投资人',
-      description: '连续创业者，3家成功企业，现为天使投资人',
-      tags: ['创业', '融资', '商业计划'],
-      keywords: ['创业指导', '商业计划书', '融资策略', '团队组建', '产品定位'],
-      category: 'startup',
-      rating: 4.9,
-      responseRate: '88%',
-      orderCount: '72单'
-    },
-    {
-      id: '6',
-      name: '周媛',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sophia',
-      title: '远程工作顾问',
-      description: '5年远程团队管理经验，帮助个人找到理想远程工作',
-      tags: ['远程工作', '自由职业', '时间管理'],
-      keywords: ['远程工作', '自由职业', '时间管理', '工作与生活平衡', '全球招聘'],
-      category: 'remote',
-      rating: 4.7,
-      responseRate: '94%',
-      orderCount: '118单'
-    }
-  ];
 
   const { data: feed, isLoading, error: feedError, refetch } = useChannelFeed(
     'career-development',
@@ -202,20 +113,8 @@ const CareerDevelopment = () => {
     { questionKeywords: categoryKeywords }
   );
 
-  const demoExpertModels = mapDemoExpertsByChannel(demoExperts, 'career-development', { categoryFallback: 'job' });
-  const fallbackExpertModels = mergeUniqueById(
-    demoExpertModels,
-    allExperts.map((item) => mapExpertToUIModel(item, { categoryFallback: item.category }))
-  );
-  const fallbackExperts = filterExpertsByCategory(fallbackExpertModels, activeCategory);
-  const filteredExperts = (feed?.experts && feed.experts.length > 0) ? feed.experts : fallbackExperts;
-
-  const fallbackQuestions = filterQuestionsByCategory(
-    mapDemoQuestionsByChannel(demoQuestions, 'career-development'),
-    activeCategory,
-    categoryKeywords
-  );
-  const filteredQuestions = (feed?.questions && feed.questions.length > 0) ? feed.questions : fallbackQuestions;
+  const filteredExperts = feed?.experts || [];
+  const filteredQuestions = feed?.questions || [];
   const featuredQuestion = filteredQuestions[0];
   const featuredExpert = filteredExperts[0];
   const featuredTopic = feed?.featured;

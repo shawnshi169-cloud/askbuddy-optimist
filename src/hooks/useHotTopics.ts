@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { demoTopicDetails, demoTopics } from '@/lib/demoData';
 import { TOPIC_DISCUSSION_CAPABILITY } from '../../packages/shared-api/src/capabilities';
+import { isPresentationFixtureAllowed } from '@/config/runtimeMode';
 
 export const TOPIC_PUBLISH_UNAVAILABLE_MESSAGE = '讨论发布功能暂未开放';
 
@@ -72,11 +73,15 @@ export const useHotTopics = () => {
         .order('discussions_count', { ascending: false })
         .order('created_at', { ascending: false });
 
-      if (error || !data || data.length === 0) {
+      if (error) {
+        if (isPresentationFixtureAllowed()) return demoTopics as HotTopic[];
+        throw error;
+      }
+      if ((!data || data.length === 0) && isPresentationFixtureAllowed()) {
         return demoTopics as HotTopic[];
       }
 
-      return data as HotTopic[];
+      return (data || []) as HotTopic[];
     },
     staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
@@ -90,9 +95,10 @@ export const useTopicDetail = (topicId: string) => {
   return useQuery({
     queryKey: ['topic', topicId, user?.id],
     queryFn: async () => {
-      const demoData = demoTopicDetails[topicId as keyof typeof demoTopicDetails];
-      if (demoData) {
-        return demoData;
+      if (topicId.startsWith('demo-topic-')) {
+        const presentationFixture = demoTopicDetails[topicId as keyof typeof demoTopicDetails];
+        if (isPresentationFixtureAllowed() && presentationFixture) return presentationFixture;
+        throw new Error('演示专题在当前运行环境不可用');
       }
 
       const { data: topic, error: topicError } = await supabase
@@ -120,7 +126,7 @@ export const useTopicDetail = (topicId: string) => {
               .eq('topic_id', topicId)
               .order('likes_count', { ascending: false })
               .order('created_at', { ascending: false });
-            if (fallbackResult.error) return [];
+            if (fallbackResult.error) throw fallbackResult.error;
             return fallbackResult.data || [];
           })()
         : (discussionsResult.data || []);
