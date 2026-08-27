@@ -118,7 +118,10 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     currentWriteContracts: [
       "rpc:create_answer_secure", "rpc:accept_answer_v2",
     ],
-    notes: ["Demo question routes are development-only; production details preserve real loading/error truth and canonical writes."],
+    notes: [
+      "Demo question routes are development-only; production details preserve real loading/error truth and canonical writes.",
+      "Answer submission persists only canonical answer content through create_answer_secure; no asker/answerer scheduling or availability contract currently exists.",
+    ],
   },
   {
     pageId: "channel",

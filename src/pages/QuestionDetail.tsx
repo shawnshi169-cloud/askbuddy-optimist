@@ -50,7 +50,6 @@ const QuestionDetail = () => {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [isAnswerDialogOpen, setIsAnswerDialogOpen] = useState(false);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-  const [answerContent, setAnswerContent] = useState('');
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
@@ -112,7 +111,7 @@ const QuestionDetail = () => {
   const { question, answers } = resolvedData;
 
   // 回答弹窗提交
-  const handleAnswerDialogSubmit = (payload: { timeSlots: string[]; message: string }) => {
+  const handleAnswerDialogSubmit = (payload: { message: string }) => {
     if (!user) {
       toast({ title: "请先登录", variant: "destructive" });
       navigateToAuthWithReturn(navigate, location);
@@ -127,7 +126,6 @@ const QuestionDetail = () => {
     if (isDemoQuestion) {
       toast({ title: '这是演示问题', description: '当前用于前端展示，回答提交流程已保留但不会写入真实数据。' });
       setIsAnswerDialogOpen(false);
-      setAnswerContent('');
       return;
     }
 
@@ -137,7 +135,6 @@ const QuestionDetail = () => {
     }, {
       onSuccess: () => {
         setIsAnswerDialogOpen(false);
-        setAnswerContent('');
       }
     });
   };
@@ -199,8 +196,8 @@ const QuestionDetail = () => {
   };
 
   // 回复
-  const handleReply = (answerId: string) => {
-    toast({ title: `回复回答` });
+  const handleReply = (_answerId: string) => {
+    toast({ title: '回复功能暂未开放' });
   };
 
   // 采纳回答
@@ -328,11 +325,6 @@ const QuestionDetail = () => {
       <AnswerDialog
         open={isAnswerDialogOpen}
         onOpenChange={setIsAnswerDialogOpen}
-        askerTimeSlots={[
-          { id: "today14", label: "今天 14:00-15:00" },
-          { id: "today19", label: "今天 19:00-20:00" },
-          { id: "weekend", label: "周末可约" }
-        ]}
         onSubmit={handleAnswerDialogSubmit}
       />
       <ShareDialog

@@ -53,6 +53,49 @@ assert.doesNotMatch(questionDetail, /randomuser\.me/);
 assert.match(questionDetail, /avatar: answer\.profile_avatar \|\| null/);
 assert.match(questionDetail, /avatar: question\.profile_avatar \|\| null/);
 
+const questionCard = read('src/components/QuestionCard.tsx');
+for (const forbiddenPattern of [
+  /askerExpertData/,
+  /rating: 4\.5/,
+  /responseRate: '90%'/,
+  /orderCount: '10单'/,
+  /askerTimeSlots/,
+  /void payload/,
+  /AnswerDialog/,
+]) {
+  assert.doesNotMatch(questionCard, forbiddenPattern);
+}
+assert.match(
+  questionCard,
+  /navigate\(`\/question\/\$\{id\}`,[\s\S]{0,160}intent: 'answer'/,
+  'QuestionCard answer action must route to the canonical Question Detail flow',
+);
+
+const answerDialog = read('src/components/AnswerDialog.tsx');
+for (const forbiddenPattern of [
+  /askerTimeSlots/,
+  /availableWeekSlots/,
+  /selectedSlots/,
+  /customSlot/,
+  /提问者偏好时间段/,
+  /你的可回答时间段/,
+  /timeSlots/,
+]) {
+  assert.doesNotMatch(answerDialog, forbiddenPattern);
+}
+assert.match(answerDialog, /onSubmit: \(payload: \{ message: string \}\)/);
+assert.match(answerDialog, /disabled=\{!message\.trim\(\)\}/);
+
+for (const forbiddenPattern of [/today14/, /today19/, /周末可约/, /askerTimeSlots=/]) {
+  assert.doesNotMatch(questionDetail, forbiddenPattern);
+}
+assert.match(questionDetail, /useCreateAnswer/);
+assert.match(questionDetail, /createAnswer\.mutate\(/);
+assert.match(questionDetail, /回复功能暂未开放/);
+
+const questions = read('src/hooks/useQuestions.ts');
+assert.match(questions, /rpc\('create_answer_secure'/);
+
 const baseline = JSON.parse(read('scripts/typecheck-baseline.json'));
 assert.deepEqual(baseline, {}, 'TypeScript baseline must remain empty');
 
@@ -65,5 +108,8 @@ const pageContracts = read('packages/shared-api/src/page-contract-map.ts');
 const messagesContract = pageContracts.match(/pageId: "messages"[\s\S]*?\n  },/)?.[0] || '';
 assert.match(messagesContract, /fallback:legacyReadFallback:table:messages/);
 assert.match(messagesContract, /unavailable in production\/unknown runtime/);
+const questionDetailContract = pageContracts.match(/pageId: "question-detail"[\s\S]*?\n  },/)?.[0] || '';
+assert.match(questionDetailContract, /create_answer_secure/);
+assert.match(questionDetailContract, /no asker\/answerer scheduling or availability contract/);
 
 console.log('UI-0a engineering readiness guards passed.');
