@@ -48,6 +48,11 @@ assert.match(adapters, /consultationPrice: number \| null/);
 assert.match(adapters, /createdAt: string \| null/);
 assert.match(adapters, /avatar: string \| null/);
 
+const questionDetail = read('src/pages/QuestionDetail.tsx');
+assert.doesNotMatch(questionDetail, /randomuser\.me/);
+assert.match(questionDetail, /avatar: answer\.profile_avatar \|\| null/);
+assert.match(questionDetail, /avatar: question\.profile_avatar \|\| null/);
+
 const baseline = JSON.parse(read('scripts/typecheck-baseline.json'));
 assert.deepEqual(baseline, {}, 'TypeScript baseline must remain empty');
 

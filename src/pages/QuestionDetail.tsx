@@ -226,7 +226,7 @@ const QuestionDetail = () => {
   const formattedAnswers = answers.map(answer => ({
     id: answer.id,
     name: answer.profile_nickname || '匿名用户',
-    avatar: answer.profile_avatar || 'https://randomuser.me/api/portraits/lego/1.jpg',
+    avatar: answer.profile_avatar || null,
     title: '回答者',
     content: answer.content,
     time: formatTime(answer.created_at),
@@ -240,7 +240,7 @@ const QuestionDetail = () => {
         title="问题详情"
         asker={{
           name: question.profile_nickname || '匿名用户',
-          avatar: question.profile_avatar || 'https://randomuser.me/api/portraits/lego/1.jpg',
+          avatar: question.profile_avatar || null,
           id: question.user_id
         }}
         time={formatTime(question.created_at)}
