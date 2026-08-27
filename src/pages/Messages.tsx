@@ -264,7 +264,7 @@ const Messages = () => {
                     key={chat.id}
                     className={cn(
                       "surface-card flex w-full items-center rounded-3xl px-4 py-4 text-left transition-colors active:bg-muted/50",
-                      chat.unreadCount > 0 ? 'app-soft-border app-soft-muted-bg border' : ''
+                      (chat.unreadCount ?? 0) > 0 ? 'app-soft-border app-soft-muted-bg border' : ''
                     )}
                     onClick={() => handleChatClick(chat.partnerId)}
                   >
@@ -277,14 +277,14 @@ const Messages = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <div className="truncate pr-3 font-medium text-foreground">{chat.partnerNickname || '用户'}</div>
-                        <div className="shrink-0 text-xs text-muted-foreground">{chat.lastMessageTime ? formatTime(chat.lastMessageTime) : '刚刚'}</div>
+                        <div className="shrink-0 text-xs text-muted-foreground">{chat.lastMessageTime ? formatTime(chat.lastMessageTime) : '时间未知'}</div>
                       </div>
                       <div className="mt-1 text-sm text-muted-foreground truncate">{chat.lastMessage || '暂无消息内容'}</div>
                     </div>
                     <div className="ml-3 flex items-center gap-2">
-                      {chat.unreadCount > 0 && (
+                      {(chat.unreadCount ?? 0) > 0 && (
                         <div className="min-w-[20px] h-5 flex items-center justify-center bg-destructive text-destructive-foreground text-xs rounded-full px-1.5">
-                          {chat.unreadCount > 9 ? '9+' : chat.unreadCount}
+                          {(chat.unreadCount ?? 0) > 9 ? '9+' : chat.unreadCount}
                         </div>
                       )}
                       <ChevronRight size={16} className="text-muted-foreground" />

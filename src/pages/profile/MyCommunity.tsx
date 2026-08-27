@@ -11,17 +11,6 @@ import { buildFromState } from '@/utils/navigation';
 import { usePageScrollMemory } from '@/hooks/usePageScrollMemory';
 import { isPresentationFixtureAllowed } from '@/config/runtimeMode';
 
-interface FollowingProfile {
-  nickname: string | null;
-  avatar_url: string | null;
-  bio: string | null;
-}
-
-interface FollowingRecordWithProfile {
-  id: string;
-  profile: FollowingProfile | null;
-}
-
 type GroupFilter = 'all' | 'unread' | 'mention';
 
 interface CommunityGroup {
@@ -50,8 +39,8 @@ const MyCommunity = () => {
 
   const groups = useMemo(() => {
     if (!presentationFixturesEnabled) return [];
-    const baseGroups: CommunityGroup[] = ((following || []) as FollowingRecordWithProfile[]).slice(0, 8).map((item, index: number) => ({
-      id: item.id,
+    const baseGroups: CommunityGroup[] = (following || []).slice(0, 8).map((item, index: number) => ({
+      id: item.following_id,
       name: `${item.profile?.nickname || '问友'}交流群`,
       members: 80 + index * 37,
       topic: index % 2 === 0 ? '经验分享' : '资料互助',

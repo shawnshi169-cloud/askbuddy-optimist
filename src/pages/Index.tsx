@@ -118,7 +118,8 @@ const Index = () => {
   ];
 
   // 格式化时间
-  const formatTime = (dateString: string) => {
+  const formatTime = (dateString: string | null) => {
+    if (!dateString) return '时间未知';
     try {
       return formatDistanceToNow(new Date(dateString), { 
         addSuffix: true, 
@@ -130,7 +131,8 @@ const Index = () => {
   };
 
   // 格式化浏览量
-  const formatViewCount = (count: number) => {
+  const formatViewCount = (count: number | null) => {
+    if (count === null) return undefined;
     if (count >= 1000) {
       return (count / 1000).toFixed(1) + 'k';
     }

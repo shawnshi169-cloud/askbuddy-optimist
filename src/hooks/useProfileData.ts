@@ -43,6 +43,19 @@ export interface MyEarningsData {
   earningTransactions: EarningTransactionRecord[];
 }
 
+export interface FollowingWithProfile {
+  follower_id: string;
+  followee_id: string;
+  following_id: string;
+  created_at: string;
+  profile: {
+    user_id: string;
+    nickname: string | null;
+    avatar_url: string | null;
+    bio: string | null;
+  } | null;
+}
+
 export const usePointAccountBalance = () => {
   const { user } = useAuth();
 
@@ -76,20 +89,25 @@ export const useProfileStats = () => {
       if (!user) return { orders: 0, answers: 0, favorites: 0, following: 0 };
 
       const [ordersRes, answersRes, favoritesRes, followingRes] = await Promise.all([
-        (supabase as any)
+        supabase
           .from('orders')
           .select('*', { count: 'exact', head: true })
           .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`),
         supabase.from('answers').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
         supabase.from('favorites').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
-        (supabase as any).from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', user.id),
+        supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', user.id),
       ]);
 
+      if (ordersRes.error) throw ordersRes.error;
+      if (answersRes.error) throw answersRes.error;
+      if (favoritesRes.error) throw favoritesRes.error;
+      if (followingRes.error) throw followingRes.error;
+
       return {
-        orders: ordersRes.count || 0,
-        answers: answersRes.count || 0,
-        favorites: favoritesRes.count || 0,
-        following: followingRes.count || 0,
+        orders: ordersRes.count ?? 0,
+        answers: answersRes.count ?? 0,
+        favorites: favoritesRes.count ?? 0,
+        following: followingRes.count ?? 0,
       };
     },
     enabled: !!user,
@@ -155,7 +173,7 @@ export const useMyOrders = (statusFilter?: string) => {
     queryFn: async () => {
       if (!user) return [];
 
-      let query = (supabase as any)
+      let query = supabase
         .from('orders')
         .select('*')
         .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
@@ -181,10 +199,10 @@ export const useMyFollowing = () => {
 
   return useQuery({
     queryKey: ['my-following', user?.id],
-    queryFn: async () => {
+    queryFn: async (): Promise<FollowingWithProfile[]> => {
       if (!user) return [];
 
-      const { data: following, error } = await (supabase as any)
+      const { data: following, error } = await supabase
         .from('follows')
         .select('*')
         .eq('follower_id', user.id)
@@ -194,7 +212,7 @@ export const useMyFollowing = () => {
 
       if (!following || following.length === 0) return [];
 
-      const followingIds = Array.from(new Set(following.map((item: { followee_id: string }) => item.followee_id)));
+      const followingIds = Array.from(new Set(following.map((item) => item.followee_id)));
       const { data: profiles, error: profileError } = await supabase
         .from('profiles')
         .select('user_id, nickname, avatar_url, bio')
@@ -203,7 +221,7 @@ export const useMyFollowing = () => {
       if (profileError) throw profileError;
 
       const profileMap = new Map((profiles || []).map((profile) => [profile.user_id, profile]));
-      return following.map((item: { followee_id: string; follower_id: string; created_at: string }) => ({
+      return following.map((item) => ({
         ...item,
         following_id: item.followee_id,
         profile: profileMap.get(item.followee_id) || null,
@@ -262,7 +280,7 @@ export const useUnfollow = () => {
 
   return async (followingId: string) => {
     if (!user) throw new Error('请先登录');
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('follows')
       .delete()
       .eq('follower_id', user.id)

@@ -118,18 +118,8 @@ export const useTopicDetail = (topicId: string) => {
         .order('likes_count', { ascending: false })
         .order('created_at', { ascending: false });
 
-      const discussions = discussionsResult.error
-        ? await (async () => {
-            const fallbackResult = await supabase
-              .from('topic_discussions')
-              .select('*')
-              .eq('topic_id', topicId)
-              .order('likes_count', { ascending: false })
-              .order('created_at', { ascending: false });
-            if (fallbackResult.error) throw fallbackResult.error;
-            return fallbackResult.data || [];
-          })()
-        : (discussionsResult.data || []);
+      if (discussionsResult.error) throw discussionsResult.error;
+      const discussions = discussionsResult.data || [];
 
       const userIds = [...new Set(discussions.map((discussion) => discussion.user_id))];
       const discussionIds = discussions.map((discussion) => discussion.id);

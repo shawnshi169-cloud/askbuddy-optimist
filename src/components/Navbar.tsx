@@ -8,14 +8,14 @@ interface NavbarProps {
   location?: string;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ location = "深圳" }) => {
+const Navbar: React.FC<NavbarProps> = ({ location: locationLabel = "深圳" }) => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
+  const routerLocation = useLocation();
   
   const handleLocationSelect = () => {
     setIsOpen(false);
-    navigate('/city-selector', { state: buildFromState(location) });
+    navigate('/city-selector', { state: buildFromState(routerLocation) });
   };
   
   return (
@@ -32,7 +32,7 @@ const Navbar: React.FC<NavbarProps> = ({ location = "深圳" }) => {
         <div className="flex items-center gap-2">
           <button
             className="relative p-1.5"
-            onClick={() => navigate('/notifications', { state: buildFromState(location) })}
+            onClick={() => navigate('/notifications', { state: buildFromState(routerLocation) })}
           >
             <Bell size={18} className="text-white" />
             <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-destructive rounded-full"></span>
@@ -43,7 +43,7 @@ const Navbar: React.FC<NavbarProps> = ({ location = "深圳" }) => {
             onClick={handleLocationSelect}
           >
             <MapPin size={12} className="text-white" />
-            <span>{location}</span>
+            <span>{locationLabel}</span>
             <ChevronDown size={12} />
           </button>
         </div>

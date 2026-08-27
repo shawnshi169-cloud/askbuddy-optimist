@@ -6,7 +6,7 @@ import { isNativeApp } from "@/utils/platform";
 
 interface HeaderProps {
   title: string;
-  asker: { name: string; avatar: string; id: string };
+  asker: { name: string; avatar: string | null; id: string };
   time: string;
   viewCount: string;
   points: number;
@@ -37,7 +37,7 @@ const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center gap-3">
           <div className="flex min-w-0 items-center cursor-pointer" onClick={() => onViewUser(asker.id)}>
             <Avatar className="w-9 h-9 mr-2">
-              <AvatarImage src={asker.avatar} alt={asker.name} />
+              <AvatarImage src={asker.avatar || undefined} alt={asker.name} />
               <AvatarFallback>{asker.name.charAt(0)}</AvatarFallback>
             </Avatar>
             <div className="min-w-0">

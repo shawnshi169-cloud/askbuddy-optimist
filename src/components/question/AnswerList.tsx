@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 interface Answer {
   id: string;
   name: string;
-  avatar: string;
+  avatar: string | null;
   title: string;
   content: React.ReactNode;
   time: string;
@@ -35,7 +35,7 @@ const AnswerList: React.FC<AnswerListProps> = ({
             onClick={() => onViewUser(ans.id)}
           >
             <Avatar className="w-9 h-9 mr-3">
-              <AvatarImage src={ans.avatar} />
+              <AvatarImage src={ans.avatar || undefined} />
               <AvatarFallback>{ans.name.charAt(0)}</AvatarFallback>
             </Avatar>
             <div className="min-w-0">

@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { MessageCircle, Award, Eye } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import ExpertDetailDialog from './ExpertDetailDialog';
-import AnswerDialog from "./AnswerDialog";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { buildFromState } from '@/utils/navigation';
 
@@ -12,15 +10,13 @@ interface QuestionCardProps {
   description?: string;
   asker: {
     name: string;
-    avatar: string;
+    avatar: string | null;
   };
   time: string;
   tags: string[];
-  points: number;
+  points: number | null;
   viewCount?: string;
   delay?: number;
-  answerName?: string;
-  answerAvatar?: string;
 }
 
 const QuestionCard: React.FC<QuestionCardProps> = ({
@@ -32,44 +28,19 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   tags,
   points,
   viewCount,
-  delay = 0,
-  answerName,
-  answerAvatar
+  delay = 0
 }) => {
-  const [showAnswerDialog, setShowAnswerDialog] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Create unique expert data for the asker based on their properties
-  const askerExpertData = {
-    id: id + '-asker',
-    name: asker.name,
-    avatar: asker.avatar,
-    title: '提问者',
-    description: `这位用户 ${asker.name} 经常在平台上提出高质量的问题，帮助社区成长。`,
-    tags: tags,
-    rating: 4.5,
-    responseRate: '90%',
-    orderCount: '10单',
-    education: ['未知'],
-    experience: ['活跃社区成员'],
-    verified: false
-  };
-
-  // 伪数据：假定每个提问者的偏好时间段
-  const askerTimeSlots = [
-    { id: "today14", label: "今天 14:00-15:00" },
-    { id: "today19", label: "今天 19:00-20:00" },
-    { id: "weekend", label: "周末可约" }
-  ];
-
-  // 回答弹窗提交
-  const handleAnswerDialogSubmit = (payload: { timeSlots: string[]; message: string }) => {
-    // 预留：后续接入回答提交/预约接口
-    void payload;
-  };
   const openQuestionDetail = () => {
     navigate(`/question/${id}`, { state: buildFromState(location) });
+  };
+
+  const openQuestionDetailForAnswer = () => {
+    navigate(`/question/${id}`, {
+      state: { ...buildFromState(location), intent: 'answer' },
+    });
   };
 
   return (
@@ -101,27 +72,20 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         )}
 
         <div className="flex items-center justify-between mb-3">
-          <div>
-            <ExpertDetailDialog {...askerExpertData}>
-              <div
-                className="flex items-center gap-2 cursor-pointer"
-                onClick={(event) => event.stopPropagation()}
-              >
-                <Avatar className="w-8 h-8 border app-soft-border">
-                  <AvatarImage src={asker.avatar} alt={asker.name} className="object-cover" />
-                  <AvatarFallback>{asker.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div className="text-left">
-                  <div className="text-xs font-medium text-foreground">{asker.name}</div>
-                  <div className="text-xs text-muted-foreground">{time}</div>
-                </div>
-              </div>
-            </ExpertDetailDialog>
+          <div className="flex items-center gap-2">
+            <Avatar className="w-8 h-8 border app-soft-border">
+              <AvatarImage src={asker.avatar || undefined} alt={asker.name} className="object-cover" />
+              <AvatarFallback>{asker.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div className="text-left">
+              <div className="text-xs font-medium text-foreground">{asker.name}</div>
+              <div className="text-xs text-muted-foreground">{time}</div>
+            </div>
           </div>
           
           <span className="flex items-center gap-1 bg-gradient-to-r from-yellow-50 to-orange-50 text-amber-600 text-xs px-2.5 py-1 rounded-full font-medium border border-amber-100 shadow-sm">
             <Award size={14} className="text-amber-500" />
-            {points} 积分
+            {points === null ? '积分未提供' : `${points} 积分`}
           </span>
         </div>
         
@@ -139,7 +103,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
               className="h-8 min-w-[78px] bg-primary text-primary-foreground px-3 rounded-full text-xs font-medium inline-flex items-center justify-center gap-1 shadow-sm hover:shadow-md hover:bg-primary/90 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
               onClick={(event) => {
                 event.stopPropagation();
-                setShowAnswerDialog(true);
+                openQuestionDetailForAnswer();
               }}
             >
               <MessageCircle size={12} />
@@ -149,12 +113,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
         </div>
       </div>
       
-      <AnswerDialog
-        open={showAnswerDialog}
-        onOpenChange={setShowAnswerDialog}
-        askerTimeSlots={askerTimeSlots}
-        onSubmit={handleAnswerDialogSubmit}
-      />
     </>
   );
 };
