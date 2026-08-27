@@ -12,11 +12,11 @@ interface QuestionCardProps {
   description?: string;
   asker: {
     name: string;
-    avatar: string;
+    avatar: string | null;
   };
   time: string;
   tags: string[];
-  points: number;
+  points: number | null;
   viewCount?: string;
   delay?: number;
   answerName?: string;
@@ -44,7 +44,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   const askerExpertData = {
     id: id + '-asker',
     name: asker.name,
-    avatar: asker.avatar,
+    avatar: asker.avatar || '',
     title: '提问者',
     description: `这位用户 ${asker.name} 经常在平台上提出高质量的问题，帮助社区成长。`,
     tags: tags,
@@ -108,7 +108,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                 onClick={(event) => event.stopPropagation()}
               >
                 <Avatar className="w-8 h-8 border app-soft-border">
-                  <AvatarImage src={asker.avatar} alt={asker.name} className="object-cover" />
+                  <AvatarImage src={asker.avatar || undefined} alt={asker.name} className="object-cover" />
                   <AvatarFallback>{asker.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className="text-left">
@@ -121,7 +121,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           
           <span className="flex items-center gap-1 bg-gradient-to-r from-yellow-50 to-orange-50 text-amber-600 text-xs px-2.5 py-1 rounded-full font-medium border border-amber-100 shadow-sm">
             <Award size={14} className="text-amber-500" />
-            {points} 积分
+            {points === null ? '积分未提供' : `${points} 积分`}
           </span>
         </div>
         

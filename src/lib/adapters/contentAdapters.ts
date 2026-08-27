@@ -1,25 +1,83 @@
-import type { Expert } from '@/hooks/useExperts';
-import type { Question } from '@/hooks/useQuestions';
+interface ExpertAdapterInput {
+  id: string;
+  user_id?: string;
+  nickname?: string | null;
+  name?: string | null;
+  avatar_url?: string | null;
+  avatar?: string | null;
+  title?: string | null;
+  bio?: string | null;
+  description?: string | null;
+  tags?: unknown;
+  keywords?: unknown;
+  category?: string | null;
+  rating?: number | string | null;
+  response_rate?: number | null;
+  responseRate?: string | null;
+  order_count?: number | null;
+  orderCount?: string | null;
+  consultation_price?: number | null;
+  consultationPrice?: number | null;
+  location?: string | null;
+  education?: unknown;
+  experience?: unknown;
+  is_verified?: boolean | null;
+  verified?: boolean | null;
+}
 
-type AnyRecord = Record<string, any>;
+interface QuestionAdapterInput {
+  id: string;
+  title?: string | null;
+  content?: string | null;
+  tags?: unknown;
+  bounty_points?: number | null;
+  bountyPoints?: number | null;
+  view_count?: number | null;
+  viewCount?: number | null;
+  created_at?: string | null;
+  createdAt?: string | null;
+  profile_nickname?: string | null;
+  askerName?: string | null;
+  profile_avatar?: string | null;
+  askerAvatar?: string | null;
+  answers_count?: number | null;
+  answersCount?: number | null;
+  category?: string | null;
+}
+
+interface ConversationAdapterInput {
+  id?: string;
+  partner_id?: string;
+  partnerId?: string;
+  partner_nickname?: string | null;
+  partnerNickname?: string | null;
+  partner_avatar?: string | null;
+  partnerAvatar?: string | null;
+  last_message?: string | null;
+  lastMessage?: string | null;
+  last_message_time?: string | null;
+  lastMessageTime?: string | null;
+  unread_count?: number | null;
+  unreadCount?: number | null;
+}
 
 export interface UIExpertCardModel {
   id: string;
   name: string;
-  avatar: string;
+  avatar: string | null;
   title: string;
   description: string;
   tags: string[];
   keywords: string[];
-  category: string;
-  rating: number;
-  responseRate: string;
-  orderCount: string;
-  consultationPrice: number;
-  location: string;
+  category: string | null;
+  rating: number | null;
+  responseRate: string | null;
+  orderCount: string | null;
+  consultationPrice: number | null;
+  location: string | null;
   education: string[];
   experience: string[];
-  verified: boolean;
+  verified: boolean | null;
 }
 
 export interface UIQuestionModel {
@@ -27,12 +85,12 @@ export interface UIQuestionModel {
   title: string;
   content: string | null;
   tags: string[];
-  bountyPoints: number;
-  viewCount: number;
-  createdAt: string;
+  bountyPoints: number | null;
+  viewCount: number | null;
+  createdAt: string | null;
   askerName: string;
-  askerAvatar: string;
-  answersCount: number;
+  askerAvatar: string | null;
+  answersCount: number | null;
   category?: string | null;
 }
 
@@ -42,9 +100,25 @@ export interface UIConversationModel {
   partnerNickname: string;
   partnerAvatar: string | null;
   lastMessage: string;
-  lastMessageTime: string;
-  unreadCount: number;
+  lastMessageTime: string | null;
+  unreadCount: number | null;
 }
+
+const firstPresent = (...values: unknown[]) =>
+  values.find((value) => value !== null && value !== undefined);
+
+const toNullableString = (value: unknown): string | null =>
+  typeof value === 'string' && value.length > 0 ? value : null;
+
+const toNullableNumber = (value: unknown): number | null => {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  if (typeof value !== 'string' || value.trim() === '') return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const toNullableBoolean = (value: unknown): boolean | null =>
+  typeof value === 'boolean' ? value : null;
 
 const toStringArray = (value: unknown): string[] => {
   if (!Array.isArray(value)) return [];
@@ -52,48 +126,50 @@ const toStringArray = (value: unknown): string[] => {
     .map((item) => {
       if (typeof item === 'string') return item;
       if (item && typeof item === 'object') {
-        const obj = item as AnyRecord;
-        return `${obj.school || obj.company || ''} ${obj.degree || obj.position || obj.title || ''}`.trim();
+        const obj = item as Record<string, unknown>;
+        const organization = toNullableString(obj.school) || toNullableString(obj.company) || '';
+        const role = toNullableString(obj.degree) || toNullableString(obj.position) || toNullableString(obj.title) || '';
+        return `${organization} ${role}`.trim();
       }
       return '';
     })
     .filter((item) => item.length > 0);
 };
 
-export const mapExpertToUIModel = (expert: Expert | AnyRecord, options?: { categoryFallback?: string }): UIExpertCardModel => ({
+export const mapExpertToUIModel = (expert: ExpertAdapterInput, options?: { categoryFallback?: string }): UIExpertCardModel => ({
   id: expert.id,
   name: expert.nickname || expert.name || '专家',
-  avatar: expert.avatar_url || expert.avatar || 'https://randomuser.me/api/portraits/lego/1.jpg',
+  avatar: toNullableString(firstPresent(expert.avatar_url, expert.avatar)),
   title: expert.title || '',
   description: expert.bio || expert.description || '',
-  tags: Array.isArray(expert.tags) ? expert.tags : [],
-  keywords: Array.isArray(expert.keywords) ? expert.keywords : [],
-  category: expert.category || options?.categoryFallback || 'all',
-  rating: Number(expert.rating || 0),
+  tags: toStringArray(expert.tags),
+  keywords: toStringArray(expert.keywords),
+  category: expert.category || options?.categoryFallback || null,
+  rating: toNullableNumber(expert.rating),
   responseRate: typeof expert.response_rate === 'number'
     ? `${expert.response_rate}%`
-    : (expert.responseRate || `${Number(expert.response_rate || 0)}%`),
+    : toNullableString(expert.responseRate),
   orderCount: typeof expert.order_count === 'number'
     ? `${expert.order_count}单`
-    : (expert.orderCount || `${Number(expert.order_count || 0)}单`),
-  consultationPrice: Number(expert.consultation_price || expert.consultationPrice || 50),
-  location: expert.location || '未设置地区',
+    : toNullableString(expert.orderCount),
+  consultationPrice: toNullableNumber(firstPresent(expert.consultation_price, expert.consultationPrice)),
+  location: toNullableString(expert.location),
   education: toStringArray(expert.education),
   experience: toStringArray(expert.experience),
-  verified: Boolean(expert.is_verified || expert.verified),
+  verified: toNullableBoolean(firstPresent(expert.is_verified, expert.verified)),
 });
 
-export const mapQuestionToUIModel = (question: Question | AnyRecord): UIQuestionModel => ({
+export const mapQuestionToUIModel = (question: QuestionAdapterInput): UIQuestionModel => ({
   id: question.id,
   title: question.title || '',
   content: question.content || null,
-  tags: Array.isArray(question.tags) ? question.tags : [],
-  bountyPoints: Number(question.bounty_points || question.bountyPoints || 0),
-  viewCount: Number(question.view_count || question.viewCount || 0),
-  createdAt: question.created_at || question.createdAt || new Date().toISOString(),
+  tags: toStringArray(question.tags),
+  bountyPoints: toNullableNumber(firstPresent(question.bounty_points, question.bountyPoints)),
+  viewCount: toNullableNumber(firstPresent(question.view_count, question.viewCount)),
+  createdAt: toNullableString(firstPresent(question.created_at, question.createdAt)),
   askerName: question.profile_nickname || question.askerName || '匿名用户',
-  askerAvatar: question.profile_avatar || question.askerAvatar || 'https://randomuser.me/api/portraits/lego/1.jpg',
-  answersCount: Number(question.answers_count || question.answersCount || 0),
+  askerAvatar: toNullableString(firstPresent(question.profile_avatar, question.askerAvatar)),
+  answersCount: toNullableNumber(firstPresent(question.answers_count, question.answersCount)),
   category: question.category || null,
 });
 
@@ -102,14 +178,14 @@ export const mergeUniqueById = <T extends { id: string }>(primary: T[], fallback
   return merged.filter((item, index) => merged.findIndex((target) => target.id === item.id) === index);
 };
 
-export const mapConversationToUIModel = (conversation: AnyRecord): UIConversationModel => ({
-  id: String(conversation.partner_id || conversation.partnerId || conversation.id || ''),
-  partnerId: String(conversation.partner_id || conversation.partnerId || conversation.id || ''),
-  partnerNickname: String(conversation.partner_nickname || conversation.partnerNickname || '用户'),
-  partnerAvatar: (conversation.partner_avatar || conversation.partnerAvatar || null) as string | null,
-  lastMessage: String(conversation.last_message || conversation.lastMessage || '暂无消息内容'),
-  lastMessageTime: String(conversation.last_message_time || conversation.lastMessageTime || new Date().toISOString()),
-  unreadCount: Number(conversation.unread_count || conversation.unreadCount || 0),
+export const mapConversationToUIModel = (conversation: ConversationAdapterInput): UIConversationModel => ({
+  id: toNullableString(firstPresent(conversation.partner_id, conversation.partnerId, conversation.id)) || '',
+  partnerId: toNullableString(firstPresent(conversation.partner_id, conversation.partnerId, conversation.id)) || '',
+  partnerNickname: toNullableString(firstPresent(conversation.partner_nickname, conversation.partnerNickname)) || '用户',
+  partnerAvatar: toNullableString(firstPresent(conversation.partner_avatar, conversation.partnerAvatar)),
+  lastMessage: toNullableString(firstPresent(conversation.last_message, conversation.lastMessage)) || '暂无消息内容',
+  lastMessageTime: toNullableString(firstPresent(conversation.last_message_time, conversation.lastMessageTime)),
+  unreadCount: toNullableNumber(firstPresent(conversation.unread_count, conversation.unreadCount)),
 });
 
 export const filterExpertsByCategory = (experts: UIExpertCardModel[], activeCategory: string) => {
@@ -118,7 +194,7 @@ export const filterExpertsByCategory = (experts: UIExpertCardModel[], activeCate
 };
 
 export const mapDemoExpertsByChannel = (
-  experts: AnyRecord[],
+  experts: ExpertAdapterInput[],
   channelCategory: string,
   options?: { categoryFallback?: string }
 ) => {
@@ -150,10 +226,10 @@ const normalizeChannel = (value: string | null | undefined) => {
   return map[input] || input;
 };
 
-const questionTextBag = (item: AnyRecord) =>
+const questionTextBag = (item: QuestionAdapterInput) =>
   [item.title || '', item.content || '', ...(Array.isArray(item.tags) ? item.tags : [])].join(' ').toLowerCase();
 
-export const mapDemoQuestionsByChannel = (questions: AnyRecord[], channelCategory: string) => {
+export const mapDemoQuestionsByChannel = (questions: QuestionAdapterInput[], channelCategory: string) => {
   const normalized = normalizeChannel(channelCategory);
   const keywords = CHANNEL_KEYWORDS[normalized] || [];
 
@@ -186,22 +262,26 @@ export const filterQuestionsByCategory = (
   });
 };
 
-export const mapDemoQuestionsForSearch = (demoQuestions: AnyRecord[], normalizedQuery: string) => {
+export const mapDemoQuestionsForSearch = (demoQuestions: QuestionAdapterInput[], normalizedQuery: string) => {
   return demoQuestions
     .filter((item) => {
-      const bag = [item.title, item.content || '', ...(item.tags || [])].join(' ').toLowerCase();
+      const bag = [item.title || '', item.content || '', ...toStringArray(item.tags)].join(' ').toLowerCase();
       return bag.includes(normalizedQuery);
     })
-    .map((item) => ({
-      ...item,
-      category: item.tags?.[0] || null,
-    }));
+    .map((item) => {
+      const tags = toStringArray(item.tags);
+      return {
+        ...item,
+        tags,
+        category: tags[0] || null,
+      };
+    });
 };
 
-export const mapDemoUsersForSearch = (demoExperts: AnyRecord[], normalizedQuery: string) => {
+export const mapDemoUsersForSearch = (demoExperts: ExpertAdapterInput[], normalizedQuery: string) => {
   return demoExperts
     .filter((item) => {
-      const bag = [item.nickname || '', item.title || '', item.bio || '', ...(item.tags || [])].join(' ').toLowerCase();
+      const bag = [item.nickname || '', item.title || '', item.bio || '', ...toStringArray(item.tags)].join(' ').toLowerCase();
       return bag.includes(normalizedQuery);
     })
     .slice(0, 10)

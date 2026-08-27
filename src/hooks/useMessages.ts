@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { isRuntimeCapabilityAllowed } from '@/config/runtimeMode';
 
 const isMissingRpcError = (error: unknown, functionName: string) => {
   const message = error instanceof Error ? error.message : String(error || '');
@@ -53,7 +54,10 @@ export const useConversations = () => {
         }));
       }
 
-      if (!isMissingRpcError(rpcResult.error, 'get_user_conversations')) {
+      if (
+        !isMissingRpcError(rpcResult.error, 'get_user_conversations')
+        || !isRuntimeCapabilityAllowed('legacyReadFallback')
+      ) {
         throw rpcResult.error;
       }
 

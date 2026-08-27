@@ -84,13 +84,13 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     writeContracts: ["rpc:send_direct_message", "rpc:mark_notifications_read"],
     implementationStatus: "legacy",
     currentReadContracts: [
-      "rpc:get_user_conversations", "fallback:table:messages", "table:notifications", "fixture:development-only",
+      "rpc:get_user_conversations", "fallback:legacyReadFallback:table:messages", "table:notifications", "fixture:development-only",
     ],
     currentWriteContracts: [
       "rpc:send_direct_message",
       "rpc:mark_notifications_read",
     ],
-    notes: ["Production conversation and notification reads never merge or fall back to fixtures; write paths remain canonical-only."],
+    notes: ["Production conversation reads fail closed on canonical RPC errors; the legacy table read is capability-gated and unavailable in production/unknown runtime. Notification reads never fall back to fixtures; write paths remain canonical-only."],
   },
   {
     pageId: "profile",

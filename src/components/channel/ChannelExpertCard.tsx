@@ -7,13 +7,13 @@ interface ChannelExpertCardProps {
   expert: {
     id: string;
     name: string;
-    avatar: string;
+    avatar: string | null;
     title: string;
     description: string;
     tags: string[];
-    rating: number;
-    responseRate: string;
-    orderCount: string;
+    rating: number | null;
+    responseRate: string | null;
+    orderCount: string | null;
   };
   accentBorderClass: string;
   accentTextClass: string;
@@ -51,7 +51,7 @@ const ChannelExpertCard: React.FC<ChannelExpertCardProps> = ({
         <div className="flex items-start justify-between">
         <div className="flex items-center gap-2 text-left">
           <Avatar className={`h-10 w-10 border ${accentBorderClass}`}>
-            <AvatarImage src={expert.avatar} alt={expert.name} className="object-cover" />
+            <AvatarImage src={expert.avatar || undefined} alt={expert.name} className="object-cover" />
             <AvatarFallback>{expert.name.charAt(0)}</AvatarFallback>
           </Avatar>
           <div>
@@ -63,15 +63,15 @@ const ChannelExpertCard: React.FC<ChannelExpertCardProps> = ({
         <div className="flex flex-col items-end">
           <div className="flex items-center gap-1 text-yellow-500">
             <Award size={12} />
-            <span className="text-xs font-medium">{expert.rating}</span>
+            <span className="text-xs font-medium">{expert.rating ?? '暂无'}</span>
           </div>
           <div className="flex items-center gap-1 text-xs text-primary">
             <Clock size={10} />
-            <span>{expert.responseRate}</span>
+            <span>{expert.responseRate ?? '暂无'}</span>
           </div>
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <Users size={10} />
-            <span>{expert.orderCount}</span>
+            <span>{expert.orderCount ?? '暂无'}</span>
           </div>
         </div>
         </div>

@@ -479,7 +479,7 @@ const NewQuestion: React.FC = () => {
         title="发布问题"
         onBack={handleBack}
         right={
-          <button onClick={saveDraft} className="rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white hover:bg-white/25">
+          <button onClick={() => saveDraft()} className="rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white hover:bg-white/25">
             存草稿
           </button>
         }

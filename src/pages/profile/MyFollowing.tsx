@@ -11,17 +11,6 @@ import PageStateCard from '@/components/common/PageStateCard';
 import { buildFromState } from '@/utils/navigation';
 import { usePageScrollMemory } from '@/hooks/usePageScrollMemory';
 
-interface FollowingItem {
-  id: string;
-  following_id: string;
-  profile?: {
-    user_id: string;
-    nickname: string | null;
-    avatar_url: string | null;
-    bio: string | null;
-  } | null;
-}
-
 const MyFollowing = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -48,16 +37,16 @@ const MyFollowing = () => {
         </div>
       ) : following && following.length > 0 ? (
         <div className="p-4 space-y-4">
-          {(following as FollowingItem[]).map((item) => (
+          {following.map((item) => (
             <Card
-              key={item.id}
+              key={item.following_id}
               className="surface-card rounded-3xl border-none shadow-sm"
             >
               <CardContent className="p-4">
                 <button
                   type="button"
                   className="flex w-full items-center gap-3 text-left"
-                  onClick={() => navigate(`/expert-profile/${item.following_id || item.profile?.user_id || item.id}`, { state: buildFromState(location) })}
+                  onClick={() => navigate(`/expert-profile/${item.following_id}`, { state: buildFromState(location) })}
                 >
                   <Avatar className="h-12 w-12">
                     <AvatarImage src={item.profile?.avatar_url || ''} />

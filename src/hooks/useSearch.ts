@@ -38,6 +38,7 @@ export interface SearchExpert {
 export interface SearchSkill {
   id: string;
   expert_id: string;
+  category_id?: string | null;
   title: string;
   description: string | null;
   category_name?: string | null;
