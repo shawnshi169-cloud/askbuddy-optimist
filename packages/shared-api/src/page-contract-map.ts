@@ -29,9 +29,12 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     ],
     writeContracts: [],
     implementationStatus: "legacy",
-    currentReadContracts: ["table:questions", "table:experts", "fixture:demo-content"],
+    currentReadContracts: [
+      "table:categories", "table:questions", "table:experts", "table:hot_topics",
+      "rpc:get_my_unread_notification_count", "fixture:development-only",
+    ],
     currentWriteContracts: [],
-    notes: ["Core App currently merges demo content into real reads."],
+    notes: ["Presentation fixtures require the explicit development-only runtime gate; production empty/error states never merge or fall back to fixtures."],
   },
   {
     pageId: "search",
@@ -42,10 +45,10 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     currentReadContracts: [
       "rpc:search_app_content_v2", "rpc:search_app_content",
       "table:questions", "table:experts", "table:skill_offers", "table:posts",
-      "fixture:demo-content",
+      "fixture:development-only",
     ],
     currentWriteContracts: ["rpc:upsert_search_history"],
-    notes: ["V2 is canonical; legacy/direct/demo fallbacks remain in Core App."],
+    notes: ["V2 is canonical; production uses no fixture merge or read fallback, while real legacy reads remain capability-gated outside production."],
   },
   {
     pageId: "ask",
@@ -65,11 +68,11 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
       "table:posts", "table:post_likes", "table:post_favorites", "table:post_comments",
     ],
     implementationStatus: "legacy",
-    currentReadContracts: ["table:posts", "table:notifications", "fixture:interactions"],
+    currentReadContracts: ["table:posts", "table:notifications", "fixture:development-only"],
     currentWriteContracts: [
       "table:posts", "table:post_likes", "table:post_favorites", "table:post_comments",
     ],
-    notes: ["Primary post writes are real; interactions still fall back to fixtures."],
+    notes: ["Production posts and interactions preserve real loading/empty/error states; presentation interactions are explicit development-only fixtures."],
   },
   {
     pageId: "messages",
@@ -81,13 +84,13 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     writeContracts: ["rpc:send_direct_message", "rpc:mark_notifications_read"],
     implementationStatus: "legacy",
     currentReadContracts: [
-      "rpc:get_user_conversations", "fallback:table:messages", "fixture:demo-conversations",
+      "rpc:get_user_conversations", "fallback:table:messages", "table:notifications", "fixture:development-only",
     ],
     currentWriteContracts: [
       "rpc:send_direct_message",
       "rpc:mark_notifications_read",
     ],
-    notes: ["Direct-message and notification-read writes are canonical-only; read fixtures remain separate debt."],
+    notes: ["Production conversation and notification reads never merge or fall back to fixtures; write paths remain canonical-only."],
   },
   {
     pageId: "profile",
@@ -100,10 +103,10 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     implementationStatus: "legacy",
     currentReadContracts: [
       "table:profiles", "table:point_accounts", "table:orders",
-      "table:point_transactions", "table:earning_transactions", "fixture:community",
+      "table:point_transactions", "table:earning_transactions", "fixture:development-only",
     ],
     currentWriteContracts: ["table:profiles", "table:user_settings"],
-    notes: ["Ledger reads are canonical; community sections remain presentation data."],
+    notes: ["Community presentation data is development-only; production shows unavailable until a real community contract exists."],
   },
   {
     pageId: "question-detail",
@@ -111,11 +114,11 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     readContracts: ["table:questions", "table:answers", "table:profiles"],
     writeContracts: ["rpc:create_answer_secure", "rpc:accept_answer_v2"],
     implementationStatus: "legacy",
-    currentReadContracts: ["table:questions", "table:answers", "table:profiles"],
+    currentReadContracts: ["table:questions", "table:answers", "table:profiles", "fixture:development-only"],
     currentWriteContracts: [
       "rpc:create_answer_secure", "rpc:accept_answer_v2",
     ],
-    notes: ["Answer creation and acceptance are canonical-only; no client-side system counter write remains."],
+    notes: ["Demo question routes are development-only; production details preserve real loading/error truth and canonical writes."],
   },
   {
     pageId: "channel",
@@ -123,9 +126,9 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     readContracts: ["rpc:get_channel_feed"],
     writeContracts: [],
     implementationStatus: "legacy",
-    currentReadContracts: ["rpc:get_channel_feed", "fixture:channel-content"],
+    currentReadContracts: ["rpc:get_channel_feed", "fixture:development-only"],
     currentWriteContracts: [],
-    notes: ["Real channel responses are currently merged with demo content."],
+    notes: ["Production renders the RPC result, empty, or error directly; presentation feed fixtures require the explicit development-only gate."],
   },
   {
     pageId: "topic-detail",
@@ -133,11 +136,12 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     readContracts: ["table:hot_topics", "table:topic_discussions"],
     writeContracts: ["capability:topic-discussion-publish"],
     implementationStatus: "blocked",
-    currentReadContracts: ["table:hot_topics", "table:topic_discussions", "fixture:topics"],
+    currentReadContracts: ["table:hot_topics", "table:topic_discussions", "fixture:development-only"],
     currentWriteContracts: ["capability:unavailable"],
     notes: [
       "create_topic_discussion_secure remains compatibility-only.",
       "Production publishing fails closed until a canonical moderation-aligned action exists.",
+      "Production topic reads never fall back to fixtures or generated article content.",
     ],
   },
   {
@@ -146,9 +150,9 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     readContracts: ["table:experts", "table:skill_offers", "table:profiles"],
     writeContracts: ["capability:consultation-order"],
     implementationStatus: "blocked",
-    currentReadContracts: ["table:experts", "fixture:demo-experts"],
+    currentReadContracts: ["table:experts", "fixture:development-only"],
     currentWriteContracts: ["capability:unavailable"],
-    notes: ["Consultation fails closed; the incompatible legacy order RPC is not called."],
+    notes: ["Consultation fails closed; demo expert routes are development-only and the incompatible legacy order RPC is not called."],
   },
   {
     pageId: "skill-publish",
@@ -166,9 +170,9 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     readContracts: ["table:messages", "table:conversations"],
     writeContracts: ["rpc:send_direct_message"],
     implementationStatus: "legacy",
-    currentReadContracts: ["table:messages", "fixture:demo-chat"],
+    currentReadContracts: ["table:messages", "fixture:development-only"],
     currentWriteContracts: ["rpc:send_direct_message", "capability:demo-send-unavailable"],
-    notes: ["Real sends clear input only after canonical RPC success; demo sends fail closed."],
+    notes: ["Production demo-chat routes are unavailable; development demo sends fail closed and real sends clear input only after canonical RPC success."],
   },
   {
     pageId: "post-editor",

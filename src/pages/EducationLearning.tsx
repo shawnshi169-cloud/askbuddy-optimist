@@ -30,16 +30,7 @@ import ChannelExpertCard from '@/components/channel/ChannelExpertCard';
 import ChannelQuestionSkeleton from '@/components/channel/ChannelQuestionSkeleton';
 import ChannelExpertSkeleton from '@/components/channel/ChannelExpertSkeleton';
 import ChannelFloatingActionButton from '@/components/channel/ChannelFloatingActionButton';
-import { demoExperts, demoQuestions } from '@/lib/demoData';
 import PageStateCard from '@/components/common/PageStateCard';
-import {
-  filterExpertsByCategory,
-  filterQuestionsByCategory,
-  mapDemoExpertsByChannel,
-  mapDemoQuestionsByChannel,
-  mapExpertToUIModel,
-  mergeUniqueById,
-} from '@/lib/adapters/contentAdapters';
 import { buildFromState, navigateBackOr } from '@/utils/navigation';
 import { usePageScrollMemory } from '@/hooks/usePageScrollMemory';
 
@@ -113,86 +104,6 @@ const EducationLearning = () => {
     paper: ['论文', '开题', 'SCI', '投稿'],
   };
 
-  const allExperts = [
-    {
-      id: '1',
-      name: '张同学',
-      avatar: 'https://randomuser.me/api/portraits/women/22.jpg',
-      title: '北大硕士 | 出国党',
-      description: '专注留学申请文书指导，斯坦福offer获得者',
-      tags: ['留学', '文书', '面试'],
-      keywords: ['留学', '文书', '个人陈述', '面试', '斯坦福', '美国大学', '申请', 'SOP'],
-      category: 'study-abroad',
-      rating: 4.9,
-      responseRate: '98%',
-      orderCount: '126单'
-    },
-    {
-      id: '2',
-      name: '刘导师',
-      avatar: 'https://randomuser.me/api/portraits/men/55.jpg',
-      title: '清华博士 | 考研规划',
-      description: '5年考研辅导经验，擅长数学与专业课',
-      tags: ['考研', '数学', '规划'],
-      keywords: ['考研', '数学', '专业课', '清华', '规划', '复习'],
-      category: 'kaoyan',
-      rating: 4.8,
-      responseRate: '95%',
-      orderCount: '210单'
-    },
-    {
-      id: '3',
-      name: '王老师',
-      avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-      title: '高考志愿规划师',
-      description: '10年高考志愿填报指导经验，专精各省份政策',
-      tags: ['高考', '志愿填报', '专业选择'],
-      keywords: ['高考', '志愿', '填报', '专业选择', '大学', '分数线'],
-      category: 'gaokao',
-      rating: 4.7,
-      responseRate: '92%',
-      orderCount: '185单'
-    },
-    {
-      id: '4',
-      name: '李明',
-      avatar: 'https://randomuser.me/api/portraits/men/43.jpg',
-      title: '清华研究生',
-      description: '考研英语特长，英语六级高分，专注英语学习方法',
-      tags: ['考研', '英语', '备考'],
-      keywords: ['考研', '英语', '六级', '词汇', '听力', '阅读', '写作'],
-      category: 'kaoyan',
-      rating: 4.6,
-      responseRate: '90%',
-      orderCount: '98单'
-    },
-    {
-      id: '5',
-      name: '陈教授',
-      avatar: 'https://randomuser.me/api/portraits/men/75.jpg',
-      title: '某985教授 | 论文指导',
-      description: '研究生导师，IEEE/SCI论文审稿人，多篇高被引论文',
-      tags: ['论文', 'SCI', '科研'],
-      keywords: ['学术论文', 'SCI', 'IEEE', '期刊投稿', '审稿意见', '开题报告'],
-      category: 'paper',
-      rating: 4.9,
-      responseRate: '96%',
-      orderCount: '156单'
-    },
-    {
-      id: '6',
-      name: '张竞赛',
-      avatar: 'https://randomuser.me/api/portraits/women/45.jpg',
-      title: '全国数学竞赛金牌 | 教练',
-      description: '指导学生获得多项全国级奖项，擅长数学建模竞赛',
-      tags: ['数学竞赛', '数模', '指导'],
-      keywords: ['数学竞赛', '数学建模', 'MCM', 'ICM', '美赛', '华赛'],
-      category: 'competition',
-      rating: 4.8,
-      responseRate: '94%',
-      orderCount: '87单'
-    }
-  ];
 
   const { data: feed, isLoading, error: feedError, refetch } = useChannelFeed(
     'education-learning',
@@ -200,20 +111,8 @@ const EducationLearning = () => {
     { questionKeywords: categoryKeywords }
   );
 
-  const demoExpertModels = mapDemoExpertsByChannel(demoExperts, 'education-learning', { categoryFallback: 'study-abroad' });
-  const fallbackExpertModels = mergeUniqueById(
-    demoExpertModels,
-    allExperts.map((item) => mapExpertToUIModel(item, { categoryFallback: item.category }))
-  );
-  const fallbackExperts = filterExpertsByCategory(fallbackExpertModels, activeCategory);
-  const filteredExperts = (feed?.experts && feed.experts.length > 0) ? feed.experts : fallbackExperts;
-
-  const fallbackQuestions = filterQuestionsByCategory(
-    mapDemoQuestionsByChannel(demoQuestions, 'education-learning'),
-    activeCategory,
-    categoryKeywords
-  );
-  const filteredQuestions = (feed?.questions && feed.questions.length > 0) ? feed.questions : fallbackQuestions;
+  const filteredExperts = feed?.experts || [];
+  const filteredQuestions = feed?.questions || [];
   const featuredQuestion = filteredQuestions[0];
   const featuredExpert = filteredExperts[0];
   const featuredTopic = feed?.featured;

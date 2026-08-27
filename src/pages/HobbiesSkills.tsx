@@ -32,16 +32,7 @@ import ChannelExpertCard from '@/components/channel/ChannelExpertCard';
 import ChannelQuestionSkeleton from '@/components/channel/ChannelQuestionSkeleton';
 import ChannelExpertSkeleton from '@/components/channel/ChannelExpertSkeleton';
 import ChannelFloatingActionButton from '@/components/channel/ChannelFloatingActionButton';
-import { demoExperts, demoQuestions } from '@/lib/demoData';
 import PageStateCard from '@/components/common/PageStateCard';
-import {
-  filterExpertsByCategory,
-  filterQuestionsByCategory,
-  mapDemoExpertsByChannel,
-  mapDemoQuestionsByChannel,
-  mapExpertToUIModel,
-  mergeUniqueById,
-} from '@/lib/adapters/contentAdapters';
 import { buildFromState, navigateBackOr } from '@/utils/navigation';
 import { usePageScrollMemory } from '@/hooks/usePageScrollMemory';
 
@@ -115,80 +106,6 @@ const HobbiesSkills = () => {
     cooking: ['烹饪', '做饭', '菜谱', '烘焙', '料理'],
   };
 
-  const allExperts = [
-    {
-      id: '1',
-      name: '张摄影',
-      avatar: 'https://randomuser.me/api/portraits/men/22.jpg',
-      title: '专业摄影师',
-      description: '10年摄影经验，曾获多项国际摄影奖项',
-      tags: ['风光摄影', '人像', '后期修图'],
-      category: 'photography',
-      rating: 4.9,
-      responseRate: '98%',
-      orderCount: '156单'
-    },
-    {
-      id: '2',
-      name: '王音乐',
-      avatar: 'https://randomuser.me/api/portraits/women/23.jpg',
-      title: '音乐制作人',
-      description: '专注电子音乐制作，多首作品登上热门榜单',
-      tags: ['电子音乐', '混音', '编曲'],
-      category: 'music',
-      rating: 4.8,
-      responseRate: '95%',
-      orderCount: '132单'
-    },
-    {
-      id: '3',
-      name: '林画家',
-      avatar: 'https://randomuser.me/api/portraits/women/24.jpg',
-      title: '当代艺术家',
-      description: '擅长水彩与油画创作，个人作品在多个画廊展出',
-      tags: ['水彩', '油画', '素描'],
-      category: 'art',
-      rating: 4.7,
-      responseRate: '92%',
-      orderCount: '98单'
-    },
-    {
-      id: '4',
-      name: '李教练',
-      avatar: 'https://randomuser.me/api/portraits/men/25.jpg',
-      title: '健身教练',
-      description: '国家认证健身教练，专注力量训练与体态改善',
-      tags: ['力量训练', '体态矫正', '减脂'],
-      category: 'fitness',
-      rating: 4.9,
-      responseRate: '97%',
-      orderCount: '203单'
-    },
-    {
-      id: '5',
-      name: '陈大厨',
-      avatar: 'https://randomuser.me/api/portraits/men/26.jpg',
-      title: '米其林星级厨师',
-      description: '曾在多家星级餐厅任职，擅长中西融合料理',
-      tags: ['料理', '烘焙', '中餐'],
-      category: 'cooking',
-      rating: 4.8,
-      responseRate: '94%',
-      orderCount: '176单'
-    },
-    {
-      id: '6',
-      name: '赵作曲',
-      avatar: 'https://randomuser.me/api/portraits/men/27.jpg',
-      title: '音乐老师',
-      description: '古典音乐专业，钢琴演奏家，擅长教学与作曲',
-      tags: ['钢琴', '作曲', '乐理'],
-      category: 'music',
-      rating: 4.6,
-      responseRate: '90%',
-      orderCount: '87单'
-    }
-  ];
 
   const { data: feed, isLoading, error: feedError, refetch } = useChannelFeed(
     'hobbies-skills',
@@ -196,20 +113,8 @@ const HobbiesSkills = () => {
     { questionKeywords: categoryKeywords }
   );
 
-  const demoExpertModels = mapDemoExpertsByChannel(demoExperts, 'hobbies-skills', { categoryFallback: 'art' });
-  const fallbackExpertModels = mergeUniqueById(
-    demoExpertModels,
-    allExperts.map((item) => mapExpertToUIModel(item, { categoryFallback: item.category }))
-  );
-  const fallbackExperts = filterExpertsByCategory(fallbackExpertModels, activeCategory);
-  const filteredExperts = (feed?.experts && feed.experts.length > 0) ? feed.experts : fallbackExperts;
-
-  const fallbackQuestions = filterQuestionsByCategory(
-    mapDemoQuestionsByChannel(demoQuestions, 'hobbies-skills'),
-    activeCategory,
-    categoryKeywords
-  );
-  const filteredQuestions = (feed?.questions && feed.questions.length > 0) ? feed.questions : fallbackQuestions;
+  const filteredExperts = feed?.experts || [];
+  const filteredQuestions = feed?.questions || [];
   const featuredQuestion = filteredQuestions[0];
   const featuredExpert = filteredExperts[0];
   const featuredTopic = feed?.featured;

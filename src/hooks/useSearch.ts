@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { demoExperts, demoQuestions, demoTopics } from '@/lib/demoData';
 import { mergeUniqueById } from '@/lib/adapters/contentAdapters';
+import { isPresentationFixtureAllowed, isRuntimeCapabilityAllowed } from '@/config/runtimeMode';
 
 const isMissingRpcError = (error: unknown, functionName: string) => {
   const message = error instanceof Error ? error.message : String(error || '');
@@ -106,12 +107,13 @@ export const useSearch = (query: string) => {
         return { questions: [], experts: [], skills: [], posts: [] };
       }
 
-      const rpcV2Result = await (supabase as any).rpc('search_app_content_v2', {
+      const rpcV2Result = await supabase.rpc('search_app_content_v2', {
         p_query: query.trim(),
         p_limit: 10,
       });
 
       const trimmedQuery = query.trim();
+      const presentationFixturesEnabled = isPresentationFixtureAllowed();
       const normalizedQuery = trimmedQuery.toLowerCase();
       const relatedTerms = getSearchRelatedTerms(trimmedQuery);
       const normalizedKeywords = Array.from(
@@ -119,7 +121,7 @@ export const useSearch = (query: string) => {
       );
       const isMatched = (value: string) => normalizedKeywords.some((keyword) => value.includes(keyword));
 
-      const demoMatchedQuestions = demoQuestions
+      const demoMatchedQuestions = presentationFixturesEnabled ? demoQuestions
         .filter((item) => {
           const bag = [item.title, item.content || '', ...(item.tags || [])].join(' ').toLowerCase();
           return isMatched(bag);
@@ -127,9 +129,9 @@ export const useSearch = (query: string) => {
         .map((item) => ({
           ...item,
           category: item.tags?.[0] || null,
-        })) as SearchQuestion[];
+        })) as SearchQuestion[] : [];
 
-      const demoMatchedUsers = demoExperts
+      const demoMatchedUsers = presentationFixturesEnabled ? demoExperts
         .filter((item) => {
           const bag = [item.nickname || '', item.title || '', item.bio || '', ...(item.tags || [])].join(' ').toLowerCase();
           return isMatched(bag);
@@ -145,9 +147,9 @@ export const useSearch = (query: string) => {
           verification_status: item.is_verified ? 'verified' : 'unverified',
           follower_count: item.followers_count || 0,
           service_count: item.consultation_count || 0,
-        })) as SearchExpert[];
+        })) as SearchExpert[] : [];
 
-      const demoMatchedPosts = demoTopics
+      const demoMatchedPosts = presentationFixturesEnabled ? demoTopics
         .filter((item) => {
           const bag = [item.title || '', item.description || '', item.category || ''].join(' ').toLowerCase();
           return isMatched(bag);
@@ -165,7 +167,7 @@ export const useSearch = (query: string) => {
           comment_count: item.discussions_count || 0,
           author_nickname: '问问专题',
           author_avatar: null,
-        })) as SearchPost[];
+        })) as SearchPost[] : [];
 
       if (!rpcV2Result.error) {
         const payload = (rpcV2Result.data || {}) as Partial<SearchResults>;
@@ -188,8 +190,11 @@ export const useSearch = (query: string) => {
       if (!isMissingRpcError(rpcV2Result.error, 'search_app_content_v2')) {
         throw rpcV2Result.error;
       }
+      if (!isRuntimeCapabilityAllowed('legacyReadFallback')) {
+        throw rpcV2Result.error;
+      }
 
-      const rpcLegacyResult = await (supabase as any).rpc('search_app_content', {
+      const rpcLegacyResult = await supabase.rpc('search_app_content', {
         p_query: query.trim(),
         p_limit: 10,
       });
@@ -391,7 +396,7 @@ export const useHotKeywords = (keywordType: 'all' | 'question' | 'expert' | 'ski
   return useQuery({
     queryKey: ['search-hot-keywords', keywordType],
     queryFn: async (): Promise<string[]> => {
-      const fromRpc = await (supabase as any).rpc('get_search_suggestions_v2', {
+      const fromRpc = await supabase.rpc('get_search_suggestions_v2', {
         p_query: '',
         p_limit: 12,
         p_type: keywordType,
@@ -402,8 +407,11 @@ export const useHotKeywords = (keywordType: 'all' | 'question' | 'expert' | 'ski
         const hot = Array.isArray(payload.hot_keywords)
           ? payload.hot_keywords.filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
           : [];
-        if (hot.length > 0) return hot;
+        return hot;
       } else if (!isMissingRpcError(fromRpc.error, 'get_search_suggestions_v2')) {
+        throw fromRpc.error;
+      }
+      if (!isRuntimeCapabilityAllowed('legacyReadFallback')) {
         throw fromRpc.error;
       }
 

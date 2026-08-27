@@ -20,6 +20,7 @@ import { usePageScrollMemory } from '@/hooks/usePageScrollMemory';
 import { mapExpertToUIModel, mapQuestionToUIModel, mergeUniqueById } from '@/lib/adapters/contentAdapters';
 import { isNativeApp } from '@/utils/platform';
 import { buildFromState } from '@/utils/navigation';
+import { isPresentationFixtureAllowed } from '@/config/runtimeMode';
 
 interface LocationState {
   location?: string;
@@ -30,6 +31,7 @@ const Index = () => {
   const navigate = useNavigate();
   const locationState = routeLocation.state as LocationState;
   const nativeMode = isNativeApp();
+  const presentationFixturesEnabled = isPresentationFixtureAllowed();
   
   const [activeTab, setActiveTab] = useState<'everyone' | 'experts'>(() => {
     const cached = sessionStorage.getItem('tab:index');
@@ -100,7 +102,7 @@ const Index = () => {
     };
   }, []);
 
-  const activities = [
+  const presentationTopicFixtures = [
     {
       id: '1',
       title: '大学生灵活就业圈',
@@ -135,15 +137,15 @@ const Index = () => {
     return count.toString();
   };
 
-  const experts = mergeUniqueById(
-    (dbExperts || []).map((item) => mapExpertToUIModel(item)),
-    demoExperts.map((item) => mapExpertToUIModel(item))
-  );
+  const realExperts = (dbExperts || []).map((item) => mapExpertToUIModel(item));
+  const experts = presentationFixturesEnabled
+    ? mergeUniqueById(realExperts, demoExperts.map((item) => mapExpertToUIModel(item)))
+    : realExperts;
 
-  const homepageQuestions = mergeUniqueById(
-    (questions || []).map((item) => mapQuestionToUIModel(item)),
-    demoQuestions.map((item) => mapQuestionToUIModel(item))
-  );
+  const realQuestions = (questions || []).map((item) => mapQuestionToUIModel(item));
+  const homepageQuestions = presentationFixturesEnabled
+    ? mergeUniqueById(realQuestions, demoQuestions.map((item) => mapQuestionToUIModel(item)))
+    : realQuestions;
 
   const handleViewQuestionDetail = (questionId: string) => {
     navigate(`/question/${questionId}`, { state: buildFromState(routeLocation) });
@@ -337,9 +339,9 @@ const Index = () => {
               </div>
             ))}
           </div>
-        ) : (
+        ) : presentationFixturesEnabled ? (
           <div className="flex gap-4 overflow-x-auto px-4 pb-2 scrollbar-hide snap-x snap-mandatory" data-no-swipe-back="true">
-            {activities.map((activity, index) => (
+            {presentationTopicFixtures.map((activity) => (
               <div key={activity.id} className="shrink-0 w-[280px] snap-start">
                 <div className="surface-card overflow-hidden rounded-3xl">
                   <div className="relative h-[112px]">
@@ -369,6 +371,14 @@ const Index = () => {
                 </div>
               </div>
             ))}
+          </div>
+        ) : (
+          <div className="px-4 pb-2">
+            <PageStateCard
+              compact
+              title="热榜暂时为空"
+              description="当前没有可展示的真实专题。"
+            />
           </div>
         )}
       </div>

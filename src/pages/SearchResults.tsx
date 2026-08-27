@@ -16,6 +16,7 @@ import { isNativeApp } from '@/utils/platform';
 import { usePageScrollMemory } from '@/hooks/usePageScrollMemory';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { isPresentationFixtureAllowed } from '@/config/runtimeMode';
 
 const SEARCH_HISTORY_KEY = 'searchHistory';
 const channelThemes = {
@@ -90,6 +91,7 @@ const SearchResults = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const nativeMode = isNativeApp();
+  const presentationFixturesEnabled = isPresentationFixtureAllowed();
   const searchParams = new URLSearchParams(location.search);
   const initialQuery = searchParams.get('q') || '';
   const channel = searchParams.get('channel') || 'default';
@@ -219,12 +221,14 @@ const SearchResults = () => {
     });
 
     if (user) {
-      (supabase as any)
+      void supabase
         .rpc('upsert_search_history', {
           p_query_text: normalized,
           p_query_type: 'all',
         })
-        .catch(() => {});
+        .then(({ error: historyError }) => {
+          if (historyError) console.warn('Search history write failed', historyError.message);
+        });
     }
   };
 
@@ -241,7 +245,14 @@ const SearchResults = () => {
   const showError = debouncedQuery.trim() && !!error;
   const showSuggestions = searchFocused && searchQuery.trim().length > 0;
   const showDefaultState = !debouncedQuery.trim() && !showSuggestions;
-  const displayHotTerms = hotKeywords.length > 0 ? hotKeywords : popularSearchTerms;
+  const displayHotTerms = useMemo(
+    () => hotKeywords.length > 0
+      ? hotKeywords
+      : presentationFixturesEnabled
+        ? popularSearchTerms
+        : [],
+    [hotKeywords, presentationFixturesEnabled],
+  );
 
   const suggestionTerms = useMemo(() => {
     const keyword = searchQuery.trim().toLowerCase();
@@ -252,8 +263,12 @@ const SearchResults = () => {
       ...recentSearches.map((term) => ({ term, source: 'recent' as const })),
       ...displayHotTerms.map((term) => ({ term, source: 'popular' as const })),
       ...relatedTerms.map((term) => ({ term, source: 'related' as const })),
-      ...demoQuestions.flatMap((item) => [item.title, ...(item.tags || [])]).map((term) => ({ term, source: 'content' as const })),
-      ...demoExperts.flatMap((item) => [item.title || '', ...(item.tags || [])]).map((term) => ({ term, source: 'content' as const })),
+      ...(presentationFixturesEnabled
+        ? demoQuestions.flatMap((item) => [item.title, ...(item.tags || [])]).map((term) => ({ term, source: 'content' as const }))
+        : []),
+      ...(presentationFixturesEnabled
+        ? demoExperts.flatMap((item) => [item.title || '', ...(item.tags || [])]).map((term) => ({ term, source: 'content' as const }))
+        : []),
     ];
 
     const scoreBySource = { recent: 45, related: 35, popular: 28, content: 12 } as const;
@@ -283,7 +298,7 @@ const SearchResults = () => {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 8)
       .map(([lower]) => labelByTerm.get(lower) || lower);
-  }, [displayHotTerms, searchQuery, recentSearches]);
+  }, [displayHotTerms, presentationFixturesEnabled, searchQuery, recentSearches]);
 
   const relatedTerms = useMemo(() => {
     if (!debouncedQuery.trim()) return [] as string[];

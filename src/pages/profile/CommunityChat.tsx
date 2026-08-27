@@ -9,6 +9,8 @@ import SubPageHeader from '@/components/layout/SubPageHeader';
 import { isNativeApp } from '@/utils/platform';
 import { buildFromState } from '@/utils/navigation';
 import { useToast } from '@/hooks/use-toast';
+import PageStateCard from '@/components/common/PageStateCard';
+import { isPresentationFixtureAllowed } from '@/config/runtimeMode';
 
 interface CommunityGroupState {
   id: string;
@@ -39,6 +41,7 @@ const CommunityChat = () => {
   const { groupId } = useParams();
   const nativeMode = isNativeApp();
   const { toast } = useToast();
+  const presentationFixturesEnabled = isPresentationFixtureAllowed();
   const messageEndRef = useRef<HTMLDivElement | null>(null);
   const [draft, setDraft] = useState('');
   const groupFromState = (location.state as { group?: CommunityGroupState } | null)?.group;
@@ -80,6 +83,22 @@ const CommunityChat = () => {
       variant: 'destructive',
     });
   };
+
+  if (!presentationFixturesEnabled) {
+    return (
+      <div className="min-h-[100dvh] bg-muted">
+        <SubPageHeader title="社群聊天" />
+        <div className="px-4 pt-5">
+          <PageStateCard
+            variant="error"
+            compact
+            title="社群聊天暂未开放"
+            description="当前没有可用的真实群聊读取或发送能力。"
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[100dvh] bg-muted pb-24">

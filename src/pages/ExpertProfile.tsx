@@ -22,6 +22,7 @@ import PageStateCard from '@/components/common/PageStateCard';
 import { buildFromState, navigateBackOr } from '@/utils/navigation';
 import SubPageHeader from '@/components/layout/SubPageHeader';
 import { isNativeApp } from '@/utils/platform';
+import { isPresentationFixtureAllowed } from '@/config/runtimeMode';
 
 type EducationItem = string | { school?: string; degree?: string };
 type ExperienceItem = string | { company?: string; position?: string; title?: string };
@@ -31,8 +32,10 @@ const ExpertProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const isDemoExpert = !!id?.startsWith('demo-expert-');
-  const { data: expert, isLoading, error } = useExpertDetail(isDemoExpert ? '' : id || '');
+  const presentationFixturesEnabled = isPresentationFixtureAllowed();
+  const requestedDemoExpert = !!id?.startsWith('demo-expert-');
+  const isDemoExpert = presentationFixturesEnabled && requestedDemoExpert;
+  const { data: expert, isLoading, error } = useExpertDetail(requestedDemoExpert ? '' : id || '');
   const nativeMode = isNativeApp();
   const [isBioExpanded, setIsBioExpanded] = useState(false);
   const resolvedExpert = isDemoExpert ? demoExperts.find((item) => item.id === id) : expert;
@@ -41,7 +44,15 @@ const ExpertProfile = () => {
     window.scrollTo({ top: 0, behavior: 'auto' });
   }, [id]);
 
-  if (!isDemoExpert && isLoading) {
+  if (requestedDemoExpert && !presentationFixturesEnabled) {
+    return (
+      <div className="min-h-[100dvh] flex items-center justify-center bg-gradient-to-b from-[rgb(248,253,251)] via-white to-white p-4">
+        <PageStateCard variant="error" title="演示专家不可用" description="当前运行环境未启用展示数据。" />
+      </div>
+    );
+  }
+
+  if (!requestedDemoExpert && isLoading) {
     return (
       <div className="min-h-[100dvh] flex items-center justify-center bg-gradient-to-b from-[rgb(248,253,251)] via-white to-white p-4">
         <PageStateCard variant="loading" title="正在加载个人主页…" />

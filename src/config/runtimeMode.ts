@@ -1,4 +1,5 @@
 import {
+  isPresentationFixtureAllowedForMode,
   isRuntimeCapabilityAllowedForMode,
   resolveRuntimeMode,
 } from "./runtimeModeCore";
@@ -13,6 +14,16 @@ export type { RuntimeCapability, RuntimeMode } from "./runtimeModeCore";
 
 // Vite MODE is a build fact. Client-provided VITE_* values cannot downgrade it.
 export const runtimeMode: RuntimeMode = resolveRuntimeMode(import.meta.env.MODE);
+const presentationFixturesExplicitlyRequested = import.meta.env.VITE_PRESENTATION_FIXTURES === "true";
+
+export function isPresentationFixtureAllowed(
+  mode: RuntimeMode = runtimeMode,
+): boolean {
+  return isPresentationFixtureAllowedForMode(
+    mode,
+    presentationFixturesExplicitlyRequested,
+  );
+}
 
 export function isRuntimeCapabilityAllowed(
   capability: RuntimeCapability,

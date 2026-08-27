@@ -31,12 +31,14 @@ import PageStateCard from '@/components/common/PageStateCard';
 import { usePageScrollMemory } from '@/hooks/usePageScrollMemory';
 import { isNativeApp } from '@/utils/platform';
 import { buildFromState } from '@/utils/navigation';
+import { isPresentationFixtureAllowed } from '@/config/runtimeMode';
 import { toast } from 'sonner';
 
 const Discover: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const nativeMode = isNativeApp();
+  const presentationFixturesEnabled = isPresentationFixtureAllowed();
   const [activeTab, setActiveTab] = useState<'following' | 'recommended' | 'local'>(() => {
     const cached = sessionStorage.getItem('tab:discover');
     if (cached === 'following' || cached === 'local' || cached === 'recommended') return cached;
@@ -67,7 +69,7 @@ const Discover: React.FC = () => {
     refetch: retryLocalPosts,
   } = useLocalPosts(currentLocation);
 
-  const plazaTopics = [
+  const presentationTopicFixtures = [
     { id: 'topic-1', name: '留学申请', hint: '经验帖最多' },
     { id: 'topic-2', name: '简历优化', hint: '今天很热' },
     { id: 'topic-3', name: '租房避坑', hint: '同城讨论' },
@@ -247,7 +249,7 @@ const Discover: React.FC = () => {
               emptyText="暂无关注用户的动态，去关注感兴趣的人吧"
               showComposer
               onQuickPost={() => setIsPostDialogOpen(true)}
-              topicChips={plazaTopics.slice(0, 4)}
+              topicChips={presentationFixturesEnabled ? presentationTopicFixtures.slice(0, 4) : []}
               tabLabel="关注广场"
             />
           )}
@@ -266,7 +268,7 @@ const Discover: React.FC = () => {
             formatTime={formatTime}
             showComposer
             onQuickPost={() => setIsPostDialogOpen(true)}
-            topicChips={plazaTopics}
+            topicChips={presentationFixturesEnabled ? presentationTopicFixtures : []}
             tabLabel="推荐广场"
           />
         </TabsContent>
@@ -285,7 +287,7 @@ const Discover: React.FC = () => {
             emptyText={`还没有“${currentLocation}”的同城动态`}
             showComposer
             onQuickPost={() => setIsPostDialogOpen(true)}
-            topicChips={plazaTopics.slice(1)}
+            topicChips={presentationFixturesEnabled ? presentationTopicFixtures.slice(1) : []}
             tabLabel={`${currentLocation}广场`}
             locationLabel={currentLocation}
           />

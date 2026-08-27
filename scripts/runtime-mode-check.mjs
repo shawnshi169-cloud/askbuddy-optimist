@@ -22,6 +22,19 @@ assert.equal(runtime.resolveRuntimeMode("production"), "production");
 assert.equal(runtime.resolveRuntimeMode("development-from-local-env"), "production");
 assert.equal(runtime.resolveRuntimeMode(undefined), "production");
 
+assert.equal(runtime.isPresentationFixtureAllowedForMode("development", true), true);
+assert.equal(runtime.isPresentationFixtureAllowedForMode("development", false), false);
+assert.equal(runtime.isPresentationFixtureAllowedForMode("staging", true), false);
+assert.equal(runtime.isPresentationFixtureAllowedForMode("production", true), false);
+assert.equal(
+  runtime.isPresentationFixtureAllowedForMode(runtime.resolveRuntimeMode("trial"), true),
+  false,
+);
+assert.equal(
+  runtime.isPresentationFixtureAllowedForMode(runtime.resolveRuntimeMode(undefined), true),
+  false,
+);
+
 for (const capability of runtime.RUNTIME_CAPABILITIES) {
   assert.equal(
     runtime.isRuntimeCapabilityAllowedForMode(capability, "production"),

@@ -32,16 +32,7 @@ import ChannelExpertCard from '@/components/channel/ChannelExpertCard';
 import ChannelQuestionSkeleton from '@/components/channel/ChannelQuestionSkeleton';
 import ChannelExpertSkeleton from '@/components/channel/ChannelExpertSkeleton';
 import ChannelFloatingActionButton from '@/components/channel/ChannelFloatingActionButton';
-import { demoExperts, demoQuestions } from '@/lib/demoData';
 import PageStateCard from '@/components/common/PageStateCard';
-import {
-  filterExpertsByCategory,
-  filterQuestionsByCategory,
-  mapDemoExpertsByChannel,
-  mapDemoQuestionsByChannel,
-  mapExpertToUIModel,
-  mergeUniqueById,
-} from '@/lib/adapters/contentAdapters';
 import { buildFromState, navigateBackOr } from '@/utils/navigation';
 import { usePageScrollMemory } from '@/hooks/usePageScrollMemory';
 
@@ -115,80 +106,6 @@ const LifestyleServices = () => {
     overseas: ['海外生活', '移民', '签证', '国际', '境外'],
   };
 
-  const allExperts = [
-    {
-      id: '1',
-      name: '王律师',
-      avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-      title: '劳动法专家',
-      description: '专注于劳动法、合同纠纷，5年执业经验',
-      tags: ['劳动法', '合同', '纠纷'],
-      category: 'legal',
-      rating: 4.8,
-      responseRate: '95%',
-      orderCount: '156单'
-    },
-    {
-      id: '2',
-      name: '林咨询师',
-      avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
-      title: '情感心理专家',
-      description: '婚恋关系、亲子关系咨询，执业8年',
-      tags: ['情感', '心理', '婚恋'],
-      category: 'emotional',
-      rating: 4.9,
-      responseRate: '98%',
-      orderCount: '203单'
-    },
-    {
-      id: '3',
-      name: '张先生',
-      avatar: 'https://randomuser.me/api/portraits/men/85.jpg',
-      title: '租房达人',
-      description: '10年租房经验，帮助过200+人解决租房问题',
-      tags: ['租房', '合同', '维权'],
-      category: 'housing',
-      rating: 4.6,
-      responseRate: '92%',
-      orderCount: '127单'
-    },
-    {
-      id: '4',
-      name: '李顾问',
-      avatar: 'https://randomuser.me/api/portraits/women/68.jpg',
-      title: '保险规划师',
-      description: '专注于个人、家庭保险规划，擅长理赔指导',
-      tags: ['保险', '理赔', '规划'],
-      category: 'insurance',
-      rating: 4.7,
-      responseRate: '94%',
-      orderCount: '185单'
-    },
-    {
-      id: '5',
-      name: '郑先生',
-      avatar: 'https://randomuser.me/api/portraits/men/42.jpg',
-      title: '移民顾问',
-      description: '5年海外留学与移民经验，擅长澳洲和加拿大',
-      tags: ['移民', '留学', '海外生活'],
-      category: 'overseas',
-      rating: 4.5,
-      responseRate: '90%',
-      orderCount: '96单'
-    },
-    {
-      id: '6',
-      name: '赵房产',
-      avatar: 'https://randomuser.me/api/portraits/men/56.jpg',
-      title: '房产经纪人',
-      description: '8年房产经纪经验，专注北上广深一线城市租赁市场',
-      tags: ['房产', '租赁', '买卖'],
-      category: 'housing',
-      rating: 4.8,
-      responseRate: '96%',
-      orderCount: '214单'
-    }
-  ];
 
   const { data: feed, isLoading, error: feedError, refetch } = useChannelFeed(
     'lifestyle-services',
@@ -196,20 +113,8 @@ const LifestyleServices = () => {
     { questionKeywords: categoryKeywords }
   );
 
-  const demoExpertModels = mapDemoExpertsByChannel(demoExperts, 'lifestyle-services', { categoryFallback: 'housing' });
-  const fallbackExpertModels = mergeUniqueById(
-    demoExpertModels,
-    allExperts.map((item) => mapExpertToUIModel(item, { categoryFallback: item.category }))
-  );
-  const fallbackExperts = filterExpertsByCategory(fallbackExpertModels, activeCategory);
-  const filteredExperts = (feed?.experts && feed.experts.length > 0) ? feed.experts : fallbackExperts;
-
-  const fallbackQuestions = filterQuestionsByCategory(
-    mapDemoQuestionsByChannel(demoQuestions, 'lifestyle-services'),
-    activeCategory,
-    categoryKeywords
-  );
-  const filteredQuestions = (feed?.questions && feed.questions.length > 0) ? feed.questions : fallbackQuestions;
+  const filteredExperts = feed?.experts || [];
+  const filteredQuestions = feed?.questions || [];
   const featuredQuestion = filteredQuestions[0];
   const featuredExpert = filteredExperts[0];
   const featuredTopic = feed?.featured;

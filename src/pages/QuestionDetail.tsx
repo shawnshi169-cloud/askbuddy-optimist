@@ -19,6 +19,7 @@ import { demoQuestionDetails } from '@/lib/demoData';
 import PageStateCard from "@/components/common/PageStateCard";
 import { buildFromState, navigateBackOr, navigateToAuthWithReturn } from '@/utils/navigation';
 import { copyTextToClipboard } from '@/utils/clipboard';
+import { isPresentationFixtureAllowed } from '@/config/runtimeMode';
 
 // 分享选项
 const SHARE_OPTIONS = [
@@ -34,10 +35,12 @@ const QuestionDetail = () => {
   const location = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
-  const isDemoQuestion = !!id?.startsWith('demo-question-');
+  const presentationFixturesEnabled = isPresentationFixtureAllowed();
+  const requestedDemoQuestion = !!id?.startsWith('demo-question-');
+  const isDemoQuestion = presentationFixturesEnabled && requestedDemoQuestion;
 
   // 获取问题数据
-  const { data, isLoading, error } = useQuestionDetail(isDemoQuestion ? '' : id || '');
+  const { data, isLoading, error } = useQuestionDetail(requestedDemoQuestion ? '' : id || '');
   const createAnswer = useCreateAnswer();
   const toggleFavorite = useToggleFavorite();
   const acceptAnswer = useAcceptAnswer();
@@ -73,7 +76,15 @@ const QuestionDetail = () => {
     return count.toString();
   };
 
-  if (!isDemoQuestion && isLoading) {
+  if (requestedDemoQuestion && !presentationFixturesEnabled) {
+    return (
+      <div className="app-container min-h-[100dvh] bg-gradient-to-b from-[rgb(248,253,251)] via-white to-white flex items-center justify-center p-4">
+        <PageStateCard variant="error" title="演示问题不可用" description="当前运行环境未启用展示数据。" />
+      </div>
+    );
+  }
+
+  if (!requestedDemoQuestion && isLoading) {
     return (
       <div className="app-container min-h-[100dvh] bg-gradient-to-b from-[rgb(248,253,251)] via-white to-white flex items-center justify-center p-4">
         <PageStateCard variant="loading" title="正在加载问题内容…" />
