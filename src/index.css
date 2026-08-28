@@ -33,6 +33,15 @@
     --ring: 174 54% 56%;
 
     --radius: 0.75rem;
+    /* UI 2.0 semantic tokens. Keep shadcn --primary unchanged for legacy pages. */
+    --app-brand-mint-rgb: 121 213 199;
+    --app-action-rgb: 43 127 115;
+    --app-page-rgb: 250 252 251;
+    --app-surface-rgb: 255 255 255;
+    --app-border-subtle-rgb: 225 234 231;
+    --app-action-soft-rgb: 231 246 242;
+    --app-warm-rgb: 255 247 237;
+    --app-warm-foreground-rgb: 194 65 12;
     --app-header-rgb: 121 213 199;
     --app-header-soft-rgb: 223 245 239;
     --app-accent-rgb: 73 170 155;
@@ -48,6 +57,13 @@
     --app-space-2: 0.5rem;
     --app-space-3: 0.75rem;
     --app-space-4: 1rem;
+    --app-space-6: 1.5rem;
+    --app-space-8: 2rem;
+    --app-radius-sm: 0.5rem;
+    --app-radius-md: 0.75rem;
+    --app-radius-lg: 1rem;
+    --app-radius-xl: 1.25rem;
+    --app-radius-sheet: 1.5rem;
   }
   
   * {
@@ -133,6 +149,39 @@
     box-shadow: var(--app-shadow-sm);
   }
 
+  .app-surface {
+    @apply bg-white border;
+    border-color: rgb(var(--app-border-subtle-rgb));
+    border-radius: var(--app-radius-lg);
+  }
+
+  .app-surface-elevated {
+    @apply bg-white border;
+    border-color: rgb(var(--app-border-subtle-rgb));
+    border-radius: var(--app-radius-xl);
+    box-shadow: var(--app-shadow-md);
+  }
+
+  .app-page-bg {
+    background-color: rgb(var(--app-page-rgb));
+  }
+
+  .app-brand-mint-bg {
+    background-color: rgb(var(--app-brand-mint-rgb));
+  }
+
+  .app-action-bg {
+    background-color: rgb(var(--app-action-rgb));
+  }
+
+  .app-action-text {
+    color: rgb(var(--app-action-rgb));
+  }
+
+  .app-action-soft-bg {
+    background-color: rgb(var(--app-action-soft-rgb));
+  }
+
   .app-header-bg {
     background-color: rgb(var(--app-header-rgb));
   }
@@ -185,6 +234,26 @@
     @apply rounded-full bg-primary text-primary-foreground shadow-sm transition-colors hover:bg-primary/90;
   }
 
+  .app-btn-action {
+    @apply inline-flex min-h-11 items-center justify-center rounded-full px-4 text-sm font-semibold text-white transition-[transform,background-color] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-45 active:scale-[0.98];
+    background-color: rgb(var(--app-action-rgb));
+    --tw-ring-color: rgb(var(--app-action-rgb) / 0.3);
+  }
+
+  .app-btn-action:hover {
+    background-color: rgb(35 105 96);
+  }
+
+  .app-btn-quiet {
+    @apply inline-flex min-h-11 items-center justify-center rounded-full px-4 text-sm font-semibold transition-[transform,background-color] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98];
+    color: rgb(var(--app-action-rgb));
+    --tw-ring-color: rgb(var(--app-action-rgb) / 0.25);
+  }
+
+  .app-btn-quiet:hover {
+    background-color: rgb(var(--app-action-soft-rgb));
+  }
+
   .app-btn-secondary {
     @apply rounded-full border app-soft-border bg-white text-foreground shadow-sm transition-colors hover:bg-muted;
   }
@@ -198,11 +267,40 @@
   }
 
   .app-section-title {
-    @apply text-base font-semibold text-foreground;
+    @apply text-[17px] font-semibold leading-6 text-foreground;
   }
 
   .app-section-subtitle {
     @apply mt-1 text-xs leading-5 text-muted-foreground;
+  }
+
+  .app-page-title {
+    @apply text-xl font-semibold leading-7 text-foreground;
+  }
+
+  .app-content-title {
+    @apply text-[16px] font-semibold leading-6 text-foreground;
+  }
+
+  .app-body-copy {
+    @apply text-[15px] leading-6 text-foreground;
+  }
+
+  .app-secondary-copy {
+    @apply text-[13px] leading-5 text-muted-foreground;
+  }
+
+  .app-metadata {
+    @apply text-xs leading-4 text-muted-foreground;
+  }
+
+  .app-feed-list {
+    @apply overflow-hidden bg-white;
+  }
+
+  .app-feed-item {
+    @apply border-b px-4 py-4 last:border-b-0;
+    border-color: rgb(var(--app-border-subtle-rgb));
   }
 }
 
