@@ -7,6 +7,8 @@ import { buildFromState } from '@/utils/navigation';
 import PageStateCard from '@/components/common/PageStateCard';
 import { isPresentationFixtureAllowed } from '@/config/runtimeMode';
 
+type CategorySectionVariant = 'default' | 'home';
+
 // Map icon names from DB to actual Lucide components
 const iconMap: Record<string, LucideIcon> = {
   GraduationCap,
@@ -41,6 +43,13 @@ const gradients = [
   'from-gray-400 to-slate-500',
 ];
 
+const homeAccents = [
+  'bg-blue-50 text-blue-600',
+  'bg-teal-50 text-teal-700',
+  'bg-orange-50 text-orange-600',
+  'bg-violet-50 text-violet-600',
+];
+
 const presentationCategoryFixtures = [
   { id: 'education', name: '教育学习', icon: 'GraduationCap', gradient: 'from-blue-400 to-indigo-500', path: '/education' },
   { id: 'career', name: '职业发展', icon: 'Briefcase', gradient: 'from-green-400 to-teal-500', path: '/career' },
@@ -48,7 +57,11 @@ const presentationCategoryFixtures = [
   { id: 'hobbies', name: '兴趣技能', icon: 'Camera', gradient: 'from-pink-400 to-rose-500', path: '/hobbies' },
 ];
 
-const CategorySection: React.FC = () => {
+interface CategorySectionProps {
+  variant?: CategorySectionVariant;
+}
+
+const CategorySection: React.FC<CategorySectionProps> = ({ variant = 'default' }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { data: dbCategories, isLoading, isError, error, refetch } = useCategories();
@@ -72,10 +85,22 @@ const CategorySection: React.FC = () => {
   };
 
   if (isLoading) {
+    if (variant === 'home') {
+      return (
+        <div className="grid grid-cols-4 gap-3 px-4 py-5" role="status" aria-label="正在加载分类">
+          {[0, 1, 2, 3].map((item) => (
+            <div key={item} className="flex animate-pulse flex-col items-center gap-2">
+              <div className="h-12 w-12 rounded-2xl bg-slate-100" />
+              <div className="h-3 w-12 rounded-full bg-slate-100" />
+            </div>
+          ))}
+        </div>
+      );
+    }
     return <PageStateCard compact variant="loading" title="正在加载分类…" className="mx-4 my-4" />;
   }
 
-  if (isError) {
+  if (isError && !presentationFixturesEnabled) {
     return (
       <PageStateCard
         compact
@@ -84,13 +109,42 @@ const CategorySection: React.FC = () => {
         description={error instanceof Error ? error.message : '请稍后重试'}
         actionLabel="重试"
         onAction={() => void refetch()}
-        className="mx-4 my-4"
+        className={variant === 'home' ? 'app-surface mx-4 my-4 rounded-2xl shadow-none' : 'mx-4 my-4'}
       />
     );
   }
 
   if (categories.length === 0) {
-    return <PageStateCard compact title="暂无可用分类" className="mx-4 my-4" />;
+    return (
+      <PageStateCard
+        compact
+        title="暂无可用分类"
+        className={variant === 'home' ? 'app-surface mx-4 my-4 rounded-2xl shadow-none' : 'mx-4 my-4'}
+      />
+    );
+  }
+
+  if (variant === 'home') {
+    return (
+      <div className="grid grid-cols-4 gap-3 px-4 py-5">
+        {categories.map((category, index) => {
+          const IconComponent = iconMap[category.icon] || HelpCircle;
+          return (
+            <button
+              type="button"
+              key={category.id}
+              className="flex min-h-[76px] flex-col items-center justify-start gap-2 rounded-2xl px-1 py-1 text-slate-700 transition-transform duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-action/30 active:scale-[0.98]"
+              onClick={() => handleCategoryClick(category.path)}
+            >
+              <span className={`flex h-12 w-12 items-center justify-center rounded-2xl ${homeAccents[index] || homeAccents[0]}`}>
+                <IconComponent aria-hidden size={22} strokeWidth={2} />
+              </span>
+              <span className="text-center text-xs font-semibold leading-4">{category.name}</span>
+            </button>
+          );
+        })}
+      </div>
+    );
   }
 
   return (

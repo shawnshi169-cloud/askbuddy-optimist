@@ -12,11 +12,13 @@ interface QuestionCardProps {
     name: string;
     avatar: string | null;
   };
-  time: string;
+  time?: string;
   tags: string[];
   points: number | null;
   viewCount?: string;
+  answerCount?: number | null;
   delay?: number;
+  variant?: 'default' | 'homeFeed';
 }
 
 const QuestionCard: React.FC<QuestionCardProps> = ({
@@ -28,7 +30,9 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
   tags,
   points,
   viewCount,
-  delay = 0
+  answerCount,
+  delay = 0,
+  variant = 'default',
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -42,6 +46,53 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
       state: { ...buildFromState(location), intent: 'answer' },
     });
   };
+
+  if (variant === 'homeFeed') {
+    const metadata = [
+      answerCount !== null && answerCount !== undefined ? `${answerCount}个回答` : null,
+      viewCount ? `${viewCount}人看过` : null,
+    ].filter(Boolean);
+
+    return (
+      <article className="border-b border-app-border-subtle last:border-b-0">
+        <button
+          type="button"
+          className="block w-full px-1 py-4 text-left transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-app-action/25 active:bg-app-action-soft/50"
+          onClick={openQuestionDetail}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="app-content-title min-w-0 flex-1">{title}</h3>
+            {points !== null && points > 0 ? (
+              <span className="shrink-0 rounded-full bg-amber-50 px-2 py-1 text-[11px] font-medium text-amber-700">
+                {points} 积分
+              </span>
+            ) : null}
+          </div>
+
+          {description ? (
+            <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{description}</p>
+          ) : null}
+
+          {tags.length > 0 ? (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {tags.slice(0, 3).map((tag) => (
+                <span key={tag} className="rounded-full bg-app-action-soft px-2 py-1 text-[11px] font-medium text-app-action">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          ) : null}
+
+          <div className="mt-3 flex items-center justify-between gap-3 text-xs text-slate-500">
+            <span className="min-w-0 truncate">
+              {asker.name}{time ? ` · ${time}` : ''}
+            </span>
+            {metadata.length > 0 ? <span className="shrink-0">{metadata.join(' · ')}</span> : null}
+          </div>
+        </button>
+      </article>
+    );
+  }
 
   return (
     <>
@@ -79,7 +130,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
             </Avatar>
             <div className="text-left">
               <div className="text-xs font-medium text-foreground">{asker.name}</div>
-              <div className="text-xs text-muted-foreground">{time}</div>
+              {time ? <div className="text-xs text-muted-foreground">{time}</div> : null}
             </div>
           </div>
           

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Home, Compass, Plus, MessageSquare, User, Star } from 'lucide-react';
+import { ChevronRight, CircleHelp, Compass, HandHeart, Home, MessageSquare, Plus, User } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useUnreadCount } from '@/hooks/useNotifications';
 import { useUnreadMessageCount } from '@/hooks/useMessages';
@@ -8,9 +8,11 @@ import { isNativeApp } from '@/utils/platform';
 import { 
   Sheet,
   SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
   SheetTrigger
 } from "@/components/ui/sheet";
-import { Button } from '@/components/ui/button';
 import { buildFromState } from '@/utils/navigation';
 
 const HOME_TAB_PREFIXES = ['/education', '/career', '/lifestyle', '/hobbies', '/search', '/topic'];
@@ -69,7 +71,7 @@ const BottomNav: React.FC = () => {
 
   return (
     <nav 
-      className={`fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.06)] ${
+      className={`fixed bottom-0 left-0 right-0 z-50 border-t border-app-border-subtle bg-white/95 backdrop-blur-sm ${
         nativeMode ? '' : 'max-w-md mx-auto'
       }`}
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
@@ -80,8 +82,8 @@ const BottomNav: React.FC = () => {
           className={`nav-item flex flex-col items-center justify-center w-1/5 py-1 ${belongsToTab('/') ? 'active' : ''}`}
           aria-current={belongsToTab('/') ? 'page' : undefined}
         >
-          <Home size={20} className={belongsToTab('/') ? "text-primary" : "text-muted-foreground"} />
-          <span className={`text-[10px] mt-0.5 ${belongsToTab('/') ? "text-primary font-medium" : "text-muted-foreground"}`}>首页</span>
+          <Home size={20} className={belongsToTab('/') ? "text-app-action" : "text-muted-foreground"} />
+          <span className={`text-[10px] mt-0.5 ${belongsToTab('/') ? "text-app-action font-medium" : "text-muted-foreground"}`}>首页</span>
         </button>
         
         <button 
@@ -89,8 +91,8 @@ const BottomNav: React.FC = () => {
           className={`nav-item flex flex-col items-center justify-center w-1/5 py-1 ${belongsToTab('/discover') ? 'active' : ''}`}
           aria-current={belongsToTab('/discover') ? 'page' : undefined}
         >
-          <Compass size={20} className={belongsToTab('/discover') ? "text-primary" : "text-muted-foreground"} />
-          <span className={`text-[10px] mt-0.5 ${belongsToTab('/discover') ? "text-primary font-medium" : "text-muted-foreground"}`}>发现</span>
+          <Compass size={20} className={belongsToTab('/discover') ? "text-app-action" : "text-muted-foreground"} />
+          <span className={`text-[10px] mt-0.5 ${belongsToTab('/discover') ? "text-app-action font-medium" : "text-muted-foreground"}`}>发现</span>
         </button>
         
         <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
@@ -101,30 +103,48 @@ const BottomNav: React.FC = () => {
               aria-haspopup="dialog"
               aria-expanded={isMenuOpen}
             >
-              <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center shadow-lg ring-2 ring-primary/20">
-                <Plus size={22} className="text-primary-foreground" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-app-action text-white shadow-[0_6px_16px_rgba(43,127,115,0.24)]">
+                <Plus size={22} />
               </div>
-              <span className="text-[10px] mt-0.5 text-primary font-semibold">发布</span>
+              <span className="mt-0.5 text-[10px] font-semibold text-app-action">发布</span>
             </button>
           </SheetTrigger>
-          <SheetContent side="bottom" className="pt-0 px-0 pb-8 rounded-t-3xl">
-            <div className="flex flex-col items-center pt-8 pb-4 gap-4">
-              <Button 
+          <SheetContent side="bottom" className="mx-auto max-w-md rounded-t-[24px] border-app-border-subtle px-4 pb-8 pt-6 shadow-[0_-12px_36px_rgba(15,23,42,0.12)]">
+            <SheetHeader className="pr-10 text-left">
+              <SheetTitle className="text-xl font-semibold text-slate-800">想做点什么？</SheetTitle>
+              <SheetDescription>选择一个真实可用的发布入口</SheetDescription>
+            </SheetHeader>
+
+            <div className="mt-5 divide-y divide-app-border-subtle overflow-hidden rounded-2xl border border-app-border-subtle bg-white">
+              <button
+                type="button"
                 onClick={handleNeedClick}
-                className="w-4/5 h-12 text-base rounded-full"
+                className="flex min-h-16 w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-app-action/25 active:bg-app-action-soft/60"
               >
-                <MessageSquare size={18} className="mr-2" />
-                我有需求
-              </Button>
-              
-              <Button 
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-app-action-soft text-app-action">
+                  <CircleHelp aria-hidden size={20} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[15px] font-semibold text-slate-800">提个问题</span>
+                  <span className="mt-0.5 block text-[13px] text-slate-500">有件事想找人问问</span>
+                </span>
+                <ChevronRight aria-hidden size={18} className="text-slate-400" />
+              </button>
+
+              <button
+                type="button"
                 onClick={handleSkillClick}
-                variant="secondary"
-                className="w-4/5 h-12 text-base rounded-full"
+                className="flex min-h-16 w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-app-action/25 active:bg-app-action-soft/60"
               >
-                <Star size={18} className="mr-2" />
-                我有技能
-              </Button>
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-orange-50 text-orange-600">
+                  <HandHeart aria-hidden size={20} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[15px] font-semibold text-slate-800">我能帮忙</span>
+                  <span className="mt-0.5 block text-[13px] text-slate-500">把自己的经历和能力告诉大家</span>
+                </span>
+                <ChevronRight aria-hidden size={18} className="text-slate-400" />
+              </button>
             </div>
           </SheetContent>
         </Sheet>
@@ -135,14 +155,14 @@ const BottomNav: React.FC = () => {
           aria-current={belongsToTab('/messages') ? 'page' : undefined}
         >
           <div className="relative">
-            <MessageSquare size={20} className={belongsToTab('/messages') ? "text-primary" : "text-muted-foreground"} />
+            <MessageSquare size={20} className={belongsToTab('/messages') ? "text-app-action" : "text-muted-foreground"} />
             {(unreadCount || 0) > 0 && (
               <span className="absolute -top-1 -right-2 min-w-[16px] h-4 bg-destructive rounded-full text-[10px] text-destructive-foreground flex items-center justify-center px-1">
                 {(unreadCount || 0) > 99 ? '99+' : unreadCount}
               </span>
             )}
           </div>
-          <span className={`text-[10px] mt-0.5 ${belongsToTab('/messages') ? "text-primary font-medium" : "text-muted-foreground"}`}>消息</span>
+          <span className={`text-[10px] mt-0.5 ${belongsToTab('/messages') ? "text-app-action font-medium" : "text-muted-foreground"}`}>消息</span>
         </button>
         
         <button 
@@ -150,8 +170,8 @@ const BottomNav: React.FC = () => {
           className={`nav-item flex flex-col items-center justify-center w-1/5 py-1 ${belongsToTab('/profile') ? 'active' : ''}`}
           aria-current={belongsToTab('/profile') ? 'page' : undefined}
         >
-          <User size={20} className={belongsToTab('/profile') ? "text-primary" : "text-muted-foreground"} />
-          <span className={`text-[10px] mt-0.5 ${belongsToTab('/profile') ? "text-primary font-medium" : "text-muted-foreground"}`}>我的</span>
+          <User size={20} className={belongsToTab('/profile') ? "text-app-action" : "text-muted-foreground"} />
+          <span className={`text-[10px] mt-0.5 ${belongsToTab('/profile') ? "text-app-action font-medium" : "text-muted-foreground"}`}>我的</span>
         </button>
       </div>
     </nav>
