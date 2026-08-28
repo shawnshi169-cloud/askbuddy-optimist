@@ -66,14 +66,23 @@ export default {
           border: 'hsl(var(--sidebar-border))',
           ring: 'hsl(var(--sidebar-ring))'
         },
-        // App semantic color tokens
-        'app-header': 'hsl(var(--app-header))',
-        'app-header-light': 'hsl(var(--app-header-light))',
-        'app-accent': 'hsl(var(--app-accent))',
-        'app-surface': 'hsl(var(--app-surface))',
-        'app-border-light': 'hsl(var(--app-border-light))',
-        'app-warm': 'hsl(var(--app-warm))',
-        'app-warm-foreground': 'hsl(var(--app-warm-foreground))',
+        // UI 2.0 semantic colors use RGB channels so opacity modifiers remain available.
+        'app-brand-mint': 'rgb(var(--app-brand-mint-rgb) / <alpha-value>)',
+        'app-action': 'rgb(var(--app-action-rgb) / <alpha-value>)',
+        'app-page': 'rgb(var(--app-page-rgb) / <alpha-value>)',
+        'app-surface': 'rgb(var(--app-surface-rgb) / <alpha-value>)',
+        'app-border-subtle': 'rgb(var(--app-border-subtle-rgb) / <alpha-value>)',
+        'app-action-soft': 'rgb(var(--app-action-soft-rgb) / <alpha-value>)',
+        'app-text': 'rgb(var(--app-text-rgb) / <alpha-value>)',
+        'app-text-muted': 'rgb(var(--app-text-muted-rgb) / <alpha-value>)',
+        // Compatibility aliases for existing Shared Core classes.
+        'app-header': 'rgb(var(--app-header-rgb) / <alpha-value>)',
+        'app-header-light': 'rgb(var(--app-header-soft-rgb) / <alpha-value>)',
+        'app-teal': 'rgb(var(--app-accent-rgb) / <alpha-value>)',
+        'app-accent': 'rgb(var(--app-accent-rgb) / <alpha-value>)',
+        'app-border-light': 'rgb(var(--app-soft-border-rgb) / <alpha-value>)',
+        'app-warm': 'rgb(var(--app-warm-rgb) / <alpha-value>)',
+        'app-warm-foreground': 'rgb(var(--app-warm-foreground-rgb) / <alpha-value>)',
       },
       boxShadow: {
         'soft': '0 4px 20px rgba(0, 0, 0, 0.05)',
