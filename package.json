@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -13,12 +16,13 @@
     "lint": "eslint .",
     "lint:changed": "node scripts/lint-changed.mjs",
     "preview": "vite preview",
-    "test:contracts": "node scripts/schema-contract-check.mjs && node scripts/contract-truth-check.mjs && node scripts/p1-4b-backend-hardening-check.mjs && node scripts/p1-4c-production-writes-check.mjs && node scripts/p1-4d-demo-fixture-isolation-check.mjs && node scripts/ui-0a-engineering-readiness-check.mjs && node scripts/wechat-auth-jwk-check.mjs",
+    "test:contracts": "node scripts/schema-contract-check.mjs && node scripts/contract-truth-check.mjs && node scripts/p1-4b-backend-hardening-check.mjs && node scripts/p1-4c-production-writes-check.mjs && node scripts/p1-4d-demo-fixture-isolation-check.mjs && node scripts/ui-0a-engineering-readiness-check.mjs && node scripts/ui-0b-platform-truth-check.mjs && node scripts/wechat-auth-jwk-check.mjs",
     "test:backend-hardening": "node scripts/p1-4b-backend-hardening-check.mjs",
     "test:runtime-mode": "node scripts/runtime-mode-check.mjs",
     "test:production-writes": "node scripts/p1-4c-production-writes-check.mjs",
     "test:fixture-isolation": "node scripts/p1-4d-demo-fixture-isolation-check.mjs",
     "test:ui-engineering-readiness": "node scripts/ui-0a-engineering-readiness-check.mjs",
+    "test:ui-platform-readiness": "node scripts/ui-0b-platform-truth-check.mjs",
     "test:smoke": "node scripts/rpc-smoke-test.mjs",
     "test:call": "node scripts/call-v1-validation.mjs"
   },

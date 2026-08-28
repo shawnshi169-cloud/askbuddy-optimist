@@ -293,46 +293,45 @@ const rpc = <Request, Response>() => <Name extends string>(
 export const RPC_CATALOG = {
   accept_answer_v2: rpc<AcceptAnswerV2Params, AcceptAnswerV2Result>()(
     "accept_answer_v2", "canonical", "authenticated", "questions",
-    "AcceptAnswerV2Params", "AcceptAnswerV2Result", "overbroad",
-    "Production currently grants anon EXECUTE; function auth guard remains effective.",
+    "AcceptAnswerV2Params", "AcceptAnswerV2Result", "aligned",
   ),
   accept_answer_and_transfer_points: rpc<AcceptAnswerLegacyParams, void>()(
     "accept_answer_and_transfer_points", "deprecated", "service_role", "questions",
-    "AcceptAnswerLegacyParams", "void", "overbroad",
+    "AcceptAnswerLegacyParams", "void", "aligned",
     "Post-P1.4c server-only compatibility path using deprecated balance and ledger models.",
   ),
   create_question_secure: rpc<CreateQuestionSecureParams, string>()(
     "create_question_secure", "canonical", "authenticated", "questions",
-    "CreateQuestionSecureParams", "UUID", "overbroad",
+    "CreateQuestionSecureParams", "UUID", "aligned",
   ),
   create_answer_secure: rpc<CreateAnswerSecureParams, string>()(
     "create_answer_secure", "canonical", "authenticated", "questions",
-    "CreateAnswerSecureParams", "UUID", "overbroad",
+    "CreateAnswerSecureParams", "UUID", "aligned",
   ),
   create_topic_discussion_secure: rpc<CreateTopicDiscussionSecureParams, string>()(
     "create_topic_discussion_secure", "compatibility-only", "service_role", "topics",
-    "CreateTopicDiscussionSecureParams", "UUID", "overbroad",
+    "CreateTopicDiscussionSecureParams", "UUID", "aligned",
     "Post-P1.4c server-only compatibility path using legacy discussion moderation vocabulary.",
   ),
   send_direct_message: rpc<SendDirectMessageParams, string>()(
     "send_direct_message", "canonical", "authenticated", "messages",
-    "SendDirectMessageParams", "UUID", "overbroad",
+    "SendDirectMessageParams", "UUID", "aligned",
   ),
   get_user_conversations: rpc<Record<string, never>, GetUserConversationItem[]>()(
     "get_user_conversations", "canonical", "authenticated", "messages",
-    "EmptyParams", "GetUserConversationItem[]", "overbroad",
+    "EmptyParams", "GetUserConversationItem[]", "aligned",
   ),
   get_my_unread_message_count: rpc<Record<string, never>, number>()(
     "get_my_unread_message_count", "canonical", "authenticated", "messages",
-    "EmptyParams", "number", "overbroad",
+    "EmptyParams", "number", "aligned",
   ),
   get_my_unread_notification_count: rpc<Record<string, never>, number>()(
     "get_my_unread_notification_count", "canonical", "authenticated", "notifications",
-    "EmptyParams", "number", "overbroad",
+    "EmptyParams", "number", "aligned",
   ),
   mark_notifications_read: rpc<MarkNotificationsReadParams, number>()(
     "mark_notifications_read", "canonical", "authenticated", "notifications",
-    "MarkNotificationsReadParams", "number", "overbroad",
+    "MarkNotificationsReadParams", "number", "aligned",
   ),
   create_system_notification_v2: rpc<CreateSystemNotificationV2Params, string>()(
     "create_system_notification_v2", "canonical", "service_role", "notifications",
@@ -348,7 +347,7 @@ export const RPC_CATALOG = {
   ),
   upsert_search_history: rpc<UpsertSearchHistoryParams, string>()(
     "upsert_search_history", "canonical", "authenticated", "search",
-    "UpsertSearchHistoryParams", "UUID", "overbroad",
+    "UpsertSearchHistoryParams", "UUID", "aligned",
   ),
   search_app_content: rpc<SearchAppContentV2Params, JsonObject>()(
     "search_app_content", "deprecated", "anon", "search",
@@ -356,11 +355,11 @@ export const RPC_CATALOG = {
   ),
   get_channel_feed: rpc<GetChannelFeedParams, JsonObject>()(
     "get_channel_feed", "canonical", "anon", "channels",
-    "GetChannelFeedParams", "ChannelFeedResult", "overbroad",
+    "GetChannelFeedParams", "ChannelFeedResult", "aligned",
   ),
   submit_content_report: rpc<SubmitContentReportParams, string>()(
     "submit_content_report", "canonical", "authenticated", "moderation",
-    "SubmitContentReportParams", "UUID", "overbroad",
+    "SubmitContentReportParams", "UUID", "aligned",
   ),
   review_content_report: rpc<ReviewContentReportParams, boolean>()(
     "review_content_report", "compatibility-only", "admin", "moderation",
@@ -400,30 +399,32 @@ export const RPC_CATALOG = {
   ),
   recharge_points: rpc<RechargePointsParams, void>()(
     "recharge_points", "deprecated", "service_role", "payments",
-    "RechargePointsParams", "void", "overbroad",
+    "RechargePointsParams", "void", "aligned",
     "Post-P1.4c server-only compatibility path using deprecated balance and ledger models.",
   ),
   create_recharge_payment_order: rpc<CreateRechargePaymentOrderParams, JsonObject>()(
     "create_recharge_payment_order", "blocked", "service_role", "payments",
-    "CreateRechargePaymentOrderParams", "LegacyRechargeOrderResult", "overbroad",
+    "CreateRechargePaymentOrderParams", "LegacyRechargeOrderResult", "aligned",
     "Post-P1.4c server-only blocked path using pre-Pack06 order vocabulary.",
   ),
   confirm_recharge_payment: rpc<ConfirmRechargePaymentParams, boolean>()(
     "confirm_recharge_payment", "blocked", "service_role", "payments",
-    "ConfirmRechargePaymentParams", "boolean", "server-guarded",
+    "ConfirmRechargePaymentParams", "boolean", "aligned",
     "Service-only payment-webhook reconciliation for the blocked legacy recharge contract.",
   ),
   admin_confirm_recharge_order: rpc<AdminConfirmRechargeOrderParams, boolean>()(
     "admin_confirm_recharge_order", "blocked", "admin", "payments",
     "AdminConfirmRechargeOrderParams", "boolean", "server-guarded",
+    "Database EXECUTE is granted to authenticated and service_role; effective admin authorization is enforced inside the function.",
   ),
   list_pending_recharge_orders: rpc<Record<string, never>, JsonObject>()(
     "list_pending_recharge_orders", "blocked", "admin", "payments",
     "EmptyParams", "PendingRechargeOrderList", "server-guarded",
+    "Database EXECUTE is granted to authenticated and service_role; effective admin/moderator authorization is enforced inside the function.",
   ),
   create_consultation_order: rpc<CreateConsultationOrderParams, string>()(
     "create_consultation_order", "blocked", "service_role", "orders",
-    "CreateConsultationOrderParams", "UUID", "overbroad",
+    "CreateConsultationOrderParams", "UUID", "aligned",
     "Post-P1.4c server-only blocked path using legacy balances and invalid Pack06 order vocabulary.",
   ),
   get_nearby_experts: rpc<GetNearbyExpertsParams, JsonValue[]>()(
