@@ -1,7 +1,7 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ExperienceTag, VerificationBadge } from '@/components/ui2';
+import { ExperienceTag } from '@/components/ui2';
 import type { UIExpertCardModel } from '@/lib/adapters/contentAdapters';
 
 interface PersonRecommendationCardProps {
@@ -25,10 +25,7 @@ const PersonRecommendationCard: React.FC<PersonRecommendationCardProps> = ({ per
       </Avatar>
 
       <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <h3 className="text-[16px] font-semibold leading-6 text-slate-800">{person.name}</h3>
-          {person.verified === true ? <VerificationBadge /> : null}
-        </div>
+        <h3 className="text-[16px] font-semibold leading-6 text-slate-800">{person.name}</h3>
         {person.title ? <p className="mt-0.5 text-[13px] leading-5 text-slate-600">{person.title}</p> : null}
         {person.description ? (
           <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{person.description}</p>
