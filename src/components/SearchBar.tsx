@@ -4,6 +4,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { buildFromState } from '@/utils/navigation';
+import { cn } from '@/lib/utils';
+
+type SearchBarVariant = 'default' | 'home';
 
 interface SearchBarProps {
   onSearch?: (value: string) => void;
@@ -20,6 +23,7 @@ interface SearchBarProps {
   iconClassName?: string;
   navigateToPath?: string;
   onFocusChange?: (focused: boolean) => void;
+  variant?: SearchBarVariant;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({ 
@@ -37,6 +41,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   iconClassName = 'app-accent-text',
   navigateToPath,
   onFocusChange,
+  variant = 'default',
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -139,9 +144,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
   };
 
   return (
-    <div className={`px-4 py-2.5 ${className}`}>
+    <div className={cn('px-4 py-2.5', className)}>
       <div
-        className={`relative ${isFocused ? `ring-2 ${accentRingClassName} rounded-2xl` : ''}`}
+        className={cn(
+          'relative rounded-2xl',
+          isFocused && `ring-2 ${accentRingClassName}`,
+        )}
         onClick={clickToNavigate ? handleNavigateToSearch : undefined}
       >
         <Input
@@ -153,7 +161,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
           onBlur={handleBlur}
           placeholder={placeholder}
           readOnly={clickToNavigate}
-          className={`search-input pr-10 shadow-sm focus-visible:ring-2 ${inputBorderClassName} ${inputAccentClassName}`}
+          className={cn(
+            variant === 'home'
+              ? 'h-12 rounded-2xl border border-app-border-subtle bg-white px-4 pr-11 text-foreground shadow-none placeholder:text-slate-500 focus-visible:ring-2'
+              : 'search-input pr-10 shadow-sm focus-visible:ring-2',
+            inputBorderClassName,
+            inputAccentClassName,
+          )}
         />
         <Search 
           size={18} 

@@ -15,6 +15,7 @@ export const usePageScrollMemory = (key: string) => {
     const saved = sessionStorage.getItem(storageKey);
     let writeRafId: number | null = null;
     let lastSavedY = -1;
+    let latestScrollY = window.scrollY;
 
     const persistScroll = (y: number) => {
       if (Math.abs(y - lastSavedY) < 8) return;
@@ -34,10 +35,11 @@ export const usePageScrollMemory = (key: string) => {
     }
 
     const onScroll = () => {
+      latestScrollY = window.scrollY;
       if (writeRafId !== null) return;
       writeRafId = window.requestAnimationFrame(() => {
         writeRafId = null;
-        persistScroll(window.scrollY);
+        persistScroll(latestScrollY);
       });
     };
 
@@ -47,6 +49,7 @@ export const usePageScrollMemory = (key: string) => {
       if (!path) return;
       const matchedPaths = TAB_SCROLL_PATHS[key] || [];
       if (!matchedPaths.includes(path)) return;
+      latestScrollY = 0;
       persistScroll(0);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -57,7 +60,7 @@ export const usePageScrollMemory = (key: string) => {
       if (writeRafId !== null) {
         window.cancelAnimationFrame(writeRafId);
       }
-      persistScroll(window.scrollY);
+      persistScroll(latestScrollY);
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener(TAB_RESELECT_EVENT, onTabReselect as EventListener);
     };
