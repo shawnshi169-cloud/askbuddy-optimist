@@ -110,7 +110,7 @@ const BottomNav: React.FC = () => {
             </button>
           </SheetTrigger>
           <SheetContent side="bottom" className="mx-auto max-w-md rounded-t-[24px] border-app-border-subtle px-4 pb-8 pt-6 shadow-[0_-12px_36px_rgba(15,23,42,0.12)]">
-            <SheetHeader className="pr-10 text-left">
+            <SheetHeader className="text-left">
               <SheetTitle className="text-xl font-semibold text-slate-800">想做点什么？</SheetTitle>
               <SheetDescription>选择一个真实可用的发布入口</SheetDescription>
             </SheetHeader>
