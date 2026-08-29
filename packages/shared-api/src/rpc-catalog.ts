@@ -7,6 +7,7 @@ import type {
   OrderStatus,
   SearchObjectType,
 } from "../../shared-types/src/contracts";
+import type { ProductChannelSlug } from "../../shared-types/src/product-channels";
 import type { SearchAppContentV2RawResult } from "./search-v2";
 
 export type JsonPrimitive = string | number | boolean | null;
@@ -128,10 +129,23 @@ export interface UpsertSearchHistoryParams {
 }
 
 export interface GetChannelFeedParams {
-  p_channel: string;
+  p_channel: ProductChannelSlug;
   p_subcategory?: string;
   p_questions_limit?: number;
   p_experts_limit?: number;
+}
+
+export interface ChannelFeedCollection<Item extends JsonObject = JsonObject> {
+  items: Item[];
+  next_cursor: string | null;
+}
+
+export interface ChannelFeedResult {
+  channel: ProductChannelSlug;
+  subcategory: string | null;
+  featured: JsonObject | null;
+  questions: ChannelFeedCollection;
+  experts: ChannelFeedCollection;
 }
 
 export interface GetUserConversationItem {
@@ -353,7 +367,7 @@ export const RPC_CATALOG = {
     "search_app_content", "deprecated", "anon", "search",
     "SearchAppContentV2Params", "LegacySearchResult", "aligned",
   ),
-  get_channel_feed: rpc<GetChannelFeedParams, JsonObject>()(
+  get_channel_feed: rpc<GetChannelFeedParams, ChannelFeedResult>()(
     "get_channel_feed", "canonical", "anon", "channels",
     "GetChannelFeedParams", "ChannelFeedResult", "aligned",
   ),
