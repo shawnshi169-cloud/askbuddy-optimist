@@ -12,7 +12,10 @@
 
 ## 2. 统一枚举
 
-> 建议后端使用英文稳定枚举；前端如需中文展示再做映射。
+> 四个一级频道是稳定 Product Channel Catalog，不是动态 category 表。
+> Canonical shared definition: `packages/shared-types/src/product-channels.ts`.
+> `public.skill_categories` 只服务于 skill offer 下层分类，不得替代本目录。
+> 前端如需路由、图标或颜色，在平台层按稳定 slug 映射。
 
 ### 2.1 channel
 
@@ -84,7 +87,7 @@
 - `response_rate`
 - `order_count`
 - `consultation_price`
-- `is_verified`
+- `verification_status`（仅表示专家档案审核状态，不等价于通用身份/资质核验）
 
 ## 3.3 featured（本周精选）
 
@@ -218,4 +221,3 @@
 3. “本周精选”切到“高考”后变为高考精选；切回“全部”回到频道通用精选。
 4. 四个频道都满足同样规则。
 5. 搜索页在频道内搜索时，不跨频道出结果。
-
