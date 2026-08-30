@@ -3,6 +3,7 @@ import { createRequire } from "node:module";
 import {
   mkdirSync,
   mkdtempSync,
+  readdirSync,
   readFileSync,
   rmSync,
   writeFileSync,
@@ -17,6 +18,7 @@ const require = createRequire(import.meta.url);
 
 const sourceFiles = [
   "packages/shared-types/src/contracts.ts",
+  "packages/shared-types/src/product-channels.ts",
   "packages/shared-api/src/moderation.ts",
   "packages/shared-api/src/notification.ts",
   "packages/shared-api/src/search-v2.ts",
@@ -50,6 +52,9 @@ try {
   sourceFiles.forEach(transpile);
 
   const sharedTypes = require(join(tempRoot, "packages/shared-types/src/contracts.js"));
+  const productChannels = require(
+    join(tempRoot, "packages/shared-types/src/product-channels.js"),
+  );
   const moderation = require(join(tempRoot, "packages/shared-api/src/moderation.js"));
   const notifications = require(join(tempRoot, "packages/shared-api/src/notification.js"));
   const search = require(join(tempRoot, "packages/shared-api/src/search-v2.js"));
@@ -66,6 +71,24 @@ try {
   for (const invalidStatus of ["draft", "matched", "hidden"]) {
     assert.equal(sharedTypes.QUESTION_STATUS.includes(invalidStatus), false);
   }
+
+  assert.deepEqual(productChannels.PRODUCT_CHANNEL_SLUGS, [
+    "education-learning",
+    "career-development",
+    "lifestyle-services",
+    "hobbies-skills",
+  ]);
+  assert.deepEqual(productChannels.PRODUCT_CHANNEL_CATALOG, [
+    { slug: "education-learning", label: "教育学习", sortOrder: 0 },
+    { slug: "career-development", label: "职业发展", sortOrder: 1 },
+    { slug: "lifestyle-services", label: "生活服务", sortOrder: 2 },
+    { slug: "hobbies-skills", label: "兴趣技能", sortOrder: 3 },
+  ]);
+  for (const slug of productChannels.PRODUCT_CHANNEL_SLUGS) {
+    assert.equal(productChannels.isProductChannelSlug(slug), true);
+  }
+  assert.equal(productChannels.isProductChannelSlug("skill-categories"), false);
+  assert.equal(productChannels.isProductChannelSlug("education"), false);
 
   assert.deepEqual(sharedTypes.MODERATION_TARGET_TYPE, [
     "question", "answer", "post", "skill_offer", "expert", "message",
@@ -205,6 +228,17 @@ try {
   assert.equal(catalog.claim_wechat_identity_v1.authentication, "service_role");
   assert.equal(catalog.create_system_notification_v2.authentication, "service_role");
   assert.equal(catalog.transition_order_status_v2.authentication, "service_role");
+  assert.equal(catalog.get_channel_feed.requestType, "GetChannelFeedParams");
+  assert.equal(catalog.get_channel_feed.responseType, "ChannelFeedResult");
+
+  const rpcCatalogSource = readFileSync(
+    join(root, "packages/shared-api/src/rpc-catalog.ts"),
+    "utf8",
+  );
+  assert.match(
+    rpcCatalogSource,
+    /interface GetChannelFeedParams\s*{[\s\S]*?p_channel:\s*ProductChannelSlug;/,
+  );
 
   const catalogNames = Object.values(catalog).map((entry) => entry.name);
   assert.equal(new Set(catalogNames).size, catalogNames.length);
@@ -286,6 +320,37 @@ try {
   for (const value of sharedTypes.MODERATION_REPORT_STATUS) {
     assert.ok(migrations.includes(`'${value}'`), `Pack07 migration missing ${value}`);
   }
+
+  const channelMigration = readFileSync(
+    join(root, "supabase/migrations/20260416091000_channel_feed_contract.sql"),
+    "utf8",
+  );
+  for (const slug of productChannels.PRODUCT_CHANNEL_SLUGS) {
+    assert.ok(channelMigration.includes(`'${slug}'`), `Channel migration missing ${slug}`);
+  }
+  assert.match(channelMigration, /CREATE OR REPLACE FUNCTION public\.get_channel_feed\(/);
+  assert.match(channelMigration, /v_channel text := public\.normalize_channel\(p_channel\)/);
+  assert.match(channelMigration, /RAISE EXCEPTION 'Invalid channel:/);
+
+  const migrationDirectory = join(root, "supabase/migrations");
+  const allMigrationSql = readdirSync(migrationDirectory)
+    .filter((file) => file.endsWith(".sql"))
+    .map((file) => readFileSync(join(migrationDirectory, file), "utf8"))
+    .join("\n");
+  assert.doesNotMatch(
+    allMigrationSql,
+    /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?public\.categories\b/i,
+  );
+
+  const skillMigration = readFileSync(
+    join(root, "supabase/migrations/20260416201000_pack_03_experts_and_skill_offers.sql"),
+    "utf8",
+  );
+  assert.match(skillMigration, /CREATE TABLE IF NOT EXISTS public\.skill_categories/);
+  assert.match(
+    skillMigration,
+    /category_id uuid REFERENCES public\.skill_categories\(id\)/,
+  );
 
   console.log("P1.4a contract truth checks passed.");
 } finally {
