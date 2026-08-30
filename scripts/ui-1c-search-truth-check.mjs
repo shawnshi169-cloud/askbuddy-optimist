@@ -7,6 +7,7 @@ const searchBar = read('src/components/SearchBar.tsx');
 const tabs = read('src/components/search/SearchResultTabs.tsx');
 const items = read('src/components/search/SearchResultItems.tsx');
 const sheet = read('src/components/ui/sheet.tsx');
+const bottomNav = read('src/components/BottomNav.tsx');
 
 assert.match(tabs, /label: '综合'/);
 assert.match(tabs, /label: '问题'/);
@@ -39,6 +40,7 @@ assert.match(searchBar, /h-11 w-11/);
 assert.match(sheet, /SheetPrimitive\.Close className="[^"]*h-11 w-11[^"]*"/);
 assert.match(sheet, /<X className="h-4 w-4"/);
 assert.match(sheet, /<span className="sr-only">关闭<\/span>/);
-assert.match(sheet, /pr-14 text-center/);
+assert.doesNotMatch(sheet, /flex flex-col space-y-2 pr-14/);
+assert.match(bottomNav, /<SheetHeader className="pr-14 text-left">/);
 
 console.log('UI-1C Search truth checks passed.');
