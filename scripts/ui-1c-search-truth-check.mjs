@@ -22,6 +22,7 @@ assert.doesNotMatch(searchPage, /<Bell|相关专家|去找专家|让专家看到
 assert.match(searchPage, /title="可能懂的人"/);
 assert.match(searchPage, /title="相关分享"/);
 assert.match(searchPage, /title="相关服务"/);
+assert.match(searchPage, /source !== 'related' && !lower\.includes\(keyword\)/);
 
 assert.doesNotMatch(items, /verification_status|已核验|已认证|立即咨询|立即购买|擅长经验答疑与实战建议/);
 assert.doesNotMatch(items, /price_amount|price_currency/);

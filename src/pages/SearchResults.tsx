@@ -200,7 +200,7 @@ const SearchResults = () => {
       const normalized = term.trim();
       if (!normalized) return;
       const lower = normalized.toLowerCase();
-      if (!lower.includes(keyword)) return;
+      if (source !== 'related' && !lower.includes(keyword)) return;
       let score = sourceScore[source];
       if (lower === keyword) score += 50;
       if (lower.startsWith(keyword)) score += 30;
