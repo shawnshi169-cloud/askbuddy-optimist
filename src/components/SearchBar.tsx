@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { buildFromState } from '@/utils/navigation';
 import { cn } from '@/lib/utils';
 
-type SearchBarVariant = 'default' | 'home';
+type SearchBarVariant = 'default' | 'home' | 'searchPage';
 
 interface SearchBarProps {
   onSearch?: (value: string) => void;
@@ -23,6 +23,7 @@ interface SearchBarProps {
   iconClassName?: string;
   navigateToPath?: string;
   onFocusChange?: (focused: boolean) => void;
+  onClear?: () => void;
   variant?: SearchBarVariant;
 }
 
@@ -41,6 +42,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   iconClassName = 'app-accent-text',
   navigateToPath,
   onFocusChange,
+  onClear,
   variant = 'default',
 }) => {
   const navigate = useNavigate();
@@ -48,6 +50,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const [searchValue, setSearchValue] = useState(value || '');
   const [isFocused, setIsFocused] = useState(false);
   const blurTimerRef = useRef<number | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (value !== undefined) {
@@ -87,6 +90,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
     if (onSubmit) {
       onSubmit(searchValue.trim());
+      inputRef.current?.blur();
       return;
     }
     
@@ -110,6 +114,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
         navigate(`/search?q=${encodeURIComponent(searchValue)}`, { state: buildFromState(location) });
       }
     }
+  };
+
+  const handleClear = () => {
+    setSearchValue('');
+    onClear?.();
+    if (!onClear) onSearch?.('');
+    window.requestAnimationFrame(() => inputRef.current?.focus());
   };
 
   const handleNavigateToSearch = () => {
@@ -144,7 +155,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   };
 
   return (
-    <div className={cn('px-4 py-2.5', className)}>
+    <div className={cn(variant === 'searchPage' ? 'w-full' : 'px-4 py-2.5', className)}>
       <div
         className={cn(
           'relative rounded-2xl',
@@ -153,6 +164,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         onClick={clickToNavigate ? handleNavigateToSearch : undefined}
       >
         <Input
+          ref={inputRef}
           type="text"
           value={value !== undefined ? value : searchValue}
           onChange={handleInputChange}
@@ -160,20 +172,40 @@ const SearchBar: React.FC<SearchBarProps> = ({
           onFocus={handleFocus}
           onBlur={handleBlur}
           placeholder={placeholder}
+          aria-label="搜索"
           readOnly={clickToNavigate}
           className={cn(
             variant === 'home'
               ? 'h-12 rounded-2xl border border-app-border-subtle bg-white px-4 pr-11 text-foreground shadow-none placeholder:text-slate-500 focus-visible:ring-2'
-              : 'search-input pr-10 shadow-sm focus-visible:ring-2',
+              : variant === 'searchPage'
+                ? 'h-12 rounded-2xl border border-app-border-subtle bg-white pl-11 pr-11 text-foreground shadow-none placeholder:text-slate-500 focus-visible:ring-0'
+                : 'search-input pr-10 shadow-sm focus-visible:ring-2',
             inputBorderClassName,
             inputAccentClassName,
           )}
         />
-        <Search 
-          size={18} 
-          className={`absolute right-4 top-1/2 transform -translate-y-1/2 cursor-pointer ${iconClassName}`} 
-          onClick={clickToNavigate ? handleNavigateToSearch : handleSearch}
-        />
+        {variant === 'searchPage' ? (
+          <>
+            <Search aria-hidden size={18} className={cn('pointer-events-none absolute left-4 top-1/2 -translate-y-1/2', iconClassName)} />
+            {(value !== undefined ? value : searchValue).length > 0 ? (
+              <button
+                type="button"
+                className="absolute right-0 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-2xl text-slate-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-app-action/30 active:bg-slate-100"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={handleClear}
+                aria-label="清除搜索内容"
+              >
+                <X aria-hidden size={16} />
+              </button>
+            ) : null}
+          </>
+        ) : (
+          <Search
+            size={18}
+            className={`absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer ${iconClassName}`}
+            onClick={clickToNavigate ? handleNavigateToSearch : handleSearch}
+          />
+        )}
       </div>
     </div>
   );
