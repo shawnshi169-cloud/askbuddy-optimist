@@ -50,14 +50,20 @@ const Index = () => {
   const locationState = routeLocation.state as LocationState;
   const nativeMode = isNativeApp();
   const presentationFixturesEnabled = isPresentationFixtureAllowed();
+  const {
+    initialScrollY,
+    isRestoring: isRestoringScroll,
+    prepareForNavigation,
+  } = usePageScrollMemory('index');
+  const initiallyCollapsed = initialScrollY > 28;
   
   const [activeTab, setActiveTab] = useState<'everyone' | 'experts'>(() => {
     const cached = sessionStorage.getItem('tab:index');
     return cached === 'experts' ? 'experts' : 'everyone';
   });
   const [currentLocation, setCurrentLocation] = useState<string>('深圳');
-  const [isSearchCollapsed, setIsSearchCollapsed] = useState(false);
-  const searchCollapsedRef = useRef(false);
+  const [isSearchCollapsed, setIsSearchCollapsed] = useState(initiallyCollapsed);
+  const searchCollapsedRef = useRef(initiallyCollapsed);
   
   // 使用真实数据
   const {
@@ -85,8 +91,6 @@ const Index = () => {
     setCurrentLocation(storedLocation);
   }, []);
 
-  usePageScrollMemory('index');
-
   useEffect(() => {
     sessionStorage.setItem('tab:index', activeTab);
   }, [activeTab]);
@@ -101,6 +105,7 @@ const Index = () => {
     let rafId: number | null = null;
 
     const onScroll = () => {
+      if (isRestoringScroll) return;
       if (rafId !== null) return;
       rafId = window.requestAnimationFrame(() => {
         rafId = null;
@@ -111,7 +116,7 @@ const Index = () => {
       });
     };
 
-    onScroll();
+    if (!isRestoringScroll) onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => {
       if (rafId !== null) {
@@ -119,7 +124,7 @@ const Index = () => {
       }
       window.removeEventListener('scroll', onScroll);
     };
-  }, []);
+  }, [isRestoringScroll]);
 
   const formatTime = (dateString: string | null) => {
     if (!dateString) return undefined;
@@ -153,8 +158,14 @@ const Index = () => {
     : realQuestions;
 
   const hotTopicNavState = { ...buildFromState(routeLocation), fromHotRank: true };
-  const navigateWithHistory = (path: string) => navigate(path, { state: buildFromState(routeLocation) });
-  const openTopic = (topicId: string) => navigate(`/topic/${topicId}`, { state: hotTopicNavState });
+  const navigateWithHistory = (path: string) => {
+    prepareForNavigation();
+    navigate(path, { state: buildFromState(routeLocation) });
+  };
+  const openTopic = (topicId: string) => {
+    prepareForNavigation();
+    navigate(`/topic/${topicId}`, { state: hotTopicNavState });
+  };
 
   const fixedHeader = (
     <header className={`fixed top-0 z-[90] w-full border-b border-app-action/10 bg-app-brand-mint ${nativeMode ? 'left-0' : 'left-1/2 max-w-md -translate-x-1/2'}`}>
@@ -194,17 +205,19 @@ const Index = () => {
         </div>
       </div>
       <div className={`overflow-hidden border-t border-app-action/10 transition-[max-height,opacity] duration-200 ${isSearchCollapsed ? 'max-h-0 opacity-0' : 'max-h-24 opacity-100'}`}>
-        <SearchBar
-          variant="home"
-          className="pb-4 pt-3"
-          placeholder="搜问题、经历或人"
-          clickToNavigate
-          navigateToPath="/search"
-          accentRingClassName="ring-app-action/20"
-          inputAccentClassName="focus-visible:border-app-action/45 focus-visible:ring-app-action/15"
-          inputBorderClassName="border-app-border-subtle"
-          iconClassName="text-app-action"
-        />
+        <div onClickCapture={prepareForNavigation}>
+          <SearchBar
+            variant="home"
+            className="pb-4 pt-3"
+            placeholder="搜问题、经历或人"
+            clickToNavigate
+            navigateToPath="/search"
+            accentRingClassName="ring-app-action/20"
+            inputAccentClassName="focus-visible:border-app-action/45 focus-visible:ring-app-action/15"
+            inputBorderClassName="border-app-border-subtle"
+            iconClassName="text-app-action"
+          />
+        </div>
       </div>
     </header>
   );
@@ -221,7 +234,7 @@ const Index = () => {
             : 'calc(env(safe-area-inset-top) + 8.25rem)'
         }}
       >
-        <CategorySection variant="home" />
+        <CategorySection variant="home" onBeforeNavigate={prepareForNavigation} />
       
         {isLoadingTopics ? (
           <HomeHotRankSkeleton />
@@ -292,19 +305,20 @@ const Index = () => {
             ) : homepageQuestions.length > 0 ? (
               <div>
                 {homepageQuestions.map((question) => (
-                  <QuestionCard
-                    key={question.id}
-                    variant="homeFeed"
-                    id={question.id}
-                    title={question.title}
-                    description={question.content || undefined}
-                    asker={{ name: question.askerName, avatar: question.askerAvatar }}
-                    time={formatTime(question.createdAt)}
-                    tags={question.tags || []}
-                    points={question.bountyPoints}
-                    answerCount={question.answersCount}
-                    viewCount={formatViewCount(question.viewCount)}
-                  />
+                  <div key={question.id} onClickCapture={prepareForNavigation}>
+                    <QuestionCard
+                      variant="homeFeed"
+                      id={question.id}
+                      title={question.title}
+                      description={question.content || undefined}
+                      asker={{ name: question.askerName, avatar: question.askerAvatar }}
+                      time={formatTime(question.createdAt)}
+                      tags={question.tags || []}
+                      points={question.bountyPoints}
+                      answerCount={question.answersCount}
+                      viewCount={formatViewCount(question.viewCount)}
+                    />
+                  </div>
                 ))}
               </div>
             ) : (
@@ -355,7 +369,7 @@ const Index = () => {
       </section>
       </div>
 
-      <BottomNav />
+      <BottomNav onBeforeNavigate={prepareForNavigation} />
     </div>
   );
 };
