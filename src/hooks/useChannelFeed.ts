@@ -12,9 +12,11 @@ import {
 } from '@/lib/adapters/contentAdapters';
 import { demoExperts, demoQuestions } from '@/lib/demoData';
 import { isPresentationFixtureAllowed } from '@/config/runtimeMode';
+import type { GetChannelFeedParams } from '../../packages/shared-api/src/rpc-catalog';
+import type { ProductChannelSlug } from '../../packages/shared-types/src/product-channels';
 
-interface ChannelFeedResult {
-  channel: string;
+interface ChannelFeedUIResult {
+  channel: ProductChannelSlug;
   subcategory: string | null;
   featured: {
     id: string;
@@ -31,10 +33,10 @@ const isMissingRpcError = (error: unknown, functionName: string) => {
 };
 
 const buildPresentationFixtureFeed = (
-  channel: string,
+  channel: ProductChannelSlug,
   subcategory: string,
   questionKeywords: Record<string, string[]>
-): ChannelFeedResult => {
+): ChannelFeedUIResult => {
   const demoQuestionModels = mapDemoQuestionsByChannel(demoQuestions, channel);
   const demoExpertModels = mapDemoExpertsByChannel(demoExperts, channel, { categoryFallback: 'all' });
 
@@ -58,7 +60,7 @@ const buildPresentationFixtureFeed = (
 };
 
 export const useChannelFeed = (
-  channel: 'education-learning' | 'career-development' | 'lifestyle-services' | 'hobbies-skills',
+  channel: ProductChannelSlug,
   subcategory: string,
   options?: { questionKeywords?: Record<string, string[]> }
 ) => {
@@ -68,12 +70,13 @@ export const useChannelFeed = (
     queryKey: ['channel-feed', channel, subcategory],
     queryFn: async () => {
       const presentationFixturesEnabled = isPresentationFixtureAllowed();
-      const rpcResult = await supabase.rpc('get_channel_feed', {
+      const rpcParams = {
         p_channel: channel,
         p_subcategory: subcategory,
         p_questions_limit: 24,
         p_experts_limit: 16,
-      });
+      } satisfies GetChannelFeedParams;
+      const rpcResult = await supabase.rpc('get_channel_feed', rpcParams);
 
       if (rpcResult.error) {
         if (presentationFixturesEnabled && isMissingRpcError(rpcResult.error, 'get_channel_feed')) {
@@ -112,7 +115,7 @@ export const useChannelFeed = (
         : null;
 
       return {
-        channel: typeof payload.channel === 'string' ? payload.channel : channel,
+        channel,
         subcategory: typeof payload.subcategory === 'string'
           ? payload.subcategory
           : (subcategory === 'all' ? null : subcategory),
@@ -133,7 +136,7 @@ export const useChannelFeed = (
         experts: presentationFixture
           ? mergeUniqueById(dbExperts, presentationFixture.experts)
           : dbExperts,
-      } satisfies ChannelFeedResult;
+      } satisfies ChannelFeedUIResult;
     },
     staleTime: 30_000,
     refetchOnWindowFocus: false,
