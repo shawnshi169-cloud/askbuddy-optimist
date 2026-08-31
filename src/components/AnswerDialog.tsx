@@ -1,73 +1,90 @@
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogClose,
-  DialogDescription
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import { Textarea } from '@/components/ui/textarea';
 
 export interface AnswerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (payload: { message: string }) => void;
+  submitting?: boolean;
 }
 
 export const AnswerDialog: React.FC<AnswerDialogProps> = ({
   open,
   onOpenChange,
-  onSubmit
+  onSubmit,
+  submitting = false,
 }) => {
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
-    if (!open) setMessage("");
+    if (!open) setMessage('');
   }, [open]);
 
-  const handleSubmit = () => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     const content = message.trim();
-    if (!content) return;
+    if (!content || submitting) return;
     onSubmit({ message: content });
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] sm:max-w-[420px] animate-fade-in space-y-6">
-        <DialogHeader>
-          <DialogTitle className="text-left text-base font-bold">我来回答</DialogTitle>
-          <DialogDescription className="text-gray-500 text-xs text-left">
-            请填写与问题直接相关的回答内容。
-          </DialogDescription>
-        </DialogHeader>
-        <div>
-          <div className="text-xs text-gray-600 mb-1">回答内容</div>
-          <Textarea
-            placeholder="输入你的回答"
-            value={message}
-            onChange={e => setMessage(e.target.value)}
-            className="resize-none"
-            rows={3}
-          />
-        </div>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline" type="button">取消</Button>
-          </DialogClose>
-          <Button
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
-            disabled={!message.trim()}
-            onClick={handleSubmit}
-          >
-            提交
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side="bottom"
+        className="mx-auto max-h-[85dvh] max-w-md overflow-y-auto rounded-t-[24px] border-app-border-subtle px-4 pb-6 pt-6 shadow-[0_-12px_36px_rgba(15,23,42,0.12)]"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 24px)' }}
+      >
+        <SheetHeader className="pr-14 text-left">
+          <SheetTitle className="text-xl font-semibold text-slate-900">分享你的回答</SheetTitle>
+          <SheetDescription className="text-[13px] leading-5 text-slate-500">
+            写下与问题直接相关的真实经历或建议。
+          </SheetDescription>
+        </SheetHeader>
+
+        <form className="mt-5 space-y-4" onSubmit={handleSubmit}>
+          <div>
+            <label htmlFor="answer-content" className="mb-2 block text-sm font-medium text-slate-700">
+              回答内容
+            </label>
+            <Textarea
+              id="answer-content"
+              autoFocus
+              placeholder="说说你经历过什么，以及你会怎么做…"
+              value={message}
+              onChange={(event) => setMessage(event.target.value)}
+              className="min-h-36 resize-none rounded-2xl border-app-border-subtle bg-white px-4 py-3 text-[15px] leading-6 focus-visible:ring-app-action/30"
+              disabled={submitting}
+            />
+          </div>
+
+          <SheetFooter className="gap-2 sm:space-x-0">
+            <SheetClose asChild>
+              <Button type="button" variant="outline" className="h-11 rounded-full" disabled={submitting}>
+                取消
+              </Button>
+            </SheetClose>
+            <Button
+              type="submit"
+              variant="action"
+              className="h-11 rounded-full"
+              disabled={!message.trim() || submitting}
+            >
+              {submitting ? '提交中…' : '提交回答'}
+            </Button>
+          </SheetFooter>
+        </form>
+      </SheetContent>
+    </Sheet>
   );
 };
 

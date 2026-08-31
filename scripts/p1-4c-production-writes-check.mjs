@@ -93,11 +93,9 @@ assert.match(community, /当前不可发送/);
 
 const clipboard = read('src/utils/clipboard.ts');
 const questionDetail = read('src/pages/QuestionDetail.tsx');
-const shareDialog = read('src/components/question/ShareDialog.tsx');
 const posts = read('src/hooks/usePosts.ts');
 assert.match(clipboard, /await navigator\.clipboard\.writeText\(text\)/);
 assert.match(questionDetail, /await copyTextToClipboard\([\s\S]*?分享链接已复制/);
-assert.match(shareDialog, /await copyTextToClipboard\([\s\S]*?链接已复制到剪贴板/);
 assert.match(posts, /await copyTextToClipboard\([\s\S]*?if \(readError\) throw readError[\s\S]*?if \(error\) throw error/);
 assert.match(posts, /onError:[\s\S]*?分享失败/);
 

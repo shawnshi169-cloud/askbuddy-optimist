@@ -13,6 +13,7 @@ export interface Question {
   bounty_points: number;
   status: QuestionStatus;
   view_count: number;
+  author_id?: string;
   user_id: string;
   created_at: string;
   updated_at: string;
@@ -25,13 +26,18 @@ export interface Answer {
   id: string;
   content: string;
   question_id: string;
+  author_id: string;
   user_id: string;
+  status: string;
   is_accepted: boolean;
+  like_count: number;
   likes_count: number;
   created_at: string;
   updated_at: string;
   profile_nickname?: string | null;
   profile_avatar?: string | null;
+  expert_id?: string | null;
+  expert_headline?: string | null;
 }
 
 export const useQuestions = (category?: string) => {
@@ -115,40 +121,62 @@ export const useQuestionDetail = (questionId: string) => {
         .select('*')
         .eq('question_id', questionId)
         .eq('is_hidden', false)
+        .in('status', ['active', 'accepted'])
         .order('is_accepted', { ascending: false })
-        .order('likes_count', { ascending: false })
         .order('created_at', { ascending: true });
 
       if (answersError) throw answersError;
 
-      const allUserIds = Array.from(
-        new Set([question.user_id, ...(answers || []).map((answer) => answer.user_id)])
-      );
+      const questionAuthorId = question.author_id || question.user_id;
+      const allUserIds = Array.from(new Set([
+        questionAuthorId,
+        ...(answers || []).map((answer) => answer.author_id || answer.user_id),
+      ]));
 
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('user_id, nickname, avatar_url')
-        .in('user_id', allUserIds);
+      const [profilesResult, expertsResult] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('user_id, nickname, avatar_url')
+          .in('user_id', allUserIds),
+        supabase
+          .from('experts')
+          .select('id, user_id, headline')
+          .in('user_id', allUserIds)
+          .eq('profile_status', 'active')
+          .eq('is_active', true),
+      ]);
 
-      if (profilesError) throw profilesError;
+      if (profilesResult.error) throw profilesResult.error;
+      if (expertsResult.error) throw expertsResult.error;
 
       const profileMap = new Map(
-        (profiles || []).map((profile) => [profile.user_id, profile])
+        (profilesResult.data || []).map((profile) => [profile.user_id, profile])
+      );
+      const expertMap = new Map(
+        (expertsResult.data || []).map((expert) => [expert.user_id, expert])
       );
 
-      const answersWithProfiles = (answers || []).map((answer) => ({
-        ...answer,
-        profile_nickname: profileMap.get(answer.user_id)?.nickname || '匿名用户',
-        profile_avatar: profileMap.get(answer.user_id)?.avatar_url,
-      })) as Answer[];
+      const answersWithProfiles = (answers || []).map((answer) => {
+        const authorId = answer.author_id || answer.user_id;
+        const expert = expertMap.get(authorId);
+        return {
+          ...answer,
+          author_id: authorId,
+          profile_nickname: profileMap.get(authorId)?.nickname || '匿名用户',
+          profile_avatar: profileMap.get(authorId)?.avatar_url,
+          expert_id: expert?.id || null,
+          expert_headline: expert?.headline || null,
+        };
+      }) as Answer[];
 
       return {
         question: {
           ...question,
-          profile_nickname: profileMap.get(question.user_id)?.nickname || '匿名用户',
-          profile_avatar: profileMap.get(question.user_id)?.avatar_url,
+          author_id: questionAuthorId,
+          profile_nickname: profileMap.get(questionAuthorId)?.nickname || '匿名用户',
+          profile_avatar: profileMap.get(questionAuthorId)?.avatar_url,
           answers_count: answersWithProfiles.length,
-          view_count: question.view_count || 0,
+          view_count: question.view_count ?? 0,
         } as Question,
         answers: answersWithProfiles,
       };
@@ -224,10 +252,10 @@ export const useCreateAnswer = () => {
       queryClient.invalidateQueries({ queryKey: ['questions'] });
       toast({ title: '回答成功', description: '感谢您的回答！' });
     },
-    onError: (error: Error) => {
+    onError: () => {
       toast({
         title: '回答失败',
-        description: error.message,
+        description: '回答暂时无法提交，请稍后重试。',
         variant: 'destructive',
       });
     },
@@ -267,16 +295,38 @@ export const useToggleFavorite = () => {
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['favorites'] });
+      queryClient.invalidateQueries({ queryKey: ['question-favorite'] });
       toast({
         title: result.action === 'added' ? '已收藏' : '已取消收藏',
       });
     },
-    onError: (error: Error) => {
+    onError: () => {
       toast({
         title: '操作失败',
-        description: error.message,
+        description: '收藏状态暂时无法更新，请稍后重试。',
         variant: 'destructive',
       });
     },
+  });
+};
+
+export const useQuestionFavoriteState = (questionId: string) => {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['question-favorite', questionId, user?.id],
+    queryFn: async () => {
+      if (!user) return false;
+      const { data, error } = await supabase
+        .from('favorites')
+        .select('id')
+        .eq('question_id', questionId)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      return !!data;
+    },
+    enabled: !!questionId && !!user,
   });
 };

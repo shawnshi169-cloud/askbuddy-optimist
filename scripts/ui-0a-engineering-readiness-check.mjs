@@ -51,7 +51,7 @@ assert.match(adapters, /avatar: string \| null/);
 const questionDetail = read('src/pages/QuestionDetail.tsx');
 assert.doesNotMatch(questionDetail, /randomuser\.me/);
 assert.match(questionDetail, /avatar: answer\.profile_avatar \|\| null/);
-assert.match(questionDetail, /avatar: question\.profile_avatar \|\| null/);
+assert.match(questionDetail, /AvatarImage src=\{question\.profile_avatar \|\| undefined\}/);
 
 const questionCard = read('src/components/QuestionCard.tsx');
 for (const forbiddenPattern of [
@@ -84,14 +84,14 @@ for (const forbiddenPattern of [
   assert.doesNotMatch(answerDialog, forbiddenPattern);
 }
 assert.match(answerDialog, /onSubmit: \(payload: \{ message: string \}\)/);
-assert.match(answerDialog, /disabled=\{!message\.trim\(\)\}/);
+assert.match(answerDialog, /disabled=\{!message\.trim\(\) \|\| submitting\}/);
 
 for (const forbiddenPattern of [/today14/, /today19/, /周末可约/, /askerTimeSlots=/]) {
   assert.doesNotMatch(questionDetail, forbiddenPattern);
 }
 assert.match(questionDetail, /useCreateAnswer/);
 assert.match(questionDetail, /createAnswer\.mutate\(/);
-assert.match(questionDetail, /回复功能暂未开放/);
+assert.doesNotMatch(questionDetail, /回复功能暂未开放|handleReply/);
 
 const questions = read('src/hooks/useQuestions.ts');
 assert.match(questions, /rpc\('create_answer_secure'/);

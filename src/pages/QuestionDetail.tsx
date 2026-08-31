@@ -1,33 +1,66 @@
-import React, { useEffect, useState } from "react";
-import Header from "@/components/question/Header";
-import Tags from "@/components/question/Tags";
-import Actions from "@/components/question/Actions";
-import AnswerList from "@/components/question/AnswerList";
-import ShareDialog from "@/components/question/ShareDialog";
-import BottomBar from "@/components/question/BottomBar";
-import AnswerDialog from "@/components/AnswerDialog";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { Users } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useQuestionDetail, useCreateAnswer, useToggleFavorite } from "@/hooks/useQuestions";
-import { useAcceptAnswer } from "@/hooks/useAcceptAnswer";
-import { useAuth } from "@/contexts/AuthContext";
+import React, { useEffect, useState } from 'react';
+import { Bookmark, BookmarkCheck, Coins, Eye, MessageCircle, Share2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
-import { useSubmitContentReport } from '@/hooks/useModeration';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import AnswerDialog from '@/components/AnswerDialog';
+import AnswerList, { type AnswerFeedItem } from '@/components/question/AnswerList';
+import BottomBar from '@/components/question/BottomBar';
+import Tags from '@/components/question/Tags';
+import SubPageHeader from '@/components/layout/SubPageHeader';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAcceptAnswer } from '@/hooks/useAcceptAnswer';
+import {
+  useCreateAnswer,
+  useQuestionDetail,
+  useQuestionFavoriteState,
+  useToggleFavorite,
+} from '@/hooks/useQuestions';
+import { useToast } from '@/hooks/use-toast';
+import { isPresentationFixtureAllowed } from '@/config/runtimeMode';
 import { demoQuestionDetails } from '@/lib/demoData';
-import PageStateCard from "@/components/common/PageStateCard";
 import { buildFromState, navigateBackOr, navigateToAuthWithReturn } from '@/utils/navigation';
 import { copyTextToClipboard } from '@/utils/clipboard';
-import { isPresentationFixtureAllowed } from '@/config/runtimeMode';
 
-// 分享选项
-const SHARE_OPTIONS = [
-  { id: "internal", name: "站内用户", icon: <Users size={20} className="text-primary" /> },
-  { id: "wechat", name: "微信", icon: <div className="w-5 h-5 bg-green-500 rounded-md flex items-center justify-center text-white font-bold text-xs">W</div> },
-  { id: "qq", name: "QQ", icon: <div className="w-5 h-5 bg-blue-400 rounded-md flex items-center justify-center text-white font-bold text-xs">Q</div> },
-  { id: "douyin", name: "抖音", icon: <div className="w-5 h-5 bg-black rounded-md flex items-center justify-center text-white font-bold text-xs">抖</div> }
-];
+const formatTime = (dateString?: string | null) => {
+  if (!dateString) return null;
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return null;
+  return formatDistanceToNow(date, { addSuffix: true, locale: zhCN });
+};
+
+const QuestionDetailSkeleton = ({ onBack }: { onBack: () => void }) => (
+  <div className="app-container min-h-[100dvh] bg-app-page pb-28">
+    <SubPageHeader title="问题详情" variant="content" onBack={onBack} />
+    <main className="animate-pulse px-4" aria-label="正在加载问题内容">
+      <section className="border-b border-app-border-subtle py-6">
+        <div className="h-4 w-28 rounded bg-slate-100" />
+        <div className="mt-5 h-7 w-11/12 rounded bg-slate-100" />
+        <div className="mt-3 h-7 w-3/4 rounded bg-slate-100" />
+        <div className="mt-5 h-4 w-full rounded bg-slate-100" />
+        <div className="mt-2 h-4 w-5/6 rounded bg-slate-100" />
+      </section>
+      <section className="py-6">
+        <div className="h-5 w-24 rounded bg-slate-100" />
+        {[0, 1].map((item) => (
+          <div key={item} className="border-b border-app-border-subtle py-5 last:border-0">
+            <div className="flex items-center gap-3">
+              <div className="h-11 w-11 rounded-full bg-slate-100" />
+              <div className="space-y-2">
+                <div className="h-4 w-24 rounded bg-slate-100" />
+                <div className="h-3 w-36 rounded bg-slate-100" />
+              </div>
+            </div>
+            <div className="mt-4 h-4 w-full rounded bg-slate-100" />
+            <div className="mt-2 h-4 w-4/5 rounded bg-slate-100" />
+          </div>
+        ))}
+      </section>
+    </main>
+  </div>
+);
 
 const QuestionDetail = () => {
   const { id } = useParams();
@@ -38,302 +71,292 @@ const QuestionDetail = () => {
   const presentationFixturesEnabled = isPresentationFixtureAllowed();
   const requestedDemoQuestion = !!id?.startsWith('demo-question-');
   const isDemoQuestion = presentationFixturesEnabled && requestedDemoQuestion;
+  const questionId = id || '';
 
-  // 获取问题数据
-  const { data, isLoading, error } = useQuestionDetail(requestedDemoQuestion ? '' : id || '');
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+  } = useQuestionDetail(requestedDemoQuestion ? '' : questionId);
   const createAnswer = useCreateAnswer();
   const toggleFavorite = useToggleFavorite();
+  const favoriteState = useQuestionFavoriteState(isDemoQuestion ? '' : questionId);
   const acceptAnswer = useAcceptAnswer();
-  const submitReport = useSubmitContentReport();
-
-  // 状态管理
-  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [isAnswerDialogOpen, setIsAnswerDialogOpen] = useState(false);
-  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+
+  const goBack = () => navigateBackOr(navigate, '/', { location });
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
   }, [id]);
 
-  // 格式化时间
-  const formatTime = (dateString: string) => {
-    try {
-      return formatDistanceToNow(new Date(dateString), { 
-        addSuffix: true, 
-        locale: zhCN 
-      });
-    } catch {
-      return '刚刚';
-    }
-  };
-
-  // 格式化浏览量
-  const formatViewCount = (count: number) => {
-    if (count >= 1000) {
-      return (count / 1000).toFixed(1) + 'k';
-    }
-    return count.toString();
-  };
-
   if (requestedDemoQuestion && !presentationFixturesEnabled) {
     return (
-      <div className="app-container min-h-[100dvh] bg-gradient-to-b from-[rgb(248,253,251)] via-white to-white flex items-center justify-center p-4">
-        <PageStateCard variant="error" title="演示问题不可用" description="当前运行环境未启用展示数据。" />
+      <div className="app-container min-h-[100dvh] bg-app-page">
+        <SubPageHeader title="问题详情" variant="content" onBack={goBack} />
+        <main className="flex min-h-[65dvh] flex-col items-center justify-center px-6 text-center">
+          <h2 className="text-lg font-semibold text-slate-900">演示问题不可用</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-500">当前运行环境未启用展示数据。</p>
+          <Button type="button" variant="outline" className="mt-5 h-11 rounded-full px-6" onClick={goBack}>
+            返回
+          </Button>
+        </main>
       </div>
     );
   }
 
   if (!requestedDemoQuestion && isLoading) {
-    return (
-      <div className="app-container min-h-[100dvh] bg-gradient-to-b from-[rgb(248,253,251)] via-white to-white flex items-center justify-center p-4">
-        <PageStateCard variant="loading" title="正在加载问题内容…" />
-      </div>
-    );
+    return <QuestionDetailSkeleton onBack={goBack} />;
   }
 
-  const demoData = isDemoQuestion ? demoQuestionDetails[id as keyof typeof demoQuestionDetails] : null;
+  const demoData = isDemoQuestion
+    ? demoQuestionDetails[questionId as keyof typeof demoQuestionDetails]
+    : null;
   const resolvedData = isDemoQuestion ? demoData : data;
 
   if (error || !resolvedData) {
     return (
-      <div className="app-container min-h-[100dvh] bg-gradient-to-b from-[rgb(248,253,251)] via-white to-white flex items-center justify-center p-4">
-        <PageStateCard
-          variant="error"
-          title="暂时无法加载问题"
-          description="链接可能已失效，或当前网络不稳定。"
-          actionLabel="返回上页"
-          onAction={() => navigateBackOr(navigate, '/', { location })}
-        />
+      <div className="app-container min-h-[100dvh] bg-app-page">
+        <SubPageHeader title="问题详情" variant="content" onBack={goBack} />
+        <main className="flex min-h-[65dvh] flex-col items-center justify-center px-6 text-center">
+          <h2 className="text-lg font-semibold text-slate-900">问题暂时加载失败</h2>
+          <p className="mt-2 max-w-xs text-sm leading-6 text-slate-500">
+            网络或服务似乎遇到了问题，请稍后重试。
+          </p>
+          {!requestedDemoQuestion ? (
+            <Button
+              type="button"
+              variant="action"
+              className="mt-5 h-11 rounded-full px-7"
+              onClick={() => void refetch()}
+            >
+              重试
+            </Button>
+          ) : null}
+          <Button type="button" variant="ghost" className="mt-2 h-11 rounded-full px-6" onClick={goBack}>
+            返回
+          </Button>
+        </main>
       </div>
     );
   }
 
   const { question, answers } = resolvedData;
+  const questionAuthorId = ('author_id' in question && question.author_id)
+    ? question.author_id
+    : question.user_id;
+  const questionTime = formatTime(question.created_at);
+  const answerItems: AnswerFeedItem[] = answers.map((answer) => ({
+    id: answer.id,
+    name: answer.profile_nickname || '匿名用户',
+    avatar: answer.profile_avatar || null,
+    headline: 'expert_headline' in answer ? answer.expert_headline || null : null,
+    content: answer.content,
+    time: formatTime(answer.created_at),
+    expertId: 'expert_id' in answer ? answer.expert_id || null : null,
+    accepted: answer.is_accepted,
+  }));
 
-  // 回答弹窗提交
   const handleAnswerDialogSubmit = (payload: { message: string }) => {
     if (!user) {
-      toast({ title: "请先登录", variant: "destructive" });
+      toast({ title: '请先登录', variant: 'destructive' });
       navigateToAuthWithReturn(navigate, location);
       return;
     }
 
-    if (!payload.message.trim()) {
-      toast({ title: "请输入回答内容", variant: "destructive" });
-      return;
-    }
-
     if (isDemoQuestion) {
-      toast({ title: '这是演示问题', description: '当前用于前端展示，回答提交流程已保留但不会写入真实数据。' });
+      toast({
+        title: '这是演示问题',
+        description: '展示数据不会写入真实回答。',
+      });
       setIsAnswerDialogOpen(false);
       return;
     }
 
     createAnswer.mutate({
-      question_id: id!,
-      content: payload.message
+      question_id: questionId,
+      content: payload.message,
     }, {
-      onSuccess: () => {
-        setIsAnswerDialogOpen(false);
-      }
+      onSuccess: () => setIsAnswerDialogOpen(false),
     });
   };
 
-  // 收藏操作
   const handleCollect = () => {
     if (!user) {
-      toast({ title: "请先登录", variant: "destructive" });
+      toast({ title: '请先登录', variant: 'destructive' });
       navigateToAuthWithReturn(navigate, location);
       return;
     }
     if (isDemoQuestion) {
-      toast({ title: '这是演示问题', description: '收藏流程在真实问题上可正常使用。' });
+      toast({ title: '这是演示问题', description: '展示数据不会写入收藏。' });
       return;
     }
-    toggleFavorite.mutate(id!);
+    toggleFavorite.mutate(questionId);
   };
 
-  // 分享弹窗
-  const handleShareDialog = () => setIsShareDialogOpen(true);
-
-  // 分享
-  const handleShareQuestion = async (_optionId: string) => {
+  const handleShareQuestion = async () => {
     try {
       await copyTextToClipboard(window.location.href);
-      setIsShareDialogOpen(false);
       toast({ title: '分享链接已复制' });
-    } catch (shareError) {
+    } catch {
       toast({
         title: '分享失败',
-        description: shareError instanceof Error ? shareError.message : '无法复制分享链接',
+        description: '当前设备无法复制链接，请稍后重试。',
         variant: 'destructive',
       });
     }
   };
 
-  const handleReportQuestion = () => {
+  const handleAcceptAnswer = (answerId: string) => {
     if (!user) {
-      toast({ title: "请先登录", variant: "destructive" });
+      toast({ title: '请先登录', variant: 'destructive' });
       navigateToAuthWithReturn(navigate, location);
       return;
     }
-    if (isDemoQuestion) {
-      toast({ title: '这是演示问题', description: '演示问题不需要举报。' });
-      return;
-    }
-
-    submitReport.mutate({
-      targetId: question.id,
-      targetType: 'question',
-      reason: '疑似违规或垃圾内容',
-      details: `来自问题详情页：${question.title}`,
+    acceptAnswer.mutate({ answerId, questionId }, {
+      onSuccess: () => toast({ title: '已采纳回答' }),
+      onError: () => toast({
+        title: '采纳失败',
+        description: '当前无法采纳这条回答，请稍后重试。',
+        variant: 'destructive',
+      }),
     });
   };
 
-  // 查看用户资料
-  const handleViewUserProfile = (userId: string) => {
-    navigate(`/expert-profile/${userId}`, { state: buildFromState(location) });
+  const openPerson = (expertId: string) => {
+    navigate(`/expert-profile/${expertId}`, { state: buildFromState(location) });
   };
 
-  // 回复
-  const handleReply = (_answerId: string) => {
-    toast({ title: '回复功能暂未开放' });
-  };
-
-  // 采纳回答
-  const handleAcceptAnswer = (answerId: string) => {
-    if (!user) {
-      toast({ title: "请先登录", variant: "destructive" });
-      return;
-    }
-    acceptAnswer.mutate({ answerId, questionId: id! }, {
-      onSuccess: () => {
-        toast({ title: "已采纳回答，积分已转移" });
-      },
-      onError: (error: Error) => {
-        toast({ title: error.message || "采纳失败", variant: "destructive" });
-      }
-    });
-  };
-
-  const isQuestionOwner = user?.id === question.user_id;
-  const hasAcceptedAnswer = answers.some(a => a.is_accepted);
-
-  // 转换回答数据格式
-  const formattedAnswers = answers.map(answer => ({
-    id: answer.id,
-    name: answer.profile_nickname || '匿名用户',
-    avatar: answer.profile_avatar || null,
-    title: '回答者',
-    content: answer.content,
-    time: formatTime(answer.created_at),
-    viewCount: answer.likes_count,
-    best: answer.is_accepted
-  }));
+  const isQuestionOwner = user?.id === questionAuthorId;
+  const hasAcceptedAnswer = answers.some((answer) => answer.is_accepted);
+  const acceptingAnswerId = acceptAnswer.isPending ? acceptAnswer.variables?.answerId || null : null;
+  const tags = [...(question.tags || [])].slice(0, 4);
 
   return (
-    <div className="app-container bg-gradient-to-b from-[rgb(248,253,251)] via-white to-white pb-24 min-h-[100dvh]">
-      <Header
+    <div className="app-container min-h-[100dvh] bg-app-page pb-28">
+      <SubPageHeader
         title="问题详情"
-        asker={{
-          name: question.profile_nickname || '匿名用户',
-          avatar: question.profile_avatar || null,
-          id: question.user_id
-        }}
-        time={formatTime(question.created_at)}
-        viewCount={formatViewCount(question.view_count)}
-        points={question.bounty_points}
-        onBack={() => navigateBackOr(navigate, '/', { location })}
-        onViewUser={handleViewUserProfile}
-      />
-      <div className="mx-4 mb-5 mt-4 surface-card rounded-3xl p-5 animate-fade-in">
-        <div className="inline-flex rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground">问题正文</div>
-        <h1 className="mt-3 text-[21px] font-bold leading-8 text-gray-800 text-left">{question.title}</h1>
-        <div className="mt-4 text-[15px] text-gray-700 leading-7 text-left mb-5">
-          {question.content && question.content.length > 100 && !isDescriptionExpanded ? (
-            <>
-              <p>{question.content.substring(0, 100)}...</p>
-              <button
-                className="text-primary text-xs mt-2 hover:underline flex items-center"
-                onClick={() => setIsDescriptionExpanded(true)}
-                aria-label="展开全部描述"
-              >
-                展开全部
-              </button>
-            </>
-          ) : (
-            <>
-              <p>{question.content || '暂无详细描述'}</p>
-              {question.content && question.content.length > 100 && (
-                <button
-                  className="text-primary text-xs mt-2 hover:underline flex items-center"
-                  onClick={() => setIsDescriptionExpanded(false)}
-                  aria-label="收起描述"
-                >
-                  收起
-                </button>
-              )}
-            </>
-          )}
-        </div>
-        <Tags tags={question.tags || []} />
-        <div className="mt-5">
-          <Actions onCollect={handleCollect} onShare={handleShareDialog} />
-        </div>
-        <div className="mt-4 flex justify-end">
-          <button
-            className="text-xs text-muted-foreground hover:text-foreground"
-            onClick={handleReportQuestion}
-            disabled={submitReport.isPending}
+        variant="content"
+        onBack={goBack}
+        right={(
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-11 w-11 rounded-full text-slate-600 hover:bg-app-action-soft hover:text-app-action"
+            onClick={() => void handleShareQuestion()}
+            aria-label="复制问题分享链接"
           >
-            {submitReport.isPending ? '提交中...' : '举报内容'}
-          </button>
-        </div>
-      </div>
-      <div className="px-4 mb-5">
-        <div className="surface-card rounded-3xl p-5">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h2 className="font-semibold text-lg text-left text-slate-900">回答 ({answers.length})</h2>
-            <p className="mt-1 text-xs text-slate-500">优先查看高质量回答，再决定是否继续补充提问。</p>
-          </div>
-          <button
-            className="rounded-full bg-secondary px-3 py-1.5 text-xs font-medium text-primary flex items-center"
-            aria-label="按热度排序"
-          >
-            按热度排序
-          </button>
-        </div>
-        {formattedAnswers.length > 0 ? (
-          <AnswerList
-            answers={formattedAnswers}
-            onViewUser={handleViewUserProfile}
-            onReply={handleReply}
-            onAccept={handleAcceptAnswer}
-            canAccept={isQuestionOwner && !hasAcceptedAnswer}
-          />
-        ) : (
-          <PageStateCard compact title="还没有回答" description="你可以成为第一个回答的人。" />
+            <Share2 aria-hidden size={19} />
+          </Button>
         )}
-        </div>
-      </div>
+      />
+
+      <main className="px-4">
+        <section className="border-b border-app-border-subtle py-6" aria-labelledby="question-title">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-10 w-10 shrink-0">
+              <AvatarImage src={question.profile_avatar || undefined} alt={question.profile_nickname || '匿名用户'} />
+              <AvatarFallback>{(question.profile_nickname || '匿').slice(0, 1)}</AvatarFallback>
+            </Avatar>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-slate-800">
+                {question.profile_nickname || '匿名用户'}
+              </p>
+              {questionTime ? <p className="mt-0.5 text-xs text-slate-400">{questionTime}</p> : null}
+            </div>
+          </div>
+
+          <h1 id="question-title" className="mt-5 text-[22px] font-semibold leading-8 tracking-[-0.01em] text-slate-950">
+            {question.title}
+          </h1>
+
+          {question.content ? (
+            <p className="mt-4 whitespace-pre-wrap text-[15px] leading-7 text-slate-700">
+              {question.content}
+            </p>
+          ) : null}
+
+          {tags.length > 0 ? <div className="mt-4"><Tags tags={tags} /></div> : null}
+
+          <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500">
+            <span className="inline-flex items-center gap-1.5">
+              <MessageCircle aria-hidden size={14} />
+              {answers.length} 个回答
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Eye aria-hidden size={14} />
+              {question.view_count ?? 0} 人看过
+            </span>
+            {question.bounty_points > 0 ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 font-medium text-amber-700">
+                <Coins aria-hidden size={14} />
+                {question.bounty_points} 积分
+              </span>
+            ) : null}
+          </div>
+
+          {(!user || !favoriteState.isError) ? (
+            <div className="mt-4 border-t border-app-border-subtle pt-2">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-11 rounded-full px-3 text-xs text-slate-600 hover:bg-slate-50"
+                onClick={handleCollect}
+                disabled={toggleFavorite.isPending || (!!user && favoriteState.isLoading)}
+                aria-label={favoriteState.data ? '取消收藏问题' : '收藏问题'}
+              >
+                {favoriteState.data ? (
+                  <BookmarkCheck aria-hidden size={15} className="mr-1.5 text-app-action" />
+                ) : (
+                  <Bookmark aria-hidden size={15} className="mr-1.5" />
+                )}
+                {favoriteState.data ? '已收藏' : '收藏问题'}
+              </Button>
+            </div>
+          ) : null}
+        </section>
+
+        <section className="py-6" aria-labelledby="answers-heading">
+          <div className="mb-5">
+            <h2 id="answers-heading" className="text-[17px] font-semibold text-slate-900">
+              {answers.length} 个回答
+            </h2>
+          </div>
+
+          {answerItems.length > 0 ? (
+            <AnswerList
+              answers={answerItems}
+              onOpenPerson={openPerson}
+              onAccept={handleAcceptAnswer}
+              canAccept={isQuestionOwner && !hasAcceptedAnswer && !isDemoQuestion}
+              acceptingAnswerId={acceptingAnswerId}
+            />
+          ) : (
+            <div className="border-y border-app-border-subtle py-10 text-center">
+              <h3 className="text-base font-semibold text-slate-800">还没有回答</h3>
+              <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-slate-500">
+                如果你经历过类似的事，可以分享你的经验。
+              </p>
+            </div>
+          )}
+        </section>
+      </main>
+
       <BottomBar
         onAnswer={() => setIsAnswerDialogOpen(true)}
-        onInvite={handleShareDialog}
         loading={createAnswer.isPending}
       />
       <AnswerDialog
         open={isAnswerDialogOpen}
         onOpenChange={setIsAnswerDialogOpen}
         onSubmit={handleAnswerDialogSubmit}
-      />
-      <ShareDialog
-        open={isShareDialogOpen}
-        onOpenChange={setIsShareDialogOpen}
-        options={SHARE_OPTIONS}
-        onShare={handleShareQuestion}
+        submitting={createAnswer.isPending}
       />
     </div>
   );
 };
+
 export default QuestionDetail;
