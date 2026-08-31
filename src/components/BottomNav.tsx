@@ -17,7 +17,11 @@ import { buildFromState } from '@/utils/navigation';
 
 const HOME_TAB_PREFIXES = ['/education', '/career', '/lifestyle', '/hobbies', '/search', '/topic'];
 
-const BottomNav: React.FC = () => {
+interface BottomNavProps {
+  onBeforeNavigate?: () => void;
+}
+
+const BottomNav: React.FC<BottomNavProps> = ({ onBeforeNavigate }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
@@ -56,6 +60,7 @@ const BottomNav: React.FC = () => {
       dispatchTabReselect(path);
       return;
     }
+    onBeforeNavigate?.();
     navigate(path, { state: buildFromState(location) });
   };
 

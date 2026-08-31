@@ -16,7 +16,7 @@
     "lint": "eslint .",
     "lint:changed": "node scripts/lint-changed.mjs",
     "preview": "vite preview",
-    "test:contracts": "node scripts/schema-contract-check.mjs && node scripts/contract-truth-check.mjs && node scripts/p1-4b-backend-hardening-check.mjs && node scripts/p1-4c-production-writes-check.mjs && node scripts/p1-4d-demo-fixture-isolation-check.mjs && node scripts/ui-0a-engineering-readiness-check.mjs && node scripts/ui-0b-platform-truth-check.mjs && node scripts/ui-1c-search-truth-check.mjs && node scripts/wechat-auth-jwk-check.mjs",
+    "test:contracts": "node scripts/schema-contract-check.mjs && node scripts/contract-truth-check.mjs && node scripts/p1-4b-backend-hardening-check.mjs && node scripts/p1-4c-production-writes-check.mjs && node scripts/p1-4d-demo-fixture-isolation-check.mjs && node scripts/ui-0a-engineering-readiness-check.mjs && node scripts/ui-0b-platform-truth-check.mjs && node scripts/ui-1c-search-truth-check.mjs && node scripts/ui-1b-home-stabilization-check.mjs && node scripts/wechat-auth-jwk-check.mjs",
     "test:backend-hardening": "node scripts/p1-4b-backend-hardening-check.mjs",
     "test:runtime-mode": "node scripts/runtime-mode-check.mjs",
     "test:production-writes": "node scripts/p1-4c-production-writes-check.mjs",
@@ -24,6 +24,7 @@
     "test:ui-engineering-readiness": "node scripts/ui-0a-engineering-readiness-check.mjs",
     "test:ui-platform-readiness": "node scripts/ui-0b-platform-truth-check.mjs",
     "test:search-ui-truth": "node scripts/ui-1c-search-truth-check.mjs",
+    "test:home-stabilization": "node scripts/ui-1b-home-stabilization-check.mjs",
     "test:smoke": "node scripts/rpc-smoke-test.mjs",
     "test:call": "node scripts/call-v1-validation.mjs"
   },

@@ -60,9 +60,8 @@ assert.match(home, /presentationFixturesEnabled \? \(/);
 assert.match(home, /title="热榜暂时为空"/);
 
 const categories = read('src/components/CategorySection.tsx');
-assert.match(categories, /presentationFixturesEnabled[\s\S]{0,100}presentationCategoryFixtures/);
-assert.match(categories, /variant="error"[\s\S]{0,120}title="分类加载失败"/);
-assert.match(categories, /title="暂无可用分类"/);
+assert.match(categories, /PRODUCT_CHANNEL_CATALOG/);
+assert.doesNotMatch(categories, /presentationCategoryFixtures|useCategories|public\.categories/);
 
 const search = read('src/hooks/useSearch.ts');
 assert.match(search, /const demoMatchedQuestions = presentationFixturesEnabled \? demoQuestions/);
