@@ -18,7 +18,7 @@ export const useSubmitContentReport = () => {
         throw new Error('请先登录');
       }
 
-      const { data, error } = await (supabase as any).rpc('submit_content_report', {
+      const { data, error } = await supabase.rpc('submit_content_report', {
         p_target_id: params.targetId,
         p_target_type: params.targetType,
         p_reason: params.reason,
@@ -34,10 +34,10 @@ export const useSubmitContentReport = () => {
     onSuccess: () => {
       toast({ title: '举报已提交', description: '平台会尽快审核处理' });
     },
-    onError: (error: Error) => {
+    onError: () => {
       toast({
         title: '举报失败',
-        description: error.message,
+        description: '举报暂时无法提交，请稍后重试。',
         variant: 'destructive',
       });
     },

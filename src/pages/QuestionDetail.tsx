@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Bookmark, BookmarkCheck, Coins, Eye, MessageCircle, Share2 } from 'lucide-react';
+import { Bookmark, BookmarkCheck, Coins, Eye, Flag, MessageCircle, Share2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAcceptAnswer } from '@/hooks/useAcceptAnswer';
+import { useSubmitContentReport } from '@/hooks/useModeration';
 import {
   useCreateAnswer,
   useQuestionDetail,
@@ -83,6 +84,7 @@ const QuestionDetail = () => {
   const toggleFavorite = useToggleFavorite();
   const favoriteState = useQuestionFavoriteState(isDemoQuestion ? '' : questionId);
   const acceptAnswer = useAcceptAnswer();
+  const submitReport = useSubmitContentReport();
   const [isAnswerDialogOpen, setIsAnswerDialogOpen] = useState(false);
 
   const goBack = () => navigateBackOr(navigate, '/', { location });
@@ -208,6 +210,25 @@ const QuestionDetail = () => {
     }
   };
 
+  const handleReportQuestion = () => {
+    if (!user) {
+      toast({ title: '请先登录', variant: 'destructive' });
+      navigateToAuthWithReturn(navigate, location);
+      return;
+    }
+    if (isDemoQuestion) {
+      toast({ title: '这是演示问题', description: '展示数据不会提交举报。' });
+      return;
+    }
+
+    submitReport.mutate({
+      targetId: question.id,
+      targetType: 'question',
+      reason: '疑似违规或垃圾内容',
+      details: `来自问题详情页：${question.title}`,
+    });
+  };
+
   const handleAcceptAnswer = (answerId: string) => {
     if (!user) {
       toast({ title: '请先登录', variant: 'destructive' });
@@ -297,8 +318,8 @@ const QuestionDetail = () => {
             ) : null}
           </div>
 
-          {(!user || !favoriteState.isError) ? (
-            <div className="mt-4 border-t border-app-border-subtle pt-2">
+          <div className="mt-4 flex items-center gap-1 border-t border-app-border-subtle pt-2">
+            {(!user || !favoriteState.isError) ? (
               <Button
                 type="button"
                 variant="ghost"
@@ -315,8 +336,20 @@ const QuestionDetail = () => {
                 )}
                 {favoriteState.data ? '已收藏' : '收藏问题'}
               </Button>
-            </div>
-          ) : null}
+            ) : null}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-11 rounded-full px-3 text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+              onClick={handleReportQuestion}
+              disabled={submitReport.isPending}
+              aria-label="举报问题"
+            >
+              <Flag aria-hidden size={15} className="mr-1.5" />
+              {submitReport.isPending ? '提交中…' : '举报'}
+            </Button>
+          </div>
         </section>
 
         <section className="py-6" aria-labelledby="answers-heading">

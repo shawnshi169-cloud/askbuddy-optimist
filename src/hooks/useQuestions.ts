@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { resolveOptionalRows } from '@/hooks/questionDetailEnrichment';
 import type { QuestionStatus } from '../../packages/shared-types/src/contracts';
 
 export interface Question {
@@ -133,7 +134,7 @@ export const useQuestionDetail = (questionId: string) => {
         ...(answers || []).map((answer) => answer.author_id || answer.user_id),
       ]));
 
-      const [profilesResult, expertsResult] = await Promise.all([
+      const [profilesResult, expertsResult] = await Promise.allSettled([
         supabase
           .from('profiles')
           .select('user_id, nickname, avatar_url')
@@ -146,14 +147,16 @@ export const useQuestionDetail = (questionId: string) => {
           .eq('is_active', true),
       ]);
 
-      if (profilesResult.error) throw profilesResult.error;
-      if (expertsResult.error) throw expertsResult.error;
+      if (profilesResult.status === 'rejected') throw profilesResult.reason;
+      if (profilesResult.value.error) throw profilesResult.value.error;
+
+      const expertRows = resolveOptionalRows(expertsResult);
 
       const profileMap = new Map(
-        (profilesResult.data || []).map((profile) => [profile.user_id, profile])
+        (profilesResult.value.data || []).map((profile) => [profile.user_id, profile])
       );
       const expertMap = new Map(
-        (expertsResult.data || []).map((expert) => [expert.user_id, expert])
+        expertRows.map((expert) => [expert.user_id, expert])
       );
 
       const answersWithProfiles = (answers || []).map((answer) => {
