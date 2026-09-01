@@ -1,88 +1,98 @@
+import React from 'react';
+import { ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 
-import React from "react";
-import { Eye, Award, CheckCircle } from "lucide-react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-
-interface Answer {
+export interface AnswerFeedItem {
   id: string;
   name: string;
   avatar: string | null;
-  title: string;
-  content: React.ReactNode;
-  time: string;
-  viewCount: number;
-  best?: boolean;
+  headline: string | null;
+  content: string;
+  time: string | null;
+  expertId: string | null;
+  accepted: boolean;
 }
 
 interface AnswerListProps {
-  answers: Answer[];
-  onViewUser: (userId: string) => void;
-  onReply: (answerId: string) => void;
+  answers: AnswerFeedItem[];
+  onOpenPerson: (expertId: string) => void;
   onAccept?: (answerId: string) => void;
   canAccept?: boolean;
+  acceptingAnswerId?: string | null;
 }
 
 const AnswerList: React.FC<AnswerListProps> = ({
-  answers, onViewUser, onReply, onAccept, canAccept
+  answers,
+  onOpenPerson,
+  onAccept,
+  canAccept = false,
+  acceptingAnswerId = null,
 }) => (
-  <div className="space-y-4">
-    {answers.map((ans) => (
-      <div key={ans.id} className="rounded-3xl border border-slate-100 bg-white p-4 shadow-sm">
-        <div className="mb-3 flex items-start justify-between gap-3">
-          <div
-            className="flex min-w-0 items-center cursor-pointer"
-            onClick={() => onViewUser(ans.id)}
-          >
-            <Avatar className="w-9 h-9 mr-3">
-              <AvatarImage src={ans.avatar || undefined} />
-              <AvatarFallback>{ans.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-slate-900">{ans.name}</p>
-              <p className="text-xs text-muted-foreground">{ans.title}</p>
+  <div className="divide-y divide-app-border-subtle">
+    {answers.map((answer) => (
+      <article key={answer.id} className="py-5 first:pt-0 last:pb-0">
+        <header className="flex items-start gap-3">
+          <Avatar className="h-11 w-11 shrink-0">
+            <AvatarImage src={answer.avatar || undefined} alt={answer.name} />
+            <AvatarFallback>{answer.name.slice(0, 1)}</AvatarFallback>
+          </Avatar>
+
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <p className="truncate text-[15px] font-semibold text-slate-900">{answer.name}</p>
+              {answer.accepted ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">
+                  <CheckCircle2 aria-hidden size={12} />
+                  已采纳
+                </span>
+              ) : null}
             </div>
+            {answer.headline ? (
+              <p className="mt-0.5 line-clamp-1 text-[13px] text-slate-500">{answer.headline}</p>
+            ) : null}
           </div>
-          <div className="flex shrink-0 items-center gap-2">
-            {ans.best && (
-              <div className="bg-yellow-50 text-yellow-600 rounded-full px-2.5 py-1 text-xs flex items-center border border-yellow-100">
-                <Award size={12} className="mr-1" />
-                最佳回答
-              </div>
-            )}
-            {canAccept && !ans.best && onAccept && (
+
+          {answer.time ? (
+            <time className="shrink-0 pt-0.5 text-xs text-slate-400">{answer.time}</time>
+          ) : null}
+        </header>
+
+        <p className="mt-4 whitespace-pre-wrap text-[15px] leading-7 text-slate-700">
+          {answer.content}
+        </p>
+
+        {(answer.expertId || (canAccept && !answer.accepted && onAccept)) ? (
+          <footer className="mt-3 flex min-h-11 items-center justify-end gap-2">
+            {canAccept && !answer.accepted && onAccept ? (
               <Button
-                variant="outline"
+                type="button"
+                variant="ghost"
                 size="sm"
-                className="text-xs h-7 rounded-full text-primary border-primary/30"
-                onClick={() => onAccept(ans.id)}
+                className="h-11 rounded-full px-3 text-xs text-slate-600 hover:bg-slate-50"
+                disabled={acceptingAnswerId === answer.id}
+                onClick={() => onAccept(answer.id)}
               >
-                <CheckCircle size={12} className="mr-1" />
-                采纳
+                {acceptingAnswerId === answer.id ? '采纳中…' : '采纳回答'}
               </Button>
-            )}
-          </div>
-        </div>
-        <p className="mb-4 text-sm leading-7 text-slate-700 text-left">{ans.content}</p>
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>{ans.time}</span>
-          <div className="flex items-center space-x-4">
-            <span className="flex items-center">
-              <Eye size={12} className="mr-1" />
-              {ans.viewCount}
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-primary h-6 text-xs rounded-full"
-              onClick={() => onReply(ans.id)}
-              aria-label={`回复${ans.name}`}
-            >
-              回复
-            </Button>
-          </div>
-        </div>
-      </div>
+            ) : null}
+
+            {answer.expertId ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-11 rounded-full px-3 text-xs font-semibold text-app-action hover:bg-app-action-soft hover:text-app-action"
+                onClick={() => onOpenPerson(answer.expertId!)}
+                aria-label={`查看${answer.name}的个人主页`}
+              >
+                看看TA
+                <ArrowRight aria-hidden className="ml-1" size={14} />
+              </Button>
+            ) : null}
+          </footer>
+        ) : null}
+      </article>
     ))}
   </div>
 );
