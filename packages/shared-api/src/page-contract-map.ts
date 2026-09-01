@@ -109,6 +109,19 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     notes: ["Community presentation data is development-only; production shows unavailable until a real community contract exists."],
   },
   {
+    pageId: "public-person",
+    page: "Public Person Profile",
+    readContracts: ["rpc:get_public_person_profile_v1"],
+    writeContracts: [],
+    implementationStatus: "blocked",
+    currentReadContracts: [],
+    currentWriteContracts: [],
+    notes: [
+      "Architecture A owns PublicPersonId and the safe profile projection; Core UI adoption starts after the RPC deployment gate.",
+      "Contribution lists and direct profiles Data API privacy hardening are separate contracts.",
+    ],
+  },
+  {
     pageId: "question-detail",
     page: "Question Detail",
     readContracts: ["table:questions", "table:answers", "table:profiles"],

@@ -1,405 +1,439 @@
-# Canonical Public Person Profile Contract Decision
+# Canonical Public Person Profile Contract 架构决策
 
-## Status
+## 文档状态
 
-- Architecture owner: A - Backend & Shared Contract
-- Audit base: `02b72c2c429c009cb761f7d454b014dc0c179a91`
-- Production project inspected read-only: `fslpvtlavhrnxsygkpvi`
-- Decision: accepted for implementation planning
-- Runtime, schema, and product behavior changed by this decision: no
+- 架构负责人：A - Backend & Shared Contract
+- 审计基线：`02b72c2c429c009cb761f7d454b014dc0c179a91`
+- Production 项目：`fslpvtlavhrnxsygkpvi`，仅执行只读审计
+- 核心 Decision：review 通过
+- 本次 Amendment：撤回默认 `SECURITY DEFINER`，改为优先并最终采用 `SECURITY INVOKER`
+- 本文档不表示数据库已经部署，也不表示旧 `profiles` Data API 隐私风险已经解决
 
-## Decision
+## 一、不可变核心决策
 
-The canonical public-person identifier is `auth.users.id`. At public storage
-boundaries this is represented by `profiles.user_id` and by the author,
-participant, sender, receiver, follower, and followee user identifiers.
+Canonical Public Person identifier 为：
 
-The canonical public route will be:
+```text
+PublicPersonId = auth.users.id = profiles.user_id
+```
+
+Canonical public route 为：
 
 ```text
 /person/:userId
 ```
 
-`profiles.id` and `experts.id` are row identifiers, not public-person
-identifiers. `experts` is an optional capability and service-provider
-extension. A person does not need an expert row, a service offer, or a
-verification result to have a public profile.
+`profiles.id` 与 `experts.id` 都只是存储行 ID，不是 Person identity。
+`experts` 是可选 capability/service extension。普通用户没有 expert row、服务、
+收费能力或认证结果时，仍然拥有 Public Person Profile。
 
-The existing `/profile` route remains the authenticated user's private/self
-area. The name `/profile/:userId` is therefore rejected because it would blur
-self-profile and public-person semantics.
+平台不存在永久的“提问者账号”或“回答者账号”。提问者、回答者、服务提供方与
+服务购买方都只是一次 interaction/service 中的角色；同一 Auth Person 可以在不同
+场景承担不同角色，不能据此拆成不同 public identity。
 
-## Production Schema Truth
+公开身份与平台内部账户身份分离。Public Person 使用 nickname、avatar、public bio
+与已定义的公开经历语义，不要求公开法律姓名。手机号验证只属于账户登录/基础真实性
+能力，绝不等价于公开实名，也不得使 `profiles.phone` 进入 Public Person contract。
 
-The read-only production audit on 2026-09-01 established the following facts.
+现有 `/profile` 继续表示 authenticated self area，因此不采用
+`/profile/:userId`。旧 `/expert-profile/:expertId` 与 `/expert/:expertId`
+采用 additive compatibility，不在本阶段删除。
 
-### Profiles
+## 二、Production Schema Truth
 
-- `profiles.id` is the physical primary key.
-- `profiles.user_id` is unique and references `auth.users(id)` with cascade on
-  delete.
-- No production row has `profiles.id = profiles.user_id`.
-- All 27 Auth users have exactly one profile; there are no duplicate or orphan
-  profiles.
-- Stored profile fields include `nickname`, `avatar_url`, `cover_url`, `bio`,
-  `phone`, `city`, `city_code`, `gender`, `school`, `industry`, `is_expert`,
-  `is_verified`, and timestamps.
-- `profiles` has no persisted profile status or visibility column.
-- `user_settings.privacy_level` exists separately. All current profile owners
-  have a setting and all current values are `public`; `friends_only` semantics
-  have not been defined as a public-person read contract.
-- RLS is enabled, but current public-read policies and table grants allow anon
-  and authenticated callers to select every profile column, including
-  `phone`. This is an existing privacy boundary defect. New public-person code
-  must not copy or normalize this behavior.
+### profiles
 
-### Experts
+- `profiles.id` 是物理主键。
+- `profiles.user_id` 唯一并引用 `auth.users(id) ON DELETE CASCADE`。
+- Production 中不存在 `profiles.id = profiles.user_id` 的行。
+- 当前 27 个 Auth user 均有且仅有一个 profile，没有 duplicate 或 orphan。
+- 当前字段包括 `nickname`、`avatar_url`、`cover_url`、`bio`、`phone`、
+  `city`、`city_code`、`gender`、`school`、`industry`、`is_expert`、
+  `is_verified` 与时间戳。
+- `profiles` 没有 canonical `profile_status` 或 visibility 字段。
+- `user_settings.privacy_level` 单独存在，但当前 Core privacy UI 使用的是另一组
+  legacy JSON 字段；`privacy_level` 尚未成为可执行的 Public Person visibility
+  contract。现有与 profile 对应的 27 条设置全部为 `public`。
+- RLS 已启用，但现有公开读 policy 为 `USING (true)`，anon/authenticated
+  均有 table-level `SELECT`，因此 `phone` 当前可通过 Data API 直接读取。
 
-- `experts.id` is the expert-extension row primary key.
-- `experts.user_id` is unique and is the current owner identity.
-- No production expert has `experts.id = experts.user_id`.
-- Production has 3 experts and 24 profiles without an expert. All experts map
-  to an existing Auth user and profile, but production currently has no direct
-  `experts.user_id -> auth.users.id` foreign key constraint.
-- `headline`, `intro`, and `expertise_summary` are expert enrichment fields.
-- `profile_status` and legacy `is_active` control whether the extension is
-  publicly active.
-- `education` and `experience` are untyped JSON arrays. All current production
-  arrays are empty. They are not a stable experience contract.
-- `verification_status` is expert-profile review state. `is_verified` is a
-  legacy compatibility boolean.
-- `title`, `bio`, `display_name`, `avatar_url`, `category`, tags, rating,
-  response metrics, consultation pricing, order/consultation counts,
-  experience level, response time, and available slots are marketplace-era
-  fields or duplicated presentation data. They do not define Person identity.
+### experts
 
-### Content And Relationships
+- `experts.id` 是 expert extension row ID。
+- `experts.user_id` 唯一，是当前 extension owner identity。
+- 当前 3 个 expert 全部能映射现有 Auth user/profile，24 个 profile 没有 expert。
+- Production 当前缺少直接的 `experts.user_id -> auth.users.id` FK。
+- `headline`、`intro`、`expertise_summary` 是可选 enrichment。
+- `profile_status` 与 legacy `is_active` 共同影响 extension 是否 active。
+- `education` 与 `experience` 是无 schema 约束的 JSON array；当前 Production
+  全部为空，不能作为跨端 Experience contract。
+- `verification_status` 是 expert-profile review status；`is_verified` 是
+  legacy compatibility boolean。
+- `title`、`display_name`、`avatar_url`、`consultation_price`、rating、
+  response/order/consultation metrics、available slots 等属于 marketplace-era
+  字段或重复 presentation data，不定义 Person identity。
 
-- `answers.author_id`, `questions.author_id`, and `posts.author_id` reference
-  `auth.users.id`. Compatibility `user_id` columns currently match their
-  `author_id` values in production.
-- `messages.sender_id` and `messages.receiver_id` reference `auth.users.id`.
-- `follows.follower_id` and `follows.followee_id` reference `auth.users.id`.
-- All 9 production answers map to profiles, while all 9 answer authors lack an
-  expert row. Expert-gated navigation therefore excludes every current real
-  answer author.
+### 内容与关系
 
-### Skill Offers
+- `answers.author_id`、`questions.author_id`、`posts.author_id` 指向
+  `auth.users.id`。
+- `messages.sender_id/receiver_id` 指向 `auth.users.id`。
+- `follows.follower_id/followee_id` 指向 `auth.users.id`。
+- 当前 9 条 Production answer 全部存在对应 profile，但 9 条全部没有 expert
+  extension。Expert-gated profile navigation 会排除所有当前真实回答者。
 
-- `skill_offers.expert_id` is misleadingly named. Its foreign key references
-  `experts(user_id)`, not `experts(id)`.
-- Its real semantic value is the owner Auth user ID. Owner RLS also compares
-  `auth.uid()` to `skill_offers.expert_id`.
-- The future canonical service-owner field is `ownerUserId: PublicPersonId`.
-  Renaming the persisted column must be additive and compatibility-safe; it is
-  not required for the first public-person read contract.
+### skill_offers
 
-### Existing Shared Contract Drift
+- 物理字段继续是 legacy 名称 `skill_offers.expert_id`。
+- 实际 FK 为 `skill_offers.expert_id -> experts.user_id`，不是 `experts.id`。
+- Shared contract 中的真实语义为 `ownerUserId: PublicPersonId`。
+- 本阶段不物理 rename，不扩展 Payment 或 consultation contract。
 
-- `shared-types.Profile.status` has no corresponding production `profiles`
-  column and must not be reused as a public-profile visibility status.
-- the local Core `Expert` shape still contains raw `any[]` education,
-  experience, and availability fields; those are not cross-platform contracts.
-- `SearchExpertV2Row` exposes both the expert row `id` and `user_id`, but its
-  current navigation target is built from the expert row ID.
-- `shared-types.SkillOffer.expert_id` mirrors the misleading storage name even
-  though the value is a user identity.
+## 三、字段归属
 
-These items should be corrected additively in the A implementation slice. They
-must not be patched independently in page code.
+### Public Person 基础字段
 
-## Field Ownership
+V1 允许公开：
 
-### Person Base
-
-The public Person base is sourced from a safe projection of `profiles`:
-
-- `user_id`
-- `nickname`
-- `avatar_url`
-- `cover_url`
+- `userId`
+- `displayName`
+- `avatarUrl`
+- `coverUrl`
 - `bio`
 - `city`
-- `created_at`
+- `school`，明确标注 self-reported
+- `industry`，明确标注 self-reported
+- `joinedAt`
+- answer/post contribution count
+- nullable `expertExtension`
 
-`school` and `industry` may be exposed only as explicitly self-reported
-context. They are not verified experience claims.
+`city` 当前已被同城内容和公开 profile readers 使用，Production RLS 也将其视为
+公开字段，因此 V1 保持公开。未来如产品引入 location privacy，需要新 contract，
+不能由端侧自行隐藏或解释。
 
-The public contract must exclude `phone`, `gender`, `city_code`, profile row
-`id`, `is_expert`, `is_verified`, and internal timestamps that have no product
-use. The public display name falls back to a neutral product label when
-`nickname` is null; it must not make expert display data the identity source.
+V1 禁止返回：
 
-### Experience And Capability
+- `phone`
+- `profiles.id`
+- `experts.id` 作为 Person identity
+- `gender`
+- `city_code`
+- generic `is_verified`
+- raw `experts.education`
+- raw `experts.experience`
+- Auth metadata/email
+- private settings
+- unavailable fake metrics
 
-Answers and public posts are canonical evidence of a person's contributions.
-Profile `school` and `industry` are self-reported context. Active expert
-headline, intro, and expertise summary are optional self-reported enrichment.
+本阶段不定义 reputation、rating、helped-user count、completed-service count、booking、
+payment 或 commission contract。`experts.rating`、`order_count`、
+`consultation_count`、`followers_count` 等 legacy 字段即使物理存在，也不具备足够稳定
+的产品语义，不能作为 V1 enrichment。
 
-Raw `experts.education` and `experts.experience` must not cross the shared
-contract. Their JSON shape is not constrained, their current data is empty,
-and no item-level verification relationship exists.
+### Expert extension
 
-### Expert And Service Extension
+`expertExtension` 仅在同一 `userId` 存在同时满足以下条件的 expert row 时返回：
 
-An expert extension exists only when the person has an active `experts` row.
-Published `skill_offers` may enrich that extension. The extension cannot make
-the Person exist, change the route identifier, or imply that consultation or
-payment is available.
+```text
+profile_status = active
+is_active = true
+```
 
-## Canonical Shared Contract Proposal
+Extension V1 只包含：
 
-The first implementation slice should add these types to `shared-types`. Names
-are intentionally product-oriented and do not mirror legacy row names.
+- `headline`
+- `intro`
+- `expertiseSummary`
+- `publishedSkillOfferCount`
+
+没有 expert row、inactive row 或 malformed row 时返回 `null`，不得让 Person 404。
+V1 不把 expert review status、consultation、payment 或 legacy metrics 伪装成可用能力。
+
+## 四、SECURITY INVOKER Amendment
+
+### 最终决策
+
+`public.get_public_person_profile_v1(p_user_id uuid)` 使用：
+
+```sql
+SECURITY INVOKER
+SET search_path = ''
+```
+
+原文档中默认建议 `SECURITY DEFINER` 的结论正式撤回。
+
+### Invoker 读取关系与边界
+
+| Relation | V1 用途 | 当前 RLS/grant truth | RPC 额外过滤 |
+| --- | --- | --- | --- |
+| `profiles` | safe public projection | RLS enabled；anon/authenticated 可 SELECT；public policy 当前允许全部行 | 仅 `p_user_id`，显式 allowlist 列 |
+| `answers` | `answerCount` | RLS enabled；公开读 policy 存在，但有 legacy permissive policy | `author_id`、`is_hidden=false`、status active/accepted |
+| `posts` | `postCount` | RLS enabled；`can_read_post` policy | 仅 `visibility=public`、`status=active` |
+| `experts` | nullable active extension | RLS enabled；公开 active policy | 同时要求 `profile_status=active` 与 `is_active=true` |
+| `skill_offers` | published offer count | RLS enabled；public policy 仅 published | 再次显式要求 `status=published` |
+
+这些关系均已具备 invoker 所需的 SELECT grants 与 RLS。函数不读取
+`auth.users`、`user_settings`、verification evidence 或 private schema，因此不需要
+绕过 RLS。
+
+### 当前不可声称支持的状态
+
+- Banned Auth user：invoker 无权读取 `auth.users`，当前 profile schema 也没有
+  moderation status。本轮不能伪造 banned filtering。
+- Private profile：`user_settings.privacy_level` 尚未接入公开 profile contract，
+  friends/private 语义也未定义。本轮不能声称 private behavior 已完成。
+- Deleted Auth user：`profiles.user_id` 使用 `ON DELETE CASCADE`，hard-deleted user
+  会自然表现为 `{ person: null }`。
+- Inactive Person：当前不存在 canonical Person inactive status；只有 expert extension
+  有 active/inactive。
+
+如果未来确实必须查询 Auth ban state 或 owner-only privacy data，应先评估将可公开
+状态正规化到受 RLS 保护的 public projection。只有该方案无法满足安全要求时，才可
+单独提出 `SECURITY DEFINER`，并必须附 threat model、非 exposed schema placement、
+精确 EXECUTE grants、空 `search_path`、safe projection、无 dynamic SQL、caller/target
+validation、enumeration/rate-limit 评估与 advisors 结果。
+
+## 五、V1 Shared Contract
+
+V1 保持小而稳定，不返回 answers/posts/services 的无限列表。
 
 ```ts
-type PublicPersonId = Id; // auth.users.id / profiles.user_id
+type PublicPersonId = Id;
 
 interface PublicPersonSummary {
   userId: PublicPersonId;
-  displayName: string;
+  displayName: string | null;
   avatarUrl: string | null;
-  headline: string | null; // optional active expert enrichment
 }
 
-interface PublicPersonAnswerSummary {
-  answerId: Id;
-  questionId: Id;
-  questionTitle: string;
-  excerpt: string;
-  isAccepted: boolean;
-  createdAt: ISODateTime;
-}
-
-interface PublicPersonPostSummary {
-  postId: Id;
-  excerpt: string;
-  createdAt: ISODateTime;
-}
-
-interface PublicPersonSkillOfferSummary {
-  skillOfferId: Id;
-  title: string;
-  description: string | null;
-  pricingMode: SkillPricingMode;
-  priceAmount: number | null;
-  priceCurrency: string;
-  deliveryMode: SkillDeliveryMode;
-}
-
-interface PersonExpertExtension {
+interface PublicPersonExpertExtension {
   headline: string | null;
   intro: string | null;
   expertiseSummary: string | null;
-  publishedSkillOffers: PublicPersonSkillOfferSummary[];
+  publishedSkillOfferCount: number;
 }
 
-interface PublicPersonProfile {
-  userId: PublicPersonId;
-  displayName: string;
-  avatarUrl: string | null;
+interface PublicPersonContributionSummary {
+  answerCount: number;
+  postCount: number;
+}
+
+interface PublicPersonProfile extends PublicPersonSummary {
   coverUrl: string | null;
   bio: string | null;
   city: string | null;
+  school: string | null;
+  industry: string | null;
   joinedAt: ISODateTime;
-  selfReportedContext: {
-    school: string | null;
-    industry: string | null;
-  };
-  contributions: {
-    answerCount: number;
-    postCount: number;
-    recentAnswers: PublicPersonAnswerSummary[];
-    recentPosts: PublicPersonPostSummary[];
-  };
-  expertExtension: PersonExpertExtension | null;
+  contributionSummary: PublicPersonContributionSummary;
+  expertExtension: PublicPersonExpertExtension | null;
+}
+
+interface GetPublicPersonProfileV1Params {
+  p_user_id: PublicPersonId;
+}
+
+interface GetPublicPersonProfileV1Result {
+  person: PublicPersonProfile | null;
 }
 ```
 
-The V1 contract deliberately has no generic `verified` field, no profile or
-expert row ID, no phone, no raw JSON experience arrays, and no consultation
-success capability.
+`shared-api` 必须提供 runtime parser，拒绝 malformed object、错误类型、负数 count
+以及任何返回层出现的 `phone`、generic verification 或 raw experience 字段。
+`displayName` 原样来自 trimmed `profiles.nickname`；schema 未提供非空约束，因此缺失时
+返回 `null`，backend 不用固定文案制造昵称。
 
-## Experience Contract Decision
+## 六、Profile RPC Scope
 
-Structured `PersonExperience` is a follow-up contract, not a facade over the
-legacy JSON arrays. Its future minimum shape needs a stable item ID, one of
-`education` or `employment`, organization, title or degree, optional period,
-self-reported source, and an optional typed verification-claim reference.
+V1 RPC 只负责：canonical identity、safe public profile projection、self-reported
+school/industry、compact answer/post counts、nullable active expert extension，以及
+canonical not-found `{ person: null }`。
 
-Until that storage and evidence model exists, UI-1E may truthfully show:
+V1 RPC 不负责 answers/posts 内容列表、follows/messages、verification evidence、
+private settings、consultation/payment、recommendations 或 experience timeline。
 
-- profile bio;
-- self-reported school and industry;
-- active expert headline, intro, and expertise summary;
-- real answers and public posts.
+贡献内容列表后续采用独立 paginated contract。优先评估复用已有公开 question/post
+read contract；若无法稳定按 `author_id` 分页，再新增例如
+`get_public_person_contributions_v1(p_user_id, p_kind, p_cursor, p_limit)`。
+UI-1E V1 仅以 contribution count 和独立 empty state 开始，不把列表塞进 profile RPC。
 
-It must not render a verified experience timeline from the legacy arrays.
-Absence of structured experience is an explicit empty state, not a fixture.
+## 七、profiles Reader Inventory
 
-## Verification Boundary
+### Public profile readers
 
-Public Person verification remains four separate domains:
+| Consumer | 用途 | 当前字段 |
+| --- | --- | --- |
+| `useLocalPosts` | 按公开 city 找动态作者 | `user_id,nickname,avatar_url` + city filter |
+| `useQuestions` | 问题/回答作者展示 | `user_id,nickname,avatar_url` |
+| `usePosts` / `useFollowingPosts` | 动态与评论作者展示 | `user_id,nickname,avatar_url` |
+| `useMessages` / `ChatDetail` | 会话对方展示 | `user_id,nickname,avatar_url` |
+| `useHotTopics` | 讨论作者展示 | `user_id,nickname,avatar_url` |
+| `useSearch` | question/expert/post/skill owner enrichment | `user_id,nickname,avatar_url` |
+| `useExperts` | expert display enrichment | `user_id,nickname,avatar_url` |
+| `useProfileData` | following 列表 | `user_id,nickname,avatar_url,bio` |
+| `useNotifications` | sender enrichment | `user_id,nickname,avatar_url` |
 
-1. identity verification;
-2. education or employment claim verification;
-3. professional qualification verification;
-4. expert or service-profile review.
+### Current-user private profile readers/writers
 
-`profiles.is_verified`, `experts.is_verified`, and
-`experts.verification_status` must not become a generic person or experience
-badge. The V1 public-person response omits them. A later typed claim/evidence
-contract may expose scope-specific public badges after evidence privacy,
-reviewer provenance, validity, expiry, and revocation semantics are approved.
-That follow-up does not block a truthful basic Public Person page.
+| Consumer | 用途 | 当前字段/行为 |
+| --- | --- | --- |
+| `AuthContext.fetchProfile` | 当前用户 session profile | `id,user_id,nickname,avatar_url,cover_url,bio,phone,city` |
+| `useUpdateProfile` | owner update | update 后 `.select()`，会展开全部可返回列 |
+| `useUserLocation` | owner legacy location write | 写入 legacy latitude/longitude，不是 public reader |
+| `useUserSettings` | owner settings | `user_settings.select('*')`，不属于 Public Person contract |
 
-## Canonical Read API Recommendation
+### Internal/service profile readers
 
-Client-side multi-query aggregation is rejected as the canonical cross-platform
-boundary. It would duplicate identifier joins and error handling, expose
-storage vocabulary, and perpetuate the current broad profile-column access.
+| Consumer | 用途 | 当前字段/边界 |
+| --- | --- | --- |
+| `wechat-auth` Edge Function | 登录响应 enrichment | `nickname,avatar_url`，service role server path |
 
-Architecture A should implement:
+### Legacy/dead code
+
+- `useUserLocation` 是仍可触发的 legacy owner-only writer，不是 public reader，也不能在
+  privacy cutover 时被误判为 dead code。
+- 本次全仓搜索没有识别出可证明为 dead、可直接删除的 `.from('profiles')` reader。
+- 同文件内多处 `.select('*')` 实际读取 questions、answers、posts、follows、messages、
+  user settings 等其他 relation，不等价于 `profiles.select('*')`。
+
+全仓没有显式 `profiles.select('*')` 的 public read，但 `useUpdateProfile` 的无参数
+`.select()` 会在 owner update 后展开列。`AuthContext` 是当前唯一直接读取
+`profiles.phone` 的 consumer。
+
+## 八、Direct Profile Access Privacy Hardening Plan
+
+新增 safe RPC 不等于旧 `profiles` Data API 已安全。当前 remaining exposure 为：
 
 ```text
-public.get_public_person_profile_v1(p_user_id uuid) -> jsonb
+anon 或任意 authenticated caller
+-> public.profiles Data API
+-> phone 可读
 ```
 
-The matching `shared-api` contract should define a request with `p_user_id`, a
-runtime parser for `{ person: PublicPersonProfile | null }`, and a canonical RPC
-catalog entry with an `anon` semantic read boundary.
+本 PR 不立即 revoke table-level SELECT，因为这会破坏上述公开 readers、
+`AuthContext` owner phone read 和 update-returning 行为。
 
-The function should:
+最终收口顺序：
 
-- return null for missing or non-public people without disclosing which guard
-  failed;
-- allow the owner to view their own profile;
-- treat `friends_only` as unavailable until a friend visibility rule is
-  explicitly defined;
-- reject deleted or currently banned Auth users;
-- project only approved profile columns;
-- include only visible answers, public active posts, active expert enrichment,
-  and published skill offers;
-- use bounded recent-content limits and return aggregate counts;
-- never expose Auth metadata, email, phone, legacy verification booleans, or
-  raw expert JSON;
-- fail closed on malformed storage rows rather than silently substituting
-  fixtures.
+1. 部署 `get_public_person_profile_v1`，新 Person 页面只使用 safe projection。
+2. B 将公开 Person 入口迁移到 RPC；其他 author-avatar readers 保持现状但不得新增列。
+3. A/B 单独迁移 current-user private profile read/write，提供 owner-only private contract，
+   明确处理 `phone`，并移除 update 后 `.select()` 的全列返回。
+4. 清点 Core、iOS/Android shared shell、Mini Program、Edge Function 与外部 consumer，
+   确认不存在依赖直接 `profiles.phone` 或 `profiles.select('*')` 的公开调用。
+5. 新建独立 privacy cutover migration：撤销 anon/authenticated 对 `profiles` 的
+   table-level SELECT；只保留经过审核的 safe projection/API，并保留 service role
+   所需权限。
+6. 在 staging 验证公开资料、登录 self profile、编辑资料、消息、搜索、问题、动态，
+   再应用 Production 并确认 direct phone request 返回 permission denied。
 
-Because anonymous callers cannot read owner-only `user_settings` or Auth user
-status directly, the current recommendation is a narrowly scoped
-`SECURITY DEFINER` read function with `SET search_path = ''`, fully qualified
-objects, no dynamic SQL, an explicit safe projection, and explicit grants.
-`PUBLIC` execute should be revoked; only `anon`, `authenticated`, and
-`service_role` should receive execute. This is an intentional exception to the
-normal `SECURITY INVOKER` preference and requires contract, grant, and privacy
-tests.
+Exact follow-up gate：
 
-The existing direct `profiles` public read, including `phone`, requires a
-separate staged hardening after current clients are inventoried and moved to
-safe projections. The new Person page must use the RPC from its first release;
-it must not wait for or worsen the legacy table-access cleanup.
+```text
+PUBLIC_PROFILE_READERS_MIGRATED = YES
+OWNER_PRIVATE_PROFILE_CONTRACT_DEPLOYED = YES
+DIRECT_PROFILE_STAR_READS = 0
+ANON_PHONE_SELECT = NO
+AUTHENTICATED_CROSS_USER_PHONE_SELECT = NO
+```
 
-## Current Route And Entrypoint Audit
+在该 gate 完成前，`profiles.phone` exposure 必须保持 OPEN，不得写成已解决。
 
-| Entrypoint | Current identifier | Current result | Canonical target |
-| --- | --- | --- | --- |
-| Home recommendation | `experts.id` | `/expert-profile/:expertId` | `/person/:userId` from `experts.user_id` |
-| Channel recommendation | `experts.id` | profile and consultation routes use expert row ID | person route uses `user_id`; service route remains separate |
-| Search expert result | `experts.id` despite row also returning `user_id` | opens expert profile | person result/navigation uses `user_id` |
-| Question answer | `answers.author_id`, then active expert lookup | link exists only when `experts.id` resolves | direct `/person/:authorId` |
-| Question asker | `questions.author_id` | no canonical person link | `/person/:authorId` |
-| Discover author | `posts.author_id` | rendered but not linked | `/person/:authorId` |
-| Message partner | Auth user ID | chat route already uses user identity | `/person/:partnerId` when profile navigation is added |
-| Following | `follows.followee_id` | incorrectly passed to an expert-ID route | `/person/:followeeId` |
-| User notification | related user ID by semantic contract | passed to an expert-ID route | `/person/:relatedUserId` |
-| Legacy expert profile | `experts.id` | expert-only public identity | compatibility resolver to Person user ID |
-| Legacy expert detail | `experts.id` | service/consultation detail | retain as a service-extension route until separately replaced |
-| Mini Program search | legacy result key | expert-detail presentation route | later consume PublicPersonId; not part of UI-1E Core work |
+## 九、Route Migration
 
-The current code therefore mixes expert row IDs and Auth user IDs behind the
-same `/expert-profile/:id` shape. Following and notification paths are already
-capable of passing user IDs into a route that queries `experts.id`.
+### Phase 1
 
-## Route Migration
+- A 部署 shared contract 与 canonical RPC。
+- B 新增 `/person/:userId`，但旧 route 保持不变。
+- 新代码只接受命名为 `userId/PublicPersonId` 的值，不接收 generic `id`。
 
-### Phase 1: Additive Person Boundary
+### Phase 2
 
-- Architecture A implements and deploys the V1 shared contract and read RPC.
-- Architecture B adds `/person/:userId` and the UI-1E page using only that
-  contract.
-- Existing expert routes remain unchanged.
+- Home 使用 `experts.user_id` 导航 Person。
+- Search expert result 使用已有 `user_id`；未来 ordinary person search 单独扩展。
+- Channel expert item 使用 RPC 返回的 `user_id`。
+- Answer/Question 使用 `author_id`。
+- Discover 使用 `posts.author_id`。
+- Messages 使用 `partner_id`。
+- Following 使用 `followee_id`。
+- Notification user target 使用 user ID。
 
-### Phase 2: Entrypoint Cutover
+### Phase 3
 
-- Answer, asker, post author, message partner, following, notification, Home,
-  Search, and Channel person links pass user IDs directly.
-- Search and channel adapters use the existing `experts.user_id` enrichment
-  field rather than `experts.id` for person navigation.
-- `/expert-profile/:expertId` resolves the expert row to `user_id` and replaces
-  navigation with `/person/:userId`; old links continue to work.
+- `/expert-profile/:expertId` 仅作为 compatibility resolver。
+- Resolver 执行 `expertId -> experts.user_id -> /person/:userId` 并 replace history。
+- `/expert/:expertId` 暂时保留为 legacy service-extension route。
+- 通过 static guard 与 telemetry 确认无新 legacy link 后，再单独评估删除。
 
-### Phase 3: Legacy Retirement
+## 十、experts.user_id FK 建议
 
-- Remove new generation of `/expert-profile` links after telemetry and static
-  guards show zero callers.
-- Retain `/expert/:expertId` only as a legacy service-extension route until a
-  separate service contract replaces it.
-- Rename persisted service-owner vocabulary only through a new additive
-  migration and compatibility window.
+建议未来补充：
 
-## Implementation Gate And Ownership
+```text
+experts.user_id -> auth.users.id ON DELETE CASCADE
+```
 
-The following are blockers before Architecture B starts production UI-1E data
-wiring:
+Expert 是 Auth Person 的可选 extension，Auth user hard delete 后 extension 应级联删除；
+`skill_offers.expert_id -> experts.user_id ON DELETE CASCADE` 会继续清理下游 offer。
 
-1. Architecture A exports the V1 shared types and runtime parser.
-2. Architecture A adds the canonical RPC catalog/page-contract entries.
-3. Architecture A creates, tests, reviews, deploys, and smoke-tests the safe
-   read RPC against an ordinary non-expert profile and an active expert.
-4. Architecture A verifies null/private/banned behavior and sensitive-field
-   exclusion.
+当前 Production 3 个 expert 均有有效 Auth/profile，技术上可加 FK。但该 FK 不属于
+UI-1E Gate 必需条件：V1 RPC 只会从 profile 的 `user_id` 左连接 active expert，orphan
+expert 不会创建 Person，也不会影响 ordinary Person。为避免把完整性变更与公开读
+contract 混在一起，本轮不添加 FK；后续独立 migration 应先做 orphan precheck，
+再添加并 validate constraint。
 
-A separate normalized experience/verification schema is not a blocker for the
-basic profile, but it is a blocker for any verified experience timeline or
-badge.
+## 十一、Verification / Experience Boundary
 
-Ownership is:
+Public Person verification 继续拆分为：identity verification、
+education/employment claim verification、professional qualification verification、
+expert/service profile review。
 
-- A: identifier, shared types/API, RPC, grants, privacy projection, legacy
-  resolver contract, and service-owner naming migration plan.
-- B: Shared Core route/page and entrypoint adoption after the A gate passes,
-  plus iOS shared-shell and deep-link targeted QA.
-- C: Android shared-shell and deep-link targeted QA; no native identity model.
-- D: later WeChat Mini Program contract adoption; no platform-specific Person
-  semantics.
+V1 不返回任何 generic verification。`profiles.is_verified`、
+`experts.is_verified`、`experts.verification_status` 均不得翻译为“已核验经历”。
 
-## Migration Need
+结构化 `PersonExperience` 与 typed claim/evidence contract 属于后续独立阶段。
+当前 UI 可展示 bio、self-reported school/industry、真实 answers/posts 贡献和 active
+expert enrichment；不得解析 legacy JSON 生成 verified timeline。
 
-A small reviewed migration is required to create the canonical RPC and its
-explicit grants. No new Person table is required. No migration is applied by
-this decision.
+## 十二、最小 Migration 清单
 
-A later integrity migration should add and validate the missing
-`experts.user_id -> auth.users.id` foreign key after dependency review. A later
-privacy cutover should remove broad direct profile-column exposure once all
-clients use safe projections. Neither change should be bundled into the UI
-route migration without compatibility testing.
+本次 UI-1E Gate 只需要一条 additive migration：
 
-## Risks And Rollback
+- 创建 `public.get_public_person_profile_v1(uuid)`；
+- `SECURITY INVOKER`、`STABLE`、空 `search_path`、fully-qualified relation；
+- 明确撤销 `PUBLIC` EXECUTE；
+- 仅授予 `anon`、`authenticated`、`service_role` EXECUTE；
+- 不改业务数据、RLS、table grants、profile columns、expert FK 或 legacy route。
 
-- Identifier mix-up: branded naming and route helpers must distinguish
-  `PublicPersonId`, `ExpertProfileId`, and `SkillOfferId`; contract tests reject
-  expert IDs in Person navigation construction.
-- Privacy leak: the RPC is an allowlist projection and tests must assert that
-  phone, Auth metadata, verification internals, and raw experience JSON never
-  appear.
-- Visibility ambiguity: `friends_only` fails closed until its relationship
-  rule is approved.
-- Legacy-link breakage: the old route remains additive and resolves to Person;
-  it is not deleted during Phase 1 or Phase 2.
-- Expert enrichment failure: a missing, inactive, or malformed expert row
-  returns `expertExtension: null` and never makes the Person disappear.
-- Deployment rollback: the additive RPC and route can be removed or clients
-  can temporarily stop linking to `/person` without altering existing expert
-  rows or content. No destructive data migration is part of V1.
+Direct Profile Access Privacy Hardening 与 expert FK 必须使用后续独立 migration。
+
+## 十三、UI-1E Implementation Gate
+
+B 开始 UI-1E production data wiring 前，A 必须完成：
+
+1. shared-types 最小 Person contract；
+2. shared-api params/result、runtime parser、RPC catalog/whitelist/page map；
+3. SECURITY INVOKER migration 与 grants tests；
+4. ordinary non-expert 返回 profile；
+5. active expert 返回 nullable extension；
+6. missing user 返回 `{ person: null }`；
+7. inactive expert 不影响 Person，仅 extension 为 null；
+8. response sensitive-field exclusion；
+9. staging/remote smoke、security advisor、required CI；
+10. 明确记录 direct `profiles.phone` remaining exposure 和后续 gate。
+
+B 只能消费 A 定义的 `PublicPersonId` 与 RPC contract，不得自行重新定义 ID、
+fallback 到 `experts.id`，也不得直接多 query 拼装 Public Person。
+
+## 十四、风险与 Rollback
+
+- ID drift：shared 类型、route helper 和 static guard 必须区分 Person user ID 与 legacy
+  expert row ID。
+- PII exposure：新 RPC 使用列 allowlist；旧 direct phone exposure 保持 OPEN 并进入
+  强制 follow-up gate。
+- RLS drift：Invoker 依赖底层 RLS/grants，migration tests 与 remote smoke 必须验证
+  anon/authenticated 结果一致且敏感字段缺失。
+- Legacy link：旧 route 不删除，Phase 3 仅做 resolver redirect。
+- Expert enrichment：缺失/invalid/inactive 一律 `null`，Person 本体不受影响。
+- Rollback：RPC 与 shared contract 均为 additive；客户端可停止调用新 route，且无需
+  回滚任何业务数据。Privacy/FK 后续 migration 必须拥有独立 rollback plan。
