@@ -117,7 +117,7 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     currentReadContracts: [],
     currentWriteContracts: [],
     notes: [
-      "Architecture A owns PublicPersonId and the safe profile projection; Core UI adoption starts after the RPC deployment gate.",
+      "Architecture A owns PublicPersonId and the deployed safe profile projection; Core UI adoption is unblocked but not yet implemented.",
       "Contribution lists and direct profiles Data API privacy hardening are separate contracts.",
     ],
   },

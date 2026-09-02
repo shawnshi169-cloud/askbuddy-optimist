@@ -4,10 +4,23 @@
 
 - 架构负责人：A - Backend & Shared Contract
 - 审计基线：`02b72c2c429c009cb761f7d454b014dc0c179a91`
-- Production 项目：`fslpvtlavhrnxsygkpvi`，仅执行只读审计
+- Production 激活基线：`5271f7f6bc31637735a612f776e3e78ccaa729ec`
+- Production 项目：`fslpvtlavhrnxsygkpvi`
 - 核心 Decision：review 通过
 - 本次 Amendment：撤回默认 `SECURITY DEFINER`，改为优先并最终采用 `SECURITY INVOKER`
-- 本文档不表示数据库已经部署，也不表示旧 `profiles` Data API 隐私风险已经解决
+- Migration `20260901154746_canonical_public_person_profile_v1.sql`：已部署并验证
+- 旧 `profiles` Data API 隐私风险：`REMAINS`
+
+## Production 部署验证（2026-09-02）
+
+- `public.get_public_person_profile_v1(uuid)` 已通过正常 migration history 部署。
+- 函数为 `SECURITY INVOKER`、`STABLE`、空 `search_path`；无 `PUBLIC` EXECUTE。
+- `anon`、`authenticated`、`service_role` 均具有预期 EXECUTE 权限。
+- ordinary non-expert、无 expert 的 answer author、active expert、missing Person
+  与 sensitive-field exclusion remote smoke 全部通过。
+- Production Security Advisor 总量与部署前基线一致，且没有告警指向本 RPC。
+- 上述 safe projection 不等于 direct `profiles` Data API 已收口；`profiles.phone`
+  暴露继续按第八节 follow-up gate 管理。
 
 ## 一、不可变核心决策
 

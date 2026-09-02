@@ -385,8 +385,8 @@ export const RPC_CATALOG = {
     GetPublicPersonProfileV1Result
   >()(
     "get_public_person_profile_v1", "canonical", "anon", "people",
-    "GetPublicPersonProfileV1Params", "GetPublicPersonProfileV1Result", "pending-deployment",
-    "SECURITY INVOKER safe public projection is pending deployment; direct profiles Data API privacy remains a separate cutover.",
+    "GetPublicPersonProfileV1Params", "GetPublicPersonProfileV1Result", "aligned",
+    "Production uses the SECURITY INVOKER safe public projection with anon/authenticated/service_role EXECUTE; direct profiles Data API privacy remains a separate cutover.",
   ),
   submit_content_report: rpc<SubmitContentReportParams, string>()(
     "submit_content_report", "canonical", "authenticated", "moderation",
