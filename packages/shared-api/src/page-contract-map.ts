@@ -112,7 +112,10 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
       "capability:self-profile-v1", "capability:person-experience-v1",
       "capability:person-service-settings-v1", "capability:service-reputation-v1",
     ],
-    writeContracts: ["capability:self-profile-v1", "capability:person-service-settings-v1"],
+    writeContracts: [
+      "capability:self-profile-v1", "capability:person-experience-owner-v1",
+      "capability:person-service-settings-v1",
+    ],
     implementationStatus: "legacy",
     currentReadContracts: [
       "table:profiles", "table:point_accounts", "table:orders",
@@ -127,13 +130,16 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
   {
     pageId: "public-person",
     page: "Public Person Profile",
-    readContracts: ["rpc:get_public_person_profile_v1"],
+    readContracts: [
+      "rpc:get_public_person_profile_v1", "rpc:get_public_person_experiences_v1",
+    ],
     writeContracts: [],
     implementationStatus: "blocked",
     currentReadContracts: [],
     currentWriteContracts: [],
     notes: [
       "Architecture A owns PublicPersonId and the deployed safe profile projection; Core UI adoption is unblocked but not yet implemented.",
+      "EC-1A public Experience read is a target contract pending migration deployment and remote smoke; it is not current UI runtime truth.",
       "Contribution lists and direct profiles Data API privacy hardening are separate contracts.",
     ],
   },

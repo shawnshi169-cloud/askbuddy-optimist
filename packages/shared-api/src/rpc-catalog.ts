@@ -13,6 +13,23 @@ import type {
   GetPublicPersonProfileV1Params,
   GetPublicPersonProfileV1Result,
 } from "./public-person-v1";
+import type {
+  CreateExperienceClaimV1Params,
+  CreateExperienceTransitionV1Params,
+  CreatePersonExperienceV1Params,
+  DeleteExperienceClaimV1Params,
+  DeleteExperienceTransitionV1Params,
+  DeletePersonExperienceV1Params,
+  GetMyPersonExperiencesV1Params,
+  GetMyPersonExperiencesV1Result,
+  GetPublicPersonExperiencesV1Params,
+  GetPublicPersonExperiencesV1Result,
+  ReorderPersonExperiencesV1Params,
+  SetPersonExperienceVisibilityV1Params,
+  UpdateExperienceClaimV1Params,
+  UpdateExperienceTransitionV1Params,
+  UpdatePersonExperienceV1Params,
+} from "./experience-v1";
 
 export type JsonPrimitive = string | number | boolean | null;
 export type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
@@ -48,6 +65,7 @@ export type RpcFeatureOwner =
   | "orders"
   | "experts"
   | "people"
+  | "experience"
   | "call"
   | "auth"
   | "operations";
@@ -398,6 +416,73 @@ export const RPC_CATALOG = {
     "get_public_person_profile_v1", "canonical", "anon", "people",
     "GetPublicPersonProfileV1Params", "GetPublicPersonProfileV1Result", "aligned",
     "Production uses the SECURITY INVOKER safe public projection with anon/authenticated/service_role EXECUTE; direct profiles Data API privacy remains a separate cutover.",
+  ),
+  get_public_person_experiences_v1: rpc<
+    GetPublicPersonExperiencesV1Params,
+    GetPublicPersonExperiencesV1Result
+  >()(
+    "get_public_person_experiences_v1", "canonical", "anon", "experience",
+    "GetPublicPersonExperiencesV1Params", "GetPublicPersonExperiencesV1Result", "pending-deployment",
+    "EC-1A SECURITY INVOKER safe public projection; migration and Production smoke are pending review.",
+  ),
+  get_my_person_experiences_v1: rpc<
+    GetMyPersonExperiencesV1Params,
+    GetMyPersonExperiencesV1Result
+  >()(
+    "get_my_person_experiences_v1", "canonical", "authenticated", "experience",
+    "GetMyPersonExperiencesV1Params", "GetMyPersonExperiencesV1Result", "pending-deployment",
+    "EC-1A owner projection; migration and Production smoke are pending review.",
+  ),
+  create_person_experience_v1: rpc<CreatePersonExperienceV1Params, string>()(
+    "create_person_experience_v1", "canonical", "authenticated", "experience",
+    "CreatePersonExperienceV1Params", "UUID", "pending-deployment",
+    "Owner is always derived from auth.uid(); clients cannot provide person_id.",
+  ),
+  update_person_experience_v1: rpc<UpdatePersonExperienceV1Params, string>()(
+    "update_person_experience_v1", "canonical", "authenticated", "experience",
+    "UpdatePersonExperienceV1Params", "UUID", "pending-deployment",
+  ),
+  set_person_experience_visibility_v1: rpc<
+    SetPersonExperienceVisibilityV1Params,
+    string
+  >()(
+    "set_person_experience_visibility_v1", "canonical", "authenticated", "experience",
+    "SetPersonExperienceVisibilityV1Params", "UUID", "pending-deployment",
+  ),
+  reorder_person_experiences_v1: rpc<ReorderPersonExperiencesV1Params, number>()(
+    "reorder_person_experiences_v1", "canonical", "authenticated", "experience",
+    "ReorderPersonExperiencesV1Params", "number", "pending-deployment",
+  ),
+  delete_person_experience_v1: rpc<DeletePersonExperienceV1Params, string>()(
+    "delete_person_experience_v1", "canonical", "authenticated", "experience",
+    "DeletePersonExperienceV1Params", "UUID", "pending-deployment",
+    "Owner delete is a soft delete and immediately removes the Experience from normal projections.",
+  ),
+  create_experience_transition_v1: rpc<CreateExperienceTransitionV1Params, string>()(
+    "create_experience_transition_v1", "canonical", "authenticated", "experience",
+    "CreateExperienceTransitionV1Params", "UUID", "pending-deployment",
+  ),
+  update_experience_transition_v1: rpc<UpdateExperienceTransitionV1Params, string>()(
+    "update_experience_transition_v1", "canonical", "authenticated", "experience",
+    "UpdateExperienceTransitionV1Params", "UUID", "pending-deployment",
+  ),
+  delete_experience_transition_v1: rpc<DeleteExperienceTransitionV1Params, string>()(
+    "delete_experience_transition_v1", "canonical", "authenticated", "experience",
+    "DeleteExperienceTransitionV1Params", "UUID", "pending-deployment",
+  ),
+  create_experience_claim_v1: rpc<CreateExperienceClaimV1Params, string>()(
+    "create_experience_claim_v1", "canonical", "authenticated", "experience",
+    "CreateExperienceClaimV1Params", "UUID", "pending-deployment",
+    "Claim identity is owner-only verification infrastructure, not a verified result or public evidence.",
+  ),
+  update_experience_claim_v1: rpc<UpdateExperienceClaimV1Params, string>()(
+    "update_experience_claim_v1", "canonical", "authenticated", "experience",
+    "UpdateExperienceClaimV1Params", "UUID", "pending-deployment",
+  ),
+  delete_experience_claim_v1: rpc<DeleteExperienceClaimV1Params, string>()(
+    "delete_experience_claim_v1", "canonical", "authenticated", "experience",
+    "DeleteExperienceClaimV1Params", "UUID", "pending-deployment",
+    "Claim deletion is soft so a stable claim identity remains available for future audit rules.",
   ),
   submit_content_report: rpc<SubmitContentReportParams, string>()(
     "submit_content_report", "canonical", "authenticated", "moderation",

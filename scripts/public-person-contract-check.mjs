@@ -154,13 +154,22 @@ try {
   assert.match(decision, /expertExtension.*不得用于 gate.*paid service capability/s);
 
   const rpcCatalog = read("packages/shared-api/src/rpc-catalog.ts");
+  const publicPersonCatalogStart = rpcCatalog.indexOf("get_public_person_profile_v1: rpc<");
+  const publicPersonCatalogEnd = rpcCatalog.indexOf(
+    "get_public_person_experiences_v1: rpc<",
+    publicPersonCatalogStart,
+  );
+  const publicPersonCatalogEntry = rpcCatalog.slice(
+    publicPersonCatalogStart,
+    publicPersonCatalogEnd,
+  );
   assert.match(
-    rpcCatalog,
+    publicPersonCatalogEntry,
     /"get_public_person_profile_v1", "canonical", "anon", "people",[\s\S]*?"aligned"/,
   );
   assert.doesNotMatch(
-    rpcCatalog,
-    /"get_public_person_profile_v1", "canonical", "anon", "people",[\s\S]*?"pending-deployment"/,
+    publicPersonCatalogEntry,
+    /"pending-deployment"/,
   );
 
   console.log("Public Person contract checks passed.");

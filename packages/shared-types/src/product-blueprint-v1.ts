@@ -17,7 +17,7 @@ export interface CnyAmount {
   currency: ServiceCurrencyV1;
 }
 
-/** Experience 归属于 Person；具体分类、时间和 evidence shape 留给 EC-1 定义。 */
+/** EC-1 canonical Experience identity；EC-0 placeholder 已由 additive storage 绑定。 */
 export type PersonExperienceId = Id;
 
 export interface PersonExperienceOwnership {

@@ -12,6 +12,9 @@
 | `profiles.is_expert` | 旧 profile flag | optional extension/capability lookup | compatibility read only | EC-1 | A/B | NO |
 | `experts` | headline/intro/expertise enrichment + marketplace fields | Person optional legacy enrichment；Service 独立 | 保留表，不作为 gate | EC-1/EC-4 | A | NO，除 compatibility adapter |
 | `experts.education` / `experts.experience` | 无稳定 schema 的 JSON | Person-owned Experience | 不自动视为 verified；先审计迁移 | EC-1 | A | NO |
+| `person_experiences` / Experience v1 RPC | EC-1A additive migration 已准备，Production 尚未部署 | Person-owned durable Experience | review、受控部署和 remote smoke 后才允许 consumer 使用 | EC-1 | A | NO，直到部署验证 |
+| `experience_transitions` | EC-1A directed transition migration 已准备，Production 尚未部署 | Experience 内有方向的 Transition | 不降级为 Topic/string tag；部署验证前不可消费 | EC-1/EC-3 | A | NO，直到部署验证 |
+| `experience_claims` | EC-1A owner-only claim reference migration 已准备，Production 尚未部署 | EC-5 typed Verification 的稳定 Claim identity | 不公开、不含 verified/evidence；部署验证前不可消费 | EC-1/EC-5 | A | NO，直到部署验证 |
 | `profiles.is_verified` | legacy generic flag | typed verification claims | 不展示通用认证 | EC-5 | A/B | NO |
 | `experts.is_verified` / `verification_status` | expert profile review | typed verification + optional service review | compatibility/admin only | EC-5 | A | NO |
 | `user_verifications(talent/real_name)` | legacy owner/admin workflow | identity / education-employment / professional claim types | 保留历史，不扩展旧 vocabulary | EC-5 | A | NO |
