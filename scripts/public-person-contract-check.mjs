@@ -156,6 +156,10 @@ try {
   const rpcCatalog = read("packages/shared-api/src/rpc-catalog.ts");
   assert.match(
     rpcCatalog,
+    /"get_public_person_profile_v1", "canonical", "anon", "people",[\s\S]*?"aligned"/,
+  );
+  assert.doesNotMatch(
+    rpcCatalog,
     /"get_public_person_profile_v1", "canonical", "anon", "people",[\s\S]*?"pending-deployment"/,
   );
 
