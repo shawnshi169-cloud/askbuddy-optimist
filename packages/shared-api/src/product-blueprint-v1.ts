@@ -29,10 +29,10 @@ export interface BlueprintDomainContract {
  * production-ready 只用于已经部署并验证的 contract；其余目标不能伪装为可调用能力。
  */
 export const PRODUCT_BLUEPRINT_V1_DOMAIN_MAP = {
-  person: {
-    domain: "person",
+  publicPersonIdentityAndRead: {
+    domain: "public-person-identity-and-read",
     target: "PublicPersonId + get_public_person_profile_v1",
-    currentRuntime: "safe public projection deployed; legacy expert routes remain",
+    currentRuntime: "safe public projection deployed; /person consumer route is not wired",
     runtimeStatus: "production-ready",
     newCodePolicy: "may-use-deployed-contract",
     phase: "EC-1",
@@ -61,6 +61,54 @@ export const PRODUCT_BLUEPRINT_V1_DOMAIN_MAP = {
     newCodePolicy: "blocked-until-phase",
     phase: "EC-3",
   },
+  productChannels: {
+    domain: "product-channels",
+    target: "stable four-channel navigation with Person/Question discovery",
+    currentRuntime: "PRODUCT_CHANNEL_CATALOG is stable; current feed still returns experts",
+    runtimeStatus: "partial",
+    newCodePolicy: "target-contract-only",
+    phase: "EC-3",
+  },
+  canonicalTopic: {
+    domain: "canonical-topic",
+    target: "cross-module semantic layer distinct from Discover social topics/hashtags",
+    currentRuntime: "no canonical cross-module topic storage or API",
+    runtimeStatus: "not-deployed",
+    newCodePolicy: "blocked-until-phase",
+    phase: "EC-3",
+  },
+  transition: {
+    domain: "transition",
+    target: "directed Experience relationship for Person graph and matching",
+    currentRuntime: "no canonical Transition storage or graph API",
+    runtimeStatus: "not-deployed",
+    newCodePolicy: "blocked-until-phase",
+    phase: "EC-1",
+  },
+  location: {
+    domain: "location",
+    target: "city-level discovery dimension independent from Topic",
+    currentRuntime: "city/city_code exist across legacy relations without one canonical contract",
+    runtimeStatus: "partial",
+    newCodePolicy: "target-contract-only",
+    phase: "EC-3",
+  },
+  personOnboarding: {
+    domain: "person-onboarding",
+    target: "lightweight initial Person basics and optional Need/Interest/Experience seeds",
+    currentRuntime: "no canonical Blueprint onboarding contract",
+    runtimeStatus: "not-deployed",
+    newCodePolicy: "blocked-until-phase",
+    phase: "EC-1",
+  },
+  dynamicNeedInterestSignals: {
+    domain: "dynamic-need-interest-signals",
+    target: "decaying current Need/Interest signals distinct from accumulated Experience",
+    currentRuntime: "no canonical dynamic Person model or signal store",
+    runtimeStatus: "not-deployed",
+    newCodePolicy: "blocked-until-phase",
+    phase: "EC-3",
+  },
   discover: {
     domain: "discover",
     target: "Post + Topic + Person social graph; Community is separate",
@@ -79,7 +127,7 @@ export const PRODUCT_BLUEPRINT_V1_DOMAIN_MAP = {
   },
   service: {
     domain: "service",
-    target: "Person-owned voice/video availability with one base RMB price",
+    target: "optional Person-owned voice/video capability with one base RMB price when enabled",
     currentRuntime: "expert-gated skill_offers remain compatibility storage",
     runtimeStatus: "legacy-compatibility",
     newCodePolicy: "blocked-until-phase",
@@ -109,15 +157,78 @@ export const PRODUCT_BLUEPRINT_V1_DOMAIN_MAP = {
     newCodePolicy: "blocked-until-phase",
     phase: "EC-5",
   },
-  communityRecording: {
-    domain: "community-recording",
-    target: "many-to-many Community plus explicit paid-media recording consent",
-    currentRuntime: "neither canonical Community nor recording lifecycle is deployed",
+  community: {
+    domain: "community",
+    target: "long-running many-to-many Community distinct from Topic and Conversation",
+    currentRuntime: "no canonical Community storage or API",
     runtimeStatus: "not-deployed",
     newCodePolicy: "blocked-until-phase",
     phase: "EC-5",
   },
+  recordingLifecycle: {
+    domain: "recording-lifecycle",
+    target: "paid Voice/Video recording association and explicit informed consent",
+    currentRuntime: "call sessions do not provide canonical recording lifecycle",
+    runtimeStatus: "not-deployed",
+    newCodePolicy: "blocked-until-phase",
+    phase: "EC-4",
+  },
 } as const satisfies Record<string, BlueprintDomainContract>;
+
+export const PRODUCT_SEMANTIC_BOUNDARIES_V1 = {
+  channel: {
+    role: "product-navigation-and-coarse-organization",
+    isPersonIdentity: false,
+    isMatchingCoreProfile: false,
+    questionHasOnePrimaryChannel: true,
+    experienceRequiresOneChannel: false,
+  },
+  canonicalTopic: {
+    role: "cross-module-semantic-layer",
+    sameAsDiscoverSocialTopic: false,
+  },
+  transition: {
+    role: "directed-experience-relationship",
+    sameAsCanonicalTopic: false,
+    reducibleToStringTag: false,
+  },
+  location: {
+    role: "geographic-context",
+    sameAsCanonicalTopic: false,
+    v1Precision: "city",
+  },
+} as const;
+
+export const DYNAMIC_PERSON_MODEL_V1 = {
+  permanentUserTypeAllowed: false,
+  accumulatedExperience: "durable-history",
+  currentNeed: "dynamic-decaying-signal",
+  currentInterest: "dynamic-decaying-signal",
+  onboarding: {
+    role: "initial-snapshot",
+    requiresExpertChoice: false,
+    requiresProviderChoice: false,
+    requiresCompleteResume: false,
+    requiresExperience: false,
+    requiresVerification: false,
+    requiresServiceEnabled: false,
+  },
+} as const;
+
+export const BOOKING_PAYMENT_INVARIANTS_V1 = {
+  bookingRequestChargesPayment: false,
+  bookingConfirmedRequiresPaymentSuccess: true,
+  paymentTiming: "full-payment-before-exchange",
+  settlementTiming: "after-service-completion-and-finite-dispute-window",
+  platformHoldsFundsBeforeSettlement: true,
+  independentFacts: ["payment", "service-completion", "settlement", "rating"],
+  policyValuesDeferred: [
+    "payment-timeout",
+    "cancellation-threshold",
+    "dispute-window",
+    "commission-rate",
+  ],
+} as const;
 
 export type BlueprintRpcUse = "canonical-blueprint" | "legacy-compatibility";
 

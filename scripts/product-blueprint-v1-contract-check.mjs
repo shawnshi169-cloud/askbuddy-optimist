@@ -82,8 +82,15 @@ try {
   };
 
   const questionTarget = interfaceBlock("PublicQuestionV1Target");
-  assert.match(questionTarget, /deepExchangeBudget/);
+  assert.match(questionTarget, /deepExchangeBudgetIntent/);
   assert.doesNotMatch(questionTarget, /accepted|reward|bounty|point/i);
+
+  const budgetIntent = interfaceBlock("QuestionDeepExchangeBudgetIntent");
+  assert.match(budgetIntent, /currency: ServiceCurrencyV1/);
+  assert.doesNotMatch(
+    budgetIntent,
+    /amount|minimum|maximum|range|preset|storage|input/i,
+  );
 
   const answerTarget = interfaceBlock("PublicAnswerV1Target");
   assert.match(answerTarget, /helpfulCount/);
@@ -93,29 +100,86 @@ try {
   assert.match(replyTarget, /replyToPersonId/);
   assert.doesNotMatch(replyTarget, /parentReplyId/);
 
-  const serviceTarget = interfaceBlock("PersonServiceSettingsV1Target");
+  const disabledService = interfaceBlock("DisabledPersonServiceSettingsV1Target");
+  const enabledService = interfaceBlock("EnabledPersonServiceSettingsV1Target");
   const transactionMoneyTarget = interfaceBlock("ServiceTransactionMoneyV1Target");
-  assert.match(serviceTarget, /personId: PublicPersonId/);
-  assert.match(serviceTarget, /basePrice: CnyAmount/);
+  assert.match(disabledService, /personId: PublicPersonId/);
+  assert.match(disabledService, /enabled: false/);
+  assert.doesNotMatch(disabledService, /basePrice|modes|voice|video/);
+  assert.match(enabledService, /personId: PublicPersonId/);
+  assert.match(enabledService, /enabled: true/);
+  assert.match(enabledService, /basePrice: CnyAmount/);
+  assert.match(enabledService, /modes: PersonServiceModesV1/);
+  assert.match(
+    sharedSource,
+    /type PersonServiceSettingsV1Target\s*=\s*[\s\S]*DisabledPersonServiceSettingsV1Target[\s\S]*EnabledPersonServiceSettingsV1Target/,
+  );
   assert.match(transactionMoneyTarget, /feePolicyKey/);
-  assert.doesNotMatch(serviceTarget, /Point|points|expertId|commissionRate|15%/);
+  assert.doesNotMatch(enabledService, /Point|points|expertId|commissionRate|15%/);
 
   const domainMap = api.PRODUCT_BLUEPRINT_V1_DOMAIN_MAP;
-  assert.equal(domainMap.person.runtimeStatus, "production-ready");
-  assert.equal(domainMap.person.newCodePolicy, "may-use-deployed-contract");
+  assert.equal(domainMap.person, undefined);
+  assert.equal(domainMap.publicPersonIdentityAndRead.runtimeStatus, "production-ready");
+  assert.equal(
+    domainMap.publicPersonIdentityAndRead.newCodePolicy,
+    "may-use-deployed-contract",
+  );
+  assert.match(domainMap.publicPersonIdentityAndRead.currentRuntime, /route is not wired/);
   for (const key of [
     "experience",
     "questionAnswerReply",
     "homeSearchMatching",
+    "productChannels",
+    "canonicalTopic",
+    "transition",
+    "location",
+    "personOnboarding",
+    "dynamicNeedInterestSignals",
     "conversation",
     "service",
     "bookingPayment",
     "reputationVerification",
     "notificationAttention",
-    "communityRecording",
+    "community",
+    "recordingLifecycle",
   ]) {
     assert.notEqual(domainMap[key].runtimeStatus, "production-ready", `${key} is not deployed`);
   }
+  assert.equal(domainMap.communityRecording, undefined);
+  assert.equal(domainMap.community.phase, "EC-5");
+  assert.equal(domainMap.recordingLifecycle.phase, "EC-4");
+
+  const semanticBoundaries = api.PRODUCT_SEMANTIC_BOUNDARIES_V1;
+  assert.equal(semanticBoundaries.channel.isPersonIdentity, false);
+  assert.equal(semanticBoundaries.channel.isMatchingCoreProfile, false);
+  assert.equal(semanticBoundaries.channel.questionHasOnePrimaryChannel, true);
+  assert.equal(semanticBoundaries.channel.experienceRequiresOneChannel, false);
+  assert.equal(semanticBoundaries.canonicalTopic.sameAsDiscoverSocialTopic, false);
+  assert.equal(semanticBoundaries.transition.sameAsCanonicalTopic, false);
+  assert.equal(semanticBoundaries.transition.reducibleToStringTag, false);
+  assert.equal(semanticBoundaries.location.sameAsCanonicalTopic, false);
+  assert.equal(semanticBoundaries.location.v1Precision, "city");
+
+  const dynamicPerson = api.DYNAMIC_PERSON_MODEL_V1;
+  assert.equal(dynamicPerson.permanentUserTypeAllowed, false);
+  assert.equal(dynamicPerson.accumulatedExperience, "durable-history");
+  assert.equal(dynamicPerson.currentNeed, "dynamic-decaying-signal");
+  assert.equal(dynamicPerson.currentInterest, "dynamic-decaying-signal");
+  for (const requirement of Object.values(dynamicPerson.onboarding)) {
+    if (typeof requirement === "boolean") assert.equal(requirement, false);
+  }
+
+  const booking = api.BOOKING_PAYMENT_INVARIANTS_V1;
+  assert.equal(booking.bookingRequestChargesPayment, false);
+  assert.equal(booking.bookingConfirmedRequiresPaymentSuccess, true);
+  assert.equal(booking.paymentTiming, "full-payment-before-exchange");
+  assert.equal(
+    booking.settlementTiming,
+    "after-service-completion-and-finite-dispute-window",
+  );
+  assert.deepEqual(booking.independentFacts, [
+    "payment", "service-completion", "settlement", "rating",
+  ]);
 
   const rpcPolicy = api.PRODUCT_BLUEPRINT_V1_RPC_POLICY;
   assert.equal(rpcPolicy.get_public_person_profile_v1.newBlueprintCodeMayDepend, true);
@@ -161,6 +225,8 @@ try {
     "capability:person-service-settings-v1",
   ]);
   assert.ok(page("skill-publish").currentWriteContracts.includes("table:skill_offers"));
+  assert.equal(page("public-person").implementationStatus, "blocked");
+  assert.deepEqual(page("public-person").currentReadContracts, []);
 
   const targetContracts = pageMap.flatMap((entry) => [
     ...entry.readContracts,
@@ -196,6 +262,10 @@ try {
     "Verification",
     "Service",
     "Home Search",
+    "Canonical Topic",
+    "Dynamic Person",
+    "Booking Request 阶段不收费",
+    "Payment Fact、Service Completion Fact、Settlement Fact、Rating Fact",
     "EC-1",
     "EC-5",
   ]) {

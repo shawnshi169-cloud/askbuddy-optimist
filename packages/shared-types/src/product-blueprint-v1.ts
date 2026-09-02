@@ -25,9 +25,12 @@ export interface PersonExperienceOwnership {
   personId: PublicPersonId;
 }
 
-/** 问题预算是后续深入交流意向，不是公开回答的奖励。 */
-export interface QuestionDeepExchangeBudget {
-  approximateAmount: CnyAmount;
+/**
+ * 问题预算是后续深入交流的 CNY 意向，不是公开回答奖励。
+ * EC-0 不承诺单值、区间、preset 或 storage/input representation。
+ */
+export interface QuestionDeepExchangeBudgetIntent {
+  currency: ServiceCurrencyV1;
 }
 
 /**
@@ -39,7 +42,7 @@ export interface PublicQuestionV1Target {
   authorId: PublicPersonId;
   title: string;
   context: string | null;
-  deepExchangeBudget: QuestionDeepExchangeBudget | null;
+  deepExchangeBudgetIntent: QuestionDeepExchangeBudgetIntent | null;
   answerCount: number;
   createdAt: ISODateTime;
 }
@@ -68,12 +71,26 @@ export type PersonServiceModesV1 =
   | { voiceEnabled: true; videoEnabled: boolean }
   | { voiceEnabled: boolean; videoEnabled: true };
 
-/** Service 属于 Person，与 Experience、Verification、legacy Expert extension 独立。 */
-export interface PersonServiceSettingsV1Target {
+/** 未开启 Service 的 Person 不需要 price 或 voice/video availability。 */
+export interface DisabledPersonServiceSettingsV1Target {
   personId: PublicPersonId;
+  enabled: false;
+}
+
+/**
+ * Service 开启后属于 Person，与 Experience、Verification、legacy Expert extension 独立。
+ * Voice/Video 共用一个基础按次价格，且至少开启一种模式。
+ */
+export interface EnabledPersonServiceSettingsV1Target {
+  personId: PublicPersonId;
+  enabled: true;
   basePrice: CnyAmount;
   modes: PersonServiceModesV1;
 }
+
+export type PersonServiceSettingsV1Target =
+  | DisabledPersonServiceSettingsV1Target
+  | EnabledPersonServiceSettingsV1Target;
 
 /** 平台费率由 versioned policy/config 决定；contract 不写死百分比。 */
 export interface ServiceTransactionMoneyV1Target {

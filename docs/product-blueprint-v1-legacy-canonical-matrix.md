@@ -15,15 +15,15 @@
 | `profiles.is_verified` | legacy generic flag | typed verification claims | 不展示通用认证 | EC-5 | A/B | NO |
 | `experts.is_verified` / `verification_status` | expert profile review | typed verification + optional service review | compatibility/admin only | EC-5 | A | NO |
 | `user_verifications(talent/real_name)` | legacy owner/admin workflow | identity / education-employment / professional claim types | 保留历史，不扩展旧 vocabulary | EC-5 | A | NO |
-| `/person/:userId` | canonical route，UI wiring 分阶段进行 | `/person/:userId` | additive | EC-1 | B | YES |
+| `/person/:userId` | canonical target route；Shared Core consumer 尚未接线 | `/person/:userId` | EC-1 additive consumer cutover | EC-1 | B | NO，直到 consumer 实现 |
 | `/expert-profile/:id` | 旧 expert profile link | expert ID -> user ID -> Person route | compatibility resolver | EC-1/EC-3 | B | NO |
 | `/expert/:id` | 旧 service/expert detail | Person route + Service module | 暂不删除 | EC-4 | B | NO |
-| `/skill-publish` | 写 legacy skill offer，要求 expert row | Person Service Settings | fail closed/compatibility only | EC-4 | A/B | NO |
-| `skill_offers` | marketplace-era skill SKU storage | Person Service Settings | 保留旧 consumer，禁止扩展为新模型 | EC-4 | A | NO |
+| `/skill-publish` | 写 legacy skill offer，要求 expert row | optional Person Service Settings | fail closed/compatibility only | EC-4 | A/B | NO |
+| `skill_offers` | marketplace-era skill SKU storage | optional Person Service Settings | 保留旧 consumer，禁止扩展为新模型 | EC-4 | A | NO |
 | `skill_offers.expert_id` | 实际 FK 指向 `experts.user_id` | `ownerUserId: PublicPersonId` | 仅在 adapter 语义重命名，不物理 rename | EC-4 | A | NO，除 compatibility adapter |
 | `SKILL_OFFER_STATUS` | legacy storage enum | Service Settings lifecycle（待定） | `@deprecated` | EC-4 | A | NO |
 | `SKILL_PRICING_MODE` | per_question/session/hour/negotiable | 一个 Person 基础按次价 | `@deprecated` | EC-4 | A | NO |
-| `questions.reward_points` / `bounty_points` | 提问页、搜索、RPC payload | `deepExchangeBudget` in CNY | 历史字段保留，不承载新 budget | EC-2 | A/B | NO |
+| `questions.reward_points` / `bounty_points` | 提问页、搜索、RPC payload | optional CNY `deepExchangeBudgetIntent` | 历史字段保留；单值/区间/preset 留给 EC-2 | EC-2 | A/B | NO |
 | `questions.accepted_answer_id` | 旧采纳状态 | 无；Answer 可多条 | historical compatibility | EC-2 | A/B | NO |
 | `answers.is_accepted` | 旧展示/结算 | Helpful + Reply | historical compatibility | EC-2 | A/B | NO |
 | `ANSWER_STATUS.accepted` | persisted old status | visibility/moderation 与 helpful 分离 | `@deprecated` | EC-2 | A | NO |
@@ -37,6 +37,16 @@
 | `SEARCH_OBJECT_TYPE` | old Home Search vocabulary | `HOME_SEARCH_DOMAIN_V1` | `@deprecated` | EC-3 | A/B/C/D | NO |
 | `get_nearby_experts` | expert-centric discovery | Person discovery + Experience match reason | compatibility only | EC-3 | A | NO |
 | `get_channel_feed.experts` | 四频道当前 expert collection | Person/Question channel discovery | channel slug 保留，payload additive replacement | EC-3 | A/B | NO |
+| `PRODUCT_CHANNEL_CATALOG` | 四个稳定一级导航频道 | Channel navigation/coarse organization | 保留 catalog；不得作为 Person identity 或 Matching profile | EC-3 | A/B/C/D | YES，限导航 |
+| legacy question category/tag | 多套 category/tag string | Primary Channel + Canonical Topic associations | 不直接改名冒充 canonical | EC-2/EC-3 | A | NO |
+| Discover hashtag / `hot_topics` | 用户侧 social topic 内容 | Discover Social Topic mapped to Canonical Topic | 两者不等同，保留 social entity | EC-3 | A/B | YES，限 Discover |
+| Canonical Topic | 当前不存在跨模块 storage/API | shared Question/Experience/Matching/Discover/Community semantic layer | additive design，不复用 hashtag ID | EC-3 | A | NO，直到部署 |
+| Transition string/tag | 当前无 canonical directed relation | directed Experience transition | 不得降级成普通 Topic/string tag即视为完成 | EC-1/EC-3 | A | NO |
+| city/city_code | 多 relation 的 legacy location 字段 | independent city-level Location dimension | 与 Topic 分离，不扩展精确实时附近定位 | EC-3 | A | NO，待统一 contract |
+| permanent `user_type` | 不应成为 Blueprint identity | Dynamic Person model | 明确禁止 student/expert/asker/provider 永久类型 | EC-1/EC-3 | A/B/C/D | NO |
+| onboarding persona/provider choice | Blueprint target 未部署 | lightweight initial Person/Need/Interest seeds | 不强制 Expert/Provider/Experience/Verification/Service | EC-1 | A/B | NO |
+| Current Need / Interest | 无 canonical dynamic signal model | decaying behavioral/current-state signals | 不写入 durable Experience | EC-3 | A | NO，直到部署 |
+| Accumulated Experience | 无 canonical storage/API | durable Person history | 不因兴趣衰减而删除 | EC-1 | A | NO，直到部署 |
 | Discover `posts/topics` | 当前 social content | Post/Topic/Person | 可继续，但不进入 Home Search Tab | EC-3 | A/B | YES，限 Discover |
 | Post Like/follower count | social popularity | `SocialPopularitySummary` | 与 Service Reputation 分离 | EC-3/EC-5 | A | NO，作为 Reputation |
 | `send_direct_message` | 当前消息发送 | Conversation message under chat/booking entry | compatibility only | EC-4 | A/B | NO |
@@ -52,6 +62,8 @@
 | `recharge_points` | deprecated service-role path | 无 | 不开放 client，最终 retire | EC-4 | A | NO |
 | wechat-prepay mock | Production 已 fail closed | real RMB provider | 未接 provider 前 unavailable | EC-4 | A | NO |
 | hard-coded commission | 不应存在 target | versioned fee policy | 禁止写死百分比 | EC-4 | A/Product | NO |
+| Booking Request charge | legacy consultation/order 行为不可作为依据 | no charge before terms and payment stage | Request 阶段禁止扣款 | EC-4 | A | NO |
+| Payment/Completion/Settlement/Rating | legacy order status/callback 语义混杂 | four independent facts | Payment Success 后 Confirmed；完成+争议窗口后 Settlement | EC-4/EC-5 | A | NO，直到部署 |
 | fixed booking timeout/cancel/dispute | 尚未锁定 | configurable policy（待决策） | 不发明值 | EC-4 | Product/A | NO |
 | `create_call_session_v1` | call lifecycle，RTC/recording/billing 不完整 | confirmed Booking Exchange session | compatibility only | EC-4 | A/B/C/D | NO |
 | legacy rating/order/service/follower counters | 字段存在但语义混杂 | completed/helped/rating facts | 不映射、不展示 fake metrics | EC-5 | A | NO |
@@ -59,8 +71,9 @@
 | `notifications.is_read` | unread history | read state | 保留 | EC-5 | A | YES，限 history |
 | unread notification count | 当前 Bell/message 使用 | action-required attention count | current compatibility，不能冒充 target Bell | EC-5 | A/B | NO |
 | `hot_topics/topic_discussions` | social topic/discussion | Discover Topic | 不解释为 Community | EC-3/EC-5 | A/B | YES，限 Topic compatibility |
-| Community | 无 current entity | many-to-many ongoing exchange | unavailable until contract deployed | EC-5 | A | NO |
-| paid Voice/Video raw recording | 尚未部署 | explicit-consent governed recording | 不伪装可用 | EC-4/EC-5 | A/Product/Legal | NO |
+| Community | 无 current entity | many-to-many ongoing exchange | EC-5 独立 domain；unavailable until deployed | EC-5 | A | NO |
+| paid Voice/Video recording lifecycle | 尚未部署 | Exchange association + explicit informed consent | EC-4 基础设施；不伪装 RTC/recording 可用 | EC-4 | A/Product/Legal | NO |
+| recording governance | 尚未部署 | dispute/T&S/admin access、audit、retention、policy | EC-5 独立治理，不与 Community 合并 | EC-5 | A/Product/Legal | NO |
 | direct `profiles` Data API | 多个公开 reader；phone 暴露风险 | safe projections + owner-private contract | Privacy Cutover 独立进行 | 独立安全任务 | A/B | NO，禁止新增字段依赖 |
 
 ## Current / Target 使用规则

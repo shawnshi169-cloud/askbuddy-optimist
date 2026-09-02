@@ -29,8 +29,9 @@
   safe public projection。
 - `experts` 是以 `user_id` 关联 Person 的旧扩展；`experts.id` 仍被旧 route/search
   使用，但不能进入 Blueprint v1 identity。
-- `/person/:userId` 是 canonical public route；`/expert/:id`、
-  `/expert-profile/:id` 是 legacy compatibility route。
+- `/person/:userId` 是 canonical target route，但 Shared Core consumer 尚未接线；当前已
+  Production Ready 的范围仅为 `PublicPersonId + get_public_person_profile_v1(uuid)`。
+  `/expert/:id`、`/expert-profile/:id` 仍是 legacy compatibility route。
 - `skill_offers.expert_id` 的物理 FK 目标是 `experts.user_id`，Shared 语义只能解释为
   legacy `ownerUserId`，不能证明 Expert 是 Service owner root。
 
@@ -61,6 +62,8 @@
 - `get_nearby_experts` 仍返回 expert-centric result。
 - `get_channel_feed` 的四个 Product Channel slug 保持稳定，但当前 payload 含
   `experts` collection，属于 Blueprint v1 compatibility output。
+- `PRODUCT_CHANNEL_CATALOG` 已是稳定导航词汇；当前不存在跨模块 Canonical Topic 或
+  directed Transition contract。
 - Blueprint v1 Home Search 尚无 `all/person/question` 的 deployed RPC。
 
 ### Discover / Conversation / Notification
@@ -114,6 +117,24 @@ EC-0 只锁定 `PersonExperienceId` 与 `personId` ownership。Experience kind�
 排序、编辑历史和 evidence 引用必须在 EC-1 migration 前完成 schema decision，不能从
 `experts.education/experience` JSON 猜测。
 
+### Dynamic Person / Onboarding
+
+Person 不是永久 persona 标签。长期 Person Model 至少区分：
+
+- Current State；
+- Accumulated Experiences，属于持续保留的经历历史；
+- Transitions，表达经历之间有方向的变化；
+- Current Needs；
+- Current Interests。
+
+Accumulated Experience 不等于 Current Need/Interest。Need/Interest 可以由主动声明、Search、
+Question、阅读、Follow、Ask TA、Booking 等真实行为更新并衰减；过去 Experience 不因兴趣
+变化自动消失。禁止建立永久 `user_type = student/expert/asker/provider`。
+
+Onboarding 只是动态画像的第一个瞬间，只负责轻量 Account/age protection、Public Person
+basics、Need/Interest seeds 与 optional Experience invitation。不得强制选择 Expert、
+Provider、完整简历、Experience、Verification 或开启 Service。
+
 ### Question / Answer / Reply
 
 - Question = title + context + optional deep-exchange budget intent。
@@ -121,6 +142,22 @@ EC-0 只锁定 `PersonExperienceId` 与 `personId` ownership。Experience kind�
 - Helpful 只评价该 Answer，不产生 service reputation，也不增加 `helpedUserCount`。
 - Reply 是 Answer 下的一层业务结构，可携带 `replyToPersonId` 显示“回复 @Person”，但
   不提供 `parentReplyId` 形成无限嵌套。
+
+### Channel / Canonical Topic / Transition / Location
+
+- V1 一级 Channel 固定为教育学习、职业发展、生活服务、兴趣技能，继续复用
+  `PRODUCT_CHANNEL_CATALOG`。
+- Channel 只负责产品导航和粗粒度组织，不是 Person 永久身份、Matching 核心画像或通用
+  Tag 系统。
+- Question target 拥有一个 Primary Channel；Experience 不要求唯一 Channel。
+- Canonical Topic 是 Question、Experience、Person Matching、Discover Topic/Hashtag、
+  Community、Editorial/Hot Topic 可共同关联的跨模块语义层。
+- Canonical Topic 不等于 Discover Social Topic/Hashtag。多个用户侧 hashtag 可以映射或
+  关联同一 Canonical Topic，但 EC-0 不锁定 storage/map shape。
+- Transition 是有方向的 Experience 关系，例如“技术 → 销售”，不是普通 Topic 或 string
+  tag；完整 Experience Graph 留给后续设计。
+- Location 与 Topic 独立。“上海街拍”可拆为 Topic=街头摄影、Location=上海。V1 仅锁定
+  城市级社会发现，不设计精确实时附近定位。
 
 ### Home Search / Discover / Community
 
@@ -136,7 +173,10 @@ EC-0 只锁定 `PersonExperienceId` 与 `personId` ownership。Experience kind�
 - Canonical 一级用语是 Conversation（会话），不是“私信”产品根概念。
 - 只有 `chat` 或 `booking` entry point 可以创建/进入 Person-to-Person Conversation。
 - Follow、Like、Comment、Answer、Invite Answer 不自动创建 Conversation。
-- Service 属于 Person：一个基础人民币价格，Voice/Video 共用，至少开启一种。
+- Service 是 Person 可主动开启或关闭的 optional capability，不是永久 Provider 身份。
+- 未开启 Service 的 Person 仍有 Profile/Experience，可以 Question、Answer、Follow、
+  Discover 和被 Person Discovery 发现，且不需要 price 或 voice/video availability。
+- 开启 Service 后才要求一个基础人民币按次价格；Voice/Video 共用该价格且至少开启一种。
 - Booking Request 不立即收费；协商时间/方式/价格后才进入 `awaiting_payment`。
 - timeout、取消阈值、争议窗口尚未锁定，本 contract 不包含固定数值。
 
@@ -145,16 +185,27 @@ EC-0 只锁定 `PersonExperienceId` 与 `personId` ownership。Experience kind�
 - Service transaction 使用 `CNY`，采用 `gross/platformFee/net` 透明金额。
 - 平台费由 versioned policy/config 决定，禁止写死百分比。
 - 无真实 provider 时 fail closed；不得创建 fake paid/order/transaction。
+- Canonical 支付时序固定为：Booking Request → 双方协商 → 确认时间/Voice或Video/Price →
+  `awaiting_payment` → 交流前一次性支付全款 → Payment Success → Booking Confirmed → 平台
+  暂持资金 → 真实 Exchange → Service Completion Fact → finite Dispute Window → Provider
+  Settlement。
+- Booking Request 阶段不收费；Payment Success 前不形成正式履约承诺。交流前支付，完成并
+  经过有限争议窗口后结算。
+- Payment Fact、Service Completion Fact、Settlement Fact、Rating Fact 是四类独立事实，
+  不得由单一 status 或 callback 互相替代。
 - `completedServiceCount` 统计服务次数；`helpedUserCount` 对 requester/provider 去重。
 - `ratingCount/averageRating` 只来自明确的 completed service evaluation。
 - Follow/Like 属于 Social Graph/Popularity，不直接成为 Service Reputation。
 
-### Notification / Recording
+### Notification / Community / Recording
 
 - `isRead` 与 `actionRequired/resolvedAt` 是正交状态。
 - Home Bell 只聚合需要处理的高优先级 attention，不等于全部 unread history。
-- Paid media 首次使用/进入前必须显式同意录制。原始媒体初期不向用户提供下载/回放；
-  具体 retention、access、dispute 与 model-improvement policy 在 EC-4/EC-5 单独落地。
+- Community 是 EC-5 可继续设计的 many-to-many domain，不与 Recording 共享 readiness。
+- EC-4 负责 Paid media recording lifecycle 基础、Exchange association 与首次适用前/进入前
+  explicit informed consent；不得伪装 RTC/recording 已可用。
+- EC-5 负责 dispute/Trust & Safety access、admin authorization、audit log、retention、
+  governance 与 legal/privacy policy implementation。原始媒体初期不向用户下载/回放。
 
 ## 四、Shared Contract 策略
 
@@ -165,7 +216,8 @@ EC-0 只锁定 `PersonExperienceId` 与 `personId` ownership。Experience kind�
 - Person-owned Experience ownership
 - 无 accepted 字段的 Question/Answer target shape
 - 一层 Answer Reply target shape
-- Person-owned Service settings，Voice/Video 至少一种
+- optional Person Service settings；disabled 不要求价格，enabled 才要求 CNY 基础价和
+  Voice/Video 至少一种
 - configurable fee policy reference
 - Conversation entry point `chat/booking`
 - Service Reputation 与 Social Popularity 分离
@@ -179,6 +231,9 @@ EC-0 只锁定 `PersonExperienceId` 与 `personId` ownership。Experience kind�
 - `PRODUCT_BLUEPRINT_V1_RPC_POLICY` 标记 deployed RPC 能否被新 Blueprint 代码依赖；
 - `LEGACY_CONTRACT_DEPENDENCY_POLICY` 对 expert identity、skill SKU、accepted answer、
   reward points、point transaction、generic verification 一律为 `false`。
+- `PRODUCT_SEMANTIC_BOUNDARIES_V1` 分离 Channel、Canonical Topic、Transition 与 Location；
+- `DYNAMIC_PERSON_MODEL_V1` 分离 durable Experience 与 dynamic Need/Interest；
+- `BOOKING_PAYMENT_INVARIANTS_V1` 固定支付/履约/结算事实边界但不填政策数值。
 
 旧类型不删除，增加 `@deprecated` 或 compatibility note。`RPC_CATALOG.status` 继续描述
 P1.4 当前 runtime/grant truth，Blueprint eligibility 必须查新的 policy map，不能混用。
@@ -187,11 +242,14 @@ P1.4 当前 runtime/grant truth，Blueprint eligibility 必须查新的 policy m
 
 | Domain | Current Runtime | Target | Readiness |
 | --- | --- | --- | --- |
-| Person | safe Public Person RPC 已部署；旧 expert route 仍在 | Universal Person | Production ready |
+| Public Person Identity + Read | `PublicPersonId` 与 safe RPC 已部署；`/person` UI 未接线 | Universal Person identity/read | Production ready（仅此 read boundary） |
+| Person UI / Experience | `/person` consumer 与 Experience UI/API 未完成 | Universal Person profile + Experience | Not deployed / partial consumer cutover |
 | Experience | 无 canonical storage/API | Person-owned Experience | Not deployed |
 | Question/Answer | reward/accepted/status/RPC 仍运行 | free multi-answer + Helpful + one-level Reply | Legacy compatibility |
 | Home Search | question/expert/skill/post | all/person/question | Legacy compatibility |
 | Channel | 固定四频道 + expert collection | fixed channels + Person/Question discovery | Legacy compatibility |
+| Canonical Topic / Transition | 无跨模块 topic layer 或 directed transition graph | shared semantic topic + directed Experience relation | Not deployed |
+| Dynamic Person | 无 canonical Need/Interest signal model | durable Experience + decaying Need/Interest | Not deployed |
 | Discover | Post/Topic/social interactions 部分可用 | independent Social domain | Partial |
 | Conversation | direct message compatibility | chat/booking entry only | Legacy compatibility |
 | Service | expert-gated skill offers | Person-owned voice/video settings | Not deployed target |
@@ -206,7 +264,8 @@ P1.4 当前 runtime/grant truth，Blueprint eligibility 必须查新的 policy m
 ### EC-1 Person + Experience
 
 - 新 Contract：Experience identity/ownership、公开字段、visibility、ordered timeline、typed
-  claim reference；继续复用 `PublicPersonId`。
+  claim reference、Transition boundary 与 lightweight Person basics/onboarding；继续复用
+  `PublicPersonId`。
 - 新 Storage/RPC：additive Person Experience table 与 paginated safe read/write contract；
   优先 `SECURITY INVOKER` + explicit grants/RLS。
 - Legacy Compatibility：只读解析 `experts.education/experience` 需单独迁移审计，不直接
@@ -216,7 +275,8 @@ P1.4 当前 runtime/grant truth，Blueprint eligibility 必须查新的 policy m
 
 ### EC-2 Question + Answer + Reply
 
-- 新 Contract：Question Context、deep-exchange budget、free Answer、Helpful、一层 Reply。
+- 新 Contract：Question Context、CNY deep-exchange budget intent、free Answer、Helpful、一层
+  Reply；budget 的单值/区间/preset representation 必须在 EC-2 决定。
 - 新 Storage/RPC：additive vNext projection/action；不得复用 bounty/accepted 字段承载新语义。
 - Legacy Compatibility：现有 question/answer pages 和 accept RPC 暂时可运行。
 - Consumer Cutover：移除 accepted UI/notification/reward path，迁移 Question status。
@@ -225,8 +285,9 @@ P1.4 当前 runtime/grant truth，Blueprint eligibility 必须查新的 policy m
 ### EC-3 Home / Search / Matching
 
 - 新 Contract：`all/person/question`，Person result 使用 `PublicPersonId`；Experience 仅作
-  match reason。
-- 新 Storage/RPC：typed search response 和 explainable match reason；不承诺 AI 已可用。
+  match reason；同时定义 Canonical Topic、Location 与 dynamic Need/Interest signal 输入。
+- 新 Storage/RPC：typed search response、explainable match reason 与可衰减 signal boundary；
+  不承诺 AI 已可用，也不把 Current Interest 写入 durable Experience。
 - Legacy Compatibility：`search_app_content_v2`、`get_nearby_experts`、当前 channel feed 保留。
 - Consumer Cutover：Home/Search/Channel 全部导航 `/person/:userId`。
 - 删除前置：无新入口消费 expert/skill/post 作为 Home Search 一级 result。
@@ -234,18 +295,19 @@ P1.4 当前 runtime/grant truth，Blueprint eligibility 必须查新的 policy m
 ### EC-4 Conversation / Booking / RMB Payment
 
 - 新 Contract：Conversation entry reason、Person Service Settings、Booking negotiation、
-  RMB transaction、configurable fee、Voice/Video exchange 与 recording consent。
+  RMB transaction、configurable fee、Voice/Video exchange、recording lifecycle 与 consent。
 - 新 Storage/RPC：独立 Booking/Service/Payment/Settlement state machine；真实 provider 前
   全部 fail closed。
 - Legacy Compatibility：direct message、skill offers、Pack06 orders/points 仅维护旧 consumer。
-- Consumer Cutover：先聊聊/预约交流成为唯一 Conversation entry；Booking Request 不扣款。
+- Consumer Cutover：先聊聊/预约交流成为唯一 Conversation entry；Booking Request 不扣款，
+  Payment Success 后才 Confirmed，交流完成与争议窗口后才 Settlement。
 - 删除前置：真实 provider/reconciliation/ledger/dispute/consent UAT 完成，且无旧 points
   service consumer。
 
 ### EC-5 Reputation / Verification / Admin
 
 - 新 Contract：service facts/evaluation、unique helped person、typed verification claim/evidence、
-  action-required notification、Community 和运营审核。
+  action-required notification、Community、recording governance 和运营审核。
 - 新 Storage/RPC：可审计 aggregation、claim review、admin guard 与 attention queue。
 - Legacy Compatibility：generic verified flags、legacy counters 和 unread notification 保留只读。
 - Consumer Cutover：UI 不再展示通用“已认证专家”或把 follower/Helpful 当 Reputation。
