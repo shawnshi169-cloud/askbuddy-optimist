@@ -13,7 +13,6 @@ export interface PublicPersonExpertExtension {
   headline: string | null;
   intro: string | null;
   expertiseSummary: string | null;
-  publishedSkillOfferCount: number;
 }
 
 export interface PublicPersonContributionSummary {

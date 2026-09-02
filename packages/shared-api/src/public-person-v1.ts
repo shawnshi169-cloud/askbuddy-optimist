@@ -79,7 +79,7 @@ const parseExpertExtension = (value: unknown): PublicPersonExpertExtension | nul
   const row = asRecord(value, "public person expert extension");
   assertExactKeys(
     row,
-    ["headline", "intro", "expertiseSummary", "publishedSkillOfferCount"],
+    ["headline", "intro", "expertiseSummary"],
     "public person expert extension",
   );
   return {
@@ -88,10 +88,6 @@ const parseExpertExtension = (value: unknown): PublicPersonExpertExtension | nul
     expertiseSummary: asNullableString(
       row.expertiseSummary,
       "public person expertise summary",
-    ),
-    publishedSkillOfferCount: asCount(
-      row.publishedSkillOfferCount,
-      "public person published skill offer count",
     ),
   };
 };

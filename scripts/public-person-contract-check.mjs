@@ -59,11 +59,23 @@ try {
         headline: "职业经历分享者",
         intro: null,
         expertiseSummary: "职业发展",
-        publishedSkillOfferCount: 1,
       },
     },
   };
   assert.deepEqual(parseGetPublicPersonProfileV1Result(activeExpert), activeExpert);
+  assert.throws(
+    () => parseGetPublicPersonProfileV1Result({
+      person: {
+        ...activeExpert.person,
+        expertExtension: {
+          ...activeExpert.person.expertExtension,
+          publishedSkillOfferCount: 1,
+        },
+      },
+    }),
+    TypeError,
+    "Paid service capability must not be nested under expertExtension",
+  );
   assert.deepEqual(parseGetPublicPersonProfileV1Result({ person: null }), { person: null });
 
   for (const forbiddenField of [
@@ -103,9 +115,10 @@ try {
   assert.match(migration, /SECURITY INVOKER/);
   assert.doesNotMatch(migration, /SECURITY DEFINER/);
   assert.match(migration, /SET search_path = ''/);
-  for (const relation of ["profiles", "answers", "posts", "experts", "skill_offers"]) {
+  for (const relation of ["profiles", "answers", "posts", "experts"]) {
     assert.match(migration, new RegExp(`public\\.${relation}\\b`));
   }
+  assert.doesNotMatch(migration, /public\.skill_offers|publishedSkillOfferCount/);
   assert.doesNotMatch(migration, /auth\.users|public\.user_settings/);
   assert.doesNotMatch(
     migration,
@@ -121,7 +134,6 @@ try {
   assert.match(migration, /post\.visibility = 'public'/);
   assert.match(migration, /e\.profile_status = 'active'/);
   assert.match(migration, /e\.is_active IS TRUE/);
-  assert.match(migration, /offer\.status = 'published'/);
   assert.match(
     migration,
     /REVOKE ALL ON FUNCTION public\.get_public_person_profile_v1\(uuid\) FROM PUBLIC/,
@@ -138,6 +150,8 @@ try {
   assert.match(decision, /PUBLIC_PROFILE_READERS_MIGRATED = YES/);
   assert.match(decision, /Answer\/Question 使用 `author_id`/);
   assert.match(decision, /提问者账号.*回答者账号/);
+  assert.match(decision, /Paid service capability.*Person/);
+  assert.match(decision, /expertExtension.*不得用于 gate.*paid service capability/s);
 
   const rpcCatalog = read("packages/shared-api/src/rpc-catalog.ts");
   assert.match(

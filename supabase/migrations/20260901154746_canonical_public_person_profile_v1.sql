@@ -40,13 +40,7 @@ AS $$
           SELECT jsonb_build_object(
             'headline', e.headline,
             'intro', e.intro,
-            'expertiseSummary', e.expertise_summary,
-            'publishedSkillOfferCount', (
-              SELECT count(*)
-              FROM public.skill_offers AS offer
-              WHERE offer.expert_id = e.user_id
-                AND offer.status = 'published'
-            )
+            'expertiseSummary', e.expertise_summary
           )
           FROM public.experts AS e
           WHERE e.user_id = p.user_id

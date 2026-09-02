@@ -87,7 +87,10 @@ Canonical public route 为：
 - 物理字段继续是 legacy 名称 `skill_offers.expert_id`。
 - 实际 FK 为 `skill_offers.expert_id -> experts.user_id`，不是 `experts.id`。
 - Shared contract 中的真实语义为 `ownerUserId: PublicPersonId`。
+- Paid service capability 属于 Person，不属于 Expert。当前物理 FK 是历史实现约束，
+  不能成为未来 Person service capability 的 domain ownership。
 - 本阶段不物理 rename，不扩展 Payment 或 consultation contract。
+- 本 PR 不创建未来 Service Contract，只消除 Public Person V1 对该 legacy 关系的错误耦合。
 
 ## 三、字段归属
 
@@ -144,10 +147,13 @@ Extension V1 只包含：
 - `headline`
 - `intro`
 - `expertiseSummary`
-- `publishedSkillOfferCount`
 
 没有 expert row、inactive row 或 malformed row 时返回 `null`，不得让 Person 404。
 V1 不把 expert review status、consultation、payment 或 legacy metrics 伪装成可用能力。
+`expertExtension` 只是 legacy optional enrichment，不得用于 gate Public Person、
+paid service capability、Matching、Verification 或用户等级。未来 paid voice/video
+experience exchange capability 必须以 Person 为 owner，并通过独立 contract 定义；
+不得重新嵌套进 `expertExtension`。
 
 ## 四、SECURITY INVOKER Amendment
 
@@ -170,7 +176,6 @@ SET search_path = ''
 | `answers` | `answerCount` | RLS enabled；公开读 policy 存在，但有 legacy permissive policy | `author_id`、`is_hidden=false`、status active/accepted |
 | `posts` | `postCount` | RLS enabled；`can_read_post` policy | 仅 `visibility=public`、`status=active` |
 | `experts` | nullable active extension | RLS enabled；公开 active policy | 同时要求 `profile_status=active` 与 `is_active=true` |
-| `skill_offers` | published offer count | RLS enabled；public policy 仅 published | 再次显式要求 `status=published` |
 
 这些关系均已具备 invoker 所需的 SELECT grants 与 RLS。函数不读取
 `auth.users`、`user_settings`、verification evidence 或 private schema，因此不需要
@@ -210,7 +215,6 @@ interface PublicPersonExpertExtension {
   headline: string | null;
   intro: string | null;
   expertiseSummary: string | null;
-  publishedSkillOfferCount: number;
 }
 
 interface PublicPersonContributionSummary {
