@@ -24,6 +24,11 @@ export type RpcContractStatus =
   | "compatibility-only"
   | "blocked";
 
+/**
+ * `RpcContractStatus` describes the deployed P1.4 runtime contract. Blueprint v1
+ * product eligibility is defined separately by PRODUCT_BLUEPRINT_V1_RPC_POLICY.
+ */
+
 export type RpcAuthenticationBoundary =
   | "anon"
   | "authenticated"
@@ -317,6 +322,7 @@ export const RPC_CATALOG = {
   accept_answer_v2: rpc<AcceptAnswerV2Params, AcceptAnswerV2Result>()(
     "accept_answer_v2", "canonical", "authenticated", "questions",
     "AcceptAnswerV2Params", "AcceptAnswerV2Result", "aligned",
+    "Canonical for the current runtime only; Blueprint v1 removes accepted-answer semantics and new code must not depend on this RPC.",
   ),
   accept_answer_and_transfer_points: rpc<AcceptAnswerLegacyParams, void>()(
     "accept_answer_and_transfer_points", "deprecated", "service_role", "questions",
@@ -326,6 +332,7 @@ export const RPC_CATALOG = {
   create_question_secure: rpc<CreateQuestionSecureParams, string>()(
     "create_question_secure", "canonical", "authenticated", "questions",
     "CreateQuestionSecureParams", "UUID", "aligned",
+    "Current runtime action includes p_bounty_points; Blueprint v1 requires a separate deep-exchange budget contract.",
   ),
   create_answer_secure: rpc<CreateAnswerSecureParams, string>()(
     "create_answer_secure", "canonical", "authenticated", "questions",
@@ -339,6 +346,7 @@ export const RPC_CATALOG = {
   send_direct_message: rpc<SendDirectMessageParams, string>()(
     "send_direct_message", "canonical", "authenticated", "messages",
     "SendDirectMessageParams", "UUID", "aligned",
+    "Current runtime compatibility action; Blueprint v1 Conversation creation must be limited to chat or booking entry points.",
   ),
   get_user_conversations: rpc<Record<string, never>, GetUserConversationItem[]>()(
     "get_user_conversations", "canonical", "authenticated", "messages",
@@ -363,10 +371,12 @@ export const RPC_CATALOG = {
   search_app_content_v2: rpc<SearchAppContentV2Params, SearchAppContentV2RawResult>()(
     "search_app_content_v2", "canonical", "anon", "search",
     "SearchAppContentV2Params", "SearchAppContentV2RawResult", "aligned",
+    "Current runtime returns question/expert/skill/post; Blueprint v1 Home Search target is all/person/question.",
   ),
   get_search_suggestions_v2: rpc<GetSearchSuggestionsV2Params, GetSearchSuggestionsV2Result>()(
     "get_search_suggestions_v2", "canonical", "anon", "search",
     "GetSearchSuggestionsV2Params", "GetSearchSuggestionsV2Result", "aligned",
+    "Current runtime uses legacy SearchObjectType; Blueprint v1 suggestions require the EC-3 domain contract.",
   ),
   upsert_search_history: rpc<UpsertSearchHistoryParams, string>()(
     "upsert_search_history", "canonical", "authenticated", "search",
@@ -379,6 +389,7 @@ export const RPC_CATALOG = {
   get_channel_feed: rpc<GetChannelFeedParams, ChannelFeedResult>()(
     "get_channel_feed", "canonical", "anon", "channels",
     "GetChannelFeedParams", "ChannelFeedResult", "aligned",
+    "The four Product Channel slugs remain stable, but the current experts collection is Blueprint v1 compatibility output.",
   ),
   get_public_person_profile_v1: rpc<
     GetPublicPersonProfileV1Params,
@@ -461,6 +472,7 @@ export const RPC_CATALOG = {
   get_nearby_experts: rpc<GetNearbyExpertsParams, JsonValue[]>()(
     "get_nearby_experts", "canonical", "anon", "experts",
     "GetNearbyExpertsParams", "NearbyExpert[]", "aligned",
+    "Current runtime compatibility only; Blueprint v1 discovery must return Person identity rather than Expert identity.",
   ),
   get_admin_dashboard: rpc<Record<string, never>, JsonObject>()(
     "get_admin_dashboard", "compatibility-only", "admin", "operations",

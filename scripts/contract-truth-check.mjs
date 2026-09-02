@@ -271,6 +271,8 @@ try {
     capabilities.SKILL_OFFER_CAPABILITY.currentClientAction.availability,
     "real",
   );
+  assert.equal(capabilities.BLUEPRINT_V1_SERVICE_CAPABILITY.availability, "unavailable");
+  assert.equal(capabilities.BLUEPRINT_V1_SERVICE_CAPABILITY.productionReady, false);
 
   const requiredPages = [
     "home", "search", "ask", "discover", "messages", "profile", "public-person",
@@ -296,13 +298,14 @@ try {
   const questionDetail = pageMap.PAGE_CONTRACT_MAP.find(
     (entry) => entry.pageId === "question-detail",
   );
-  assert.ok(questionDetail.writeContracts.includes("rpc:accept_answer_v2"));
+  assert.ok(questionDetail.writeContracts.includes("capability:answer-helpful-v1"));
+  assert.ok(!questionDetail.writeContracts.includes("rpc:accept_answer_v2"));
   assert.ok(questionDetail.currentWriteContracts.includes("rpc:accept_answer_v2"));
   assert.ok(!questionDetail.currentWriteContracts.includes("rpc:accept_answer_and_transfer_points"));
   assert.equal(
     pageMap.PAGE_CONTRACT_MAP.find((entry) => entry.pageId === "skill-publish")
       .implementationStatus,
-    "canonical",
+    "legacy",
   );
   const topicDetail = pageMap.PAGE_CONTRACT_MAP.find(
     (entry) => entry.pageId === "topic-detail",

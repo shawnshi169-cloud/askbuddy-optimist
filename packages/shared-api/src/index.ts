@@ -7,3 +7,4 @@ export * from "./notification";
 export * from "./search-v2";
 export * from "./capabilities";
 export * from "./public-person-v1";
+export * from "./product-blueprint-v1";

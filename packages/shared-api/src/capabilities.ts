@@ -48,16 +48,22 @@ export const SKILL_OFFER_CAPABILITY = {
   storage: {
     availability: "real",
     productionReady: true,
-    reason: "public.skill_offers is the canonical persisted skill offer model",
+    reason: "public.skill_offers is real legacy compatibility storage, not Blueprint v1 Person Service settings",
   },
   publishBackendPath: {
     availability: "real",
     productionReady: true,
-    reason: "owner-scoped RLS supports canonical skill_offers persistence when the user has an existing expert profile",
+    reason: "owner-scoped RLS supports the legacy expert-gated skill_offers path only",
   },
   currentClientAction: {
     availability: "real",
     productionReady: true,
-    reason: "Skill Publish creates an owner-scoped skill_offers row after confirming the authenticated user has an existing expert profile",
+    reason: "Current Skill Publish is a legacy compatibility action that requires an existing expert profile and must not define Blueprint v1 Service",
   },
 } as const satisfies Record<string, ProductCapability>;
+
+export const BLUEPRINT_V1_SERVICE_CAPABILITY = {
+  availability: "unavailable",
+  productionReady: false,
+  reason: "Person-owned voice/video Service settings, Booking, and RMB settlement are not deployed",
+} as const satisfies ProductCapability;

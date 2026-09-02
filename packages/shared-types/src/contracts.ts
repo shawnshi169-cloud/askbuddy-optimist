@@ -12,7 +12,11 @@ export type ISODateTime = string;
 // Unified enum whitelists
 // -----------------------------
 
-/** Persisted values accepted by production public.questions.status. */
+/**
+ * Persisted values accepted by production public.questions.status.
+ * @deprecated Legacy runtime compatibility only. Blueprint v1 questions must not
+ * derive product semantics from payment/solved statuses.
+ */
 export const QUESTION_STATUS = [
   "open",
   "pending_payment",
@@ -29,21 +33,27 @@ export type QuestionStatus = (typeof QUESTION_STATUS)[number];
 export const QUESTION_DRAFT_STORAGE = "question_drafts" as const;
 export const QUESTION_VISIBILITY_FIELD = "is_hidden" as const;
 
+/** @deprecated Legacy runtime compatibility only; Blueprint v1 has no accepted answer. */
 export const ANSWER_STATUS = ["active", "accepted", "hidden", "rejected"] as const;
 export type AnswerStatus = (typeof ANSWER_STATUS)[number];
 
+/** @deprecated Expert review is not Person identity or typed experience verification. */
 export const EXPERT_VERIFICATION_STATUS = ["unverified", "pending", "verified", "rejected"] as const;
 export type ExpertVerificationStatus = (typeof EXPERT_VERIFICATION_STATUS)[number];
 
+/** @deprecated Legacy expert extension lifecycle; it must not gate Public Person. */
 export const EXPERT_PROFILE_STATUS = ["active", "inactive"] as const;
 export type ExpertProfileStatus = (typeof EXPERT_PROFILE_STATUS)[number];
 
+/** @deprecated Legacy skill-offer storage, not Blueprint v1 Person Service settings. */
 export const SKILL_OFFER_STATUS = ["draft", "pending_review", "published", "offline"] as const;
 export type SkillOfferStatus = (typeof SKILL_OFFER_STATUS)[number];
 
+/** @deprecated Legacy SKU pricing modes; Blueprint v1 uses one Person base price per session. */
 export const SKILL_PRICING_MODE = ["per_question", "per_session", "per_hour", "negotiable"] as const;
 export type SkillPricingMode = (typeof SKILL_PRICING_MODE)[number];
 
+/** @deprecated Legacy skill delivery model; Blueprint v1 service modes are voice/video. */
 export const SKILL_DELIVERY_MODE = ["online", "offline", "hybrid"] as const;
 export type SkillDeliveryMode = (typeof SKILL_DELIVERY_MODE)[number];
 
@@ -53,6 +63,7 @@ export type PostVisibility = (typeof POST_VISIBILITY)[number];
 export const POST_STATUS = ["active", "hidden", "deleted"] as const;
 export type PostStatus = (typeof POST_STATUS)[number];
 
+/** @deprecated Current search_app_content_v2 compatibility vocabulary. */
 export const SEARCH_OBJECT_TYPE = ["all", "question", "expert", "skill", "post"] as const;
 export type SearchObjectType = (typeof SEARCH_OBJECT_TYPE)[number];
 
@@ -88,6 +99,7 @@ export const CALL_ERROR_CODE = [
 ] as const;
 export type CallErrorCode = (typeof CALL_ERROR_CODE)[number];
 
+/** @deprecated Pack06 runtime vocabulary; not the Blueprint v1 booking/RMB transaction model. */
 export const ORDER_TYPE = ["question_reward", "skill_service", "points_recharge", "system_adjustment"] as const;
 export type OrderType = (typeof ORDER_TYPE)[number];
 
@@ -104,6 +116,7 @@ export type OrderStatus = (typeof ORDER_STATUS)[number];
 export const PAYMENT_STATUS = ["pending", "paid", "failed", "refunded"] as const;
 export type PaymentStatus = (typeof PAYMENT_STATUS)[number];
 
+/** @deprecated Points remain legacy compatibility and are not Blueprint v1 service currency. */
 export const POINT_TX_DIRECTION = ["credit", "debit"] as const;
 export type PointTxDirection = (typeof POINT_TX_DIRECTION)[number];
 
@@ -191,6 +204,7 @@ export interface Profile {
   updated_at: ISODateTime;
 }
 
+/** @deprecated Legacy persisted question shape. Use PublicQuestionV1Target for new design work. */
 export interface Question {
   id: Id;
   author_id: Id;
@@ -209,6 +223,7 @@ export interface Question {
   updated_at: ISODateTime;
 }
 
+/** @deprecated Legacy persisted answer shape with accepted-answer semantics. */
 export interface Answer {
   id: Id;
   question_id: Id;
@@ -221,6 +236,7 @@ export interface Answer {
   updated_at: ISODateTime;
 }
 
+/** @deprecated Legacy optional extension; never use Expert.id as PublicPersonId. */
 export interface Expert {
   id: Id;
   user_id: Id;
@@ -238,6 +254,7 @@ export interface Expert {
   updated_at: ISODateTime;
 }
 
+/** @deprecated Legacy SKU storage; not Blueprint v1 Person Service settings. */
 export interface SkillOffer {
   id: Id;
   expert_id: Id;
@@ -335,6 +352,7 @@ export interface CallSession {
   updated_at: ISODateTime;
 }
 
+/** @deprecated Pack06 runtime order shape; not Blueprint v1 booking/payment contract. */
 export interface Order {
   id: Id;
   buyer_id: Id;
@@ -354,6 +372,7 @@ export interface Order {
   updated_at: ISODateTime;
 }
 
+/** @deprecated Legacy points compatibility only. */
 export interface PointAccount {
   user_id: Id;
   available_balance: number;
@@ -364,6 +383,7 @@ export interface PointAccount {
   updated_at: ISODateTime;
 }
 
+/** @deprecated Legacy points compatibility only. */
 export interface PointTransaction {
   id: Id;
   user_id: Id;
