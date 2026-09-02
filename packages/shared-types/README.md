@@ -4,6 +4,12 @@
 
 当前覆盖用户、问题、回答、专家、技能、消息、通知、订单、积分、收益与 Call v1；导出入口为 `src/index.ts`。
 
+Public Person 规则：
+
+- `PublicPersonId` 永远表示 `auth.users.id / profiles.user_id`。
+- `PublicPersonProfile` 是基础公开身份；`PublicPersonExpertExtension` 只能是 nullable enrichment。
+- 端侧不得把 `profiles.id` 或 `experts.id` 重新定义为 Person identifier。
+
 P1.4a truth rules：
 
 - `QuestionStatus` 只表示 production `questions.status` 的持久化值；草稿使用 `question_drafts`，隐藏使用 `is_hidden`。

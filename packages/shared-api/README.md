@@ -6,6 +6,7 @@
 - `src/rpc-whitelist.ts`：从 catalog 消费的 client/server 白名单兼容出口。
 - `src/page-contract-map.ts`：canonical contract 与当前实现状态的对照。
 - `src/search-v2.ts`：Search v2 生产 payload 校验与跨端规范化。
+- `src/public-person-v1.ts`：Public Person V1 参数、响应与 runtime validation。
 - `src/notification.ts`：通知 storage row 到 domain object 的兼容归一化。
 - `src/index.ts`：统一导出入口。
 

@@ -9,6 +9,10 @@ import type {
 } from "../../shared-types/src/contracts";
 import type { ProductChannelSlug } from "../../shared-types/src/product-channels";
 import type { SearchAppContentV2RawResult } from "./search-v2";
+import type {
+  GetPublicPersonProfileV1Params,
+  GetPublicPersonProfileV1Result,
+} from "./public-person-v1";
 
 export type JsonPrimitive = string | number | boolean | null;
 export type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
@@ -38,11 +42,16 @@ export type RpcFeatureOwner =
   | "payments"
   | "orders"
   | "experts"
+  | "people"
   | "call"
   | "auth"
   | "operations";
 
-export type ProductionGrantReview = "aligned" | "overbroad" | "server-guarded";
+export type ProductionGrantReview =
+  | "aligned"
+  | "overbroad"
+  | "server-guarded"
+  | "pending-deployment";
 
 export interface RpcContractDefinition<Request, Response, Name extends string = string> {
   name: Name;
@@ -370,6 +379,14 @@ export const RPC_CATALOG = {
   get_channel_feed: rpc<GetChannelFeedParams, ChannelFeedResult>()(
     "get_channel_feed", "canonical", "anon", "channels",
     "GetChannelFeedParams", "ChannelFeedResult", "aligned",
+  ),
+  get_public_person_profile_v1: rpc<
+    GetPublicPersonProfileV1Params,
+    GetPublicPersonProfileV1Result
+  >()(
+    "get_public_person_profile_v1", "canonical", "anon", "people",
+    "GetPublicPersonProfileV1Params", "GetPublicPersonProfileV1Result", "pending-deployment",
+    "SECURITY INVOKER safe public projection is pending deployment; direct profiles Data API privacy remains a separate cutover.",
   ),
   submit_content_report: rpc<SubmitContentReportParams, string>()(
     "submit_content_report", "canonical", "authenticated", "moderation",

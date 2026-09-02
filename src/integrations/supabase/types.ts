@@ -2338,6 +2338,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_public_person_profile_v1: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
       get_or_create_direct_conversation: {
         Args: { p_created_by?: string; p_user_a: string; p_user_b: string }
         Returns: string

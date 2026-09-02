@@ -273,7 +273,7 @@ try {
   );
 
   const requiredPages = [
-    "home", "search", "ask", "discover", "messages", "profile",
+    "home", "search", "ask", "discover", "messages", "profile", "public-person",
     "question-detail", "channel", "topic-detail", "expert-detail",
     "skill-publish", "chat-detail", "post-editor", "call",
   ];
