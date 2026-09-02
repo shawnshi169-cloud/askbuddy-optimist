@@ -69,6 +69,10 @@ Claim 为未来 EC-5 Verification 提供稳定 `claimId`，V1 只允许有限类
 
 Experience：create、update、visibility、reorder、soft delete。
 
+`reorder_person_experiences_v1` 必须收到 Owner 全部 active/non-deleted Experience ID，且每个
+ID 恰好出现一次；Owner 没有 active Experience 时，空数组是合法 no-op。该约束避免对子集从
+`0` 重排后产生重复 `sort_order`。
+
 Transition：create、update、delete。
 
 Claim：create、update、soft delete。
@@ -86,6 +90,8 @@ Person 创建、修改、排序或删除。RPC 全部使用 `SECURITY INVOKER`�
   必须确认父 Experience 属于当前用户且未删除。
 - Claim 没有 public/anon SELECT policy；owner 只能读写自己的 active Claim 与 active parent。
 - 默认 `PUBLIC` table/function 权限被显式撤销。
+- Experience v1 从第一天使用 least-privilege column grants，不授予 anon/authenticated
+  table-level `SELECT`；未来新增内部字段不会自动扩大 Direct Data API 可读范围。
 - Public read RPC 目标 EXECUTE：`anon + authenticated + service_role`。
 - Owner read/write RPC 目标 EXECUTE：`authenticated + service_role`；函数内部仍要求有效
   `auth.uid()`，service role grant 不是普通客户端路径，也不构成 owner impersonation API。

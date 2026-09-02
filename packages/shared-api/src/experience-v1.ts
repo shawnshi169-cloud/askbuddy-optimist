@@ -86,6 +86,10 @@ export interface SetPersonExperienceVisibilityV1Params {
 }
 
 export interface ReorderPersonExperiencesV1Params {
+  /**
+   * Complete ordered set of the owner's active Experience IDs. An empty array
+   * is valid only when the owner has no active Experience.
+   */
   p_experience_ids: PersonExperienceId[];
 }
 

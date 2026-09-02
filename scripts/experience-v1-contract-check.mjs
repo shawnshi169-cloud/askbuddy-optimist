@@ -238,10 +238,106 @@ try {
   }
 
   assert.match(migration, /CREATE POLICY person_experiences_anon_select_v1[\s\S]*?TO anon[\s\S]*?visibility = 'public'[\s\S]*?deleted_at IS NULL/);
-  assert.match(migration, /CREATE POLICY person_experiences_authenticated_select_v1[\s\S]*?TO authenticated[\s\S]*?visibility = 'public' OR \(SELECT auth\.uid\(\)\) = person_id/);
+  assert.match(migration, /CREATE POLICY person_experiences_authenticated_select_v1[\s\S]*?TO authenticated[\s\S]*?person_experiences\.visibility = 'public'[\s\S]*?\(SELECT auth\.uid\(\)\) = person_experiences\.person_id/);
   assert.doesNotMatch(migration, /TO anon, authenticated[\s\S]{0,120}USING/);
   assert.match(migration, /CREATE POLICY experience_claims_owner_select_v1[\s\S]*?TO authenticated/);
   assert.doesNotMatch(migration, /CREATE POLICY experience_claims_public/);
+
+  const policy = (name) => {
+    const start = migration.indexOf(`CREATE POLICY ${name}`);
+    assert.ok(start >= 0, `Missing policy ${name}`);
+    const possibleEnds = [
+      migration.indexOf("CREATE POLICY ", start + 1),
+      migration.indexOf("REVOKE ALL ON TABLE", start + 1),
+    ].filter((index) => index >= 0);
+    const end = possibleEnds.length > 0 ? Math.min(...possibleEnds) : migration.length;
+    return migration.slice(start, end);
+  };
+
+  const transitionPolicyNames = [
+    "experience_transitions_anon_select_v1",
+    "experience_transitions_authenticated_select_v1",
+    "experience_transitions_owner_insert_v1",
+    "experience_transitions_owner_update_v1",
+    "experience_transitions_owner_delete_v1",
+  ];
+  for (const name of transitionPolicyNames) {
+    const definition = policy(name);
+    assert.match(definition, /parent_experience\.id = experience_transitions\.experience_id/);
+    assert.match(definition, /parent_experience\.person_id = experience_transitions\.person_id/);
+    assert.match(definition, /parent_experience\.deleted_at IS NULL/);
+    assert.doesNotMatch(definition, /\(SELECT auth\.uid\(\)\) = person_id\b/);
+  }
+
+  const transitionDeletePolicy = policy("experience_transitions_owner_delete_v1");
+  assert.match(
+    transitionDeletePolicy,
+    /\(SELECT auth\.uid\(\)\) = experience_transitions\.person_id/,
+  );
+  assert.doesNotMatch(transitionDeletePolicy, /experience_claims/);
+
+  for (const name of [
+    "experience_claims_owner_select_v1",
+    "experience_claims_owner_insert_v1",
+    "experience_claims_owner_update_v1",
+  ]) {
+    const definition = policy(name);
+    assert.match(definition, /\(SELECT auth\.uid\(\)\) = experience_claims\.person_id/);
+    assert.match(definition, /parent_experience\.id = experience_claims\.experience_id/);
+    assert.match(definition, /parent_experience\.person_id = experience_claims\.person_id/);
+    assert.match(definition, /parent_experience\.deleted_at IS NULL/);
+    assert.doesNotMatch(definition, /parent_experience\.id = experience_id\b/);
+    assert.doesNotMatch(definition, /parent_experience\.person_id = person_id\b/);
+  }
+
+  const reorderStart = migration.indexOf(
+    "CREATE OR REPLACE FUNCTION public.reorder_person_experiences_v1",
+  );
+  const reorderEnd = migration.indexOf(
+    "CREATE OR REPLACE FUNCTION public.delete_person_experience_v1",
+    reorderStart,
+  );
+  const reorderFunction = migration.slice(reorderStart, reorderEnd);
+  assert.match(reorderFunction, /array_position\(p_experience_ids, NULL\) IS NOT NULL/);
+  assert.match(reorderFunction, /count\(DISTINCT item\.id\)/);
+  assert.match(
+    reorderFunction,
+    /WHERE experience\.person_id = v_uid[\s\S]*?experience\.deleted_at IS NULL;[\s\S]*?v_requested_count <> v_active_count/,
+    "Reorder must require every active Experience exactly once",
+  );
+  assert.match(
+    reorderFunction,
+    /Empty is a valid no-op only when the owner has no active Experience/,
+  );
+
+  for (const table of [
+    "person_experiences",
+    "experience_transitions",
+    "experience_claims",
+  ]) {
+    assert.doesNotMatch(
+      migration,
+      new RegExp(`GRANT SELECT ON TABLE public\\.${table}`),
+      `${table} must not have table-level SELECT grants`,
+    );
+    assert.match(
+      migration,
+      new RegExp(`GRANT SELECT \\([^;]*\\) ON public\\.${table} TO`),
+      `${table} must use explicit column-level SELECT grants`,
+    );
+  }
+  assert.match(
+    migration,
+    /GRANT SELECT \([^;]*visibility[^;]*deleted_at[^;]*\) ON public\.person_experiences TO anon, authenticated/,
+  );
+  assert.match(
+    migration,
+    /GRANT SELECT \([^;]*experience_id[^;]*person_id[^;]*\) ON public\.experience_transitions TO anon, authenticated/,
+  );
+  assert.match(
+    migration,
+    /GRANT SELECT \([^;]*claim_type[^;]*claim_value[^;]*deleted_at[^;]*\) ON public\.experience_claims TO authenticated/,
+  );
   assert.match(migration, /GRANT EXECUTE ON FUNCTION public\.get_public_person_experiences_v1[\s\S]*?TO anon, authenticated, service_role/);
   assert.match(migration, /CREATE OR REPLACE FUNCTION public\.create_person_experience_v1[\s\S]*?v_uid uuid := \(SELECT auth\.uid\(\)\)/);
 
@@ -287,6 +383,7 @@ try {
     "profiles.phone",
     "REMAINS",
     "BLOCKED",
+    "least-privilege column grants",
   ]) {
     assert.ok(decision.includes(truth), `Decision missing: ${truth}`);
   }

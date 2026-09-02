@@ -165,29 +165,41 @@ CREATE POLICY person_experiences_anon_select_v1
   ON public.person_experiences
   FOR SELECT
   TO anon
-  USING (visibility = 'public' AND deleted_at IS NULL);
+  USING (
+    person_experiences.visibility = 'public'
+    AND person_experiences.deleted_at IS NULL
+  );
 
 CREATE POLICY person_experiences_authenticated_select_v1
   ON public.person_experiences
   FOR SELECT
   TO authenticated
   USING (
-    deleted_at IS NULL
-    AND (visibility = 'public' OR (SELECT auth.uid()) = person_id)
+    person_experiences.deleted_at IS NULL
+    AND (
+      person_experiences.visibility = 'public'
+      OR (SELECT auth.uid()) = person_experiences.person_id
+    )
   );
 
 CREATE POLICY person_experiences_owner_insert_v1
   ON public.person_experiences
   FOR INSERT
   TO authenticated
-  WITH CHECK ((SELECT auth.uid()) = person_id AND deleted_at IS NULL);
+  WITH CHECK (
+    (SELECT auth.uid()) = person_experiences.person_id
+    AND person_experiences.deleted_at IS NULL
+  );
 
 CREATE POLICY person_experiences_owner_update_v1
   ON public.person_experiences
   FOR UPDATE
   TO authenticated
-  USING ((SELECT auth.uid()) = person_id AND deleted_at IS NULL)
-  WITH CHECK ((SELECT auth.uid()) = person_id);
+  USING (
+    (SELECT auth.uid()) = person_experiences.person_id
+    AND person_experiences.deleted_at IS NULL
+  )
+  WITH CHECK ((SELECT auth.uid()) = person_experiences.person_id);
 
 CREATE POLICY experience_transitions_anon_select_v1
   ON public.experience_transitions
@@ -196,11 +208,11 @@ CREATE POLICY experience_transitions_anon_select_v1
   USING (
     EXISTS (
       SELECT 1
-      FROM public.person_experiences AS experience
-      WHERE experience.id = experience_transitions.experience_id
-        AND experience.person_id = experience_transitions.person_id
-        AND experience.visibility = 'public'
-        AND experience.deleted_at IS NULL
+      FROM public.person_experiences AS parent_experience
+      WHERE parent_experience.id = experience_transitions.experience_id
+        AND parent_experience.person_id = experience_transitions.person_id
+        AND parent_experience.visibility = 'public'
+        AND parent_experience.deleted_at IS NULL
     )
   );
 
@@ -211,12 +223,12 @@ CREATE POLICY experience_transitions_authenticated_select_v1
   USING (
     EXISTS (
       SELECT 1
-      FROM public.person_experiences AS experience
-      WHERE experience.id = experience_transitions.experience_id
-        AND experience.person_id = experience_transitions.person_id
-        AND experience.deleted_at IS NULL
+      FROM public.person_experiences AS parent_experience
+      WHERE parent_experience.id = experience_transitions.experience_id
+        AND parent_experience.person_id = experience_transitions.person_id
+        AND parent_experience.deleted_at IS NULL
         AND (
-          experience.visibility = 'public'
+          parent_experience.visibility = 'public'
           OR (SELECT auth.uid()) = experience_transitions.person_id
         )
     )
@@ -227,13 +239,13 @@ CREATE POLICY experience_transitions_owner_insert_v1
   FOR INSERT
   TO authenticated
   WITH CHECK (
-    (SELECT auth.uid()) = person_id
+    (SELECT auth.uid()) = experience_transitions.person_id
     AND EXISTS (
       SELECT 1
-      FROM public.person_experiences AS experience
-      WHERE experience.id = experience_transitions.experience_id
-        AND experience.person_id = experience_transitions.person_id
-        AND experience.deleted_at IS NULL
+      FROM public.person_experiences AS parent_experience
+      WHERE parent_experience.id = experience_transitions.experience_id
+        AND parent_experience.person_id = experience_transitions.person_id
+        AND parent_experience.deleted_at IS NULL
     )
   );
 
@@ -241,15 +253,24 @@ CREATE POLICY experience_transitions_owner_update_v1
   ON public.experience_transitions
   FOR UPDATE
   TO authenticated
-  USING ((SELECT auth.uid()) = person_id)
-  WITH CHECK (
-    (SELECT auth.uid()) = person_id
+  USING (
+    (SELECT auth.uid()) = experience_transitions.person_id
     AND EXISTS (
       SELECT 1
-      FROM public.person_experiences AS experience
-      WHERE experience.id = experience_transitions.experience_id
-        AND experience.person_id = experience_transitions.person_id
-        AND experience.deleted_at IS NULL
+      FROM public.person_experiences AS parent_experience
+      WHERE parent_experience.id = experience_transitions.experience_id
+        AND parent_experience.person_id = experience_transitions.person_id
+        AND parent_experience.deleted_at IS NULL
+    )
+  )
+  WITH CHECK (
+    (SELECT auth.uid()) = experience_transitions.person_id
+    AND EXISTS (
+      SELECT 1
+      FROM public.person_experiences AS parent_experience
+      WHERE parent_experience.id = experience_transitions.experience_id
+        AND parent_experience.person_id = experience_transitions.person_id
+        AND parent_experience.deleted_at IS NULL
     )
   );
 
@@ -258,13 +279,13 @@ CREATE POLICY experience_transitions_owner_delete_v1
   FOR DELETE
   TO authenticated
   USING (
-    (SELECT auth.uid()) = person_id
+    (SELECT auth.uid()) = experience_transitions.person_id
     AND EXISTS (
       SELECT 1
-      FROM public.person_experiences AS experience
-      WHERE experience.id = experience_claims.experience_id
-        AND experience.person_id = experience_claims.person_id
-        AND experience.deleted_at IS NULL
+      FROM public.person_experiences AS parent_experience
+      WHERE parent_experience.id = experience_transitions.experience_id
+        AND parent_experience.person_id = experience_transitions.person_id
+        AND parent_experience.deleted_at IS NULL
     )
   );
 
@@ -273,14 +294,14 @@ CREATE POLICY experience_claims_owner_select_v1
   FOR SELECT
   TO authenticated
   USING (
-    (SELECT auth.uid()) = person_id
-    AND deleted_at IS NULL
+    (SELECT auth.uid()) = experience_claims.person_id
+    AND experience_claims.deleted_at IS NULL
     AND EXISTS (
       SELECT 1
-      FROM public.person_experiences AS experience
-      WHERE experience.id = experience_claims.experience_id
-        AND experience.person_id = experience_claims.person_id
-        AND experience.deleted_at IS NULL
+      FROM public.person_experiences AS parent_experience
+      WHERE parent_experience.id = experience_claims.experience_id
+        AND parent_experience.person_id = experience_claims.person_id
+        AND parent_experience.deleted_at IS NULL
     )
   );
 
@@ -289,14 +310,14 @@ CREATE POLICY experience_claims_owner_insert_v1
   FOR INSERT
   TO authenticated
   WITH CHECK (
-    (SELECT auth.uid()) = person_id
-    AND deleted_at IS NULL
+    (SELECT auth.uid()) = experience_claims.person_id
+    AND experience_claims.deleted_at IS NULL
     AND EXISTS (
       SELECT 1
-      FROM public.person_experiences AS experience
-      WHERE experience.id = experience_claims.experience_id
-        AND experience.person_id = experience_claims.person_id
-        AND experience.deleted_at IS NULL
+      FROM public.person_experiences AS parent_experience
+      WHERE parent_experience.id = experience_claims.experience_id
+        AND parent_experience.person_id = experience_claims.person_id
+        AND parent_experience.deleted_at IS NULL
     )
   );
 
@@ -304,15 +325,25 @@ CREATE POLICY experience_claims_owner_update_v1
   ON public.experience_claims
   FOR UPDATE
   TO authenticated
-  USING ((SELECT auth.uid()) = person_id AND deleted_at IS NULL)
-  WITH CHECK (
-    (SELECT auth.uid()) = person_id
+  USING (
+    (SELECT auth.uid()) = experience_claims.person_id
+    AND experience_claims.deleted_at IS NULL
     AND EXISTS (
       SELECT 1
-      FROM public.person_experiences AS experience
-      WHERE experience.id = experience_id
-        AND experience.person_id = person_id
-        AND experience.deleted_at IS NULL
+      FROM public.person_experiences AS parent_experience
+      WHERE parent_experience.id = experience_claims.experience_id
+        AND parent_experience.person_id = experience_claims.person_id
+        AND parent_experience.deleted_at IS NULL
+    )
+  )
+  WITH CHECK (
+    (SELECT auth.uid()) = experience_claims.person_id
+    AND EXISTS (
+      SELECT 1
+      FROM public.person_experiences AS parent_experience
+      WHERE parent_experience.id = experience_claims.experience_id
+        AND parent_experience.person_id = experience_claims.person_id
+        AND parent_experience.deleted_at IS NULL
     )
   );
 
@@ -320,7 +351,11 @@ REVOKE ALL ON TABLE public.person_experiences FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON TABLE public.experience_transitions FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON TABLE public.experience_claims FROM PUBLIC, anon, authenticated;
 
-GRANT SELECT ON TABLE public.person_experiences TO anon, authenticated;
+GRANT SELECT (
+  id, person_id, title, description, experience_kind, start_year, start_month,
+  end_year, end_month, is_current, location_label, city, city_code, can_share,
+  visibility, sort_order, created_at, updated_at, deleted_at
+) ON public.person_experiences TO anon, authenticated;
 GRANT INSERT (
   person_id, title, description, experience_kind, start_year, start_month,
   end_year, end_month, is_current, location_label, city, city_code, can_share,
@@ -332,7 +367,10 @@ GRANT UPDATE (
   sort_order, deleted_at
 ) ON public.person_experiences TO authenticated;
 
-GRANT SELECT ON TABLE public.experience_transitions TO anon, authenticated;
+GRANT SELECT (
+  id, experience_id, person_id, from_label, to_label, occurred_year,
+  occurred_month, sort_order, created_at, updated_at
+) ON public.experience_transitions TO anon, authenticated;
 GRANT INSERT (
   experience_id, person_id, from_label, to_label, occurred_year, occurred_month, sort_order
 ) ON public.experience_transitions TO authenticated;
@@ -341,7 +379,10 @@ GRANT UPDATE (
 ) ON public.experience_transitions TO authenticated;
 GRANT DELETE ON TABLE public.experience_transitions TO authenticated;
 
-GRANT SELECT ON TABLE public.experience_claims TO authenticated;
+GRANT SELECT (
+  id, experience_id, person_id, claim_type, claim_value, created_at, updated_at,
+  deleted_at
+) ON public.experience_claims TO authenticated;
 GRANT INSERT (experience_id, person_id, claim_type, claim_value)
   ON public.experience_claims TO authenticated;
 GRANT UPDATE (claim_type, claim_value, deleted_at)
@@ -703,6 +744,7 @@ AS $$
 DECLARE
   v_uid uuid := (SELECT auth.uid());
   v_requested_count integer;
+  v_active_count integer;
   v_owned_count integer;
   v_updated_count integer;
 BEGIN
@@ -718,6 +760,17 @@ BEGIN
   FROM unnest(p_experience_ids) AS item(id);
 
   IF v_requested_count <> v_owned_count THEN
+    RAISE EXCEPTION 'EXPERIENCE_INVALID_ORDER';
+  END IF;
+
+  SELECT count(*)
+  INTO v_active_count
+  FROM public.person_experiences AS experience
+  WHERE experience.person_id = v_uid
+    AND experience.deleted_at IS NULL;
+
+  -- Empty is a valid no-op only when the owner has no active Experience.
+  IF v_requested_count <> v_active_count THEN
     RAISE EXCEPTION 'EXPERIENCE_INVALID_ORDER';
   END IF;
 
