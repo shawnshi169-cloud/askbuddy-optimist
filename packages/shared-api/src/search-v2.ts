@@ -9,6 +9,7 @@ import {
   type SkillPricingMode,
 } from "../../shared-types/src/contracts";
 
+/** @deprecated Current runtime vocabulary; Blueprint v1 Home Search is all/person/question. */
 export type SearchResultKind = "question" | "expert" | "skill" | "post";
 
 export interface SearchNavigationTarget {
@@ -75,7 +76,10 @@ export interface SearchPostV2Row {
   author_avatar: string | null;
 }
 
-/** Exact JSON payload returned by production search_app_content_v2. */
+/**
+ * Exact JSON payload returned by production search_app_content_v2.
+ * @deprecated Legacy runtime compatibility; do not extend for Blueprint v1 search.
+ */
 export interface SearchAppContentV2RawResult {
   questions: SearchQuestionV2Row[];
   experts: SearchExpertV2Row[];
