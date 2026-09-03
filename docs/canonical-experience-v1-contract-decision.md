@@ -1,7 +1,8 @@
 # Canonical Experience v1 Contract Decision
 
-状态：EC-1A 基础 migration 已部署；Production 回滚 smoke 发现 owner soft-delete RLS
-阻塞，corrective migration 已准备但**尚未部署**。Consumer rollout 继续停止。
+状态：EC-1A 基础 migration 与 corrective migration 均已部署并完成 Production 验证。
+Experience backend storage/API contract 已解除 consumer dependency 阻塞；`/person/:userId`
+Shared Core UI 仍未实现。
 
 本决策继承 `Product Blueprint v1`：Person 是唯一公共主体，Experience 是 Person
 拥有的持久经历，不是 Expert、Service、Verification、Current Need 或 Current Interest。
@@ -19,12 +20,14 @@
 
 ## 二、Storage
 
-Migration：`20260902145009_canonical_experience_v1.sql`。
+Production migrations：
 
-Production 已记录该 migration。隔离 smoke 随后确认 `SECURITY INVOKER` soft-delete
-会因新 tombstone row 不再满足 owner SELECT policy 而被 RLS 拒绝。已新增、尚未部署的
-corrective migration：
-`20260903125354_ec1a_experience_soft_delete_rls_fix.sql`。不得改写已应用的原 migration。
+- Base：`20260902145009_canonical_experience_v1.sql`；
+- Corrective：`20260903125354_ec1a_experience_soft_delete_rls_fix.sql`。
+
+Base migration 部署后的隔离 smoke 发现，`SECURITY INVOKER` soft-delete 会因 tombstone row
+不再满足原 owner SELECT policy 而被 RLS 拒绝。Corrective migration 以 additive policy
+修复 owner-only tombstone 可见性，并保留原 migration history；不得改写已应用的 base migration。
 
 ### `public.person_experiences`
 
@@ -87,6 +90,14 @@ Claim：create、update、soft delete。
 Person 创建、修改、排序或删除。RPC 全部使用 `SECURITY INVOKER`，不通过 service role 绕过
 普通客户端权限。
 
+### Claim consumer gate
+
+Claim storage 与 create/update/delete RPC 是已部署、已验证的 Canonical backend infrastructure，
+但不是 EC-1B 普通 Experience 编辑能力。三个 Claim mutation RPC 不进入
+`CLIENT_RPC_WHITELIST`，且 `newBlueprintCodeMayDepend = false`；只有后续 Verification/Claim
+workflow 明确授权后，普通 Blueprint feature consumer 才能依赖。Backend deployed/aligned
+不等于当前 client-consumable。
+
 ## 四、RLS 与 Grants
 
 - 三张新表从第一天启用并强制 RLS。
@@ -119,34 +130,46 @@ Person 创建、修改、排序或删除。RPC 全部使用 `SECURITY INVOKER`�
 
 ## 六、Current Runtime Truth
 
-- `20260902145009` 已部署，但完整 remote smoke 因 owner soft-delete RLS 阻塞未通过；因此
-  `productionGrantReview = pending-deployment` 继续保持，不能进入 deployed client whitelist。
-- Corrective migration `20260903125354` 仅存在于当前修复 branch，尚未部署。
-- 基础 migration 部署后的 Performance Advisor 新增 2 条 composite FK finding：
-  `experience_transitions(experience_id, person_id)` 与
-  `experience_claims(experience_id, person_id)`。Corrective migration 增加对应 covering index，
-  不删除已有 order/active lookup index，也不扩展到既有全库 performance debt。
-- `PRODUCT_BLUEPRINT_V1_DOMAIN_MAP.experience.runtimeStatus = not-deployed`。
-- Production-generated `src/integrations/supabase/types.ts` 不提前加入未部署 relation；部署后再从
-  remote schema 重新生成，避免 generated types 冒充 Current Runtime Truth。
+- `20260902145009` 与 `20260903125354` 均已进入 Production migration history。
+- 13 个 Experience RPC 已验证为 `SECURITY INVOKER` 且 `search_path = ''`，catalog grant
+  review 均为 `aligned`。其中 10 个 Experience/Transition RPC 允许当前 Blueprint client
+  consumer 使用；3 个 Claim mutation RPC 仍受 Verification/Claim consumer gate 约束。
+- 完整 rollback smoke 已通过：普通 non-expert Person owner CRUD、public/private isolation、
+  cross-user denial、Transition create/update/delete、Claim create/update/soft-delete、full-set
+  reorder、Experience soft-delete、parent-delete child hiding 与 public projection privacy。
+- Owner 可在底层 RLS 范围读取自己的 Experience/Claim tombstone，但 normal Owner/Public RPC
+  均隐藏 deleted data。Production persistent smoke data = `0`。
+- Base migration 部署后新增的 2 条 composite FK Performance Advisor finding 已由 corrective
+  migration 的 covering indexes 修复：`experience_transitions(experience_id, person_id)` 与
+  `experience_claims(experience_id, person_id)`；原 order/active lookup indexes 保留。
+- Advisor：Security `102 -> 102`，Performance `325 -> 323`；新增 Experience Security finding =
+  `NO`，两条目标 `unindexed_foreign_keys` finding 均已消失。
+- `PRODUCT_BLUEPRINT_V1_DOMAIN_MAP.experience.runtimeStatus = production-ready`，仅表示
+  Experience backend storage/API ready，不表示 Shared Core UI 已实现。
+- `src/integrations/supabase/types.ts` 已从真实 Production remote schema 重新生成。该生成同时
+  reconciled 了此前已存在于 remote、但本地 generated types 尚未同步的 `wechat_identities`、
+  `claim_wechat_identity_v1` 及 generator/PostgREST `14.1 -> 14.5` 差异；这些对象不是本
+  closeout PR 新增的 Production schema，本 PR 没有 migration、DDL 或微信登录 schema mutation。
 - `get_public_person_profile_v1` 的既有 safe projection不改写、不扩字段。
-- `/person/:userId` Shared Core consumer 与 Experience UI 不在 EC-1A 范围。
+- `/person/:userId` Shared Core consumer 与 Experience UI 仍为 **NOT IMPLEMENTED**。
 - `profiles.phone` direct Data API privacy exposure = **REMAINS**。新 Experience safe projection
   不等于旧 `profiles` Data API 已完成 Privacy Cutover。
 
-## 七、Deployment Gate
+## 七、Deployment Closeout
 
-Architecture Review 与 merge 后，必须通过受控 Production gate：
+Production gate 已按以下顺序完成：
 
-1. review corrective migration，并 dry-run 确认其为唯一待部署 migration；
-2. apply `20260903125354`；
-3. 验证 anon/authenticated/service_role grants 与 RLS；
-4. 使用隔离测试用户验证 public/private、owner、soft delete、Transition/Claim 边界；
-5. 确认 public payload 不含 Claim/phone/private/deleted 字段；
-6. 运行 Security Advisor 并区分新增问题与既有 debt；
-7. 完成 remote smoke 后才能把 catalog/domain truth 改为 deployed/aligned。
+1. linked dry-run 确认 `20260903125354` 为唯一 pending migration；
+2. 通过标准 migration mechanism apply corrective migration；
+3. 验证 migration history、RLS、column grants、RPC grants、`SECURITY INVOKER` 与空
+   `search_path`；
+4. 使用 rollback 隔离测试 identity 完成 owner/public/cross-user/reorder/soft-delete smoke；
+5. 确认 public payload 不含 Claim、phone、private/deleted metadata 或 legacy Expert JSON；
+6. 确认 rollback 后 persistent smoke rows 为 `0`；
+7. 对比 Security/Performance Advisor 并确认无新增 Experience Security finding。
 
-在上述 gate 完成前，EC-1B Shared Core Public Person + Experience UI 状态为 **BLOCKED**。
+Experience backend contract 现已 production-ready；Shared Core 可以在 closeout review 后消费
+该 contract，但 UI 自身仍是单独的未实现工作，不得由 backend readiness 冒充完成。
 
 ## 八、Rollback 原则
 

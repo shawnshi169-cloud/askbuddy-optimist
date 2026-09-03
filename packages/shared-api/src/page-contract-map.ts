@@ -138,8 +138,8 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     currentReadContracts: [],
     currentWriteContracts: [],
     notes: [
-      "Architecture A owns PublicPersonId and the deployed safe profile projection; Core UI adoption is unblocked but not yet implemented.",
-      "EC-1A public Experience read is a target contract pending migration deployment and remote smoke; it is not current UI runtime truth.",
+      "Architecture A owns PublicPersonId and the deployed safe profile projection; Core UI adoption is not yet implemented.",
+      "The EC-1A public Experience RPC is deployed and remote-smoke verified, but it remains a target read contract until the Shared Core consumer is wired.",
       "Contribution lists and direct profiles Data API privacy hardening are separate contracts.",
     ],
   },

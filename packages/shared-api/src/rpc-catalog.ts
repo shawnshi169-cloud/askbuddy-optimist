@@ -422,67 +422,67 @@ export const RPC_CATALOG = {
     GetPublicPersonExperiencesV1Result
   >()(
     "get_public_person_experiences_v1", "canonical", "anon", "experience",
-    "GetPublicPersonExperiencesV1Params", "GetPublicPersonExperiencesV1Result", "pending-deployment",
-    "EC-1A SECURITY INVOKER safe public projection; migration and Production smoke are pending review.",
+    "GetPublicPersonExperiencesV1Params", "GetPublicPersonExperiencesV1Result", "aligned",
+    "Production-deployed SECURITY INVOKER safe public projection; public/private isolation and response privacy were remote-smoke verified.",
   ),
   get_my_person_experiences_v1: rpc<
     GetMyPersonExperiencesV1Params,
     GetMyPersonExperiencesV1Result
   >()(
     "get_my_person_experiences_v1", "canonical", "authenticated", "experience",
-    "GetMyPersonExperiencesV1Params", "GetMyPersonExperiencesV1Result", "pending-deployment",
-    "EC-1A owner projection; migration and Production smoke are pending review.",
+    "GetMyPersonExperiencesV1Params", "GetMyPersonExperiencesV1Result", "aligned",
+    "Production-deployed owner projection; normal results exclude Experience and Claim tombstones.",
   ),
   create_person_experience_v1: rpc<CreatePersonExperienceV1Params, string>()(
     "create_person_experience_v1", "canonical", "authenticated", "experience",
-    "CreatePersonExperienceV1Params", "UUID", "pending-deployment",
-    "Owner is always derived from auth.uid(); clients cannot provide person_id.",
+    "CreatePersonExperienceV1Params", "UUID", "aligned",
+    "Production-deployed owner action; owner is derived from auth.uid() and clients cannot provide person_id.",
   ),
   update_person_experience_v1: rpc<UpdatePersonExperienceV1Params, string>()(
     "update_person_experience_v1", "canonical", "authenticated", "experience",
-    "UpdatePersonExperienceV1Params", "UUID", "pending-deployment",
+    "UpdatePersonExperienceV1Params", "UUID", "aligned",
   ),
   set_person_experience_visibility_v1: rpc<
     SetPersonExperienceVisibilityV1Params,
     string
   >()(
     "set_person_experience_visibility_v1", "canonical", "authenticated", "experience",
-    "SetPersonExperienceVisibilityV1Params", "UUID", "pending-deployment",
+    "SetPersonExperienceVisibilityV1Params", "UUID", "aligned",
   ),
   reorder_person_experiences_v1: rpc<ReorderPersonExperiencesV1Params, number>()(
     "reorder_person_experiences_v1", "canonical", "authenticated", "experience",
-    "ReorderPersonExperiencesV1Params", "number", "pending-deployment",
+    "ReorderPersonExperiencesV1Params", "number", "aligned",
   ),
   delete_person_experience_v1: rpc<DeletePersonExperienceV1Params, string>()(
     "delete_person_experience_v1", "canonical", "authenticated", "experience",
-    "DeletePersonExperienceV1Params", "UUID", "pending-deployment",
-    "Owner delete is a soft delete and immediately removes the Experience from normal projections.",
+    "DeletePersonExperienceV1Params", "UUID", "aligned",
+    "Production-deployed owner soft delete; owner-only storage tombstones are excluded from normal projections.",
   ),
   create_experience_transition_v1: rpc<CreateExperienceTransitionV1Params, string>()(
     "create_experience_transition_v1", "canonical", "authenticated", "experience",
-    "CreateExperienceTransitionV1Params", "UUID", "pending-deployment",
+    "CreateExperienceTransitionV1Params", "UUID", "aligned",
   ),
   update_experience_transition_v1: rpc<UpdateExperienceTransitionV1Params, string>()(
     "update_experience_transition_v1", "canonical", "authenticated", "experience",
-    "UpdateExperienceTransitionV1Params", "UUID", "pending-deployment",
+    "UpdateExperienceTransitionV1Params", "UUID", "aligned",
   ),
   delete_experience_transition_v1: rpc<DeleteExperienceTransitionV1Params, string>()(
     "delete_experience_transition_v1", "canonical", "authenticated", "experience",
-    "DeleteExperienceTransitionV1Params", "UUID", "pending-deployment",
+    "DeleteExperienceTransitionV1Params", "UUID", "aligned",
   ),
   create_experience_claim_v1: rpc<CreateExperienceClaimV1Params, string>()(
     "create_experience_claim_v1", "canonical", "authenticated", "experience",
-    "CreateExperienceClaimV1Params", "UUID", "pending-deployment",
-    "Claim identity is owner-only verification infrastructure, not a verified result or public evidence.",
+    "CreateExperienceClaimV1Params", "UUID", "aligned",
+    "Production-deployed owner-only Claim identity; it is verification infrastructure, not a verified result or public evidence.",
   ),
   update_experience_claim_v1: rpc<UpdateExperienceClaimV1Params, string>()(
     "update_experience_claim_v1", "canonical", "authenticated", "experience",
-    "UpdateExperienceClaimV1Params", "UUID", "pending-deployment",
+    "UpdateExperienceClaimV1Params", "UUID", "aligned",
   ),
   delete_experience_claim_v1: rpc<DeleteExperienceClaimV1Params, string>()(
     "delete_experience_claim_v1", "canonical", "authenticated", "experience",
-    "DeleteExperienceClaimV1Params", "UUID", "pending-deployment",
-    "Claim deletion is soft so a stable claim identity remains available for future audit rules.",
+    "DeleteExperienceClaimV1Params", "UUID", "aligned",
+    "Production-deployed Claim soft delete preserves stable identity while normal owner projections hide the tombstone.",
   ),
   submit_content_report: rpc<SubmitContentReportParams, string>()(
     "submit_content_report", "canonical", "authenticated", "moderation",
