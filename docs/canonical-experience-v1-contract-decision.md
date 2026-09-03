@@ -1,6 +1,7 @@
 # Canonical Experience v1 Contract Decision
 
-状态：EC-1A 已完成本地设计与实现，Production migration **尚未部署**。
+状态：EC-1A 基础 migration 已部署；Production 回滚 smoke 发现 owner soft-delete RLS
+阻塞，corrective migration 已准备但**尚未部署**。Consumer rollout 继续停止。
 
 本决策继承 `Product Blueprint v1`：Person 是唯一公共主体，Experience 是 Person
 拥有的持久经历，不是 Expert、Service、Verification、Current Need 或 Current Interest。
@@ -19,6 +20,11 @@
 ## 二、Storage
 
 Migration：`20260902145009_canonical_experience_v1.sql`。
+
+Production 已记录该 migration。隔离 smoke 随后确认 `SECURITY INVOKER` soft-delete
+会因新 tombstone row 不再满足 owner SELECT policy 而被 RLS 拒绝。已新增、尚未部署的
+corrective migration：
+`20260903125354_ec1a_experience_soft_delete_rls_fix.sql`。不得改写已应用的原 migration。
 
 ### `public.person_experiences`
 
@@ -84,11 +90,17 @@ Person 创建、修改、排序或删除。RPC 全部使用 `SECURITY INVOKER`�
 ## 四、RLS 与 Grants
 
 - 三张新表从第一天启用并强制 RLS。
-- Experience public policy 只允许 `public + non-deleted`；owner policy 只允许当前
-  `auth.uid()` 的 non-deleted row。
+- Experience public policy 只允许 `public + non-deleted`；authenticated owner 可在 Direct
+  Data API 下读取自己的 tombstone row，以满足 `SECURITY INVOKER` soft-delete 的 PostgreSQL
+  RLS SELECT 可见性要求。正常 Owner RPC 仍显式过滤 deleted row，其他用户与 anon 不可见。
 - Transition public policy 必须同时确认父 Experience 为 public/non-deleted；owner 写 policy
   必须确认父 Experience 属于当前用户且未删除。
-- Claim 没有 public/anon SELECT policy；owner 只能读写自己的 active Claim 与 active parent。
+- Claim 没有 public/anon SELECT policy；owner 只能读写自己的 Claim 与 active parent。为支持
+  owner soft-delete，owner 可读取自己已删除 Claim 的 tombstone；正常 Owner RPC 仍以
+  `deleted_at IS NULL` 过滤，且父 Experience 删除后所有子 Claim 均不可见。
+- 上述 owner-only tombstone 可见性属于 Storage retention，不是 Product visibility。产品/API
+  删除语义仍是立即从正常 Owner/Public projection 消失；anon 和其他 authenticated Person
+  不能读取 owner tombstone。
 - 默认 `PUBLIC` table/function 权限被显式撤销。
 - Experience v1 从第一天使用 least-privilege column grants，不授予 anon/authenticated
   table-level `SELECT`；未来新增内部字段不会自动扩大 Direct Data API 可读范围。
@@ -107,7 +119,13 @@ Person 创建、修改、排序或删除。RPC 全部使用 `SECURITY INVOKER`�
 
 ## 六、Current Runtime Truth
 
-- Migration 与 RPC 目前只存在于 branch，`productionGrantReview = pending-deployment`。
+- `20260902145009` 已部署，但完整 remote smoke 因 owner soft-delete RLS 阻塞未通过；因此
+  `productionGrantReview = pending-deployment` 继续保持，不能进入 deployed client whitelist。
+- Corrective migration `20260903125354` 仅存在于当前修复 branch，尚未部署。
+- 基础 migration 部署后的 Performance Advisor 新增 2 条 composite FK finding：
+  `experience_transitions(experience_id, person_id)` 与
+  `experience_claims(experience_id, person_id)`。Corrective migration 增加对应 covering index，
+  不删除已有 order/active lookup index，也不扩展到既有全库 performance debt。
 - `PRODUCT_BLUEPRINT_V1_DOMAIN_MAP.experience.runtimeStatus = not-deployed`。
 - Production-generated `src/integrations/supabase/types.ts` 不提前加入未部署 relation；部署后再从
   remote schema 重新生成，避免 generated types 冒充 Current Runtime Truth。
@@ -120,8 +138,8 @@ Person 创建、修改、排序或删除。RPC 全部使用 `SECURITY INVOKER`�
 
 Architecture Review 与 merge 后，必须通过受控 Production gate：
 
-1. dry-run 确认唯一待部署 migration；
-2. apply `20260902145009`；
+1. review corrective migration，并 dry-run 确认其为唯一待部署 migration；
+2. apply `20260903125354`；
 3. 验证 anon/authenticated/service_role grants 与 RLS；
 4. 使用隔离测试用户验证 public/private、owner、soft delete、Transition/Claim 边界；
 5. 确认 public payload 不含 Claim/phone/private/deleted 字段；
