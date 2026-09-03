@@ -443,34 +443,57 @@ try {
   for (const name of functionNames) {
     assert.match(
       catalog,
-      new RegExp(`"${name}"[\\s\\S]{0,260}"pending-deployment"`),
-      `${name} must remain pending until Production deployment`,
+      new RegExp(`"${name}"[\\s\\S]{0,260}"aligned"`),
+      `${name} must reflect the verified Production grant state`,
     );
   }
 
   const blueprint = read("packages/shared-api/src/product-blueprint-v1.ts");
-  assert.match(blueprint, /domain: "experience"[\s\S]*?runtimeStatus: "not-deployed"/);
+  assert.match(
+    blueprint,
+    /domain: "experience"[\s\S]*?runtimeStatus: "production-ready"[\s\S]*?newCodePolicy: "may-use-deployed-contract"/,
+  );
+  assert.match(
+    blueprint,
+    /domain: "transition"[\s\S]*?runtimeStatus: "production-ready"[\s\S]*?newCodePolicy: "may-use-deployed-contract"/,
+  );
   for (const name of functionNames) {
     assert.match(
       blueprint,
-      new RegExp(`${name}:[\\s\\S]{0,180}newBlueprintCodeMayDepend: false`),
-      `${name} must remain unavailable to new consumers until deployment`,
+      new RegExp(`${name}:[\\s\\S]{0,180}newBlueprintCodeMayDepend: true`),
+      `${name} must be available to new consumers after Production verification`,
     );
   }
 
   const clientWhitelist = read("packages/shared-api/src/rpc-whitelist.ts");
-  assert.doesNotMatch(
-    clientWhitelist,
-    /get_(?:public|my)_person_experiences_v1|create_person_experience_v1/,
-    "Pending Experience RPCs must not enter the deployed client whitelist",
-  );
+  for (const name of functionNames) {
+    assert.match(
+      clientWhitelist,
+      new RegExp(`${name}:\\s*(?:\\n\\s*)?RPC_CATALOG\\.${name}\\.qualifiedName`),
+      `${name} must be present in the deployed client whitelist`,
+    );
+  }
+
+  const generatedTypes = read("src/integrations/supabase/types.ts");
+  for (const table of [
+    "person_experiences",
+    "experience_transitions",
+    "experience_claims",
+  ]) {
+    assert.match(generatedTypes, new RegExp(`\\s${table}: \\{`));
+  }
+  for (const name of functionNames) {
+    assert.match(generatedTypes, new RegExp(`\\s${name}: \\{`));
+  }
 
   const decision = read("docs/canonical-experience-v1-contract-decision.md");
   for (const truth of [
     "SECURITY INVOKER",
-    "corrective migration 已准备但**尚未部署**",
-    "corrective migration",
-    "Consumer rollout 继续停止",
+    "20260902145009",
+    "20260903125354",
+    "Production persistent smoke data = `0`",
+    "runtimeStatus = production-ready",
+    "NOT IMPLEMENTED",
     "Storage retention",
     "Product visibility",
     "Performance Advisor",
@@ -479,11 +502,12 @@ try {
     "AI 输出",
     "profiles.phone",
     "REMAINS",
-    "BLOCKED",
     "least-privilege column grants",
   ]) {
     assert.ok(decision.includes(truth), `Decision missing: ${truth}`);
   }
+  assert.doesNotMatch(decision, /corrective migration 已准备但\*\*尚未部署\*\*/);
+  assert.doesNotMatch(decision, /productionGrantReview = pending-deployment/);
 
   const packageJson = JSON.parse(read("package.json"));
   assert.equal(

@@ -56,6 +56,24 @@ export const CLIENT_RPC_WHITELIST = {
   upsert_search_history: RPC_CATALOG.upsert_search_history.qualifiedName,
   get_channel_feed: RPC_CATALOG.get_channel_feed.qualifiedName,
   get_public_person_profile_v1: RPC_CATALOG.get_public_person_profile_v1.qualifiedName,
+  get_public_person_experiences_v1:
+    RPC_CATALOG.get_public_person_experiences_v1.qualifiedName,
+  get_my_person_experiences_v1: RPC_CATALOG.get_my_person_experiences_v1.qualifiedName,
+  create_person_experience_v1: RPC_CATALOG.create_person_experience_v1.qualifiedName,
+  update_person_experience_v1: RPC_CATALOG.update_person_experience_v1.qualifiedName,
+  set_person_experience_visibility_v1:
+    RPC_CATALOG.set_person_experience_visibility_v1.qualifiedName,
+  reorder_person_experiences_v1: RPC_CATALOG.reorder_person_experiences_v1.qualifiedName,
+  delete_person_experience_v1: RPC_CATALOG.delete_person_experience_v1.qualifiedName,
+  create_experience_transition_v1:
+    RPC_CATALOG.create_experience_transition_v1.qualifiedName,
+  update_experience_transition_v1:
+    RPC_CATALOG.update_experience_transition_v1.qualifiedName,
+  delete_experience_transition_v1:
+    RPC_CATALOG.delete_experience_transition_v1.qualifiedName,
+  create_experience_claim_v1: RPC_CATALOG.create_experience_claim_v1.qualifiedName,
+  update_experience_claim_v1: RPC_CATALOG.update_experience_claim_v1.qualifiedName,
+  delete_experience_claim_v1: RPC_CATALOG.delete_experience_claim_v1.qualifiedName,
   submit_content_report: RPC_CATALOG.submit_content_report.qualifiedName,
   get_nearby_experts: RPC_CATALOG.get_nearby_experts.qualifiedName,
   create_call_session_v1: RPC_CATALOG.create_call_session_v1.qualifiedName,

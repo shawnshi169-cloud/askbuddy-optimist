@@ -125,13 +125,16 @@ try {
     "may-use-deployed-contract",
   );
   assert.match(domainMap.publicPersonIdentityAndRead.currentRuntime, /route is not wired/);
+  assert.equal(domainMap.experience.runtimeStatus, "production-ready");
+  assert.equal(domainMap.experience.newCodePolicy, "may-use-deployed-contract");
+  assert.match(domainMap.experience.currentRuntime, /Shared Core UI is not wired/);
+  assert.equal(domainMap.transition.runtimeStatus, "production-ready");
+  assert.equal(domainMap.transition.newCodePolicy, "may-use-deployed-contract");
   for (const key of [
-    "experience",
     "questionAnswerReply",
     "homeSearchMatching",
     "productChannels",
     "canonicalTopic",
-    "transition",
     "location",
     "personOnboarding",
     "dynamicNeedInterestSignals",

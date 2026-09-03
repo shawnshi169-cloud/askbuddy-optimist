@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.1"
+    PostgrestVersion: "14.5"
   }
   graphql_public: {
     Tables: {
@@ -550,6 +550,94 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "orders"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      experience_claims: {
+        Row: {
+          claim_type: string
+          claim_value: string
+          created_at: string
+          deleted_at: string | null
+          experience_id: string
+          id: string
+          person_id: string
+          updated_at: string
+        }
+        Insert: {
+          claim_type: string
+          claim_value: string
+          created_at?: string
+          deleted_at?: string | null
+          experience_id: string
+          id?: string
+          person_id: string
+          updated_at?: string
+        }
+        Update: {
+          claim_type?: string
+          claim_value?: string
+          created_at?: string
+          deleted_at?: string | null
+          experience_id?: string
+          id?: string
+          person_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experience_claims_experience_owner_fkey"
+            columns: ["experience_id", "person_id"]
+            isOneToOne: false
+            referencedRelation: "person_experiences"
+            referencedColumns: ["id", "person_id"]
+          },
+        ]
+      }
+      experience_transitions: {
+        Row: {
+          created_at: string
+          experience_id: string
+          from_label: string
+          id: string
+          occurred_month: number | null
+          occurred_year: number | null
+          person_id: string
+          sort_order: number
+          to_label: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          experience_id: string
+          from_label: string
+          id?: string
+          occurred_month?: number | null
+          occurred_year?: number | null
+          person_id: string
+          sort_order?: number
+          to_label: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          experience_id?: string
+          from_label?: string
+          id?: string
+          occurred_month?: number | null
+          occurred_year?: number | null
+          person_id?: string
+          sort_order?: number
+          to_label?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experience_transitions_experience_owner_fkey"
+            columns: ["experience_id", "person_id"]
+            isOneToOne: false
+            referencedRelation: "person_experiences"
+            referencedColumns: ["id", "person_id"]
           },
         ]
       }
@@ -1176,6 +1264,72 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      person_experiences: {
+        Row: {
+          can_share: string[]
+          city: string | null
+          city_code: string | null
+          created_at: string
+          deleted_at: string | null
+          description: string
+          end_month: number | null
+          end_year: number | null
+          experience_kind: string
+          id: string
+          is_current: boolean
+          location_label: string | null
+          person_id: string
+          sort_order: number
+          start_month: number | null
+          start_year: number | null
+          title: string
+          updated_at: string
+          visibility: string
+        }
+        Insert: {
+          can_share?: string[]
+          city?: string | null
+          city_code?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          description: string
+          end_month?: number | null
+          end_year?: number | null
+          experience_kind?: string
+          id?: string
+          is_current?: boolean
+          location_label?: string | null
+          person_id: string
+          sort_order?: number
+          start_month?: number | null
+          start_year?: number | null
+          title: string
+          updated_at?: string
+          visibility?: string
+        }
+        Update: {
+          can_share?: string[]
+          city?: string | null
+          city_code?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          description?: string
+          end_month?: number | null
+          end_year?: number | null
+          experience_kind?: string
+          id?: string
+          is_current?: boolean
+          location_label?: string | null
+          person_id?: string
+          sort_order?: number
+          start_month?: number | null
+          start_year?: number | null
+          title?: string
+          updated_at?: string
+          visibility?: string
+        }
+        Relationships: []
       }
       point_accounts: {
         Row: {
@@ -2200,6 +2354,39 @@ export type Database = {
         }
         Relationships: []
       }
+      wechat_identities: {
+        Row: {
+          app_id: string
+          created_at: string
+          id: string
+          last_login_at: string
+          openid: string
+          unionid: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          app_id: string
+          created_at?: string
+          id?: string
+          last_login_at?: string
+          openid: string
+          unionid?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          app_id?: string
+          created_at?: string
+          id?: string
+          last_login_at?: string
+          openid?: string
+          unionid?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -2232,6 +2419,15 @@ export type Database = {
         Args: { p_author_id: string; p_status: string; p_visibility: string }
         Returns: boolean
       }
+      claim_wechat_identity_v1: {
+        Args: {
+          p_app_id: string
+          p_candidate_user_id: string
+          p_openid: string
+          p_unionid: string
+        }
+        Returns: string
+      }
       confirm_recharge_payment: {
         Args: {
           p_callback_payload?: Json
@@ -2257,6 +2453,40 @@ export type Database = {
       }
       create_consultation_order: {
         Args: { p_consult_type?: string; p_expert_id: string }
+        Returns: string
+      }
+      create_experience_claim_v1: {
+        Args: { p_claim_type: string; p_experience_id: string; p_value: string }
+        Returns: string
+      }
+      create_experience_transition_v1: {
+        Args: {
+          p_experience_id: string
+          p_from_label: string
+          p_occurred_month?: number
+          p_occurred_year?: number
+          p_sort_order?: number
+          p_to_label: string
+        }
+        Returns: string
+      }
+      create_person_experience_v1: {
+        Args: {
+          p_can_share?: string[]
+          p_city?: string
+          p_city_code?: string
+          p_description: string
+          p_end_month?: number
+          p_end_year?: number
+          p_is_current?: boolean
+          p_kind?: string
+          p_location_label?: string
+          p_sort_order?: number
+          p_start_month?: number
+          p_start_year?: number
+          p_title: string
+          p_visibility?: string
+        }
         Returns: string
       }
       create_question_secure: {
@@ -2288,6 +2518,18 @@ export type Database = {
         Args: { p_content: string; p_topic_id: string }
         Returns: string
       }
+      delete_experience_claim_v1: {
+        Args: { p_claim_id: string }
+        Returns: string
+      }
+      delete_experience_transition_v1: {
+        Args: { p_transition_id: string }
+        Returns: string
+      }
+      delete_person_experience_v1: {
+        Args: { p_experience_id: string }
+        Returns: string
+      }
       end_call_v1: {
         Args: { p_call_session_id: string; p_reason?: string }
         Returns: Json
@@ -2316,6 +2558,10 @@ export type Database = {
         }
         Returns: Json
       }
+      get_my_person_experiences_v1: {
+        Args: { p_limit?: number; p_offset?: number }
+        Returns: Json
+      }
       get_my_unread_message_count: { Args: never; Returns: number }
       get_my_unread_notification_count: { Args: never; Returns: number }
       get_nearby_experts: {
@@ -2338,13 +2584,17 @@ export type Database = {
           user_id: string
         }[]
       }
-      get_public_person_profile_v1: {
-        Args: { p_user_id: string }
-        Returns: Json
-      }
       get_or_create_direct_conversation: {
         Args: { p_created_by?: string; p_user_a: string; p_user_b: string }
         Returns: string
+      }
+      get_public_person_experiences_v1: {
+        Args: { p_limit?: number; p_offset?: number; p_person_id: string }
+        Returns: Json
+      }
+      get_public_person_profile_v1: {
+        Args: { p_user_id: string }
+        Returns: Json
       }
       get_search_suggestions_v2: {
         Args: { p_limit?: number; p_query?: string; p_type?: string }
@@ -2427,6 +2677,10 @@ export type Database = {
         Args: { p_call_session_id: string; p_reason?: string }
         Returns: Json
       }
+      reorder_person_experiences_v1: {
+        Args: { p_experience_ids: string[] }
+        Returns: number
+      }
       review_content_report: {
         Args: {
           p_report_id: string
@@ -2451,6 +2705,10 @@ export type Database = {
         }
         Returns: string
       }
+      set_person_experience_visibility_v1: {
+        Args: { p_experience_id: string; p_visibility: string }
+        Returns: string
+      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       submit_content_report: {
@@ -2465,6 +2723,41 @@ export type Database = {
       transition_order_status_v2: {
         Args: { p_order_id: string; p_reason?: string; p_to_status: string }
         Returns: Json
+      }
+      update_experience_claim_v1: {
+        Args: { p_claim_id: string; p_claim_type: string; p_value: string }
+        Returns: string
+      }
+      update_experience_transition_v1: {
+        Args: {
+          p_from_label: string
+          p_occurred_month: number
+          p_occurred_year: number
+          p_sort_order: number
+          p_to_label: string
+          p_transition_id: string
+        }
+        Returns: string
+      }
+      update_person_experience_v1: {
+        Args: {
+          p_can_share: string[]
+          p_city: string
+          p_city_code: string
+          p_description: string
+          p_end_month: number
+          p_end_year: number
+          p_experience_id: string
+          p_is_current: boolean
+          p_kind: string
+          p_location_label: string
+          p_sort_order: number
+          p_start_month: number
+          p_start_year: number
+          p_title: string
+          p_visibility: string
+        }
+        Returns: string
       }
       upsert_app_config: {
         Args: { p_description?: string; p_key: string; p_value: Json }
@@ -2492,12 +2785,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2521,11 +2814,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2546,11 +2839,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2571,11 +2864,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2588,11 +2881,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
