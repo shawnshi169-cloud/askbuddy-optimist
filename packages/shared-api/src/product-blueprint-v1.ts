@@ -40,7 +40,7 @@ export const PRODUCT_BLUEPRINT_V1_DOMAIN_MAP = {
   experience: {
     domain: "experience",
     target: "Person-owned experience records independent from verification and service",
-    currentRuntime: "no canonical experience storage or API",
+    currentRuntime: "EC-1A additive migration and RPC contracts prepared; Production deployment pending",
     runtimeStatus: "not-deployed",
     newCodePolicy: "blocked-until-phase",
     phase: "EC-1",
@@ -80,7 +80,7 @@ export const PRODUCT_BLUEPRINT_V1_DOMAIN_MAP = {
   transition: {
     domain: "transition",
     target: "directed Experience relationship for Person graph and matching",
-    currentRuntime: "no canonical Transition storage or graph API",
+    currentRuntime: "EC-1A directed Transition migration prepared; Production deployment pending",
     runtimeStatus: "not-deployed",
     newCodePolicy: "blocked-until-phase",
     phase: "EC-1",
@@ -243,6 +243,71 @@ export const PRODUCT_BLUEPRINT_V1_RPC_POLICY = {
     use: "canonical-blueprint",
     newBlueprintCodeMayDepend: true,
     replacement: "none",
+  },
+  get_public_person_experiences_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: false,
+    replacement: "none; enable consumers only after migration deployment and remote smoke",
+  },
+  get_my_person_experiences_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: false,
+    replacement: "none; enable consumers only after migration deployment and remote smoke",
+  },
+  create_person_experience_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: false,
+    replacement: "none; enable consumers only after migration deployment and owner smoke",
+  },
+  update_person_experience_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: false,
+    replacement: "none; enable consumers only after migration deployment and owner smoke",
+  },
+  set_person_experience_visibility_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: false,
+    replacement: "none; enable consumers only after public/private RLS smoke",
+  },
+  reorder_person_experiences_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: false,
+    replacement: "none; enable consumers only after migration deployment and owner smoke",
+  },
+  delete_person_experience_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: false,
+    replacement: "none; enable consumers only after soft-delete projection smoke",
+  },
+  create_experience_transition_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: false,
+    replacement: "none; enable consumers only after migration deployment and owner smoke",
+  },
+  update_experience_transition_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: false,
+    replacement: "none; enable consumers only after migration deployment and owner smoke",
+  },
+  delete_experience_transition_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: false,
+    replacement: "none; enable consumers only after migration deployment and owner smoke",
+  },
+  create_experience_claim_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: false,
+    replacement: "none; enable consumers only after owner-only Claim RLS smoke",
+  },
+  update_experience_claim_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: false,
+    replacement: "none; enable consumers only after owner-only Claim RLS smoke",
+  },
+  delete_experience_claim_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: false,
+    replacement: "none; enable consumers only after Claim soft-delete smoke",
   },
   accept_answer_v2: {
     use: "legacy-compatibility",
