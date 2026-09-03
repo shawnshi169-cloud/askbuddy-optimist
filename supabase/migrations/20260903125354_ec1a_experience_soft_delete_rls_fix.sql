@@ -43,4 +43,12 @@ CREATE POLICY experience_claims_owner_select_v1
     )
   );
 
+-- Cover the full composite owner foreign keys. Existing indexes remain in
+-- place because they serve ordering and active-claim lookup separately.
+CREATE INDEX experience_transitions_experience_owner_idx
+  ON public.experience_transitions(experience_id, person_id);
+
+CREATE INDEX experience_claims_experience_owner_idx
+  ON public.experience_claims(experience_id, person_id);
+
 COMMIT;

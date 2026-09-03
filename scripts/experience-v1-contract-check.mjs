@@ -361,6 +361,15 @@ try {
   );
   assert.match(
     correctiveMigration,
+    /CREATE POLICY person_experiences_authenticated_select_v1[\s\S]*?TO authenticated/,
+  );
+  assert.doesNotMatch(
+    correctiveMigration,
+    /(?:DROP|CREATE) POLICY person_experiences_anon_select_v1/,
+    "The corrective migration must not widen anon Experience visibility",
+  );
+  assert.match(
+    correctiveMigration,
     /DROP POLICY IF EXISTS experience_claims_owner_select_v1[\s\S]*?CREATE POLICY experience_claims_owner_select_v1/,
   );
   assert.match(
@@ -372,7 +381,63 @@ try {
     /CREATE POLICY experience_claims_owner_select_v1[\s\S]*?experience_claims\.deleted_at IS NULL/,
     "Claim owner SELECT must permit the tombstone produced by soft delete",
   );
+  assert.match(
+    correctiveMigration,
+    /CREATE POLICY experience_claims_owner_select_v1[\s\S]*?TO authenticated/,
+  );
+  assert.doesNotMatch(
+    correctiveMigration,
+    /CREATE POLICY experience_claims_owner_select_v1[\s\S]*?TO (?:PUBLIC|anon)/,
+    "Claim tombstones must never become public or anon-readable",
+  );
   assert.doesNotMatch(correctiveMigration, /SECURITY DEFINER|GRANT\s+SELECT\s+ON\s+TABLE/i);
+  assert.match(
+    correctiveMigration,
+    /CREATE INDEX experience_transitions_experience_owner_idx\s+ON public\.experience_transitions\(experience_id, person_id\)/,
+  );
+  assert.match(
+    correctiveMigration,
+    /CREATE INDEX experience_claims_experience_owner_idx\s+ON public\.experience_claims\(experience_id, person_id\)/,
+  );
+  assert.match(
+    migration,
+    /CREATE INDEX experience_transitions_experience_order_idx/,
+    "The corrective index must not replace the Transition ordering index",
+  );
+  assert.match(
+    migration,
+    /CREATE INDEX experience_claims_experience_active_idx/,
+    "The corrective index must not replace the active Claim lookup index",
+  );
+
+  const publicExperienceReadStart = migration.indexOf(
+    "CREATE OR REPLACE FUNCTION public.get_public_person_experiences_v1",
+  );
+  const publicExperienceReadEnd = migration.indexOf(
+    "CREATE OR REPLACE FUNCTION public.create_person_experience_v1",
+    publicExperienceReadStart,
+  );
+  const publicExperienceRead = migration.slice(
+    publicExperienceReadStart,
+    publicExperienceReadEnd,
+  );
+  assert.match(publicExperienceRead, /item\.visibility = 'public'/);
+  assert.match(publicExperienceRead, /item\.deleted_at IS NULL/);
+  assert.doesNotMatch(publicExperienceRead, /'claims'|claim_value|deletedAt/);
+
+  const ownerExperienceReadStart = migration.indexOf(
+    "CREATE OR REPLACE FUNCTION public.get_my_person_experiences_v1",
+  );
+  const ownerExperienceReadEnd = migration.indexOf(
+    "REVOKE ALL ON FUNCTION public.get_public_person_experiences_v1",
+    ownerExperienceReadStart,
+  );
+  const ownerExperienceRead = migration.slice(
+    ownerExperienceReadStart,
+    ownerExperienceReadEnd,
+  );
+  assert.match(ownerExperienceRead, /item\.deleted_at IS NULL/);
+  assert.match(ownerExperienceRead, /claim\.deleted_at IS NULL/);
 
   const catalog = read("packages/shared-api/src/rpc-catalog.ts");
   for (const name of functionNames) {
@@ -406,6 +471,9 @@ try {
     "corrective migration 已准备但**尚未部署**",
     "corrective migration",
     "Consumer rollout 继续停止",
+    "Storage retention",
+    "Product visibility",
+    "Performance Advisor",
     "不自动迁移",
     "Current Need",
     "AI 输出",
