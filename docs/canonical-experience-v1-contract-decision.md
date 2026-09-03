@@ -131,8 +131,9 @@ workflow 明确授权后，普通 Blueprint feature consumer 才能依赖。Back
 ## 六、Current Runtime Truth
 
 - `20260902145009` 与 `20260903125354` 均已进入 Production migration history。
-- 13 个 Experience RPC 已验证为 `SECURITY INVOKER` 且 `search_path = ''`；catalog grant review
-  为 `aligned`，允许 Blueprint consumer 使用已部署 contract。
+- 13 个 Experience RPC 已验证为 `SECURITY INVOKER` 且 `search_path = ''`，catalog grant
+  review 均为 `aligned`。其中 10 个 Experience/Transition RPC 允许当前 Blueprint client
+  consumer 使用；3 个 Claim mutation RPC 仍受 Verification/Claim consumer gate 约束。
 - 完整 rollback smoke 已通过：普通 non-expert Person owner CRUD、public/private isolation、
   cross-user denial、Transition create/update/delete、Claim create/update/soft-delete、full-set
   reorder、Experience soft-delete、parent-delete child hiding 与 public projection privacy。
