@@ -9,6 +9,8 @@ const root = process.cwd();
 const read = (path) => readFileSync(join(root, path), "utf8");
 const migrationPath =
   "supabase/migrations/20260902145009_canonical_experience_v1.sql";
+const correctiveMigrationPath =
+  "supabase/migrations/20260903125354_ec1a_experience_soft_delete_rls_fix.sql";
 const contractPath = "packages/shared-api/src/experience-v1.ts";
 const tempRoot = mkdtempSync(join(tmpdir(), "askbuddy-experience-v1-"));
 const require = createRequire(import.meta.url);
@@ -347,6 +349,31 @@ try {
   assert.match(publicPersonMigration, /SECURITY INVOKER/);
   assert.doesNotMatch(publicPersonMigration, /'phone'/);
 
+  const correctiveMigration = read(correctiveMigrationPath);
+  assert.match(
+    correctiveMigration,
+    /DROP POLICY IF EXISTS person_experiences_authenticated_select_v1[\s\S]*?CREATE POLICY person_experiences_authenticated_select_v1/,
+  );
+  assert.match(
+    correctiveMigration,
+    /\(SELECT auth\.uid\(\)\) = person_experiences\.person_id[\s\S]*?OR \([\s\S]*?person_experiences\.visibility = 'public'[\s\S]*?person_experiences\.deleted_at IS NULL/,
+    "Owner tombstones must remain owner-only readable while public reads stay active-only",
+  );
+  assert.match(
+    correctiveMigration,
+    /DROP POLICY IF EXISTS experience_claims_owner_select_v1[\s\S]*?CREATE POLICY experience_claims_owner_select_v1/,
+  );
+  assert.match(
+    correctiveMigration,
+    /\(SELECT auth\.uid\(\)\) = experience_claims\.person_id[\s\S]*?parent_experience\.id = experience_claims\.experience_id[\s\S]*?parent_experience\.person_id = experience_claims\.person_id[\s\S]*?parent_experience\.deleted_at IS NULL/,
+  );
+  assert.doesNotMatch(
+    correctiveMigration,
+    /CREATE POLICY experience_claims_owner_select_v1[\s\S]*?experience_claims\.deleted_at IS NULL/,
+    "Claim owner SELECT must permit the tombstone produced by soft delete",
+  );
+  assert.doesNotMatch(correctiveMigration, /SECURITY DEFINER|GRANT\s+SELECT\s+ON\s+TABLE/i);
+
   const catalog = read("packages/shared-api/src/rpc-catalog.ts");
   for (const name of functionNames) {
     assert.match(
@@ -376,7 +403,9 @@ try {
   const decision = read("docs/canonical-experience-v1-contract-decision.md");
   for (const truth of [
     "SECURITY INVOKER",
-    "Production migration **尚未部署**",
+    "corrective migration 已准备但**尚未部署**",
+    "corrective migration",
+    "Consumer rollout 继续停止",
     "不自动迁移",
     "Current Need",
     "AI 输出",
