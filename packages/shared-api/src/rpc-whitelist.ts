@@ -71,9 +71,6 @@ export const CLIENT_RPC_WHITELIST = {
     RPC_CATALOG.update_experience_transition_v1.qualifiedName,
   delete_experience_transition_v1:
     RPC_CATALOG.delete_experience_transition_v1.qualifiedName,
-  create_experience_claim_v1: RPC_CATALOG.create_experience_claim_v1.qualifiedName,
-  update_experience_claim_v1: RPC_CATALOG.update_experience_claim_v1.qualifiedName,
-  delete_experience_claim_v1: RPC_CATALOG.delete_experience_claim_v1.qualifiedName,
   submit_content_report: RPC_CATALOG.submit_content_report.qualifiedName,
   get_nearby_experts: RPC_CATALOG.get_nearby_experts.qualifiedName,
   create_call_session_v1: RPC_CATALOG.create_call_session_v1.qualifiedName,

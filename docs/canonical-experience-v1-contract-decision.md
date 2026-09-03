@@ -90,6 +90,14 @@ Claim：create、update、soft delete。
 Person 创建、修改、排序或删除。RPC 全部使用 `SECURITY INVOKER`，不通过 service role 绕过
 普通客户端权限。
 
+### Claim consumer gate
+
+Claim storage 与 create/update/delete RPC 是已部署、已验证的 Canonical backend infrastructure，
+但不是 EC-1B 普通 Experience 编辑能力。三个 Claim mutation RPC 不进入
+`CLIENT_RPC_WHITELIST`，且 `newBlueprintCodeMayDepend = false`；只有后续 Verification/Claim
+workflow 明确授权后，普通 Blueprint feature consumer 才能依赖。Backend deployed/aligned
+不等于当前 client-consumable。
+
 ## 四、RLS 与 Grants
 
 - 三张新表从第一天启用并强制 RLS。
@@ -137,7 +145,10 @@ Person 创建、修改、排序或删除。RPC 全部使用 `SECURITY INVOKER`�
   `NO`，两条目标 `unindexed_foreign_keys` finding 均已消失。
 - `PRODUCT_BLUEPRINT_V1_DOMAIN_MAP.experience.runtimeStatus = production-ready`，仅表示
   Experience backend storage/API ready，不表示 Shared Core UI 已实现。
-- `src/integrations/supabase/types.ts` 已从真实 Production remote schema 重新生成。
+- `src/integrations/supabase/types.ts` 已从真实 Production remote schema 重新生成。该生成同时
+  reconciled 了此前已存在于 remote、但本地 generated types 尚未同步的 `wechat_identities`、
+  `claim_wechat_identity_v1` 及 generator/PostgREST `14.1 -> 14.5` 差异；这些对象不是本
+  closeout PR 新增的 Production schema，本 PR 没有 migration、DDL 或微信登录 schema mutation。
 - `get_public_person_profile_v1` 的既有 safe projection不改写、不扩字段。
 - `/person/:userId` Shared Core consumer 与 Experience UI 仍为 **NOT IMPLEMENTED**。
 - `profiles.phone` direct Data API privacy exposure = **REMAINS**。新 Experience safe projection

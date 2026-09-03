@@ -229,6 +229,14 @@ try {
     "update_experience_claim_v1",
     "delete_experience_claim_v1",
   ];
+  const claimInfrastructureFunctionNames = [
+    "create_experience_claim_v1",
+    "update_experience_claim_v1",
+    "delete_experience_claim_v1",
+  ];
+  const clientFunctionNames = functionNames.filter(
+    (name) => !claimInfrastructureFunctionNames.includes(name),
+  );
   for (const name of functionNames) {
     const start = migration.indexOf(`CREATE OR REPLACE FUNCTION public.${name}`);
     assert.ok(start >= 0, `Missing ${name}`);
@@ -457,20 +465,39 @@ try {
     blueprint,
     /domain: "transition"[\s\S]*?runtimeStatus: "production-ready"[\s\S]*?newCodePolicy: "may-use-deployed-contract"/,
   );
-  for (const name of functionNames) {
+  for (const name of clientFunctionNames) {
     assert.match(
       blueprint,
       new RegExp(`${name}:[\\s\\S]{0,180}newBlueprintCodeMayDepend: true`),
       `${name} must be available to new consumers after Production verification`,
     );
   }
+  for (const name of claimInfrastructureFunctionNames) {
+    assert.match(
+      blueprint,
+      new RegExp(`${name}:[\\s\\S]{0,180}newBlueprintCodeMayDepend: false`),
+      `${name} must remain gated from ordinary Blueprint consumers`,
+    );
+    assert.match(
+      blueprint,
+      new RegExp(`${name}:[\\s\\S]{0,360}Verification/Claim workflow`),
+      `${name} must document the Verification/Claim consumer gate`,
+    );
+  }
 
   const clientWhitelist = read("packages/shared-api/src/rpc-whitelist.ts");
-  for (const name of functionNames) {
+  for (const name of clientFunctionNames) {
     assert.match(
       clientWhitelist,
       new RegExp(`${name}:\\s*(?:\\n\\s*)?RPC_CATALOG\\.${name}\\.qualifiedName`),
       `${name} must be present in the deployed client whitelist`,
+    );
+  }
+  for (const name of claimInfrastructureFunctionNames) {
+    assert.doesNotMatch(
+      clientWhitelist,
+      new RegExp(`${name}:`),
+      `${name} must remain outside the ordinary client whitelist`,
     );
   }
 
@@ -494,6 +521,11 @@ try {
     "Production persistent smoke data = `0`",
     "runtimeStatus = production-ready",
     "NOT IMPLEMENTED",
+    "Claim consumer gate",
+    "Backend deployed/aligned",
+    "wechat_identities",
+    "claim_wechat_identity_v1",
+    "14.1 -> 14.5",
     "Storage retention",
     "Product visibility",
     "Performance Advisor",

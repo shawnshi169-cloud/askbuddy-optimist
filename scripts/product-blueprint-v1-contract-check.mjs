@@ -187,6 +187,15 @@ try {
   const rpcPolicy = api.PRODUCT_BLUEPRINT_V1_RPC_POLICY;
   assert.equal(rpcPolicy.get_public_person_profile_v1.newBlueprintCodeMayDepend, true);
   for (const name of [
+    "create_experience_claim_v1",
+    "update_experience_claim_v1",
+    "delete_experience_claim_v1",
+  ]) {
+    assert.equal(rpcPolicy[name].use, "canonical-blueprint", name);
+    assert.equal(rpcPolicy[name].newBlueprintCodeMayDepend, false, name);
+    assert.match(rpcPolicy[name].replacement, /Verification\/Claim workflow/, name);
+  }
+  for (const name of [
     "accept_answer_v2",
     "accept_answer_and_transfer_points",
     "create_question_secure",

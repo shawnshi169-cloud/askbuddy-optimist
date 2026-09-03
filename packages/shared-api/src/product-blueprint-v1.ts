@@ -296,18 +296,18 @@ export const PRODUCT_BLUEPRINT_V1_RPC_POLICY = {
   },
   create_experience_claim_v1: {
     use: "canonical-blueprint",
-    newBlueprintCodeMayDepend: true,
-    replacement: "none; Production deployed and owner-only Claim RLS-smoke verified",
+    newBlueprintCodeMayDepend: false,
+    replacement: "Production-deployed owner-only Claim infrastructure; client consumption remains gated until the Verification/Claim workflow is explicitly enabled",
   },
   update_experience_claim_v1: {
     use: "canonical-blueprint",
-    newBlueprintCodeMayDepend: true,
-    replacement: "none; Production deployed and owner-only Claim RLS-smoke verified",
+    newBlueprintCodeMayDepend: false,
+    replacement: "Production-deployed owner-only Claim infrastructure; client consumption remains gated until the Verification/Claim workflow is explicitly enabled",
   },
   delete_experience_claim_v1: {
     use: "canonical-blueprint",
-    newBlueprintCodeMayDepend: true,
-    replacement: "none; Production deployed and Claim soft-delete-smoke verified",
+    newBlueprintCodeMayDepend: false,
+    replacement: "Production-deployed owner-only Claim infrastructure; client consumption remains gated until the Verification/Claim workflow is explicitly enabled",
   },
   accept_answer_v2: {
     use: "legacy-compatibility",
