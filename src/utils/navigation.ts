@@ -53,6 +53,8 @@ const resolveRouteFallback = (pathname: string, search = ''): string | null => {
     return '/';
   }
   if (pathname === '/new') return '/';
+  if (pathname === '/experience/new') return '/profile/experiences';
+  if (/^\/experience\/[^/]+\/edit$/.test(pathname)) return '/profile/experiences';
   if (pathname === '/skill-publish') return '/profile';
   if (pathname === '/profile/recharge') return '/profile/earnings';
   if (pathname === '/edit-profile') return '/profile';
@@ -65,7 +67,7 @@ const resolveRouteFallback = (pathname: string, search = ''): string | null => {
   if (/^\/profile\//.test(pathname)) return '/profile';
   if (/^\/settings\//.test(pathname)) return '/profile';
   if (pathname === '/city-selector') return '/';
-  if (/^\/(question|topic|expert|expert-profile)\//.test(pathname)) return '/';
+  if (/^\/(question|topic|expert|expert-profile|person)\//.test(pathname)) return '/';
   if (/^\/(education|career|lifestyle|hobbies)$/.test(pathname)) return '/';
   return null;
 };

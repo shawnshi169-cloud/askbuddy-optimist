@@ -28,17 +28,24 @@ assert.equal(
 assert.doesNotMatch(topicDetail, /fallbackResult/);
 
 const profileData = read('src/hooks/useProfileData.ts');
-for (const resultName of ['ordersRes', 'answersRes', 'favoritesRes', 'followingRes']) {
+const profileStatsStart = profileData.indexOf('export const useProfileStats');
+const profileStatsEnd = profileData.indexOf('export const useMyFavorites', profileStatsStart);
+const profileStats = profileData.slice(profileStatsStart, profileStatsEnd);
+assert.doesNotMatch(
+  profileStats,
+  /ordersRes|\.from\('orders'\)|orders:/,
+  'Profile stats must not retain an orders request after the orders metric leaves the Profile UI',
+);
+for (const resultName of ['answersRes', 'favoritesRes', 'followingRes']) {
   assert.match(
-    profileData,
+    profileStats,
     new RegExp(`if \\(${resultName}\\.error\\) throw ${resultName}\\.error`),
     `Profile stats must propagate ${resultName}.error`,
   );
 }
-assert.match(profileData, /orders: ordersRes\.count \?\? 0/);
-assert.match(profileData, /answers: answersRes\.count \?\? 0/);
-assert.match(profileData, /favorites: favoritesRes\.count \?\? 0/);
-assert.match(profileData, /following: followingRes\.count \?\? 0/);
+assert.match(profileStats, /answers: answersRes\.count \?\? 0/);
+assert.match(profileStats, /favorites: favoritesRes\.count \?\? 0/);
+assert.match(profileStats, /following: followingRes\.count \?\? 0/);
 
 const adapters = read('src/lib/adapters/contentAdapters.ts');
 assert.doesNotMatch(adapters, /consultationPrice[^\n]*50/);
