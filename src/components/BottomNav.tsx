@@ -64,14 +64,14 @@ const BottomNav: React.FC<BottomNavProps> = ({ onBeforeNavigate }) => {
     navigate(path, { state: buildFromState(location) });
   };
 
-  const handleNeedClick = () => {
+  const handleQuestionClick = () => {
     setIsMenuOpen(false);
     navigate('/new', { state: buildFromState(location) });
   };
 
-  const handleSkillClick = () => {
+  const handleExperienceClick = () => {
     setIsMenuOpen(false);
-    navigate('/skill-publish', { state: buildFromState(location) });
+    navigate('/experience/new', { state: buildFromState(location) });
   };
 
   return (
@@ -104,49 +104,48 @@ const BottomNav: React.FC<BottomNavProps> = ({ onBeforeNavigate }) => {
           <SheetTrigger asChild>
             <button
               className="w-1/5 flex flex-col items-center justify-center -mt-6 active:scale-[0.98]"
-              aria-label="发布内容"
+              aria-label="打开创建菜单"
               aria-haspopup="dialog"
               aria-expanded={isMenuOpen}
             >
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-app-action text-white shadow-[0_6px_16px_rgba(43,127,115,0.24)]">
                 <Plus size={22} />
               </div>
-              <span className="mt-0.5 text-[10px] font-semibold text-app-action">发布</span>
             </button>
           </SheetTrigger>
           <SheetContent side="bottom" className="mx-auto max-w-md rounded-t-[24px] border-app-border-subtle px-4 pb-8 pt-6 shadow-[0_-12px_36px_rgba(15,23,42,0.12)]">
             <SheetHeader className="pr-14 text-left">
               <SheetTitle className="text-xl font-semibold text-slate-800">想做点什么？</SheetTitle>
-              <SheetDescription>选择一个真实可用的发布入口</SheetDescription>
+              <SheetDescription>有问题想问，或分享一段真实经历</SheetDescription>
             </SheetHeader>
 
             <div className="mt-5 divide-y divide-app-border-subtle overflow-hidden rounded-2xl border border-app-border-subtle bg-white">
               <button
                 type="button"
-                onClick={handleNeedClick}
+                onClick={handleQuestionClick}
                 className="flex min-h-16 w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-app-action/25 active:bg-app-action-soft/60"
               >
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-app-action-soft text-app-action">
                   <CircleHelp aria-hidden size={20} />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[15px] font-semibold text-slate-800">提个问题</span>
-                  <span className="mt-0.5 block text-[13px] text-slate-500">有件事想找人问问</span>
+                  <span className="block text-[15px] font-semibold text-slate-800">我有问题</span>
+                  <span className="mt-0.5 block text-[13px] text-slate-500">有件事想找经历过的人问问</span>
                 </span>
                 <ChevronRight aria-hidden size={18} className="text-slate-400" />
               </button>
 
               <button
                 type="button"
-                onClick={handleSkillClick}
+                onClick={handleExperienceClick}
                 className="flex min-h-16 w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-app-action/25 active:bg-app-action-soft/60"
               >
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-orange-50 text-orange-600">
                   <HandHeart aria-hidden size={20} />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[15px] font-semibold text-slate-800">我能帮忙</span>
-                  <span className="mt-0.5 block text-[13px] text-slate-500">把自己的经历和能力告诉大家</span>
+                  <span className="block text-[15px] font-semibold text-slate-800">我有经验 / 技能</span>
+                  <span className="mt-0.5 block text-[13px] text-slate-500">分享一段你经历过、做过或熟悉的事情</span>
                 </span>
                 <ChevronRight aria-hidden size={18} className="text-slate-400" />
               </button>

@@ -4,7 +4,7 @@ import { useSwipeBack } from '@/hooks/useSwipeBack';
 
 const SwipeBackWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { pathname } = useLocation();
-  const isDetailRoute = /^\/(question|topic|expert|expert-profile|chat)\//.test(pathname);
+  const isDetailRoute = /^\/(question|topic|expert|expert-profile|person|experience|chat)\//.test(pathname);
   const isSecondaryRoute = /^\/(city-selector|notifications|discover\/interactions|search|education\/search|education|career|lifestyle|hobbies)$/.test(pathname);
   const isProfileOrSettingsRoute = /^\/profile\//.test(pathname) || /^\/settings\//.test(pathname);
 

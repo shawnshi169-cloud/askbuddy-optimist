@@ -86,25 +86,19 @@ export const useProfileStats = () => {
   return useQuery({
     queryKey: ['profile-stats', user?.id],
     queryFn: async () => {
-      if (!user) return { orders: 0, answers: 0, favorites: 0, following: 0 };
+      if (!user) return { answers: 0, favorites: 0, following: 0 };
 
-      const [ordersRes, answersRes, favoritesRes, followingRes] = await Promise.all([
-        supabase
-          .from('orders')
-          .select('*', { count: 'exact', head: true })
-          .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`),
+      const [answersRes, favoritesRes, followingRes] = await Promise.all([
         supabase.from('answers').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
         supabase.from('favorites').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
         supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', user.id),
       ]);
 
-      if (ordersRes.error) throw ordersRes.error;
       if (answersRes.error) throw answersRes.error;
       if (favoritesRes.error) throw favoritesRes.error;
       if (followingRes.error) throw followingRes.error;
 
       return {
-        orders: ordersRes.count ?? 0,
         answers: answersRes.count ?? 0,
         favorites: favoritesRes.count ?? 0,
         following: followingRes.count ?? 0,

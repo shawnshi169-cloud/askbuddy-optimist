@@ -3,10 +3,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Settings,
   FileText,
-  Award,
-  Star,
   User,
-  Coins,
+  BookOpenText,
+  Bookmark,
   Loader2,
   Camera,
   ChevronRight,
@@ -15,7 +14,7 @@ import {
   MessageSquareText,
   Info,
   Edit3,
-  UserPlus,
+  MessageCircle,
 } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -25,7 +24,7 @@ import BottomNav from '@/components/BottomNav';
 import SettingsMenu from '@/components/profile/SettingsMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUploadAvatar, useUploadCover, useUpdateProfile } from '@/hooks/useProfile';
-import { usePointAccountBalance, useProfileStats } from '@/hooks/useProfileData';
+import { useProfileStats } from '@/hooks/useProfileData';
 import { useToast } from '@/hooks/use-toast';
 import { useIsAdmin } from '@/hooks/useHotTopics';
 import { usePageScrollMemory } from '@/hooks/usePageScrollMemory';
@@ -48,7 +47,6 @@ const Profile = () => {
   const uploadCover = useUploadCover();
   const updateProfile = useUpdateProfile();
   const { data: stats } = useProfileStats();
-  const { data: availableBalance = 0 } = usePointAccountBalance();
   const { data: isAdmin } = useIsAdmin();
   usePageScrollMemory('profile');
 
@@ -90,7 +88,6 @@ const Profile = () => {
   };
 
   const profileStats = [
-    { label: '订单', count: stats?.orders || 0, route: '/profile/orders' },
     { label: '回答', count: stats?.answers || 0, route: '/profile/answers' },
     { label: '收藏', count: stats?.favorites || 0, route: '/profile/favorites' },
     { label: '关注', count: stats?.following || 0, route: '/profile/following' },
@@ -102,24 +99,24 @@ const Profile = () => {
     onClick: () => void;
   }> = [
     {
-      icon: <Coins size={22} className="text-amber-500" />,
-      label: '我的收益',
-      onClick: () => navigate('/profile/earnings', { state: buildFromState(location) }),
+      icon: <BookOpenText size={22} className="text-app-action" />,
+      label: '我的经历',
+      onClick: () => navigate('/profile/experiences', { state: buildFromState(location) }),
     },
     {
-      icon: <UserPlus size={22} className="text-indigo-500" />,
-      label: '我的社群',
-      onClick: () => navigate('/profile/community', { state: buildFromState(location) }),
+      icon: <MessageCircle size={22} className="text-sky-600" />,
+      label: '我的回答',
+      onClick: () => navigate('/profile/answers', { state: buildFromState(location) }),
     },
     {
-      icon: <FileText size={22} className="text-primary" />,
+      icon: <Bookmark size={22} className="text-amber-600" />,
+      label: '我的收藏',
+      onClick: () => navigate('/profile/favorites', { state: buildFromState(location) }),
+    },
+    {
+      icon: <FileText size={22} className="text-slate-500" />,
       label: '草稿箱',
       onClick: () => navigate('/profile/drafts', { state: buildFromState(location) }),
-    },
-    {
-      icon: <Award size={22} className="text-orange-500" />,
-      label: '达人认证',
-      onClick: () => navigate('/profile/talent-certification', { state: buildFromState(location) }),
     },
   ];
 
@@ -221,7 +218,7 @@ const Profile = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-white/90 hover:text-white hover:bg-white/20 backdrop-blur-sm rounded-full h-8 w-8"
+                className="h-11 w-11 rounded-full text-white/90 backdrop-blur-sm hover:bg-white/20 hover:text-white"
                 onClick={() => coverInputRef.current?.click()}
                 disabled={coverUploading}
               >
@@ -231,7 +228,7 @@ const Profile = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="text-white/90 hover:text-white hover:bg-white/20 backdrop-blur-sm rounded-full h-8 w-8"
+              className="h-11 w-11 rounded-full text-white/90 backdrop-blur-sm hover:bg-white/20 hover:text-white"
               onClick={() => setShowSettingsMenu(true)}
             >
               <Settings size={18} />
@@ -261,7 +258,7 @@ const Profile = () => {
                     </AvatarFallback>
                   </Avatar>
                   <button
-                    className="absolute -bottom-0.5 -right-0.5 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-sm border-2 border-background"
+                    className="absolute -bottom-2 -right-2 flex h-11 w-11 items-center justify-center rounded-full border-4 border-background bg-app-action text-white shadow-sm"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading}
                   >
@@ -273,23 +270,22 @@ const Profile = () => {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <h2 className="text-lg font-semibold text-foreground">{profile?.nickname || '新用户'}</h2>
-                      <button
-                        className="app-chip-neutral mt-1 px-2.5 py-1 text-[11px] font-medium"
-                        onClick={() => navigate('/edit-profile', { state: buildFromState(location) })}
-                      >
-                        <Edit3 size={11} className="mr-1" />
-                        编辑资料
-                      </button>
+                      <div className="mt-1 flex flex-wrap gap-2">
+                        <button
+                          className="app-chip-neutral min-h-11 px-3 text-[11px] font-medium"
+                          onClick={() => navigate(`/person/${user?.id}`, { state: buildFromState(location) })}
+                        >
+                          查看我的主页
+                        </button>
+                        <button
+                          className="app-chip-neutral min-h-11 px-3 text-[11px] font-medium"
+                          onClick={() => navigate('/edit-profile', { state: buildFromState(location) })}
+                        >
+                          <Edit3 size={11} className="mr-1" />
+                          编辑资料
+                        </button>
+                      </div>
                     </div>
-                    <button
-                      type="button"
-                      className="flex shrink-0 items-center rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-600 transition-colors hover:bg-amber-100"
-                      onClick={() => navigate('/profile/recharge', { state: buildFromState(location) })}
-                    >
-                      <Star size={11} className="mr-1" />
-                      {Number(availableBalance ?? profile?.available_balance ?? 0)} 积分
-                      <ChevronRight size={11} className="ml-1 opacity-70" />
-                    </button>
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {profile?.bio || '点击头像可更新头像，右上角可继续调整个人设置。'}
@@ -312,7 +308,7 @@ const Profile = () => {
                   登录 / 注册
                 </Button>
               </div>
-              <p className="mt-3 text-sm text-muted-foreground">登录后查看订单、回答、收藏和个人资料。</p>
+              <p className="mt-3 text-sm text-muted-foreground">登录后记录经历、回答问题并管理个人资料。</p>
             </div>
           )}
         </div>
@@ -322,7 +318,7 @@ const Profile = () => {
       <div className="app-page-padding mt-4">
         <Card className="overflow-hidden rounded-3xl border-none shadow-sm">
           <CardContent className="p-0">
-            <div className="grid grid-cols-4">
+            <div className="grid grid-cols-3">
               {profileStats.map((item, index) => (
                 <button 
                   key={item.label}
@@ -345,8 +341,8 @@ const Profile = () => {
         <Card className="overflow-hidden rounded-3xl border-none shadow-sm">
           <CardContent className="p-5">
             <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold text-foreground">
-              <span className="w-7 h-7 bg-primary/10 rounded-lg flex items-center justify-center">
-                <Star size={14} className="text-primary" />
+              <span className="w-7 h-7 bg-app-action-soft rounded-lg flex items-center justify-center">
+                <BookOpenText size={14} className="text-app-action" />
               </span>
               常用功能
             </h3>

@@ -22,6 +22,7 @@ const CitySelector = lazy(() => import("./pages/CitySelector"));
 const QuestionDetail = lazy(() => import("./pages/QuestionDetail"));
 const ExpertDetail = lazy(() => import("./pages/ExpertDetail"));
 const ExpertProfile = lazy(() => import("./pages/ExpertProfile"));
+const PublicPerson = lazy(() => import("./pages/PublicPerson"));
 const NewQuestion = lazy(() => import("./pages/NewQuestion"));
 const Messages = lazy(() => import("./pages/Messages"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -44,6 +45,8 @@ const CommunityChat = lazy(() => import("./pages/profile/CommunityChat"));
 const MyDrafts = lazy(() => import("./pages/profile/MyDrafts"));
 const TalentCertification = lazy(() => import("./pages/profile/TalentCertification"));
 const PointsRecharge = lazy(() => import("./pages/profile/PointsRecharge"));
+const MyExperiences = lazy(() => import("./pages/profile/MyExperiences"));
+const ExperienceEditor = lazy(() => import("./pages/ExperienceEditor"));
 
 const AccountSecurity = lazy(() => import("./pages/settings/AccountSecurity"));
 const GeneralSettings = lazy(() => import("./pages/settings/GeneralSettings"));
@@ -126,12 +129,15 @@ function App() {
                 <Route path="/question/:id" element={<QuestionDetail />} />
                 <Route path="/expert/:id" element={<ExpertDetail />} />
                 <Route path="/expert-profile/:id" element={<ExpertProfile />} />
+                <Route path="/person/:userId" element={<PublicPerson />} />
                 <Route path="/new" element={<NewQuestion />} />
                 <Route path="/messages" element={<Messages />} />
                 <Route path="/chat/:chatId" element={<ChatDetail />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/edit-profile" element={<EditProfile />} />
                 <Route path="/skill-publish" element={<SkillPublish />} />
+                <Route path="/experience/new" element={<ExperienceEditor />} />
+                <Route path="/experience/:experienceId/edit" element={<ExperienceEditor />} />
                 <Route path="/topic/:topicId" element={<TopicDetail />} />
                 <Route path="/notifications" element={<Notifications />} />
                 
@@ -147,6 +153,7 @@ function App() {
                 <Route path="/profile/drafts" element={<MyDrafts />} />
                 <Route path="/profile/talent-certification" element={<TalentCertification />} />
                 <Route path="/profile/recharge" element={<PointsRecharge />} />
+                <Route path="/profile/experiences" element={<MyExperiences />} />
                 
                 {/* Settings sub-pages */}
                 <Route path="/settings/account" element={<AccountSecurity />} />
