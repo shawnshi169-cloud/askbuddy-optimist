@@ -3,6 +3,7 @@ export const BLUEPRINT_RUNTIME_STATUS = [
   "partial",
   "legacy-compatibility",
   "not-deployed",
+  "contract-proposed",
 ] as const;
 export type BlueprintRuntimeStatus = (typeof BLUEPRINT_RUNTIME_STATUS)[number];
 
@@ -48,8 +49,8 @@ export const PRODUCT_BLUEPRINT_V1_DOMAIN_MAP = {
   questionAnswerReply: {
     domain: "question-answer-reply",
     target: "free public answers, helpful feedback, one-level replies, no acceptance",
-    currentRuntime: "accepted-answer and point-reward fields/RPCs remain active",
-    runtimeStatus: "legacy-compatibility",
+    currentRuntime: "EC-2A contract proposed, not deployed; accepted-answer and point-reward legacy fields/RPCs remain active",
+    runtimeStatus: "contract-proposed",
     newCodePolicy: "target-contract-only",
     phase: "EC-2",
   },
@@ -323,6 +324,11 @@ export const PRODUCT_BLUEPRINT_V1_RPC_POLICY = {
     use: "legacy-compatibility",
     newBlueprintCodeMayDepend: false,
     replacement: "EC-2 question publish contract with optional deep-exchange budget",
+  },
+  create_answer_secure: {
+    use: "legacy-compatibility",
+    newBlueprintCodeMayDepend: false,
+    replacement: "EC-2A create_answer_v1 proposal; ordinary consumer remains gated until deployment and review",
   },
   search_app_content_v2: {
     use: "legacy-compatibility",

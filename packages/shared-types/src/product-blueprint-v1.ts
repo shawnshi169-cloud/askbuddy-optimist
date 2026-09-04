@@ -1,5 +1,6 @@
 import type { Id, ISODateTime } from "./contracts";
 import type { PublicPersonId } from "./public-person";
+import type { CanonicalQuestionV1, CanonicalAnswerV1, CanonicalAnswerReplyV1 } from "./question-answer-v1";
 
 /** Product Blueprint v1 的目标 contract；不表示对应 storage/RPC 已部署。 */
 export const PRODUCT_BLUEPRINT_V1 = "product-blueprint-v1" as const;
@@ -27,45 +28,19 @@ export interface PersonExperienceOwnership {
 
 /**
  * 问题预算是后续深入交流的 CNY 意向，不是公开回答奖励。
- * EC-0 不承诺单值、区间、preset 或 storage/input representation。
+ * @deprecated EC-0 历史语义 placeholder。EC-2A 已锁定 deepExchangeBudgetMaxCents，
+ * 新设计只能使用 CanonicalQuestionV1；此类型不代表另一个可消费 Budget contract。
  */
 export interface QuestionDeepExchangeBudgetIntent {
   currency: ServiceCurrencyV1;
 }
 
-/**
- * EC-2 目标问题 contract。当前 public.questions storage 仍是 legacy compatibility，
- * 因此该类型不能被解释为已部署 RPC 的返回值。
- */
-export interface PublicQuestionV1Target {
-  questionId: Id;
-  authorId: PublicPersonId;
-  title: string;
-  context: string | null;
-  deepExchangeBudgetIntent: QuestionDeepExchangeBudgetIntent | null;
-  answerCount: number;
-  createdAt: ISODateTime;
-}
-
-/** Public Answer 免费、可多条且没有 accepted-answer 语义。 */
-export interface PublicAnswerV1Target {
-  answerId: Id;
-  questionId: Id;
-  authorId: PublicPersonId;
-  content: string;
-  helpfulCount: number;
-  createdAt: ISODateTime;
-}
-
-/** Reply 只表达 Answer 下的一层业务结构，不包含 parentReplyId。 */
-export interface AnswerReplyV1Target {
-  replyId: Id;
-  answerId: Id;
-  authorId: PublicPersonId;
-  replyToPersonId: PublicPersonId | null;
-  content: string;
-  createdAt: ISODateTime;
-}
+/** @deprecated EC-0 设计名称；使用 EC-2A CanonicalQuestionV1（仍未部署）。 */
+export type PublicQuestionV1Target = CanonicalQuestionV1;
+/** @deprecated EC-0 设计名称；使用 EC-2A CanonicalAnswerV1（仍未部署）。 */
+export type PublicAnswerV1Target = CanonicalAnswerV1;
+/** @deprecated EC-0 设计名称；使用 EC-2A CanonicalAnswerReplyV1（仍未部署）。 */
+export type AnswerReplyV1Target = CanonicalAnswerReplyV1;
 
 export type PersonServiceModesV1 =
   | { voiceEnabled: true; videoEnabled: boolean }

@@ -67,6 +67,7 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     notes: [
       "Current create_question_secure includes legacy bounty points and is not the Blueprint v1 publish contract.",
       "Blueprint v1 question budget is an optional deep-exchange budget; public answers remain free.",
+      "EC-2A create_question_v1 is contract-proposed only: required Context, one Product Channel, nullable positive CNY deepExchangeBudgetMaxCents; no deployed consumer authorization.",
     ],
   },
   {
@@ -158,6 +159,7 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     ],
     notes: [
       "Blueprint v1 has no accepted answer; current accept_answer_v2 remains currentWriteContracts compatibility truth only.",
+      "EC-2A Question/Answer/Reply proposals are not deployed; current table reads and legacy writes are unchanged. Ordinary moderation mutation is not a client capability.",
       "Public Answer is free; Helpful is answer feedback and never counts as helpedUserCount.",
       "Current create_answer_secure has no asker/answerer scheduling or availability contract.",
       "Demo question routes are development-only; production details preserve real loading/error truth.",

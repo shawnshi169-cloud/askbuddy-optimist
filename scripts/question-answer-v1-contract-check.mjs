@@ -1,0 +1,283 @@
+import assert from "node:assert/strict";
+import { createRequire } from "node:module";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import ts from "typescript";
+
+const root = process.cwd();
+const read = (path) => readFileSync(join(root, path), "utf8");
+const sources = [
+  "packages/shared-types/src/product-channels.ts",
+  "packages/shared-types/src/question-answer-v1.ts",
+  "packages/shared-api/src/question-answer-v1.ts",
+];
+// Generated CommonJS harness stays under node_modules so the existing Zod resolves.
+const temp = mkdtempSync(join(root, "node_modules/.ec2-contract-"));
+const require = createRequire(import.meta.url);
+let assertions = 0;
+const check = (name, run) => {
+  try { run(); assertions += 1; } catch (error) {
+    throw new Error(`EC-2 contract: ${name}`, { cause: error });
+  }
+};
+const rejected = (run) => assert.throws(run, /Invalid EC-2/);
+
+try {
+  const program = ts.createProgram(sources.map((path) => join(root, path)), {
+    strict: true, noEmit: true, skipLibCheck: true,
+    target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext,
+    moduleResolution: ts.ModuleResolutionKind.Bundler,
+  });
+  const diagnostics = ts.getPreEmitDiagnostics(program);
+  assert.equal(diagnostics.length, 0, ts.formatDiagnosticsWithColorAndContext(diagnostics, {
+    getCanonicalFileName: (path) => path, getCurrentDirectory: () => root, getNewLine: () => "\n",
+  }));
+  writeFileSync(join(temp, "package.json"), JSON.stringify({ type: "commonjs" }));
+  for (const source of sources) {
+    const out = join(temp, source.replace(/\.ts$/, ".js"));
+    mkdirSync(dirname(out), { recursive: true });
+    writeFileSync(out, ts.transpileModule(read(source), {
+      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+    }).outputText);
+  }
+  const api = require(join(temp, "packages/shared-api/src/question-answer-v1.js"));
+  const types = require(join(temp, "packages/shared-types/src/question-answer-v1.js"));
+  const { PRODUCT_CHANNEL_SLUGS: channels } = require(join(temp, "packages/shared-types/src/product-channels.js"));
+  const rpc = api.PROPOSED_QUESTION_ANSWER_V1_RPCS;
+  const id = (n) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
+  const person = { userId: id(1), displayName: null, avatarUrl: null };
+  const question = {
+    questionId: id(2), requesterPersonId: id(1), title: "真实问题", context: "真实背景",
+    primaryChannel: "education-learning", topicIds: [], deepExchangeBudgetMaxCents: null,
+    status: "open", createdAt: "2026-09-05T00:00:00Z", updatedAt: "2026-09-05T00:00:00Z",
+  };
+  const detail = { ...question, requester: person, answerCount: 1 };
+  const answer = {
+    answerId: id(3), questionId: id(2), authorPersonId: id(1), author: person, body: "真实回答",
+    helpfulCount: 0, viewerHasMarkedHelpful: false, replyCount: 1,
+    createdAt: question.createdAt, updatedAt: question.updatedAt,
+  };
+  const reply = {
+    replyId: id(4), answerId: id(3), authorPersonId: id(1), author: person, body: "真实回复",
+    createdAt: question.createdAt, updatedAt: question.updatedAt,
+  };
+  const create = {
+    p_title: question.title, p_context: question.context, p_primary_channel: question.primaryChannel,
+    p_topic_ids: [], p_deep_exchange_budget_max_cents: null,
+  };
+  const questionParams = { p_question_id: id(2) };
+  const answerParams = { p_answer_id: id(3) };
+  const replyParams = { p_reply_id: id(4) };
+  const questionsPage = { p_primary_channel: null, p_status: null, p_limit: 10, p_offset: 0 };
+  const answersPage = { ...questionParams, p_order: "comprehensive", p_limit: 10, p_offset: 0 };
+  const repliesPage = { ...answerParams, p_limit: 10, p_offset: 0 };
+  const cases = {
+    create_question_v1: ["text,text,text,uuid[],bigint", create, { questionId: id(2) }],
+    update_question_v1: ["uuid,text,text,text,uuid[],bigint", { ...questionParams, ...create }, { questionId: id(2) }],
+    close_question_v1: ["uuid", questionParams, { questionId: id(2), status: "closed" }],
+    get_question_detail_v1: ["uuid", questionParams, { question: detail }],
+    list_questions_v1: ["text,text,integer,integer", questionsPage, { questions: [detail], nextOffset: null }],
+    create_answer_v1: ["uuid,text", { ...questionParams, p_body: answer.body }, { answerId: id(3) }],
+    delete_answer_v1: ["uuid", answerParams, { answerId: id(3) }],
+    list_question_answers_v1: ["uuid,text,integer,integer", answersPage, { answers: [answer], nextOffset: null }],
+    set_answer_helpful_v1: ["uuid,boolean", { ...answerParams, p_is_helpful: true }, { answerId: id(3), helpfulCount: 1, viewerHasMarkedHelpful: true }],
+    create_answer_reply_v1: ["uuid,text", { ...answerParams, p_body: reply.body }, { replyId: id(4) }],
+    delete_answer_reply_v1: ["uuid", replyParams, { replyId: id(4) }],
+    list_answer_replies_v1: ["uuid,integer,integer", repliesPage, { replies: [reply], nextOffset: null }],
+  };
+  check("exact proposal capabilities", () => assert.deepEqual(Object.keys(rpc).sort(), Object.keys(cases).sort()));
+  const deployedSources = [
+    "packages/shared-api/src/rpc-catalog.ts", "packages/shared-api/src/rpc-whitelist.ts",
+    "src/integrations/supabase/types.ts",
+  ].map(read);
+  for (const [name, [signature, input, output]] of Object.entries(cases)) {
+    check(`${name}: gated exact signature and valid round trip`, () => {
+      assert.equal(rpc[name].signature, `public.${name}(${signature})`);
+      assert.equal(rpc[name].authentication, /^(get|list)_/.test(name) ? "anon" : "authenticated");
+      assert.equal(rpc[name].runtimeStatus, "contract-proposed");
+      assert.equal(rpc[name].productionDeployed, false);
+      assert.equal(rpc[name].productionGrantReview, "pending-deployment");
+      assert.equal(rpc[name].clientConsumable, false);
+      assert.equal(rpc[name].newBlueprintCodeMayDepend, false);
+      assert.equal(rpc[name].securityMode, "invoker");
+      assert.equal(rpc[name].searchPath, "");
+      assert.deepEqual(rpc[name].parseParams(input), input);
+      assert.deepEqual(rpc[name].parseResult(output, input), output);
+      for (const source of deployedSources) assert.doesNotMatch(source, new RegExp(`\\b${name}\\b`));
+    });
+    check(`${name}: rejects missing and unknown fields, no fallback`, () => {
+      for (const field of Object.keys(input)) {
+        const partial = { ...input }; delete partial[field];
+        rejected(() => rpc[name].parseParams(partial));
+      }
+      for (const field of Object.keys(output)) {
+        const partial = { ...output }; delete partial[field];
+        rejected(() => rpc[name].parseResult(partial, input));
+      }
+      for (const field of ["p_person_id", "p_author_person_id", "p_requester_person_id", "p_expert_id", "p_moderation_visibility", "p_status", "p_price"]) {
+        if (!(field in input)) rejected(() => rpc[name].parseParams({ ...input, [field]: id(99) }));
+      }
+      for (const field of ["phone", "claims", "payment", "accepted", "rawMetadata"]) {
+        rejected(() => rpc[name].parseResult({ ...output, [field]: "must not leak" }, input));
+      }
+      for (const bad of [undefined, null, [], "", { error: "not found" }]) {
+        rejected(() => rpc[name].parseResult(bad, input));
+      }
+    });
+  }
+  const dtoCases = [
+    [api.parseCanonicalQuestionV1, question], [api.parseCanonicalQuestionDetailV1, detail],
+    [api.parseCanonicalAnswerV1, answer], [api.parseCanonicalAnswerReplyV1, reply],
+  ];
+  for (const [parse, row] of dtoCases) {
+    check(`safe DTO ${Object.keys(row)[0]}`, () => {
+      assert.deepEqual(parse(row), row);
+      for (const key of Object.keys(row)) {
+        const partial = { ...row }; delete partial[key]; rejected(() => parse(partial));
+      }
+      for (const key of ["phone", "email", "claims", "claimId", "expertId", "profileId", "is_verified", "deletedAt", "moderationVisibility", "accepted", "bestAnswerId", "is_accepted", "reward_points", "price", "payment", "relevantExperience", "parentReplyId", "children", "helped_user_count"]) {
+        rejected(() => parse({ ...row, [key]: "untrusted" }));
+      }
+      for (const key of Object.keys(row).filter((key) => /Id$/.test(key))) {
+        rejected(() => parse({ ...row, [key]: "not-a-person-or-entity-uuid" }));
+      }
+      rejected(() => parse({ ...row, createdAt: "yesterday" }));
+      const summaryKey = "author" in row ? "author" : "requester" in row ? "requester" : null;
+      if (summaryKey) {
+        assert.equal(parse({ ...row, [summaryKey]: null })[summaryKey], null);
+        rejected(() => parse({ ...row, [summaryKey]: { ...person, userId: id(99) } }));
+        rejected(() => parse({ ...row, [summaryKey]: { ...person, phone: "private" } }));
+        rejected(() => parse({ ...row, [summaryKey]: { userId: id(1) } }));
+      }
+    });
+  }
+  check("budget: null or positive lossless integer cents, no invented product cap", () => {
+    for (const value of [null, 1, 6900, 10000, 999999999999, Number.MAX_SAFE_INTEGER]) {
+      assert.equal(api.parseCanonicalQuestionV1({ ...question, deepExchangeBudgetMaxCents: value }).deepExchangeBudgetMaxCents, value);
+      assert.equal(rpc.create_question_v1.parseParams({ ...create, p_deep_exchange_budget_max_cents: value }).p_deep_exchange_budget_max_cents, value);
+    }
+    for (const value of [0, -1, 0.01, 69.5, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1, "6900", undefined]) {
+      rejected(() => api.parseCanonicalQuestionV1({ ...question, deepExchangeBudgetMaxCents: value }));
+      rejected(() => rpc.create_question_v1.parseParams({ ...create, p_deep_exchange_budget_max_cents: value }));
+    }
+  });
+  check("required Question + Context and meaningful Answer/Reply body", () => {
+    for (const value of ["", " \n\t", null, 3]) {
+      for (const key of ["title", "context"]) rejected(() => api.parseCanonicalQuestionV1({ ...question, [key]: value }));
+      for (const key of ["p_title", "p_context"]) rejected(() => rpc.create_question_v1.parseParams({ ...create, [key]: value }));
+      rejected(() => api.parseCanonicalAnswerV1({ ...answer, body: value }));
+      rejected(() => api.parseCanonicalAnswerReplyV1({ ...reply, body: value }));
+    }
+  });
+  check("Channel reuse and Topic capability closed until canonical resolver", () => {
+    assert.deepEqual(channels, ["education-learning", "career-development", "lifestyle-services", "hobbies-skills"]);
+    for (const value of channels) assert.equal(api.parseCanonicalQuestionV1({ ...question, primaryChannel: value }).primaryChannel, value);
+    for (const value of ["education", "work", "skill", null, []]) rejected(() => rpc.create_question_v1.parseParams({ ...create, p_primary_channel: value }));
+    for (const value of [[id(8)], ["#topic"], ["career-development"], null, "topic"]) {
+      rejected(() => api.parseCanonicalQuestionV1({ ...question, topicIds: value }));
+      rejected(() => rpc.create_question_v1.parseParams({ ...create, p_topic_ids: value }));
+    }
+  });
+  check("business lifecycle cannot accept legacy or moderation state", () => {
+    assert.deepEqual(types.QUESTION_BUSINESS_STATUS_V1, ["open", "closed"]);
+    for (const status of ["open", "closed"]) assert.equal(api.parseCanonicalQuestionV1({ ...question, status }).status, status);
+    for (const status of ["accepted", "solved", "paid", "hidden", "moderated-hidden"]) rejected(() => api.parseCanonicalQuestionV1({ ...question, status }));
+    rejected(() => rpc.close_question_v1.parseResult({ questionId: id(2), status: "open" }, questionParams));
+    assert.equal(rpc.reopen_question_v1, undefined);
+  });
+  check("counts are real nonnegative integers and Reply has no Helpful", () => {
+    for (const value of [-1, 0.5, "100", NaN]) {
+      rejected(() => api.parseCanonicalAnswerV1({ ...answer, helpfulCount: value }));
+      rejected(() => api.parseCanonicalAnswerV1({ ...answer, replyCount: value }));
+      rejected(() => api.parseCanonicalQuestionDetailV1({ ...detail, answerCount: value }));
+    }
+    rejected(() => api.parseCanonicalAnswerReplyV1({ ...reply, helpfulCount: 1 }));
+    rejected(() => api.parseCanonicalAnswerReplyV1({ ...reply, likeCount: 1 }));
+  });
+  check("explicit idempotent Helpful desired state", () => {
+    const parser = rpc.set_answer_helpful_v1;
+    for (const value of [true, false]) assert.equal(parser.parseResult({ answerId: id(3), helpfulCount: 0, viewerHasMarkedHelpful: value }, { ...answerParams, p_is_helpful: value }).viewerHasMarkedHelpful, value);
+    rejected(() => parser.parseParams({ ...answerParams, p_is_helpful: "toggle" }));
+    rejected(() => parser.parseResult({ answerId: id(3), helpfulCount: 1, viewerHasMarkedHelpful: false }, { ...answerParams, p_is_helpful: true }));
+  });
+  check("response must match requested identity", () => {
+    for (const name of ["update_question_v1", "close_question_v1", "delete_answer_v1", "delete_answer_reply_v1", "set_answer_helpful_v1"]) {
+      const [, input, output] = cases[name];
+      const key = Object.keys(output).find((key) => /Id$/.test(key));
+      rejected(() => rpc[name].parseResult({ ...output, [key]: id(99) }, input));
+    }
+    rejected(() => rpc.get_question_detail_v1.parseResult({ question: { ...detail, questionId: id(99) } }, questionParams));
+    assert.equal(rpc.get_question_detail_v1.parseResult({ question: null }, questionParams).question, null);
+  });
+  for (const [name, key, row, params, parent] of [
+    ["list_questions_v1", "questions", detail, questionsPage, null],
+    ["list_question_answers_v1", "answers", answer, answersPage, "questionId"],
+    ["list_answer_replies_v1", "replies", reply, repliesPage, "answerId"],
+  ]) {
+    check(`${name}: bounded pagination and relation checks`, () => {
+      assert.deepEqual(rpc[name].parseResult({ [key]: [], nextOffset: null }, params), { [key]: [], nextOffset: null });
+      assert.equal(rpc[name].parseResult({ [key]: [row], nextOffset: 1 }, params).nextOffset, 1);
+      rejected(() => rpc[name].parseResult({ [key]: [], nextOffset: 1 }, params));
+      rejected(() => rpc[name].parseResult({ [key]: [row], nextOffset: 100 }, params));
+      rejected(() => rpc[name].parseResult({ [key]: [row, row], nextOffset: null }, params));
+      rejected(() => rpc[name].parseResult({ [key]: [row], nextOffset: null }, { ...params, p_limit: 0 }));
+      for (const value of [-1, 0, 101, 1.5]) rejected(() => rpc[name].parseParams({ ...params, p_limit: value }));
+      if (parent) rejected(() => rpc[name].parseResult({ [key]: [{ ...row, [parent]: id(99) }], nextOffset: null }, params));
+    });
+  }
+  check("question filters and answer sort parameter", () => {
+    rejected(() => rpc.list_questions_v1.parseResult({ questions: [detail], nextOffset: null }, { ...questionsPage, p_status: "closed" }));
+    rejected(() => rpc.list_questions_v1.parseResult({ questions: [detail], nextOffset: null }, { ...questionsPage, p_primary_channel: "hobbies-skills" }));
+    assert.deepEqual(types.ANSWER_ORDER_V1, ["comprehensive", "latest"]);
+    for (const order of types.ANSWER_ORDER_V1) assert.equal(rpc.list_question_answers_v1.parseParams({ ...answersPage, p_order: order }).p_order, order);
+    for (const order of ["accepted", "budget", "expert_score"]) rejected(() => rpc.list_question_answers_v1.parseParams({ ...answersPage, p_order: order }));
+  });
+  check("locked product boundaries, not database smoke", () => {
+    assert.equal(types.QUESTION_BUDGET_CURRENCY_V1, "CNY");
+    assert.deepEqual(api.QUESTION_ANSWER_V1_INVARIANTS, {
+      personIdentity: "auth.users.id = profiles.user_id", actorSource: "auth.uid()",
+      questionRequiresContext: true, businessStatusSeparateFromModeration: true,
+      closedAllowsNewAnswerOrReply: false, publicAnswerIsFree: true,
+      budgetField: "deepExchangeBudgetMaxCents", budgetCurrency: "CNY", budgetUnit: "cents",
+      budgetValidation: "null-or-positive-safe-integer", budgetIsConsumable: false,
+      budgetAffectsAnswerRanking: false, legacyBountyMigration: "forbidden", legacyAcceptanceMigration: "forbidden",
+      selfHelpfulAllowed: false, helpfulCreatesReputation: false, replyParent: "answer-only",
+      replyHasHelpful: false, replyCreatesConversation: false, relevantExperience: "omitted-until-EC-3",
+    });
+    const review = api.QUESTION_ANSWER_V1_PRODUCT_REVIEW;
+    for (const item of Object.values(review)) assert.equal(item.status, "pending-review");
+    assert.equal(review.questionReopen.recommendation, "close-only");
+    assert.equal(review.deletedAnswerWithReplies.recommendation, "hide-entire-answer-branch");
+    assert.deepEqual(review.comprehensiveOrder.recommendation, ["helpfulCount DESC", "createdAt DESC", "answerId ASC"]);
+    assert.equal(review.canonicalTopic.recommendation, "empty-topicIds-until-resolver");
+  });
+  check("canonical ID typing and no unsafe casts or network adapter", () => {
+    const source = read("packages/shared-types/src/question-answer-v1.ts");
+    assert.match(source, /requesterPersonId: PublicPersonId/);
+    assert.equal((source.match(/authorPersonId: PublicPersonId/g) ?? []).length, 2);
+    assert.match(source, /primaryChannel: ProductChannelSlug/);
+    assert.doesNotMatch(source, /expertId\s*:|parentReplyId\s*:|accepted\s*:|bounty\s*:|reward\s*:|price\s*:/);
+    const ast = ts.createSourceFile("contract.ts", read("packages/shared-api/src/question-answer-v1.ts"), ts.ScriptTarget.Latest, true);
+    const visit = (node) => {
+      assert.notEqual(node.kind, ts.SyntaxKind.AnyKeyword, "no any in proposed API");
+      if (ts.isAsExpression(node)) assert.equal(node.type.getText(ast), "const", "no unchecked type assertions");
+      if (ts.isCallExpression(node)) assert.doesNotMatch(node.expression.getText(ast), /^(fetch|.*\.rpc|.*\.from)$/);
+      ts.forEachChild(node, visit);
+    };
+    visit(ast);
+  });
+  check("decision retains privacy, deployment and direct DML safety gates", () => {
+    const doc = read("docs/canonical-question-answer-v1-contract-decision.md");
+    for (const text of ["LEGACY", "SECURITY INVOKER", "search_path = ''", "Direct Data API", "advisory lock", "pending-review", "REMAINS", "Static Contract PASS ≠ Database Apply PASS"]) {
+      assert.ok(doc.toLowerCase().includes(text.toLowerCase()), `Decision missing ${text}`);
+    }
+    assert.match(doc, /未新增 migration，未部署 RPC，未改 UI/);
+    assert.match(doc, /预算默认 null，采纳\/点赞绝不转换为 Helpful\/Closed/);
+    assert.match(read("package.json"), /"test:question-answer-v1"/);
+    assert.ok(JSON.parse(read("package.json")).scripts["test:contracts"].includes("question-answer-v1-contract-check.mjs"));
+  });
+  console.log(`EC-2 Question/Answer contract PASS (${assertions} groups; strict TypeScript + runtime parsers + proposal gates).`);
+  console.log("Contract-only: no database execution, migration apply or Production readiness claimed.");
+} finally {
+  rmSync(temp, { recursive: true, force: true });
+}
