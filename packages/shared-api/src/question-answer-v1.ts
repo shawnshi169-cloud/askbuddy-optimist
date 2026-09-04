@@ -9,22 +9,57 @@ import type {
 } from "../../shared-types/src/question-answer-v1";
 
 export const QUESTION_ANSWER_V1_CONTRACT_STATE = {
-  runtimeStatus: "contract-proposed",
+  runtimeStatus: "contract-approved",
   productionDeployed: false,
   productionGrantReview: "pending-deployment",
   clientConsumable: false,
   topicAssociation: "blocked-until-canonical-topic-resolver",
 } as const;
 
-/** 待 Product Review；不是已生效的数据库行为。 */
+/** 已锁定的基础顺序，不是 EC-3 ranking，也不代表数据库算法已部署。 */
+export const QUESTION_ANSWER_V1_ORDERING = {
+  questionList: ["createdAt DESC", "questionId ASC"],
+  comprehensiveAnswers: ["helpfulCount DESC", "createdAt DESC", "answerId ASC"],
+  latestAnswers: ["createdAt DESC", "answerId ASC"],
+  replies: ["createdAt ASC", "replyId ASC"],
+} as const;
+
+/** Product + Architecture 已批准；存储/API 尚未部署。 */
 export const QUESTION_ANSWER_V1_PRODUCT_REVIEW = {
-  questionReopen: { recommendation: "close-only", status: "pending-review" },
-  deletedAnswerWithReplies: { recommendation: "hide-entire-answer-branch", status: "pending-review" },
+  questionReopen: { decision: "close-only", status: "locked" },
+  deletedAnswerWithReplies: { decision: "hide-entire-answer-branch", status: "locked" },
   comprehensiveOrder: {
-    recommendation: ["helpfulCount DESC", "createdAt DESC", "answerId ASC"],
-    status: "pending-review",
+    decision: QUESTION_ANSWER_V1_ORDERING.comprehensiveAnswers,
+    status: "locked",
   },
-  canonicalTopic: { recommendation: "empty-topicIds-until-resolver", status: "pending-review" },
+  canonicalTopic: { decision: "empty-topicIds-until-resolver", status: "locked" },
+} as const;
+
+/** public-readable 不等于 global-only projection；不得把 authenticated caller 强制降为 anon。 */
+export const ANSWER_HELPFUL_VIEWER_SCOPE_V1 = {
+  field: "viewerHasMarkedHelpful",
+  scope: "viewer",
+  identitySource: "auth.uid()",
+  anonymousValue: false,
+  authenticatedValue: "caller-own-helpful-relation",
+  futureConsumerCache: {
+    minimumKeyParts: ["question-answers", "questionId", "order", "viewerScope"],
+    viewerScope: "viewerPersonId-or-anon",
+    includePaginationParams: true,
+    shareAcrossViewers: false,
+    authChange: "switch-scope-without-reusing-previous-viewer-result",
+  },
+} as const;
+
+/** 逻辑已锁定；物理实现可经重新 Architecture Review 更换，B 不得自行改变。 */
+export const ANSWER_HELPFUL_STORAGE_REVIEW_V1 = {
+  logicalInvariants: "locked",
+  physicalCandidate: "private-owner-mark-and-anonymous-public-fact",
+  physicalStatus: "implementation-gated",
+  productionVerified: false,
+  validationRequired: ["local-postgresql", "rls", "grants", "concurrency", "rollback-smoke"],
+  alternativeRequiresArchitectureReview: true,
+  consumerMayRedefineStorage: false,
 } as const;
 
 export const QUESTION_ANSWER_V1_INVARIANTS = {
@@ -33,6 +68,11 @@ export const QUESTION_ANSWER_V1_INVARIANTS = {
   questionRequiresContext: true,
   businessStatusSeparateFromModeration: true,
   closedAllowsNewAnswerOrReply: false,
+  closeIsIdempotent: true,
+  deletedOrHiddenAnswerHidesEntireBranch: true,
+  retainDeletedAnswerAndReplyStorage: true,
+  publicTombstoneCard: false,
+  ordering: QUESTION_ANSWER_V1_ORDERING,
   publicAnswerIsFree: true,
   budgetField: "deepExchangeBudgetMaxCents",
   budgetCurrency: "CNY",
@@ -43,6 +83,9 @@ export const QUESTION_ANSWER_V1_INVARIANTS = {
   legacyBountyMigration: "forbidden",
   legacyAcceptanceMigration: "forbidden",
   selfHelpfulAllowed: false,
+  helpfulMaxPerPersonAnswer: 1,
+  helpfulCountSource: "real-helpful-facts",
+  helpfulAddRemoveIdempotent: true,
   helpfulCreatesReputation: false,
   replyParent: "answer-only",
   replyHasHelpful: false,
@@ -162,8 +205,10 @@ function proposedRpc<P, R>(
 ) {
   return {
     ...QUESTION_ANSWER_V1_CONTRACT_STATE,
-    use: "canonical-blueprint-proposal",
+    use: "canonical-blueprint-contract",
     authentication,
+    authenticationMeaning: "minimum-access-requirement",
+    preserveCallerIdentity: true,
     intendedConsumer: authentication === "anon" ? "public-read" : "authenticated-person",
     newBlueprintCodeMayDepend: false,
     securityMode: "invoker",
@@ -188,7 +233,7 @@ function validPage(
     && (next === null || (ids.length > 0 && next === request.p_offset + ids.length));
 }
 
-/** 独立 proposal registry：不加入 RPC_CATALOG、generated types 或 client whitelist。无网络调用。 */
+/** 保留 proposal registry 标识：产品 contract 已批准，仍不加入 deployed catalog/types/whitelist。无网络调用。 */
 export const PROPOSED_QUESTION_ANSWER_V1_RPCS = {
   create_question_v1: proposedRpc("authenticated", "public.create_question_v1(text,text,text,uuid[],bigint)",
     createQuestionParams.transform(questionInput), questionIdResult),
@@ -204,7 +249,9 @@ export const PROPOSED_QUESTION_ANSWER_V1_RPCS = {
     questionIdParams, z.object({ question: canonicalQuestionDetailV1Schema.nullable() }).strict()
       .transform((row) => ({ question: row.question })),
     (request, response) => response.question === null || request.p_question_id === response.question.questionId),
-  list_questions_v1: proposedRpc("anon", "public.list_questions_v1(text,text,integer,integer)",
+  list_questions_v1: {
+    defaultOrdering: QUESTION_ANSWER_V1_ORDERING.questionList,
+    ...proposedRpc("anon", "public.list_questions_v1(text,text,integer,integer)",
     z.object({ p_primary_channel: channel.nullable(), p_status: z.enum(QUESTION_BUSINESS_STATUS_V1).nullable(), ...pagination }).strict()
       .transform((row) => ({ p_primary_channel: row.p_primary_channel, p_status: row.p_status, p_limit: row.p_limit, p_offset: row.p_offset })),
     z.object({ questions: z.array(canonicalQuestionDetailV1Schema).max(100), nextOffset }).strict()
@@ -212,19 +259,27 @@ export const PROPOSED_QUESTION_ANSWER_V1_RPCS = {
     (request, response) => validPage(request, response.questions.map((row) => row.questionId), response.nextOffset)
       && response.questions.every((row) => (request.p_primary_channel === null || row.primaryChannel === request.p_primary_channel)
         && (request.p_status === null || row.status === request.p_status))),
+  },
   create_answer_v1: proposedRpc("authenticated", "public.create_answer_v1(uuid,text)",
     z.object({ p_question_id: uuid, p_body: text }).strict()
       .transform((row) => ({ p_question_id: row.p_question_id, p_body: row.p_body })), answerIdResult),
   delete_answer_v1: proposedRpc("authenticated", "public.delete_answer_v1(uuid)",
     answerIdParams, answerIdResult,
     (request, response) => request.p_answer_id === response.answerId),
-  list_question_answers_v1: proposedRpc("anon", "public.list_question_answers_v1(uuid,text,integer,integer)",
+  list_question_answers_v1: {
+    ordering: {
+      comprehensive: QUESTION_ANSWER_V1_ORDERING.comprehensiveAnswers,
+      latest: QUESTION_ANSWER_V1_ORDERING.latestAnswers,
+    },
+    viewerProjection: ANSWER_HELPFUL_VIEWER_SCOPE_V1,
+    ...proposedRpc("anon", "public.list_question_answers_v1(uuid,text,integer,integer)",
     z.object({ p_question_id: uuid, p_order: z.enum(ANSWER_ORDER_V1), ...pagination }).strict()
       .transform((row) => ({ p_question_id: row.p_question_id, p_order: row.p_order, p_limit: row.p_limit, p_offset: row.p_offset })),
     z.object({ answers: z.array(canonicalAnswerV1Schema).max(100), nextOffset }).strict()
       .transform((row) => ({ answers: row.answers, nextOffset: row.nextOffset })),
     (request, response) => validPage(request, response.answers.map((row) => row.answerId), response.nextOffset)
       && response.answers.every((row) => row.questionId === request.p_question_id)),
+  },
   set_answer_helpful_v1: proposedRpc("authenticated", "public.set_answer_helpful_v1(uuid,boolean)",
     z.object({ p_answer_id: uuid, p_is_helpful: z.boolean() }).strict()
       .transform((row) => ({ p_answer_id: row.p_answer_id, p_is_helpful: row.p_is_helpful })),
@@ -237,13 +292,16 @@ export const PROPOSED_QUESTION_ANSWER_V1_RPCS = {
   delete_answer_reply_v1: proposedRpc("authenticated", "public.delete_answer_reply_v1(uuid)",
     replyIdParams, replyIdResult,
     (request, response) => request.p_reply_id === response.replyId),
-  list_answer_replies_v1: proposedRpc("anon", "public.list_answer_replies_v1(uuid,integer,integer)",
+  list_answer_replies_v1: {
+    defaultOrdering: QUESTION_ANSWER_V1_ORDERING.replies,
+    ...proposedRpc("anon", "public.list_answer_replies_v1(uuid,integer,integer)",
     z.object({ p_answer_id: uuid, ...pagination }).strict()
       .transform((row) => ({ p_answer_id: row.p_answer_id, p_limit: row.p_limit, p_offset: row.p_offset })),
     z.object({ replies: z.array(canonicalAnswerReplyV1Schema).max(100), nextOffset }).strict()
       .transform((row) => ({ replies: row.replies, nextOffset: row.nextOffset })),
     (request, response) => validPage(request, response.replies.map((row) => row.replyId), response.nextOffset)
       && response.replies.every((row) => row.answerId === request.p_answer_id)),
+  },
 } as const;
 
 export type QuestionAnswerV1ProposedRpcName = keyof typeof PROPOSED_QUESTION_ANSWER_V1_RPCS;

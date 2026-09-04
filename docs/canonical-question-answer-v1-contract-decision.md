@@ -1,6 +1,9 @@
 # Canonical Question / Answer / Reply v1 合同决策
 
-状态：**EC-2A CONTRACT-PROPOSED / 等待 Product + Architecture Review**。
+状态：**EC-2A CONTRACT APPROVED / NOT DEPLOYED / NOT CLIENT CONSUMABLE**。
+
+Product + Architecture 已确认下述产品决策。本 PR 仍保持 Draft，等待最终 contract amendment
+复核；批准产品语义不等于批准 merge、数据库实现、Production 部署或 UI consumer cutover。
 
 审计 baseline：`57d092166b4165ff27787c4f828281d040c36c84`（PR #37 merge）。
 本轮只审计仓库 migration、Production-generated types 和真实 consumer；未重新查询远端数据库，
@@ -94,32 +97,41 @@ hobbies-skills，一个且必填；不新增 categories 或 taxonomy。
 
 Question 目标支持 0..N Canonical Topic ID，但 baseline 没有可信跨模块 Topic backend。
 本 PR 只预留 `CanonicalTopicIdV1` identity 语义，不发号、不实现存储、不创建标签体系。
-当前 proposed parser 的 `topicIds/p_topic_ids` **仅接受 []**；非空值明确失败，不截断成空值。
+EC-2 已锁定 parser 的 `topicIds/p_topic_ids` **仅接受 []**；Create/Update 非空值明确失败，
+不截断成空值、不静默 drop，也不接受 legacy tags、hot_topics.id 或随机 UUID 占位。
 UUID 的格式合法不证明它属于 Canonical Topic。EC-3 resolver + FK + 用户确认机制经过审查后，
-再 additive 解锁非空关联。空数组不阻塞免费提问能力的后续实现。
+须先建立 Canonical Topic root，AI suggestion → user confirmation，再 additive 解锁非空关联。
+空数组不阻塞免费提问能力的后续实现；EC-2 不自行实现该 taxonomy。
 
-## 五、生命周期与待审批选择
+## 五、已锁定的生命周期与排序
 
 已锁定：business `status=open/closed` 与 `moderation_visibility=visible/hidden`、
 `deleted_at` 独立。普通 create 初始化 open；普通 update 不接收 status/moderation 字段。
 open 才可新建 Answer/Reply；closed 保留已有公开内容，只要父链未删除或隐藏。
-关闭不表示 solved、accepted 或 paid。
+关闭不表示 solved、accepted、paid 或 completed。
 
-| 待 Product Review | A 建议 | 在本 PR 中的状态 |
+| Product Decision | V1 已锁定行为 | 在本 PR 中的状态 |
 | --- | --- | --- |
-| Question reopen | V1 close-only，重复 close 可幂等；不提供 reopen RPC | pending-review，未部署 |
-| 删除有 Reply 的 Answer | 整个 Answer 分支从正常 Public projection 隐藏，底层保留 Answer/Reply；不显示可继续互动的 tombstone 卡片 | pending-review，DTO 是此建议的审查草案，不表示选择已锁定 |
-| 综合 Answer 排序 | helpfulCount DESC → createdAt DESC → answerId ASC；只统计真实 Helpful | pending-review，未实现算法 |
-| Topic 接入 | 当前 []，非空关联等 Canonical resolver/FK 后启用 | pending-review / backend BLOCKED |
+| Question reopen | CLOSE ONLY，owner close、重复 close 幂等；不提供 reopen_question_v1，未来 reopen 需新版本 contract | locked，未部署 |
+| 删除有 Reply 的 Answer | HIDE ENTIRE ANSWER BRANCH；底层保留 Answer/Reply，不显示 Public tombstone card；moderation hidden 同样隐藏整个分支 | locked，未部署 |
+| 综合 Answer 排序 | helpfulCount DESC → createdAt DESC → answerId ASC；只统计真实 Helpful | locked，未部署 |
+| Topic 接入 | EC-2 只接受 []，非空关联等 EC-3 Canonical root/resolver/FK 后解锁 | locked / 非空关联 BLOCKED |
 
-最新排序建议 `createdAt DESC, answerId ASC`；Reply 固定 `createdAt ASC, replyId ASC`。
+最新排序锁定 `createdAt DESC, answerId ASC`；Reply 固定 `createdAt ASC, replyId ASC`。
+基础 `list_questions_v1` 固定 `createdAt DESC, questionId ASC`，不新增 order 参数；这是基础
+canonical listing，不是 hot score 或个性化推荐。EC-3 Home Feed/Matching 使用独立 contract。
+四种顺序由 `QUESTION_ANSWER_V1_ORDERING`、RPC metadata 与 guard 共同保护。
 分页 p_limit=1..100、p_offset>=0 为技术响应边界；offset 在并发增删/Helpful 变化时不承诺稳定
 跨页快照，客户端须按 ID 去重/刷新，后续如有稳定快照需求再版本化 cursor。
-不使用 fake view/match/expert score、budget、accepted 参与排序。
+综合排序不得使用 deepExchangeBudgetMaxCents、Expert score、legacy accepted、bounty、price、
+fake match score、fake views 或 replyCount。确定的 tie-breaker 不等于并发分页快照。
 
 Answer/Reply 作者 soft-delete 与平台 moderation hide 为不同事实。内容审计留存不代表产品
 可见，普通用户不能 hard-delete 内容、复活 tombstone 或修改审计字段。父 Question hidden/
 deleted 时整个分支不公开；父 Answer hidden/deleted 时 Reply 不公开。正常 DTO 不返回孤儿。
+不得 hard-delete Reply、将 Reply 改挂 Question，或显示“该回答已删除”后继续展示其 Replies。
+Answer/Reply storage 留存用于审计、安全、争议与未来治理；author delete 和 moderation hide
+仍是不同 business fact，不能通过同一个状态值合并原因。
 是否允许 Question 作者删除本身不在本轮产品授权内，因此不提出普通 delete_question RPC。
 
 ## 六、Additive Storage 提案（非 migration）
@@ -140,10 +152,15 @@ Topic mapping table/FK 需等 Canonical Topic root 设计后再建；当前不�
 索引覆盖所有 parent/author FK、Question 时间列表、Answer question+createdAt、Reply
 answer+createdAt 及 Helpful unique key；不得为本提案新增任意全站索引。
 
-### Helpful 聚合的 invoker 方案
+### Helpful 逻辑已锁定，物理实现仍 gated
+
+逻辑不变量：同一 Person/Answer 最多一个 Helpful、禁止 self-helpful、helpfulCount 来自真实
+事实、viewer relationship private、add/remove 幂等、Helpful 不进入 Reputation。这些不可由
+后续 consumer 改写。
 
 直接让 anon 读取带 person_id 的 Helpful 关系，或让 invoker 在 owner-only RLS 上 COUNT
-却宣称得到总数，均不正确。建议分离私有 ownership mark 与无身份公开 fact：
+却宣称得到总数，均不正确。以下双关系仅是推荐的 **implementation-gated candidate**，
+不是已经 Production 证明的唯一 SQL 实现：分离私有 ownership mark 与无身份公开 fact。
 
 1. mark 与 public fact 以 `(mark_id,answer_id)` 建立双向、延迟校验的完整性引用，保证提交时
    一一对应；不能通过只插入 fact 伪造 Helpful，也不能只插入 mark 产生计数漂移。
@@ -155,9 +172,12 @@ answer+createdAt 及 Helpful unique key；不得为本提案新增任意全站�
 4. set_answer_helpful_v1 使用显式 boolean，幂等 add/remove，而非容易被 retry 翻转的 toggle。
    作者不能添加 self Helpful；self false 可安全 no-op，不继承旧 self-like。
 
-这是审查提案而非 SQL apply 证明。双向 FK、RLS 与 invoker 的事务完整性、取消/并发/直接表写
-必须在 local PostgreSQL 与 rollback smoke 中逐条验证，失败就阻塞部署；不得用宽松 definer
-或公开 person_id 替代。实现如果需要修改此存储方案须回到 A review，不让 B 自行聚合。
+双向 FK、RLS、grants 与 invoker 的事务完整性、取消/并发/直接表写必须在 local PostgreSQL、
+concurrency tests 与 rollback smoke 中逐条验证，失败就阻塞部署；不得用宽松 definer 或公开
+person_id 替代。如果候选方案无法安全实现，A 可提出满足相同逻辑不变量的新物理方案，但必须
+重新 Architecture Review。B 不得自行改变 Helpful storage semantics 或自行拼计数。
+机器状态见 `ANSWER_HELPFUL_STORAGE_REVIEW_V1`：逻辑 locked，物理 implementation-gated，
+productionVerified=false。
 
 ## 七、RLS、grants 与并发安全
 
@@ -192,11 +212,16 @@ write RPC，也不擅自锁定新产品限额。实现与部署前必须证明 a
 
 ## 八、Exact RPC Proposal
 
-所有 proposed RPC：Production deployed=NO；grant review=pending-deployment；current client
+12 个 RPC contract 已获产品批准，SQL 实现仍是 proposal：Production deployed=NO；grant review=pending-deployment；current client
 consumable=NO。只有安全部署、真实 smoke、consumer review 三个 gate 均通过才能解锁。
 签名、参数及 response parser 的唯一机器定义为 `PROPOSED_QUESTION_ANSWER_V1_RPCS`。
+该 registry 保留原标识名；其 runtimeStatus=contract-approved，不再表示产品决策尚未确认。
 不新增 RPC_CATALOG entry、不加白名单、不手改 generated types，不提供网络调用 adapter。
 以下所有参数显式必填；可选业务值传 null/[]，不靠 silent fallback。
+
+`authentication=anon` / `anon/public-read` 表示**最低访问要求**：anonymous 和 authenticated
+均可调用，不表示 authenticated 也必须取 anon 视图。所有请求保留真实 caller identity；
+不得为复用公共缓存而丢弃 authenticated session、强制匿名请求或把 viewer state 清为 false。
 
 | RPC / signature 参数类型 | Input 字段 | Result | Auth / 未来 consumer |
 | --- | --- | --- | --- |
@@ -204,10 +229,10 @@ consumable=NO。只有安全部署、真实 smoke、consumer review 三个 gate 
 | update_question_v1(uuid,text,text,text,uuid[],bigint) | p_question_id + 上述 create 字段 | {questionId} | authenticated owner |
 | close_question_v1(uuid) | p_question_id | {questionId,status:closed} | authenticated owner |
 | get_question_detail_v1(uuid) | p_question_id | {question:CanonicalQuestionDetailV1 或 null} | anon/public read |
-| list_questions_v1(text,text,integer,integer) | p_primary_channel 或 null,p_status 或 null,p_limit,p_offset | {questions,nextOffset} | anon/public read |
+| list_questions_v1(text,text,integer,integer) | p_primary_channel 或 null,p_status 或 null,p_limit,p_offset；无 order 参数 | {questions,nextOffset}，createdAt DESC → questionId ASC | anon/public read |
 | create_answer_v1(uuid,text) | p_question_id,p_body | {answerId} | authenticated Person |
 | delete_answer_v1(uuid) | p_answer_id | {answerId} | authenticated author |
-| list_question_answers_v1(uuid,text,integer,integer) | p_question_id,p_order,p_limit,p_offset | {answers,nextOffset} | anon/public read |
+| list_question_answers_v1(uuid,text,integer,integer) | p_question_id,p_order,p_limit,p_offset | {answers,nextOffset}，包含 viewer-scoped state | public-readable，保留 authenticated caller |
 | set_answer_helpful_v1(uuid,boolean) | p_answer_id,p_is_helpful | {answerId,helpfulCount,viewerHasMarkedHelpful} | authenticated Person |
 | create_answer_reply_v1(uuid,text) | p_answer_id,p_body | {replyId} | authenticated Person |
 | delete_answer_reply_v1(uuid) | p_reply_id | {replyId} | authenticated author |
@@ -219,6 +244,25 @@ RPC SQL 计划返回 jsonb 与上述 camelCase envelope 一致。Public detail m
 使用明确业务 error code（实现 review 时统一 SQLSTATE/adapter mapping），不透出内部 SQL。
 anon viewerHasMarkedHelpful=false；authenticated 必须查询真实关系。分页各 list 必须校验 parent
 identity 一致，不能拼入其他 Question/Answer 的记录。Reply list 不内嵌到 Answer 大数组中。
+
+### Helpful viewer projection 与后续 consumer cache
+
+`CanonicalAnswerV1.viewerHasMarkedHelpful` 是 **viewer-scoped**，不是 public-global fact。
+`helpfulCount` 是可见回答的公开聚合；`viewerHasMarkedHelpful` 则由 `auth.uid()` 决定：
+anon 固定 false，authenticated 只反映当前 caller 自己的真实 Helpful relation，不能查询
+其他 Person 的 viewer state。因此 `list_question_answers_v1` 是 public-readable，但包含
+viewer-scoped personalized projection，不能跨账号复用完整响应。
+
+未来 B 的 React Query / equivalent cache key 至少包含：
+`question-answers + questionId + order + viewerScope`，其中 viewerScope 为
+`viewerPersonId | anon`；同时纳入实际分页参数（普通分页 key 或 infinite-query pageParam）。
+Person A logout → anon → Person B login 时必须切换 scope，不能复用 A 的数据、placeholder
+或异步请求结果来展示 B 的 Helpful 状态。网络请求的 caller session 与缓存 viewer scope
+必须一致；不能从用户可控 RPC 参数指定另一个 viewer。对 HTTP/SSR/equivalent cache 同样
+不得跨 viewer 共享完整 Answer list。这是关系状态正确性边界，不是 Service Reputation。
+
+此要求由 `ANSWER_HELPFUL_VIEWER_SCOPE_V1`、Page Contract consumer note 和 EC-2 guard
+保护；本轮只写 contract，不修改 AuthContext、React Query 或 UI。
 
 ## 九、隐私与 Legacy Cutover
 
@@ -236,7 +280,8 @@ UUID 当新 Question。旧内容导入是单独 reviewed job：核对作者、�
 
 ## 十、实施与 Production Gate
 
-1. Product Review 决定本文件第五节四项选择，Architecture Review 确认存储/Helpful privacy 方案。
+1. 第五节四项产品决策及 Question listing/viewer scope 已锁定；本 PR 等最终 amendment 复核。
+   后续实现须完成 Helpful 物理方案数据库验证，必要的替代方案必须重新 Architecture Review。
 2. 新任务创建新的 timestamped additive migration；本 PR 不放任何 draft SQL 到可部署目录。
 3. local PostgreSQL 验证 schema、完整 signature、grants、RLS、跨人写拒绝、self-helpful、并发 close、
    mark/fact一致性、soft-delete 子链隐藏、safe projection；Static Contract PASS ≠ Database Apply PASS。
@@ -250,4 +295,5 @@ UUID 当新 Question。旧内容导入是单独 reviewed job：核对作者、�
 C/D 复用同一 identity/DTO。不得提前开始 EC-3 Matching 或 EC-4 Conversation/Payment。
 
 Production DB mutation = **NO**；Migration applied = **NO**；Edge deployment = **NO**。
-EC-2A contract 可供审查；Production 与 Shared Core consumer **NOT READY**。
+EC-2A contract **APPROVED-NOT-DEPLOYED**；本次 amendment 可供最终复核，PR 仍 Draft、不得
+自动 merge。Production 与 Shared Core consumer **NOT READY**。

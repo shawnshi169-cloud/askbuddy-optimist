@@ -4,6 +4,7 @@ export const BLUEPRINT_RUNTIME_STATUS = [
   "legacy-compatibility",
   "not-deployed",
   "contract-proposed",
+  "contract-approved",
 ] as const;
 export type BlueprintRuntimeStatus = (typeof BLUEPRINT_RUNTIME_STATUS)[number];
 
@@ -49,8 +50,8 @@ export const PRODUCT_BLUEPRINT_V1_DOMAIN_MAP = {
   questionAnswerReply: {
     domain: "question-answer-reply",
     target: "free public answers, helpful feedback, one-level replies, no acceptance",
-    currentRuntime: "EC-2A contract proposed, not deployed; accepted-answer and point-reward legacy fields/RPCs remain active",
-    runtimeStatus: "contract-proposed",
+    currentRuntime: "EC-2A contract approved, not deployed, not client consumable; accepted-answer and point-reward legacy fields/RPCs remain active",
+    runtimeStatus: "contract-approved",
     newCodePolicy: "target-contract-only",
     phase: "EC-2",
   },

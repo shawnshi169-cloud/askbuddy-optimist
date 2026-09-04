@@ -2,7 +2,7 @@ import type { Id, ISODateTime } from "./contracts";
 import type { ProductChannelSlug } from "./product-channels";
 import type { PublicPersonId, PublicPersonSummary } from "./public-person";
 
-/** EC-2A 审查中的目标 DTO，不是已部署 RPC 或 legacy row 的别名。 */
+/** EC-2A 已批准但未部署的目标 DTO，不是 legacy row 的别名。 */
 export type CanonicalQuestionIdV1 = Id;
 export type CanonicalAnswerIdV1 = Id;
 export type CanonicalAnswerReplyIdV1 = Id;
@@ -42,7 +42,10 @@ export interface CanonicalQuestionDetailV1 extends CanonicalQuestionV1 {
 
 export interface AnswerHelpfulSummaryV1 {
   helpfulCount: number;
-  /** anon 为 false；authenticated 只反映当前 caller 的真实 Helpful 关系。 */
+  /**
+   * Viewer-scoped，不是 public-global fact。anon 为 false；authenticated 保留 auth.uid()，
+   * 只反映 caller 自己的真实 Helpful 关系。未来列表缓存须含 questionId/order/viewerPersonId-or-anon。
+   */
   viewerHasMarkedHelpful: boolean;
 }
 

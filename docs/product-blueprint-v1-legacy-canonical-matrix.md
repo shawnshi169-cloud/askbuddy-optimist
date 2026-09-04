@@ -81,7 +81,7 @@
 
 ## Current / Target 使用规则
 
-EC-2A 增补（contract-proposed，未部署）：
+EC-2A 增补（contract-approved，未部署、不可消费）：
 
 | Legacy / Target | Current Runtime Usage | Canonical Replacement | Compatibility Strategy | Migration Phase | Owner | Can new code depend on it? |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -90,9 +90,9 @@ EC-2A 增补（contract-proposed，未部署）：
 | accepted/is_accepted | legacy 接受答案与结算 | 不存在对应新 canonical fact | 不映射为 Helpful、Closed、Best | EC-2 | A | NO |
 | answer_likes | legacy 自己也可能点赞，like_count/likes_count | unique Person Helpful，self-helpful prohibited | 不自动复制旧 likes/counters | EC-2 | A | NO |
 | post_comments / question_tags | social comment / 文本标签 | Answer Reply / Canonical Topic association | 不改名复用；Topic 当前仅 [] | EC-2/EC-3 | A | NO，跨域复用禁止 |
-| 12 个 EC-2A RPC proposals | 不在 Production catalog/types/whitelist | PROPOSED_QUESTION_ANSWER_V1_RPCS | read/write DTO runtime parser 仅用于 contract review | EC-2 | A | NO，直到部署与 consumer gate |
+| 12 个 EC-2A RPC proposals | 产品 contract 已批准；不在 Production catalog/types/whitelist | PROPOSED_QUESTION_ANSWER_V1_RPCS | read/write DTO runtime parser；SQL 仍待实现验证 | EC-2 | A | NO，直到部署与 consumer gate |
 
-精确 input/output、auth/RLS 与 review pending 项见
+精确 input/output、最低 auth/RLS、已锁定决策与仍 gated 的 Helpful 物理实现见
 [EC-2A 决策](canonical-question-answer-v1-contract-decision.md)。
 
 1. `RPC_CATALOG.status = canonical` 只说明当前 P1.4 runtime/grant contract，不自动等于

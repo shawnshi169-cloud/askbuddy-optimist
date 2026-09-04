@@ -5,7 +5,7 @@
 EC-2A 增补：Question/Answer/Reply 的最新审查 contract 见
 [Canonical Question / Answer / Reply v1](canonical-question-answer-v1-contract-decision.md)。
 本文件 EC-0 Current Runtime 章节保留历史审计时间语境；EC-1/EC-1B 完成状态以对应 closeout
-与 main consumer 代码为准。EC-2A 新 contract 为 contract-proposed，尚未部署。
+与 main consumer 代码为准。EC-2A contract 已批准（contract-approved），尚未部署且不可消费。
 
 本决策负责把目标产品模型写入仓库级 Canonical Product Contract。它不删除旧数据库
 对象，也不表示 EC-1 至 EC-5 的 storage、RPC、UI、支付、RTC、AI 或录制能力已经部署。
@@ -252,7 +252,7 @@ P1.4 当前 runtime/grant truth，Blueprint eligibility 必须查新的 policy m
 | Public Person Identity + Read | `PublicPersonId` 与 safe RPC 已部署；`/person` UI 未接线 | Universal Person identity/read | Production ready（仅此 read boundary） |
 | Person UI / Experience | `/person` consumer 与 Experience UI/API 未完成 | Universal Person profile + Experience | Not deployed / partial consumer cutover |
 | Experience | 无 canonical storage/API | Person-owned Experience | Not deployed |
-| Question/Answer | reward/accepted/status/RPC 仍运行 | EC-2A 必填 Context + CNY 最高预算意愿 + free Answer + Helpful + one-level Reply | Contract proposed，未部署 |
+| Question/Answer | reward/accepted/status/RPC 仍运行 | EC-2A 必填 Context + CNY 最高预算意愿 + free Answer + Helpful + one-level Reply | Contract approved，未部署、不可消费 |
 | Home Search | question/expert/skill/post | all/person/question | Legacy compatibility |
 | Channel | 固定四频道 + expert collection | fixed channels + Person/Question discovery | Legacy compatibility |
 | Canonical Topic / Transition | 无跨模块 topic layer 或 directed transition graph | shared semantic topic + directed Experience relation | Not deployed |
@@ -339,10 +339,13 @@ P1.4 当前 runtime/grant truth，Blueprint eligibility 必须查新的 policy m
 - 旧 answer/reward/order 数据不能直接丢弃，需要历史展示与 reconciliation 策略。
 - service/payment/recording 在 provider、政策、协议未完成前必须保持 unavailable。
 
-开放问题（不在 EC-0 自行决定）：
+EC-2A 增补：产品决策已锁定为 close-only、删除 Answer 整组隐藏、真实 Helpful/时间排序、
+Topic 仅 []；基础 Question list 固定时间倒序/ID 升序，Answer list cache 必须区分 viewer。
+Contract 已批准但未部署，见专项决策；Helpful 物理实现仍待数据库验证。
+
+以下保留 EC-0 当时的开放问题记录，后续已锁定的 EC-1 项以该阶段 closeout 为准：
 
 - Experience kind、visibility、排序、编辑历史和 claim/evidence 结构；
-- EC-2A Question reopen、删除 Answer 后的 Reply projection、综合排序与 Topic 接入，见专项决策；
 - Booking timeout、取消阈值、争议窗口；
 - 平台费率与版本化配置来源；
 - Rating eligibility、评分尺度与申诉；

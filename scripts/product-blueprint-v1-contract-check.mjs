@@ -123,9 +123,11 @@ try {
   assert.doesNotMatch(enabledService, /Point|points|expertId|commissionRate|15%/);
 
   const domainMap = api.PRODUCT_BLUEPRINT_V1_DOMAIN_MAP;
-  assert.equal(domainMap.questionAnswerReply.runtimeStatus, "contract-proposed");
+  assert.equal(domainMap.questionAnswerReply.runtimeStatus, "contract-approved");
   assert.equal(domainMap.questionAnswerReply.newCodePolicy, "target-contract-only");
   assert.match(domainMap.questionAnswerReply.currentRuntime, /not deployed/);
+  assert.match(domainMap.questionAnswerReply.currentRuntime, /contract approved/);
+  assert.match(domainMap.questionAnswerReply.currentRuntime, /not client consumable/);
   assert.equal(domainMap.person, undefined);
   assert.equal(domainMap.publicPersonIdentityAndRead.runtimeStatus, "production-ready");
   assert.equal(

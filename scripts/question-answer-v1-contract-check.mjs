@@ -10,6 +10,7 @@ const sources = [
   "packages/shared-types/src/product-channels.ts",
   "packages/shared-types/src/question-answer-v1.ts",
   "packages/shared-api/src/question-answer-v1.ts",
+  "packages/shared-api/src/page-contract-map.ts",
 ];
 // Generated CommonJS harness stays under node_modules so the existing Zod resolves.
 const temp = mkdtempSync(join(root, "node_modules/.ec2-contract-"));
@@ -41,6 +42,7 @@ try {
     }).outputText);
   }
   const api = require(join(temp, "packages/shared-api/src/question-answer-v1.js"));
+  const { PAGE_CONTRACT_MAP: pages } = require(join(temp, "packages/shared-api/src/page-contract-map.js"));
   const types = require(join(temp, "packages/shared-types/src/question-answer-v1.js"));
   const { PRODUCT_CHANNEL_SLUGS: channels } = require(join(temp, "packages/shared-types/src/product-channels.js"));
   const rpc = api.PROPOSED_QUESTION_ANSWER_V1_RPCS;
@@ -94,7 +96,10 @@ try {
     check(`${name}: gated exact signature and valid round trip`, () => {
       assert.equal(rpc[name].signature, `public.${name}(${signature})`);
       assert.equal(rpc[name].authentication, /^(get|list)_/.test(name) ? "anon" : "authenticated");
-      assert.equal(rpc[name].runtimeStatus, "contract-proposed");
+      assert.equal(rpc[name].runtimeStatus, "contract-approved");
+      assert.equal(rpc[name].use, "canonical-blueprint-contract");
+      assert.equal(rpc[name].authenticationMeaning, "minimum-access-requirement");
+      assert.equal(rpc[name].preserveCallerIdentity, true);
       assert.equal(rpc[name].productionDeployed, false);
       assert.equal(rpc[name].productionGrantReview, "pending-deployment");
       assert.equal(rpc[name].clientConsumable, false);
@@ -176,6 +181,7 @@ try {
     for (const value of [[id(8)], ["#topic"], ["career-development"], null, "topic"]) {
       rejected(() => api.parseCanonicalQuestionV1({ ...question, topicIds: value }));
       rejected(() => rpc.create_question_v1.parseParams({ ...create, p_topic_ids: value }));
+      rejected(() => rpc.update_question_v1.parseParams({ ...create, ...questionParams, p_topic_ids: value }));
     }
   });
   check("business lifecycle cannot accept legacy or moderation state", () => {
@@ -238,18 +244,92 @@ try {
       personIdentity: "auth.users.id = profiles.user_id", actorSource: "auth.uid()",
       questionRequiresContext: true, businessStatusSeparateFromModeration: true,
       closedAllowsNewAnswerOrReply: false, publicAnswerIsFree: true,
+      closeIsIdempotent: true, deletedOrHiddenAnswerHidesEntireBranch: true,
+      retainDeletedAnswerAndReplyStorage: true, publicTombstoneCard: false,
+      ordering: {
+        questionList: ["createdAt DESC", "questionId ASC"],
+        comprehensiveAnswers: ["helpfulCount DESC", "createdAt DESC", "answerId ASC"],
+        latestAnswers: ["createdAt DESC", "answerId ASC"],
+        replies: ["createdAt ASC", "replyId ASC"],
+      },
       budgetField: "deepExchangeBudgetMaxCents", budgetCurrency: "CNY", budgetUnit: "cents",
       budgetValidation: "null-or-positive-safe-integer", budgetIsConsumable: false,
       budgetAffectsAnswerRanking: false, legacyBountyMigration: "forbidden", legacyAcceptanceMigration: "forbidden",
       selfHelpfulAllowed: false, helpfulCreatesReputation: false, replyParent: "answer-only",
+      helpfulMaxPerPersonAnswer: 1, helpfulCountSource: "real-helpful-facts", helpfulAddRemoveIdempotent: true,
       replyHasHelpful: false, replyCreatesConversation: false, relevantExperience: "omitted-until-EC-3",
     });
     const review = api.QUESTION_ANSWER_V1_PRODUCT_REVIEW;
-    for (const item of Object.values(review)) assert.equal(item.status, "pending-review");
-    assert.equal(review.questionReopen.recommendation, "close-only");
-    assert.equal(review.deletedAnswerWithReplies.recommendation, "hide-entire-answer-branch");
-    assert.deepEqual(review.comprehensiveOrder.recommendation, ["helpfulCount DESC", "createdAt DESC", "answerId ASC"]);
-    assert.equal(review.canonicalTopic.recommendation, "empty-topicIds-until-resolver");
+    assert.deepEqual(Object.keys(review).sort(), ["canonicalTopic", "comprehensiveOrder", "deletedAnswerWithReplies", "questionReopen"]);
+    for (const item of Object.values(review)) assert.equal(item.status, "locked");
+    assert.equal(review.questionReopen.decision, "close-only");
+    assert.equal(review.deletedAnswerWithReplies.decision, "hide-entire-answer-branch");
+    assert.deepEqual(review.comprehensiveOrder.decision, ["helpfulCount DESC", "createdAt DESC", "answerId ASC"]);
+    assert.equal(review.canonicalTopic.decision, "empty-topicIds-until-resolver");
+    assert.equal(rpc.reopen_question_v1, undefined);
+  });
+  check("locked deterministic listing order without adding a Question order parameter", () => {
+    assert.deepEqual(api.QUESTION_ANSWER_V1_ORDERING, {
+      questionList: ["createdAt DESC", "questionId ASC"],
+      comprehensiveAnswers: ["helpfulCount DESC", "createdAt DESC", "answerId ASC"],
+      latestAnswers: ["createdAt DESC", "answerId ASC"],
+      replies: ["createdAt ASC", "replyId ASC"],
+    });
+    assert.deepEqual(rpc.list_questions_v1.defaultOrdering, ["createdAt DESC", "questionId ASC"]);
+    assert.deepEqual(rpc.list_question_answers_v1.ordering, {
+      comprehensive: ["helpfulCount DESC", "createdAt DESC", "answerId ASC"],
+      latest: ["createdAt DESC", "answerId ASC"],
+    });
+    assert.deepEqual(rpc.list_answer_replies_v1.defaultOrdering, ["createdAt ASC", "replyId ASC"]);
+    rejected(() => rpc.list_questions_v1.parseParams({ ...questionsPage, p_order: "latest" }));
+    assert.doesNotMatch(JSON.stringify(api.QUESTION_ANSWER_V1_ORDERING), /budget|expert|accepted|bounty|price|score|view|replyCount/i);
+  });
+  check("public-readable Answer list preserves caller-specific Helpful state", () => {
+    const scope = api.ANSWER_HELPFUL_VIEWER_SCOPE_V1;
+    assert.deepEqual(rpc.list_question_answers_v1.viewerProjection, scope);
+    assert.equal(scope.field, "viewerHasMarkedHelpful");
+    assert.equal(scope.scope, "viewer");
+    assert.equal(scope.identitySource, "auth.uid()");
+    assert.equal(scope.anonymousValue, false);
+    assert.equal(scope.authenticatedValue, "caller-own-helpful-relation");
+    // Parser does not invent auth: it preserves the server's viewer value, never forces an anon view.
+    for (const value of [true, false]) {
+      const result = rpc.list_question_answers_v1.parseResult({
+        answers: [{ ...answer, viewerHasMarkedHelpful: value }], nextOffset: null,
+      }, answersPage);
+      assert.equal(result.answers[0].viewerHasMarkedHelpful, value);
+    }
+    rejected(() => rpc.list_question_answers_v1.parseParams({ ...answersPage, p_viewer_person_id: id(99) }));
+  });
+  check("future consumer cache governance includes viewer identity and anon scope", () => {
+    assert.deepEqual(api.ANSWER_HELPFUL_VIEWER_SCOPE_V1.futureConsumerCache, {
+      minimumKeyParts: ["question-answers", "questionId", "order", "viewerScope"],
+      viewerScope: "viewerPersonId-or-anon", includePaginationParams: true,
+      shareAcrossViewers: false, authChange: "switch-scope-without-reusing-previous-viewer-result",
+    });
+    const page = pages.find((entry) => entry.pageId === "question-detail");
+    assert.ok(page);
+    const notes = page.notes.join("\n");
+    assert.match(notes, /question-answers \+ questionId \+ order \+ viewerScope/);
+    assert.match(notes, /viewerPersonId \| anon/);
+    assert.match(notes, /logout\/login.*不可复用上一 viewer/);
+    assert.match(notes, /public-read 是最低访问要求，不强制 anonymous/);
+    assert.match(notes, /authenticated 请求保留 caller identity/);
+    assert.match(notes, /viewerHasMarkedHelpful.*caller 自己的关系.*anon=false/);
+    assert.match(notes, /contract-approved.*未部署、不可消费/);
+    assert.equal(page.implementationStatus, "legacy");
+    for (const name of Object.keys(rpc)) {
+      assert.ok(![...page.currentReadContracts, ...page.currentWriteContracts].includes(`rpc:${name}`));
+    }
+  });
+  check("Helpful physical candidate remains implementation-gated after logical approval", () => {
+    assert.deepEqual(api.ANSWER_HELPFUL_STORAGE_REVIEW_V1, {
+      logicalInvariants: "locked",
+      physicalCandidate: "private-owner-mark-and-anonymous-public-fact",
+      physicalStatus: "implementation-gated", productionVerified: false,
+      validationRequired: ["local-postgresql", "rls", "grants", "concurrency", "rollback-smoke"],
+      alternativeRequiresArchitectureReview: true, consumerMayRedefineStorage: false,
+    });
   });
   check("canonical ID typing and no unsafe casts or network adapter", () => {
     const source = read("packages/shared-types/src/question-answer-v1.ts");
@@ -268,11 +348,17 @@ try {
   });
   check("decision retains privacy, deployment and direct DML safety gates", () => {
     const doc = read("docs/canonical-question-answer-v1-contract-decision.md");
-    for (const text of ["LEGACY", "SECURITY INVOKER", "search_path = ''", "Direct Data API", "advisory lock", "pending-review", "REMAINS", "Static Contract PASS ≠ Database Apply PASS"]) {
+    for (const text of ["LEGACY", "SECURITY INVOKER", "search_path = ''", "Direct Data API", "advisory lock", "CONTRACT APPROVED / NOT DEPLOYED / NOT CLIENT CONSUMABLE", "REMAINS", "Static Contract PASS ≠ Database Apply PASS"]) {
       assert.ok(doc.toLowerCase().includes(text.toLowerCase()), `Decision missing ${text}`);
     }
     assert.match(doc, /未新增 migration，未部署 RPC，未改 UI/);
     assert.match(doc, /预算默认 null，采纳\/点赞绝不转换为 Helpful\/Closed/);
+    assert.doesNotMatch(doc, /pending-review|CONTRACT-PROPOSED/);
+    assert.match(doc, /list_questions_v1.*createdAt DESC, questionId ASC/);
+    assert.match(doc, /不是已经 Production 证明的唯一 SQL 实现/);
+    assert.match(doc, /viewerPersonId \| anon/);
+    assert.match(doc, /anonymous 和 authenticated\s+均可调用/);
+    assert.match(doc, /重新 Architecture Review/);
     assert.match(read("package.json"), /"test:question-answer-v1"/);
     assert.ok(JSON.parse(read("package.json")).scripts["test:contracts"].includes("question-answer-v1-contract-check.mjs"));
   });
