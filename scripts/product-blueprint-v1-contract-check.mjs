@@ -67,22 +67,27 @@ try {
   );
 
   const sharedSource = read("packages/shared-types/src/product-blueprint-v1.ts");
+  const questionAnswerSource = read("packages/shared-types/src/question-answer-v1.ts");
   const publicPersonSource = read("packages/shared-types/src/public-person.ts");
   assert.match(publicPersonSource, /type PublicPersonId = Id/);
-  assert.match(sharedSource, /authorId: PublicPersonId/);
+  assert.match(questionAnswerSource, /requesterPersonId: PublicPersonId/);
+  assert.match(questionAnswerSource, /authorPersonId: PublicPersonId/);
   assert.match(sharedSource, /personId: PublicPersonId/);
   assert.doesNotMatch(sharedSource, /expertId|profilesId|profileId/);
 
-  const interfaceBlock = (name) => {
-    const start = sharedSource.indexOf(`export interface ${name}`);
+  const interfaceBlock = (name, source = sharedSource) => {
+    const start = source.indexOf(`export interface ${name}`);
     assert.ok(start >= 0, `Missing interface ${name}`);
-    const end = sharedSource.indexOf("\n}", start);
+    const end = source.indexOf("\n}", start);
     assert.ok(end > start, `Unterminated interface ${name}`);
-    return sharedSource.slice(start, end + 2);
+    return source.slice(start, end + 2);
   };
 
-  const questionTarget = interfaceBlock("PublicQuestionV1Target");
-  assert.match(questionTarget, /deepExchangeBudgetIntent/);
+  const questionTarget = interfaceBlock("CanonicalQuestionV1", questionAnswerSource);
+  assert.match(questionTarget, /deepExchangeBudgetMaxCents: number \| null/);
+  assert.match(questionTarget, /context: string;/);
+  assert.match(sharedSource, /type PublicQuestionV1Target = CanonicalQuestionV1/);
+  assert.match(sharedSource, /@deprecated EC-0 历史语义 placeholder/);
   assert.doesNotMatch(questionTarget, /accepted|reward|bounty|point/i);
 
   const budgetIntent = interfaceBlock("QuestionDeepExchangeBudgetIntent");
@@ -92,12 +97,12 @@ try {
     /amount|minimum|maximum|range|preset|storage|input/i,
   );
 
-  const answerTarget = interfaceBlock("PublicAnswerV1Target");
-  assert.match(answerTarget, /helpfulCount/);
+  const answerTarget = interfaceBlock("CanonicalAnswerV1", questionAnswerSource);
+  assert.match(answerTarget, /extends AnswerHelpfulSummaryV1/);
   assert.doesNotMatch(answerTarget, /accepted|serviceRating|helpedUser/i);
 
-  const replyTarget = interfaceBlock("AnswerReplyV1Target");
-  assert.match(replyTarget, /replyToPersonId/);
+  const replyTarget = interfaceBlock("CanonicalAnswerReplyV1", questionAnswerSource);
+  assert.match(replyTarget, /answerId: CanonicalAnswerIdV1/);
   assert.doesNotMatch(replyTarget, /parentReplyId/);
 
   const disabledService = interfaceBlock("DisabledPersonServiceSettingsV1Target");
@@ -118,6 +123,11 @@ try {
   assert.doesNotMatch(enabledService, /Point|points|expertId|commissionRate|15%/);
 
   const domainMap = api.PRODUCT_BLUEPRINT_V1_DOMAIN_MAP;
+  assert.equal(domainMap.questionAnswerReply.runtimeStatus, "contract-approved");
+  assert.equal(domainMap.questionAnswerReply.newCodePolicy, "target-contract-only");
+  assert.match(domainMap.questionAnswerReply.currentRuntime, /not deployed/);
+  assert.match(domainMap.questionAnswerReply.currentRuntime, /contract approved/);
+  assert.match(domainMap.questionAnswerReply.currentRuntime, /not client consumable/);
   assert.equal(domainMap.person, undefined);
   assert.equal(domainMap.publicPersonIdentityAndRead.runtimeStatus, "production-ready");
   assert.equal(
@@ -298,6 +308,7 @@ try {
   );
   assert.match(packageJson.scripts["test:contracts"], /p1-4d-demo-fixture-isolation-check\.mjs/);
   assert.match(packageJson.scripts["test:contracts"], /p1-4c-production-writes-check\.mjs/);
+  assert.match(packageJson.scripts["test:contracts"], /question-answer-v1-contract-check\.mjs/);
 
   console.log("Product Blueprint v1 contract truth guards passed.");
 } finally {

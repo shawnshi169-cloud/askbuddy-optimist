@@ -9,3 +9,4 @@ export * from "./capabilities";
 export * from "./public-person-v1";
 export * from "./product-blueprint-v1";
 export * from "./experience-v1";
+export * from "./question-answer-v1";

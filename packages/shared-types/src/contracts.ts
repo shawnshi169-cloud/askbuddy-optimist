@@ -204,7 +204,7 @@ export interface Profile {
   updated_at: ISODateTime;
 }
 
-/** @deprecated Legacy persisted question shape. Use PublicQuestionV1Target for new design work. */
+/** @deprecated Legacy persisted question shape. Use CanonicalQuestionV1 for EC-2A design only (not deployed). */
 export interface Question {
   id: Id;
   author_id: Id;

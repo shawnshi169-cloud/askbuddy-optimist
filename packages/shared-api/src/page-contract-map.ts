@@ -67,6 +67,7 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     notes: [
       "Current create_question_secure includes legacy bounty points and is not the Blueprint v1 publish contract.",
       "Blueprint v1 question budget is an optional deep-exchange budget; public answers remain free.",
+      "EC-2A create_question_v1 contract 已批准但未部署、不可消费：必填 Context、一个 Product Channel、nullable positive CNY deepExchangeBudgetMaxCents。",
     ],
   },
   {
@@ -158,6 +159,9 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     ],
     notes: [
       "Blueprint v1 has no accepted answer; current accept_answer_v2 remains currentWriteContracts compatibility truth only.",
+      "EC-2A Question/Answer/Reply contract-approved，但未部署、不可消费；当前 legacy 读写不变，普通客户端没有 moderation mutation 能力。",
+      "未来 list_question_answers_v1 public-read 是最低访问要求，不强制 anonymous：authenticated 请求保留 caller identity，viewerHasMarkedHelpful 只反映 caller 自己的关系；anon=false。",
+      "未来 Answer list cache key 至少为 question-answers + questionId + order + viewerScope（viewerPersonId | anon），还需纳入分页参数；logout/login 必须切换 scope，不可复用上一 viewer 的结果或 placeholder。本轮不修改 React Query/AuthContext。",
       "Public Answer is free; Helpful is answer feedback and never counts as helpedUserCount.",
       "Current create_answer_secure has no asker/answerer scheduling or availability contract.",
       "Demo question routes are development-only; production details preserve real loading/error truth.",

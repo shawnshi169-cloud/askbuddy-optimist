@@ -2,6 +2,11 @@
 
 状态：EC-0 Architecture Cutover
 
+EC-2A 增补：Question/Answer/Reply 的最新审查 contract 见
+[Canonical Question / Answer / Reply v1](canonical-question-answer-v1-contract-decision.md)。
+本文件 EC-0 Current Runtime 章节保留历史审计时间语境；EC-1/EC-1B 完成状态以对应 closeout
+与 main consumer 代码为准。EC-2A contract 已批准（contract-approved），尚未部署且不可消费。
+
 本决策负责把目标产品模型写入仓库级 Canonical Product Contract。它不删除旧数据库
 对象，也不表示 EC-1 至 EC-5 的 storage、RPC、UI、支付、RTC、AI 或录制能力已经部署。
 
@@ -137,7 +142,9 @@ Provider、完整简历、Experience、Verification 或开启 Service。
 
 ### Question / Answer / Reply
 
-- Question = title + context + optional deep-exchange budget intent。
+- Question = 必填 title + 必填 context + optional deepExchangeBudgetMaxCents。
+- EC-2A 已锁定预算为 CNY 分的 null 或正整数，表达后续单次 1:1 最高预算意愿，不是奖励、
+  成交价格、可消耗资金，也不参与 Answer 排序；Legacy bounty 不自动映射预算。
 - Public Answer 免费、可多条、无 accepted/unique-best contract。
 - Helpful 只评价该 Answer，不产生 service reputation，也不增加 `helpedUserCount`。
 - Reply 是 Answer 下的一层业务结构，可携带 `replyToPersonId` 显示“回复 @Person”，但
@@ -245,7 +252,7 @@ P1.4 当前 runtime/grant truth，Blueprint eligibility 必须查新的 policy m
 | Public Person Identity + Read | `PublicPersonId` 与 safe RPC 已部署；`/person` UI 未接线 | Universal Person identity/read | Production ready（仅此 read boundary） |
 | Person UI / Experience | `/person` consumer 与 Experience UI/API 未完成 | Universal Person profile + Experience | Not deployed / partial consumer cutover |
 | Experience | 无 canonical storage/API | Person-owned Experience | Not deployed |
-| Question/Answer | reward/accepted/status/RPC 仍运行 | free multi-answer + Helpful + one-level Reply | Legacy compatibility |
+| Question/Answer | reward/accepted/status/RPC 仍运行 | EC-2A 必填 Context + CNY 最高预算意愿 + free Answer + Helpful + one-level Reply | Contract approved，未部署、不可消费 |
 | Home Search | question/expert/skill/post | all/person/question | Legacy compatibility |
 | Channel | 固定四频道 + expert collection | fixed channels + Person/Question discovery | Legacy compatibility |
 | Canonical Topic / Transition | 无跨模块 topic layer 或 directed transition graph | shared semantic topic + directed Experience relation | Not deployed |
@@ -275,8 +282,8 @@ P1.4 当前 runtime/grant truth，Blueprint eligibility 必须查新的 policy m
 
 ### EC-2 Question + Answer + Reply
 
-- 新 Contract：Question Context、CNY deep-exchange budget intent、free Answer、Helpful、一层
-  Reply；budget 的单值/区间/preset representation 必须在 EC-2 决定。
+- 新 Contract：Question Context、deepExchangeBudgetMaxCents、free Answer、Helpful、一层
+  Reply；EC-2A 已锁定预算为 null 或正整数 CNY 分，不再等待单值/区间/preset 决策。
 - 新 Storage/RPC：additive vNext projection/action；不得复用 bounty/accepted 字段承载新语义。
 - Legacy Compatibility：现有 question/answer pages 和 accept RPC 暂时可运行。
 - Consumer Cutover：移除 accepted UI/notification/reward path，迁移 Question status。
@@ -332,10 +339,13 @@ P1.4 当前 runtime/grant truth，Blueprint eligibility 必须查新的 policy m
 - 旧 answer/reward/order 数据不能直接丢弃，需要历史展示与 reconciliation 策略。
 - service/payment/recording 在 provider、政策、协议未完成前必须保持 unavailable。
 
-开放问题（不在 EC-0 自行决定）：
+EC-2A 增补：产品决策已锁定为 close-only、删除 Answer 整组隐藏、真实 Helpful/时间排序、
+Topic 仅 []；基础 Question list 固定时间倒序/ID 升序，Answer list cache 必须区分 viewer。
+Contract 已批准但未部署，见专项决策；Helpful 物理实现仍待数据库验证。
+
+以下保留 EC-0 当时的开放问题记录，后续已锁定的 EC-1 项以该阶段 closeout 为准：
 
 - Experience kind、visibility、排序、编辑历史和 claim/evidence 结构；
-- deep-exchange budget 是单值、区间还是 preset；
 - Booking timeout、取消阈值、争议窗口；
 - 平台费率与版本化配置来源；
 - Rating eligibility、评分尺度与申诉；
