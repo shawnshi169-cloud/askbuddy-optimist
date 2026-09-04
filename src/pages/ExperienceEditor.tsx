@@ -3,6 +3,7 @@ import { Loader2 } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import ExperienceTransitionManager from '@/components/experience/ExperienceTransitionManager';
 import { EXPERIENCE_KIND_LABELS } from '@/components/experience/experiencePresentation';
+import { cityCodeForSubmit, withEditedCity } from '@/components/experience/experienceForm';
 import PageStateCard from '@/components/common/PageStateCard';
 import SubPageHeader from '@/components/layout/SubPageHeader';
 import {
@@ -113,14 +114,14 @@ const parseDraft = (value: unknown): ExperienceFormState | null => {
   };
 };
 
-const ExperienceEditor: React.FC = () => {
+const ExperienceEditorForm: React.FC = () => {
   const { experienceId } = useParams<{ experienceId?: string }>();
   const isEdit = Boolean(experienceId);
   const navigate = useNavigate();
   const routerLocation = useLocation();
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
-  const experiencesQuery = useMyPersonExperiences(Boolean(user) && isEdit);
+  const experiencesQuery = useMyPersonExperiences(user?.id, isEdit);
   const createMutation = useCreatePersonExperience(user?.id);
   const updateMutation = useUpdatePersonExperience(user?.id);
   const [form, setForm] = useState<ExperienceFormState>(EMPTY_FORM);
@@ -241,7 +242,7 @@ const ExperienceEditor: React.FC = () => {
           p_is_current: form.isCurrent,
           p_location_label: form.locationLabel.trim() || null,
           p_city: form.city.trim() || null,
-          p_city_code: form.cityCode.trim() || null,
+          p_city_code: cityCodeForSubmit(form),
           p_can_share: canShare,
           p_visibility: form.visibility,
           p_sort_order: existingExperience.sortOrder,
@@ -260,7 +261,7 @@ const ExperienceEditor: React.FC = () => {
           p_is_current: form.isCurrent,
           p_location_label: form.locationLabel.trim() || null,
           p_city: form.city.trim() || null,
-          p_city_code: form.cityCode.trim() || null,
+          p_city_code: cityCodeForSubmit(form),
           p_can_share: canShare,
           p_visibility: form.visibility,
           p_sort_order: null,
@@ -335,7 +336,7 @@ const ExperienceEditor: React.FC = () => {
           </p>
         ) : null}
 
-        <section className="space-y-5 rounded-[20px] border border-app-border-subtle bg-white p-4">
+        <section className="space-y-6" aria-label="经历故事">
           <div className="space-y-2">
             <Label htmlFor="experience-title">这段经历是什么？</Label>
             <Input
@@ -344,6 +345,7 @@ const ExperienceEditor: React.FC = () => {
               onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
               placeholder="例如：从化工背景到大客户销售"
               autoComplete="off"
+              className="min-h-12 text-[17px] font-semibold"
             />
           </div>
 
@@ -357,11 +359,17 @@ const ExperienceEditor: React.FC = () => {
               value={form.description}
               onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
               placeholder="从事情的背景、过程和你学到的东西说起…"
-              className="min-h-40 resize-y leading-6"
+              className="min-h-48 resize-y text-[16px] leading-7"
             />
           </div>
+        </section>
 
-          <div className="space-y-2">
+        <section className="divide-y divide-app-border-subtle rounded-2xl border border-app-border-subtle bg-white px-4" aria-labelledby="optional-details-title">
+          <div className="py-4">
+            <h2 id="optional-details-title" className="text-[15px] font-semibold text-slate-700">补充信息</h2>
+            <p className="mt-1 text-xs leading-5 text-slate-500">选择经历类型，时间和地点可以稍后补充。</p>
+          </div>
+          <div className="space-y-2 py-4">
             <Label htmlFor="experience-kind">经历类型</Label>
             <Select
               value={form.kind || undefined}
@@ -377,63 +385,61 @@ const ExperienceEditor: React.FC = () => {
               </SelectContent>
             </Select>
           </div>
-        </section>
-
-        <section className="space-y-4 rounded-[20px] border border-app-border-subtle bg-white p-4">
-          <h2 className="text-[16px] font-semibold text-slate-900">时间（可选）</h2>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="start-year">开始年份</Label>
-              <Input id="start-year" type="number" inputMode="numeric" min={1} max={9999} value={form.startYear} onChange={(event) => setForm((current) => ({ ...current, startYear: event.target.value }))} placeholder="2022" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="start-month">开始月份</Label>
-              <Input id="start-month" type="number" inputMode="numeric" min={1} max={12} value={form.startMonth} onChange={(event) => setForm((current) => ({ ...current, startMonth: event.target.value }))} placeholder="9" />
-            </div>
-          </div>
-          <div className="flex min-h-11 items-center justify-between gap-3">
-            <div>
-              <Label htmlFor="experience-current">目前仍在经历中</Label>
-              <p className="mt-0.5 text-xs text-slate-500">开启后不会保存结束时间。</p>
-            </div>
-            <Switch
-              id="experience-current"
-              checked={form.isCurrent}
-              onCheckedChange={(checked) => setForm((current) => ({
-                ...current,
-                isCurrent: checked,
-                endYear: checked ? '' : current.endYear,
-                endMonth: checked ? '' : current.endMonth,
-              }))}
-            />
-          </div>
-          {!form.isCurrent ? (
+          <div className="space-y-4 py-4">
+            <h3 className="text-sm font-medium text-slate-600">时间（可选）</h3>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label htmlFor="end-year">结束年份</Label>
-                <Input id="end-year" type="number" inputMode="numeric" min={1} max={9999} value={form.endYear} onChange={(event) => setForm((current) => ({ ...current, endYear: event.target.value }))} placeholder="2024" />
+                <Label htmlFor="start-year">开始年份</Label>
+                <Input id="start-year" type="number" inputMode="numeric" min={1} max={9999} value={form.startYear} onChange={(event) => setForm((current) => ({ ...current, startYear: event.target.value }))} placeholder="2022" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="end-month">结束月份</Label>
-                <Input id="end-month" type="number" inputMode="numeric" min={1} max={12} value={form.endMonth} onChange={(event) => setForm((current) => ({ ...current, endMonth: event.target.value }))} placeholder="6" />
+                <Label htmlFor="start-month">开始月份</Label>
+                <Input id="start-month" type="number" inputMode="numeric" min={1} max={12} value={form.startMonth} onChange={(event) => setForm((current) => ({ ...current, startMonth: event.target.value }))} placeholder="9" />
               </div>
             </div>
-          ) : null}
+            <div className="flex min-h-11 items-center justify-between gap-3">
+              <div>
+                <Label htmlFor="experience-current">目前仍在经历中</Label>
+                <p className="mt-0.5 text-xs text-slate-500">开启后不会保存结束时间。</p>
+              </div>
+              <Switch
+                id="experience-current"
+                checked={form.isCurrent}
+                onCheckedChange={(checked) => setForm((current) => ({
+                  ...current,
+                  isCurrent: checked,
+                  endYear: checked ? '' : current.endYear,
+                  endMonth: checked ? '' : current.endMonth,
+                }))}
+              />
+            </div>
+            {!form.isCurrent ? (
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="end-year">结束年份</Label>
+                  <Input id="end-year" type="number" inputMode="numeric" min={1} max={9999} value={form.endYear} onChange={(event) => setForm((current) => ({ ...current, endYear: event.target.value }))} placeholder="2024" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="end-month">结束月份</Label>
+                  <Input id="end-month" type="number" inputMode="numeric" min={1} max={12} value={form.endMonth} onChange={(event) => setForm((current) => ({ ...current, endMonth: event.target.value }))} placeholder="6" />
+                </div>
+              </div>
+            ) : null}
+          </div>
+          <div className="space-y-4 py-4">
+            <h3 className="text-sm font-medium text-slate-600">地点（可选）</h3>
+            <div className="space-y-2">
+              <Label htmlFor="experience-city">城市</Label>
+              <Input id="experience-city" value={form.city} onChange={(event) => setForm((current) => withEditedCity(current, event.target.value))} placeholder="例如：洛杉矶" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="experience-location">地点描述</Label>
+              <Input id="experience-location" value={form.locationLabel} onChange={(event) => setForm((current) => ({ ...current, locationLabel: event.target.value }))} placeholder="例如：南加州大学" />
+            </div>
+          </div>
         </section>
 
-        <section className="space-y-4 rounded-[20px] border border-app-border-subtle bg-white p-4">
-          <h2 className="text-[16px] font-semibold text-slate-900">地点（可选）</h2>
-          <div className="space-y-2">
-            <Label htmlFor="experience-city">城市</Label>
-            <Input id="experience-city" value={form.city} onChange={(event) => setForm((current) => ({ ...current, city: event.target.value }))} placeholder="例如：洛杉矶" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="experience-location">地点描述</Label>
-            <Input id="experience-location" value={form.locationLabel} onChange={(event) => setForm((current) => ({ ...current, locationLabel: event.target.value }))} placeholder="例如：南加州大学" />
-          </div>
-        </section>
-
-        <section className="space-y-3 rounded-[20px] border border-app-border-subtle bg-white p-4">
+        <section className="space-y-3 border-t border-app-border-subtle pt-5">
           <div>
             <Label htmlFor="experience-can-share">我可以分享</Label>
             <p className="mt-1 text-xs leading-5 text-slate-500">别人可以就哪些事情来问你？每行填写一项。</p>
@@ -447,7 +453,7 @@ const ExperienceEditor: React.FC = () => {
           />
         </section>
 
-        <section className="rounded-[20px] border border-app-border-subtle bg-white p-4">
+        <section className="border-t border-app-border-subtle pt-5">
           <h2 className="text-[16px] font-semibold text-slate-900">谁可以看到</h2>
           <div className="mt-3 grid grid-cols-2 gap-3" role="radiogroup" aria-label="经历可见范围">
             {(['private', 'public'] as const).map((visibility) => (
@@ -512,6 +518,12 @@ const ExperienceEditor: React.FC = () => {
       </AlertDialog>
     </div>
   );
+};
+
+const ExperienceEditor: React.FC = () => {
+  const { user } = useAuth();
+  const { experienceId } = useParams<{ experienceId?: string }>();
+  return <ExperienceEditorForm key={`${user?.id ?? 'signed-out'}:${experienceId ?? 'new'}`} />;
 };
 
 export default ExperienceEditor;

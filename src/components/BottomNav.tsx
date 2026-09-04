@@ -104,20 +104,19 @@ const BottomNav: React.FC<BottomNavProps> = ({ onBeforeNavigate }) => {
           <SheetTrigger asChild>
             <button
               className="w-1/5 flex flex-col items-center justify-center -mt-6 active:scale-[0.98]"
-              aria-label="发布内容"
+              aria-label="打开创建菜单"
               aria-haspopup="dialog"
               aria-expanded={isMenuOpen}
             >
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-app-action text-white shadow-[0_6px_16px_rgba(43,127,115,0.24)]">
                 <Plus size={22} />
               </div>
-              <span className="mt-0.5 text-[10px] font-semibold text-app-action">发布</span>
             </button>
           </SheetTrigger>
           <SheetContent side="bottom" className="mx-auto max-w-md rounded-t-[24px] border-app-border-subtle px-4 pb-8 pt-6 shadow-[0_-12px_36px_rgba(15,23,42,0.12)]">
             <SheetHeader className="pr-14 text-left">
               <SheetTitle className="text-xl font-semibold text-slate-800">想做点什么？</SheetTitle>
-              <SheetDescription>选择一个真实可用的发布入口</SheetDescription>
+              <SheetDescription>有问题想问，或分享一段真实经历</SheetDescription>
             </SheetHeader>
 
             <div className="mt-5 divide-y divide-app-border-subtle overflow-hidden rounded-2xl border border-app-border-subtle bg-white">

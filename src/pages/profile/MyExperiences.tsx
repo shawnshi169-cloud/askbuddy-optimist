@@ -26,16 +26,17 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { buildFromState, navigateToAuthWithReturn } from '@/utils/navigation';
 
-const MyExperiences: React.FC = () => {
+const MyExperiencesContent: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
-  const experiencesQuery = useMyPersonExperiences(Boolean(user));
+  const experiencesQuery = useMyPersonExperiences(user?.id);
   const visibilityMutation = useSetPersonExperienceVisibility(user?.id);
   const reorderMutation = useReorderPersonExperiences(user?.id);
   const deleteMutation = useDeletePersonExperience(user?.id);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [reorderMode, setReorderMode] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) navigateToAuthWithReturn(navigate, location);
@@ -111,6 +112,20 @@ const MyExperiences: React.FC = () => {
         <p className="text-sm leading-6 text-slate-500">
           记录你经历过、做过或熟悉的事情。公开的经历会展示在你的个人主页。
         </p>
+        {experiencesQuery.isSuccess && experiences.length > 1 ? (
+          <div className="mt-3 flex items-center justify-between gap-3">
+            <p className="text-xs text-slate-500">{reorderMode ? '使用上移、下移调整展示顺序' : '每一段经历，都可能帮到别人'}</p>
+            <Button
+              variant="ghost"
+              className="min-h-11 shrink-0 text-app-action"
+              onClick={() => setReorderMode((current) => !current)}
+              disabled={busy}
+              aria-pressed={reorderMode}
+            >
+              {reorderMode ? '完成' : '调整顺序'}
+            </Button>
+          </div>
+        ) : null}
 
         {experiencesQuery.isLoading ? (
           <div className="mt-5 space-y-4">
@@ -142,6 +157,7 @@ const MyExperiences: React.FC = () => {
                 key={experience.experienceId}
                 experience={experience}
                 ownerMode
+                reorderMode={reorderMode}
                 isFirst={index === 0}
                 isLast={index === experiences.length - 1}
                 busy={busy}
@@ -198,6 +214,11 @@ const MyExperiences: React.FC = () => {
       </AlertDialog>
     </div>
   );
+};
+
+const MyExperiences: React.FC = () => {
+  const { user } = useAuth();
+  return <MyExperiencesContent key={user?.id ?? 'signed-out'} />;
 };
 
 export default MyExperiences;
