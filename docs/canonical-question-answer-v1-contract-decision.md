@@ -1,11 +1,14 @@
 # Canonical Question / Answer / Reply v1 合同决策
 
-状态：**EC-2A CONTRACT APPROVED / NOT DEPLOYED / NOT CLIENT CONSUMABLE**。
+状态：**EC-2A CONTRACT APPROVED / EC-2C2 PRODUCTION DEPLOYED / NOT CLIENT CONSUMABLE**。
 
 Product + Architecture 已确认下述产品决策，EC-2A 已合入 main。
 批准产品语义不等于 Production 部署或 UI consumer cutover。
 EC-2B 的独立本地实现与执行证据见[本地实现记录](./canonical-question-answer-v1-local-implementation.md)。
 EC-2C1 的 Production 只读证据与部署计划见[Production 预检](./canonical-question-answer-v1-production-preflight.md)。
+EC-2C2 已应用并验证 backend storage/RPC；完整证据见[Production 部署记录](./canonical-question-answer-v1-production-deployment.md)。
+本状态只确认 Production backend capability，不表示 RPC catalog、普通客户端白名单或 UI consumer 已解锁；
+这些边界仍由后续 EC-2C3 单独审查。
 
 审计 baseline：`57d092166b4165ff27787c4f828281d040c36c84`（PR #37 merge）。
 EC-2A 当时只审计仓库 migration、Production-generated types 和真实 consumer；未重新查询远端数据库，

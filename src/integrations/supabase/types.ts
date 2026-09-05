@@ -39,6 +39,72 @@ export type Database = {
   }
   public: {
     Tables: {
+      answer_helpful_marks_v1: {
+        Row: {
+          answer_id: string
+          created_at: string
+          mark_id: string
+          person_id: string
+        }
+        Insert: {
+          answer_id: string
+          created_at?: string
+          mark_id?: string
+          person_id?: string
+        }
+        Update: {
+          answer_id?: string
+          created_at?: string
+          mark_id?: string
+          person_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "answer_helpful_marks_v1_answer_id_fkey"
+            columns: ["answer_id"]
+            isOneToOne: false
+            referencedRelation: "answers_v1"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpful_mark_fact_v1_fkey"
+            columns: ["mark_id", "answer_id"]
+            isOneToOne: true
+            referencedRelation: "answer_helpful_public_facts_v1"
+            referencedColumns: ["mark_id", "answer_id"]
+          },
+        ]
+      }
+      answer_helpful_public_facts_v1: {
+        Row: {
+          answer_id: string
+          mark_id: string
+        }
+        Insert: {
+          answer_id: string
+          mark_id: string
+        }
+        Update: {
+          answer_id?: string
+          mark_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "answer_helpful_public_facts_v1_answer_id_fkey"
+            columns: ["answer_id"]
+            isOneToOne: false
+            referencedRelation: "answers_v1"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "helpful_fact_mark_v1_fkey"
+            columns: ["mark_id", "answer_id"]
+            isOneToOne: true
+            referencedRelation: "answer_helpful_marks_v1"
+            referencedColumns: ["mark_id", "answer_id"]
+          },
+        ]
+      }
       answer_likes: {
         Row: {
           answer_id: string
@@ -64,6 +130,47 @@ export type Database = {
             columns: ["answer_id"]
             isOneToOne: false
             referencedRelation: "answers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      answer_replies_v1: {
+        Row: {
+          answer_id: string
+          author_person_id: string
+          body: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          moderation_visibility: string
+          updated_at: string
+        }
+        Insert: {
+          answer_id: string
+          author_person_id?: string
+          body: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          moderation_visibility?: string
+          updated_at?: string
+        }
+        Update: {
+          answer_id?: string
+          author_person_id?: string
+          body?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          moderation_visibility?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "answer_replies_v1_answer_id_fkey"
+            columns: ["answer_id"]
+            isOneToOne: false
+            referencedRelation: "answers_v1"
             referencedColumns: ["id"]
           },
         ]
@@ -117,6 +224,47 @@ export type Database = {
             columns: ["question_id"]
             isOneToOne: false
             referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      answers_v1: {
+        Row: {
+          author_person_id: string
+          body: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          moderation_visibility: string
+          question_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_person_id?: string
+          body: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          moderation_visibility?: string
+          question_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_person_id?: string
+          body?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          moderation_visibility?: string
+          question_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "answers_v1_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions_v1"
             referencedColumns: ["id"]
           },
         ]
@@ -1877,6 +2025,48 @@ export type Database = {
           },
         ]
       }
+      questions_v1: {
+        Row: {
+          context: string
+          created_at: string
+          deep_exchange_budget_max_cents: number | null
+          deleted_at: string | null
+          id: string
+          moderation_visibility: string
+          primary_channel: string
+          requester_person_id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          context: string
+          created_at?: string
+          deep_exchange_budget_max_cents?: number | null
+          deleted_at?: string | null
+          id?: string
+          moderation_visibility?: string
+          primary_channel: string
+          requester_person_id?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          context?: string
+          created_at?: string
+          deep_exchange_budget_max_cents?: number | null
+          deleted_at?: string | null
+          id?: string
+          moderation_visibility?: string
+          primary_channel?: string
+          requester_person_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       rate_limit_events: {
         Row: {
           action: string
@@ -2428,6 +2618,7 @@ export type Database = {
         }
         Returns: string
       }
+      close_question_v1: { Args: { p_question_id: string }; Returns: Json }
       confirm_recharge_payment: {
         Args: {
           p_callback_payload?: Json
@@ -2437,9 +2628,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      create_answer_reply_v1: {
+        Args: { p_answer_id: string; p_body: string }
+        Returns: Json
+      }
       create_answer_secure: {
         Args: { p_content: string; p_question_id: string }
         Returns: string
+      }
+      create_answer_v1: {
+        Args: { p_body: string; p_question_id: string }
+        Returns: Json
       }
       create_call_session_v1: {
         Args: {
@@ -2499,6 +2698,16 @@ export type Database = {
         }
         Returns: string
       }
+      create_question_v1: {
+        Args: {
+          p_context: string
+          p_deep_exchange_budget_max_cents: number
+          p_primary_channel: string
+          p_title: string
+          p_topic_ids: string[]
+        }
+        Returns: Json
+      }
       create_recharge_payment_order: {
         Args: { p_payment_method?: string; p_points: number }
         Returns: Json
@@ -2518,6 +2727,8 @@ export type Database = {
         Args: { p_content: string; p_topic_id: string }
         Returns: string
       }
+      delete_answer_reply_v1: { Args: { p_reply_id: string }; Returns: Json }
+      delete_answer_v1: { Args: { p_answer_id: string }; Returns: Json }
       delete_experience_claim_v1: {
         Args: { p_claim_id: string }
         Returns: string
@@ -2596,6 +2807,7 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: Json
       }
+      get_question_detail_v1: { Args: { p_question_id: string }; Returns: Json }
       get_search_suggestions_v2: {
         Args: { p_limit?: number; p_query?: string; p_type?: string }
         Returns: Json
@@ -2628,8 +2840,30 @@ export type Database = {
         Returns: boolean
       }
       is_service_role: { Args: never; Returns: boolean }
+      list_answer_replies_v1: {
+        Args: { p_answer_id: string; p_limit: number; p_offset: number }
+        Returns: Json
+      }
       list_content_reports: { Args: { p_status?: string }; Returns: Json }
       list_pending_recharge_orders: { Args: never; Returns: Json }
+      list_question_answers_v1: {
+        Args: {
+          p_limit: number
+          p_offset: number
+          p_order: string
+          p_question_id: string
+        }
+        Returns: Json
+      }
+      list_questions_v1: {
+        Args: {
+          p_limit: number
+          p_offset: number
+          p_primary_channel: string
+          p_status: string
+        }
+        Returns: Json
+      }
       mark_notifications_read: {
         Args: { p_notification_ids?: string[] }
         Returns: number
@@ -2705,6 +2939,10 @@ export type Database = {
         }
         Returns: string
       }
+      set_answer_helpful_v1: {
+        Args: { p_answer_id: string; p_is_helpful: boolean }
+        Returns: Json
+      }
       set_person_experience_visibility_v1: {
         Args: { p_experience_id: string; p_visibility: string }
         Returns: string
@@ -2758,6 +2996,17 @@ export type Database = {
           p_visibility: string
         }
         Returns: string
+      }
+      update_question_v1: {
+        Args: {
+          p_context: string
+          p_deep_exchange_budget_max_cents: number
+          p_primary_channel: string
+          p_question_id: string
+          p_title: string
+          p_topic_ids: string[]
+        }
+        Returns: Json
       }
       upsert_app_config: {
         Args: { p_description?: string; p_key: string; p_value: Json }

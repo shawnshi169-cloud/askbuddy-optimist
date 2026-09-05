@@ -88,10 +88,10 @@ try {
     list_answer_replies_v1: ["uuid,integer,integer", repliesPage, { replies: [reply], nextOffset: null }],
   };
   check("exact proposal capabilities", () => assert.deepEqual(Object.keys(rpc).sort(), Object.keys(cases).sort()));
-  const deployedSources = [
+  const consumerGatedSources = [
     "packages/shared-api/src/rpc-catalog.ts", "packages/shared-api/src/rpc-whitelist.ts",
-    "src/integrations/supabase/types.ts",
   ].map(read);
+  const generatedTypes = read("src/integrations/supabase/types.ts");
   for (const [name, [signature, input, output]] of Object.entries(cases)) {
     check(`${name}: gated exact signature and valid round trip`, () => {
       assert.equal(rpc[name].signature, `public.${name}(${signature})`);
@@ -108,7 +108,8 @@ try {
       assert.equal(rpc[name].searchPath, "");
       assert.deepEqual(rpc[name].parseParams(input), input);
       assert.deepEqual(rpc[name].parseResult(output, input), output);
-      for (const source of deployedSources) assert.doesNotMatch(source, new RegExp(`\\b${name}\\b`));
+      for (const source of consumerGatedSources) assert.doesNotMatch(source, new RegExp(`\\b${name}\\b`));
+      assert.match(generatedTypes, new RegExp(`\\b${name}\\s*:`));
     });
     check(`${name}: rejects missing and unknown fields, no fallback`, () => {
       for (const field of Object.keys(input)) {
@@ -348,8 +349,12 @@ try {
   });
   check("decision retains privacy, deployment and direct DML safety gates", () => {
     const doc = read("docs/canonical-question-answer-v1-contract-decision.md");
-    for (const text of ["LEGACY", "SECURITY INVOKER", "search_path = ''", "Direct Data API", "advisory lock", "CONTRACT APPROVED / NOT DEPLOYED / NOT CLIENT CONSUMABLE", "REMAINS", "Static Contract PASS ≠ Database Apply PASS"]) {
+    for (const text of ["LEGACY", "SECURITY INVOKER", "search_path = ''", "Direct Data API", "advisory lock", "EC-2C2 PRODUCTION DEPLOYED / NOT CLIENT CONSUMABLE", "REMAINS", "Static Contract PASS ≠ Database Apply PASS"]) {
       assert.ok(doc.toLowerCase().includes(text.toLowerCase()), `Decision missing ${text}`);
+    }
+    const deployment = read("docs/canonical-question-answer-v1-production-deployment.md");
+    for (const text of ["PRODUCTION MIGRATION APPLIED", "CLIENT NOT CONSUMABLE", "Persistent synthetic rows", "Security | 102 | 102 | 0", "Performance | 323 | 323 | 0", "EC-2C3"]) {
+      assert.ok(deployment.toLowerCase().includes(text.toLowerCase()), `Deployment record missing ${text}`);
     }
     assert.match(doc, /未新增 migration，未部署 RPC，未改 UI/);
     assert.match(doc, /预算默认 null，采纳\/点赞绝不转换为 Helpful\/Closed/);
@@ -363,7 +368,7 @@ try {
     assert.ok(JSON.parse(read("package.json")).scripts["test:contracts"].includes("question-answer-v1-contract-check.mjs"));
   });
   console.log(`EC-2 Question/Answer contract PASS (${assertions} groups; strict TypeScript + runtime parsers + proposal gates).`);
-  console.log("Contract-only: no database execution, migration apply or Production readiness claimed.");
+  console.log("Production generated types are present; client catalog and whitelist remain gated pending EC-2C3.");
 } finally {
   rmSync(temp, { recursive: true, force: true });
 }
