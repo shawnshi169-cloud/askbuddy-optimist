@@ -2,12 +2,13 @@
 
 状态：**EC-2A CONTRACT APPROVED / NOT DEPLOYED / NOT CLIENT CONSUMABLE**。
 
-Product + Architecture 已确认下述产品决策。本 PR 仍保持 Draft，等待最终 contract amendment
-复核；批准产品语义不等于批准 merge、数据库实现、Production 部署或 UI consumer cutover。
+Product + Architecture 已确认下述产品决策，EC-2A 已合入 main。
+批准产品语义不等于 Production 部署或 UI consumer cutover。
+EC-2B 的独立本地实现与执行证据见[本地实现记录](./canonical-question-answer-v1-local-implementation.md)。
 
 审计 baseline：`57d092166b4165ff27787c4f828281d040c36c84`（PR #37 merge）。
-本轮只审计仓库 migration、Production-generated types 和真实 consumer；未重新查询远端数据库，
-不把仓库审计表述成新的 Production smoke。未新增 migration，未部署 RPC，未改 UI。
+EC-2A 当时只审计仓库 migration、Production-generated types 和真实 consumer；未重新查询远端数据库，
+不把仓库审计表述成新的 Production smoke。EC-2A 未新增 migration，未部署 RPC，未改 UI。
 
 ## 一、已锁定的产品事实
 
@@ -212,7 +213,7 @@ write RPC，也不擅自锁定新产品限额。实现与部署前必须证明 a
 
 ## 八、Exact RPC Proposal
 
-12 个 RPC contract 已获产品批准，SQL 实现仍是 proposal：Production deployed=NO；grant review=pending-deployment；current client
+12 个 RPC contract 已获产品批准，EC-2B SQL 本地实现证据单独记录：Production deployed=NO；grant review=pending-deployment；current client
 consumable=NO。只有安全部署、真实 smoke、consumer review 三个 gate 均通过才能解锁。
 签名、参数及 response parser 的唯一机器定义为 `PROPOSED_QUESTION_ANSWER_V1_RPCS`。
 该 registry 保留原标识名；其 runtimeStatus=contract-approved，不再表示产品决策尚未确认。
@@ -280,9 +281,9 @@ UUID 当新 Question。旧内容导入是单独 reviewed job：核对作者、�
 
 ## 十、实施与 Production Gate
 
-1. 第五节四项产品决策及 Question listing/viewer scope 已锁定；本 PR 等最终 amendment 复核。
+1. 第五节四项产品决策及 Question listing/viewer scope 已锁定，EC-2A 已合并冻结。
    后续实现须完成 Helpful 物理方案数据库验证，必要的替代方案必须重新 Architecture Review。
-2. 新任务创建新的 timestamped additive migration；本 PR 不放任何 draft SQL 到可部署目录。
+2. EC-2B 独立任务创建 timestamped additive migration，仅允许本地执行，不代表已通过部署 gate。
 3. local PostgreSQL 验证 schema、完整 signature、grants、RLS、跨人写拒绝、self-helpful、并发 close、
    mark/fact一致性、soft-delete 子链隐藏、safe projection；Static Contract PASS ≠ Database Apply PASS。
 4. re-audit remote dependencies/Advisor，仅在单独部署授权后 dry-run，唯一 reviewed migration 才可 apply。
@@ -295,5 +296,5 @@ UUID 当新 Question。旧内容导入是单独 reviewed job：核对作者、�
 C/D 复用同一 identity/DTO。不得提前开始 EC-3 Matching 或 EC-4 Conversation/Payment。
 
 Production DB mutation = **NO**；Migration applied = **NO**；Edge deployment = **NO**。
-EC-2A contract **APPROVED-NOT-DEPLOYED**；本次 amendment 可供最终复核，PR 仍 Draft、不得
-自动 merge。Production 与 Shared Core consumer **NOT READY**。
+EC-2A contract **APPROVED-NOT-DEPLOYED**。EC-2B 仍需独立本地实现与安全复核，不自动 merge
+或部署。Production 与 Shared Core consumer **NOT READY**。
