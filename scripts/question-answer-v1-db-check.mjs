@@ -74,4 +74,4 @@ assert.match(source, /productionDeployed: false/);
 assert.match(source, /clientConsumable: false/);
 assert.match(source, /productionGrantReview: "pending-deployment"/);
 console.log(`EC-2B static DB contract PASS: ${tables.length} tables, ${publicFunctions.length} approved RPCs, ${functions.length} invoker functions.`);
-console.log("Static checks are not database execution evidence. Production and consumer remain gated.");
+console.log("Static checks do not replace the EC-2C2 deployment evidence; consumer machine truth remains gated pending EC-2C3.");
