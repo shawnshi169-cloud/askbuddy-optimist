@@ -5,6 +5,7 @@
 Product + Architecture 已确认下述产品决策，EC-2A 已合入 main。
 批准产品语义不等于 Production 部署或 UI consumer cutover。
 EC-2B 的独立本地实现与执行证据见[本地实现记录](./canonical-question-answer-v1-local-implementation.md)。
+EC-2C1 的 Production 只读证据与部署计划见[Production 预检](./canonical-question-answer-v1-production-preflight.md)。
 
 审计 baseline：`57d092166b4165ff27787c4f828281d040c36c84`（PR #37 merge）。
 EC-2A 当时只审计仓库 migration、Production-generated types 和真实 consumer；未重新查询远端数据库，
