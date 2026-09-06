@@ -6,8 +6,8 @@ import { resolveOptionalRows } from '../src/hooks/questionDetailEnrichment.ts';
 const root = resolve(import.meta.dirname, '..');
 const read = (path) => readFileSync(join(root, path), 'utf8');
 
-const page = read('src/pages/QuestionDetail.tsx');
-const answers = read('src/components/question/AnswerList.tsx');
+const page = read('src/pages/QuestionDetail.tsx').replace(/\s+/g, ' ');
+const answers = read('src/components/question/AnswerList.tsx').replace(/\s+/g, ' ');
 const answerDialog = read('src/components/AnswerDialog.tsx');
 const bottomBar = read('src/components/question/BottomBar.tsx');
 const questions = read('src/hooks/useQuestions.ts');
@@ -15,26 +15,24 @@ const moderation = read('src/hooks/useModeration.ts');
 const sheet = read('src/components/ui/sheet.tsx');
 
 assert.match(page, /<SubPageHeader[\s\S]{0,220}variant="content"/);
-assert.match(page, /question\.view_count \?\? 0[\s\S]{0,40}人看过/);
-assert.match(page, /answers\.length[\s\S]{0,40}个回答/);
-assert.match(page, /question\.bounty_points > 0/);
+// EC-2D cutover: UI consumes canonical Person/Answer DTOs, not legacy metrics.
+assert.match(page, /question\.answerCount/);
+assert.match(page, /question\.deepExchangeBudgetMaxCents !== null/);
 assert.match(page, /await copyTextToClipboard\(window\.location\.href\)/);
-assert.match(page, /createAnswer\.mutate\(/);
-assert.match(page, /navigate\(`\/expert-profile\/\$\{expertId\}`/);
+assert.match(page, /await createAnswer\.mutateAsync\(/);
+assert.match(page, /navigate\(`\/person\/\$\{personId\}`/);
 assert.match(page, /useSubmitContentReport/);
-assert.match(page, /targetId: question\.id[\s\S]{0,80}targetType: 'question'/);
+assert.match(page, /targetId: question\.questionId[\s\S]{0,80}targetType: 'question'/);
 assert.match(page, /variant="ghost"[\s\S]{0,260}aria-label="举报问题"/);
-assert.match(page, /展示数据不会提交举报/);
-assert.doesNotMatch(page, /专家回答|咨询专家|按热度排序|回复功能暂未开放|handleReply|SHARE_OPTIONS|邀请回答/);
-assert.doesNotMatch(page, /error\.message|surface-card|rounded-3xl/);
-
-assert.match(answers, /expertId: string \| null/);
-assert.match(answers, /answer\.expertId \?/);
-assert.match(answers, /onOpenPerson\(answer\.expertId!\)/);
-assert.match(answers, /已采纳/);
-assert.doesNotMatch(answers, /\bEye\b|viewCount|onReply|回复|评分|订单|咨询|已核验|已认证/);
+assert.doesNotMatch(page, /experts|bounty_points|view_count|acceptAnswer|useToggleFavorite|error\.message|surface-card|rounded-3xl/);
+assert.match(answers, /CanonicalAnswerV1/);
+assert.match(answers, /onOpenPerson\(answer\.authorPersonId\)/);
+assert.match(answers, /answer\.helpfulCount/);
+assert.match(answers, /answer\.replyCount/);
+assert.doesNotMatch(answers, /expertId|accepted|\bEye\b|viewCount|已采纳|评分|订单|咨询|已核验|已认证/);
 assert.doesNotMatch(answers, /surface-card|rounded-3xl|shadow/);
 
+// Legacy hook remains for Home/Search; preserve its independent fail-closed guards.
 assert.match(questions, /\.from\('experts'\)[\s\S]{0,120}\.select\('id, user_id, headline'\)/);
 assert.match(questions, /Promise\.allSettled/);
 assert.match(questions, /resolveOptionalRows\(expertsResult\)/);
@@ -72,7 +70,7 @@ assert.deepEqual(resolveOptionalRows({
 
 assert.match(answerDialog, /<SheetContent[\s\S]{0,80}side="bottom"/);
 assert.match(answerDialog, /submitting\?: boolean/);
-assert.match(answerDialog, /disabled=\{!message\.trim\(\) \|\| submitting\}/);
+assert.match(answerDialog, /disabled=\{!message\.trim\(\) \|\| submitting \|\| disabled\}/);
 assert.match(answerDialog, /type="submit"[\s\S]{0,100}variant="action"/);
 assert.doesNotMatch(answerDialog, /timeSlots|预约|服务|咨询|gradient/);
 assert.match(sheet, /h-11 w-11[\s\S]{0,420}<X className="h-4 w-4"/);

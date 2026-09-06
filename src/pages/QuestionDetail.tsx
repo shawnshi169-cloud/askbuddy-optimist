@@ -1,203 +1,186 @@
-import React, { useEffect, useState } from 'react';
-import { Bookmark, BookmarkCheck, Coins, Eye, Flag, MessageCircle, Share2 } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { useEffect, useRef, useState } from 'react';
+import { Flag, MoreHorizontal, Share2 } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import AnswerDialog from '@/components/AnswerDialog';
-import AnswerList, { type AnswerFeedItem } from '@/components/question/AnswerList';
+import AnswerList from '@/components/question/AnswerList';
 import BottomBar from '@/components/question/BottomBar';
-import Tags from '@/components/question/Tags';
+import { PersonSummary } from '@/components/question/PersonSummary';
+import { QuestionActionConfirm } from '@/components/question/QuestionActionConfirm';
+import { formatBudgetCents } from '@/components/question/questionForm';
 import SubPageHeader from '@/components/layout/SubPageHeader';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
-import { useAcceptAnswer } from '@/hooks/useAcceptAnswer';
-import { useSubmitContentReport } from '@/hooks/useModeration';
 import {
-  useCreateAnswer,
-  useQuestionDetail,
-  useQuestionFavoriteState,
-  useToggleFavorite,
-} from '@/hooks/useQuestions';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useSubmitContentReport } from '@/hooks/useModeration';
 import { useToast } from '@/hooks/use-toast';
-import { isPresentationFixtureAllowed } from '@/config/runtimeMode';
-import { demoQuestionDetails } from '@/lib/demoData';
-import { buildFromState, navigateBackOr, navigateToAuthWithReturn } from '@/utils/navigation';
+import { usePageScrollMemory } from '@/hooks/usePageScrollMemory';
+import {
+  useQuestionAnswerViewer,
+  useCanonicalQuestion,
+  useCanonicalAnswers,
+  useCreateCanonicalAnswer,
+  useCloseCanonicalQuestion,
+} from '@/hooks/useQuestionAnswerV1';
+import {
+  questionAnswerErrorText,
+  QuestionAnswerUiError,
+} from '@/lib/adapters/questionAnswerV1';
+import {
+  buildFromState,
+  navigateBackOr,
+  navigateToAuthWithReturn,
+} from '@/utils/navigation';
 import { copyTextToClipboard } from '@/utils/clipboard';
+import { PRODUCT_CHANNEL_CATALOG } from '../../packages/shared-types/src/product-channels';
+import type { AnswerOrderV1 } from '../../packages/shared-types/src/question-answer-v1';
 
-const formatTime = (dateString?: string | null) => {
-  if (!dateString) return null;
-  const date = new Date(dateString);
-  if (Number.isNaN(date.getTime())) return null;
-  return formatDistanceToNow(date, { addSuffix: true, locale: zhCN });
+const readSession = (key: string) => {
+  try {
+    return sessionStorage.getItem(key);
+  } catch {
+    return null;
+  }
 };
-
-const QuestionDetailSkeleton = ({ onBack }: { onBack: () => void }) => (
-  <div className="app-container min-h-[100dvh] bg-app-page pb-28">
-    <SubPageHeader title="问题详情" variant="content" onBack={onBack} />
-    <main className="animate-pulse px-4" aria-label="正在加载问题内容">
-      <section className="border-b border-app-border-subtle py-6">
-        <div className="h-4 w-28 rounded bg-slate-100" />
-        <div className="mt-5 h-7 w-11/12 rounded bg-slate-100" />
-        <div className="mt-3 h-7 w-3/4 rounded bg-slate-100" />
-        <div className="mt-5 h-4 w-full rounded bg-slate-100" />
-        <div className="mt-2 h-4 w-5/6 rounded bg-slate-100" />
-      </section>
-      <section className="py-6">
-        <div className="h-5 w-24 rounded bg-slate-100" />
-        {[0, 1].map((item) => (
-          <div key={item} className="border-b border-app-border-subtle py-5 last:border-0">
-            <div className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-full bg-slate-100" />
-              <div className="space-y-2">
-                <div className="h-4 w-24 rounded bg-slate-100" />
-                <div className="h-3 w-36 rounded bg-slate-100" />
-              </div>
-            </div>
-            <div className="mt-4 h-4 w-full rounded bg-slate-100" />
-            <div className="mt-2 h-4 w-4/5 rounded bg-slate-100" />
-          </div>
-        ))}
-      </section>
-    </main>
+const saveSession = (key: string, value: string) => {
+  try {
+    sessionStorage.setItem(key, value);
+  } catch {
+    /* Navigation still works without persistence. */
+  }
+};
+const ContentSkeleton = () => (
+  <div
+    className="animate-pulse space-y-6 px-4 py-6"
+    role="status"
+    aria-label="正在加载问题内容"
+  >
+    <div className="h-5 w-32 rounded bg-slate-100" />
+    <div className="h-7 w-full rounded bg-slate-100" />
+    <div className="h-7 w-3/4 rounded bg-slate-100" />
+    {[0, 1, 2].map((i) => (
+      <div key={i} className="space-y-3 border-t border-app-border-subtle pt-6">
+        <div className="h-11 w-11 rounded-full bg-slate-100" />
+        <div className="h-4 w-full rounded bg-slate-100" />
+        <div className="h-4 w-5/6 rounded bg-slate-100" />
+      </div>
+    ))}
   </div>
 );
 
-const QuestionDetail = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+const QuestionContent = ({
+  id,
+  viewer,
+}: {
+  id: string;
+  viewer: string | null;
+}) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
-  const presentationFixturesEnabled = isPresentationFixtureAllowed();
-  const requestedDemoQuestion = !!id?.startsWith('demo-question-');
-  const isDemoQuestion = presentationFixturesEnabled && requestedDemoQuestion;
-  const questionId = id || '';
-
-  const {
-    data,
-    isLoading,
-    error,
-    refetch,
-  } = useQuestionDetail(requestedDemoQuestion ? '' : questionId);
-  const createAnswer = useCreateAnswer();
-  const toggleFavorite = useToggleFavorite();
-  const favoriteState = useQuestionFavoriteState(isDemoQuestion ? '' : questionId);
-  const acceptAnswer = useAcceptAnswer();
-  const submitReport = useSubmitContentReport();
-  const [isAnswerDialogOpen, setIsAnswerDialogOpen] = useState(false);
-
-  const goBack = () => navigateBackOr(navigate, '/', { location });
-
+  const stateKey = `canonical-question-ui:${id}:${viewer ?? 'anon'}`;
+  const [order, setOrder] = useState<AnswerOrderV1>(() =>
+    readSession(`${stateKey}:order`) === 'latest' ? 'latest' : 'comprehensive',
+  );
+  const origin = useRef<unknown>(location.state);
+  if (!origin.current) {
+    try {
+      origin.current = JSON.parse(readSession(`${stateKey}:origin`) ?? 'null');
+    } catch {
+      /* Use route fallback. */
+    }
+  }
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'auto' });
-  }, [id]);
-
-  if (requestedDemoQuestion && !presentationFixturesEnabled) {
-    return (
-      <div className="app-container min-h-[100dvh] bg-app-page">
-        <SubPageHeader title="问题详情" variant="content" onBack={goBack} />
-        <main className="flex min-h-[65dvh] flex-col items-center justify-center px-6 text-center">
-          <h2 className="text-lg font-semibold text-slate-900">演示问题不可用</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-500">当前运行环境未启用展示数据。</p>
-          <Button type="button" variant="outline" className="mt-5 h-11 rounded-full px-6" onClick={goBack}>
-            返回
-          </Button>
-        </main>
-      </div>
-    );
-  }
-
-  if (!requestedDemoQuestion && isLoading) {
-    return <QuestionDetailSkeleton onBack={goBack} />;
-  }
-
-  const demoData = isDemoQuestion
-    ? demoQuestionDetails[questionId as keyof typeof demoQuestionDetails]
-    : null;
-  const resolvedData = isDemoQuestion ? demoData : data;
-
-  if (error || !resolvedData) {
-    return (
-      <div className="app-container min-h-[100dvh] bg-app-page">
-        <SubPageHeader title="问题详情" variant="content" onBack={goBack} />
-        <main className="flex min-h-[65dvh] flex-col items-center justify-center px-6 text-center">
-          <h2 className="text-lg font-semibold text-slate-900">问题暂时加载失败</h2>
-          <p className="mt-2 max-w-xs text-sm leading-6 text-slate-500">
-            网络或服务似乎遇到了问题，请稍后重试。
-          </p>
-          {!requestedDemoQuestion ? (
-            <Button
-              type="button"
-              variant="action"
-              className="mt-5 h-11 rounded-full px-7"
-              onClick={() => void refetch()}
-            >
-              重试
-            </Button>
-          ) : null}
-          <Button type="button" variant="ghost" className="mt-2 h-11 rounded-full px-6" onClick={goBack}>
-            返回
-          </Button>
-        </main>
-      </div>
-    );
-  }
-
-  const { question, answers } = resolvedData;
-  const questionAuthorId = ('author_id' in question && question.author_id)
-    ? question.author_id
-    : question.user_id;
-  const questionTime = formatTime(question.created_at);
-  const answerItems: AnswerFeedItem[] = answers.map((answer) => ({
-    id: answer.id,
-    name: answer.profile_nickname || '匿名用户',
-    avatar: answer.profile_avatar || null,
-    headline: 'expert_headline' in answer ? answer.expert_headline || null : null,
-    content: answer.content,
-    time: formatTime(answer.created_at),
-    expertId: 'expert_id' in answer ? answer.expert_id || null : null,
-    accepted: answer.is_accepted,
-  }));
-
-  const handleAnswerDialogSubmit = (payload: { message: string }) => {
-    if (!user) {
-      toast({ title: '请先登录', variant: 'destructive' });
-      navigateToAuthWithReturn(navigate, location);
-      return;
-    }
-
-    if (isDemoQuestion) {
-      toast({
-        title: '这是演示问题',
-        description: '展示数据不会写入真实回答。',
-      });
-      setIsAnswerDialogOpen(false);
-      return;
-    }
-
-    createAnswer.mutate({
-      question_id: questionId,
-      content: payload.message,
-    }, {
-      onSuccess: () => setIsAnswerDialogOpen(false),
+    if (location.state)
+      saveSession(`${stateKey}:origin`, JSON.stringify(location.state));
+  }, [location.state, stateKey]);
+  const { prepareForNavigation } = usePageScrollMemory(
+    `question:${id}:${viewer ?? 'anon'}`,
+  );
+  const query = useCanonicalQuestion(id, viewer);
+  const question = query.data?.question;
+  const answersQuery = useCanonicalAnswers(
+    id,
+    order,
+    viewer,
+    Boolean(question),
+  );
+  const createAnswer = useCreateCanonicalAnswer(viewer);
+  const close = useCloseCanonicalQuestion(viewer);
+  const report = useSubmitContentReport();
+  const [answerOpen, setAnswerOpen] = useState(false);
+  const [answerError, setAnswerError] = useState('');
+  const [actionError, setActionError] = useState('');
+  const [closeOpen, setCloseOpen] = useState(false);
+  const active = useRef(true);
+  useEffect(() => {
+    active.current = true;
+    return () => {
+      active.current = false;
+    };
+  }, []);
+  const back = () => {
+    prepareForNavigation();
+    navigateBackOr(navigate, '/', {
+      location: { ...location, state: origin.current },
     });
   };
-
-  const handleCollect = () => {
-    if (!user) {
-      toast({ title: '请先登录', variant: 'destructive' });
-      navigateToAuthWithReturn(navigate, location);
-      return;
-    }
-    if (isDemoQuestion) {
-      toast({ title: '这是演示问题', description: '展示数据不会写入收藏。' });
-      return;
-    }
-    toggleFavorite.mutate(questionId);
+  const auth = () => {
+    prepareForNavigation();
+    navigateToAuthWithReturn(navigate, location);
   };
-
-  const handleShareQuestion = async () => {
+  const openPerson = (personId: string) => {
+    prepareForNavigation();
+    navigate(`/person/${personId}`, { state: buildFromState(location) });
+  };
+  const beginAnswer = () => {
+    if (question?.status !== 'open') return;
+    if (!viewer) {
+      auth();
+      return;
+    }
+    setAnswerError('');
+    setAnswerOpen(true);
+  };
+  const submitAnswer = async ({ message }: { message: string }) => {
+    if (!question || question.status !== 'open' || createAnswer.isPending)
+      return;
+    setAnswerError('');
+    try {
+      await createAnswer.mutateAsync({
+        p_question_id: question.questionId,
+        p_body: message,
+      });
+      if (!active.current) return;
+      setAnswerOpen(false);
+      toast({ title: '回答已提交' });
+    } catch (cause) {
+      if (!active.current) return;
+      setAnswerError(questionAnswerErrorText(cause));
+      if (
+        cause instanceof QuestionAnswerUiError &&
+        cause.key === 'QUESTION_CLOSED'
+      )
+        void query.refetch();
+    }
+  };
+  const closeQuestion = async () => {
+    if (!question || close.isPending) return;
+    setActionError('');
+    try {
+      await close.mutateAsync({ p_question_id: question.questionId });
+      if (active.current) setCloseOpen(false);
+    } catch (cause) {
+      if (active.current) {
+        setCloseOpen(false);
+        setActionError(questionAnswerErrorText(cause));
+      }
+    }
+  };
+  const share = async () => {
     try {
       await copyTextToClipboard(window.location.href);
       toast({ title: '分享链接已复制' });
@@ -209,187 +192,290 @@ const QuestionDetail = () => {
       });
     }
   };
-
-  const handleReportQuestion = () => {
-    if (!user) {
-      toast({ title: '请先登录', variant: 'destructive' });
-      navigateToAuthWithReturn(navigate, location);
+  const submitReport = () => {
+    if (!viewer) {
+      auth();
       return;
     }
-    if (isDemoQuestion) {
-      toast({ title: '这是演示问题', description: '展示数据不会提交举报。' });
-      return;
-    }
-
-    submitReport.mutate({
-      targetId: question.id,
+    if (!question || report.isPending) return;
+    report.mutate({
+      targetId: question.questionId,
       targetType: 'question',
       reason: '疑似违规或垃圾内容',
       details: `来自问题详情页：${question.title}`,
     });
   };
-
-  const handleAcceptAnswer = (answerId: string) => {
-    if (!user) {
-      toast({ title: '请先登录', variant: 'destructive' });
-      navigateToAuthWithReturn(navigate, location);
-      return;
-    }
-    acceptAnswer.mutate({ answerId, questionId }, {
-      onSuccess: () => toast({ title: '已采纳回答' }),
-      onError: () => toast({
-        title: '采纳失败',
-        description: '当前无法采纳这条回答，请稍后重试。',
-        variant: 'destructive',
-      }),
-    });
-  };
-
-  const openPerson = (expertId: string) => {
-    navigate(`/expert-profile/${expertId}`, { state: buildFromState(location) });
-  };
-
-  const isQuestionOwner = user?.id === questionAuthorId;
-  const hasAcceptedAnswer = answers.some((answer) => answer.is_accepted);
-  const acceptingAnswerId = acceptAnswer.isPending ? acceptAnswer.variables?.answerId || null : null;
-  const tags = [...(question.tags || [])].slice(0, 4);
-
+  const notFound =
+    !id ||
+    (!query.isPending && !query.isError && !question) ||
+    (query.error instanceof QuestionAnswerUiError &&
+      ['TARGET_NOT_FOUND_OR_INACCESSIBLE', 'INVALID_INPUT'].includes(
+        query.error.key,
+      ));
   return (
     <div className="app-container min-h-[100dvh] bg-app-page pb-28">
       <SubPageHeader
         title="问题详情"
         variant="content"
-        onBack={goBack}
-        right={(
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="h-11 w-11 rounded-full text-slate-600 hover:bg-app-action-soft hover:text-app-action"
-            onClick={() => void handleShareQuestion()}
-            aria-label="复制问题分享链接"
-          >
-            <Share2 aria-hidden size={19} />
-          </Button>
-        )}
+        onBack={back}
+        right={
+          question ? (
+            <Button
+              variant="ghost"
+              className="h-11 w-11 p-0 text-slate-600"
+              aria-label="分享问题"
+              onClick={() => void share()}
+            >
+              <Share2 size={18} />
+            </Button>
+          ) : undefined
+        }
       />
-
-      <main className="px-4">
-        <section className="border-b border-app-border-subtle py-6" aria-labelledby="question-title">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10 shrink-0">
-              <AvatarImage src={question.profile_avatar || undefined} alt={question.profile_nickname || '匿名用户'} />
-              <AvatarFallback>{(question.profile_nickname || '匿').slice(0, 1)}</AvatarFallback>
-            </Avatar>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-slate-800">
-                {question.profile_nickname || '匿名用户'}
-              </p>
-              {questionTime ? <p className="mt-0.5 text-xs text-slate-400">{questionTime}</p> : null}
-            </div>
-          </div>
-
-          <h1 id="question-title" className="mt-5 text-[22px] font-semibold leading-8 tracking-[-0.01em] text-slate-950">
-            {question.title}
-          </h1>
-
-          {question.content ? (
-            <p className="mt-4 whitespace-pre-wrap text-[15px] leading-7 text-slate-700">
-              {question.content}
+      {notFound ? (
+        <div className="px-4 py-16">
+          <h2 className="text-lg font-semibold text-slate-800">
+            问题不存在或暂时无法访问
+          </h2>
+          <p className="mt-3 text-sm leading-6 text-slate-500">
+            链接可能已失效，或内容已不可见。
+          </p>
+          <Button
+            variant="ghost"
+            className="mt-4 h-11 text-app-action"
+            onClick={back}
+          >
+            返回
+          </Button>
+        </div>
+      ) : query.isError ? (
+        <div role="alert" className="px-4 py-16">
+          <h2 className="text-lg font-semibold text-slate-800">
+            问题暂时加载失败
+          </h2>
+          <p className="mt-3 text-sm text-slate-500">
+            网络或服务似乎遇到了问题，请稍后重试。
+          </p>
+          <Button
+            variant="ghost"
+            className="mt-4 h-11 text-app-action"
+            onClick={() => void query.refetch()}
+          >
+            重试
+          </Button>
+        </div>
+      ) : query.isPending ? (
+        <ContentSkeleton />
+      ) : question ? (
+        <main className="px-4">
+          <section className="border-b border-app-border-subtle py-6">
+            <PersonSummary
+              person={question.requester}
+              personId={question.requesterPersonId}
+              createdAt={question.createdAt}
+              onOpenPerson={openPerson}
+            />
+            <h1 className="mt-5 break-words text-[22px] font-semibold leading-8 text-slate-900">
+              {question.title}
+            </h1>
+            <p className="mt-4 whitespace-pre-wrap break-words text-base leading-7 text-slate-700">
+              {question.context}
             </p>
-          ) : null}
-
-          {tags.length > 0 ? <div className="mt-4"><Tags tags={tags} /></div> : null}
-
-          <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500">
-            <span className="inline-flex items-center gap-1.5">
-              <MessageCircle aria-hidden size={14} />
-              {answers.length} 个回答
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Eye aria-hidden size={14} />
-              {question.view_count ?? 0} 人看过
-            </span>
-            {question.bounty_points > 0 ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 font-medium text-amber-700">
-                <Coins aria-hidden size={14} />
-                {question.bounty_points} 积分
+            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-slate-500">
+              <span>
+                {
+                  PRODUCT_CHANNEL_CATALOG.find(
+                    (channel) => channel.slug === question.primaryChannel,
+                  )?.label
+                }
               </span>
+              <span>{question.answerCount} 个回答</span>
+              <span>{question.status === 'closed' ? '已关闭' : '开放中'}</span>
+            </div>
+            {question.deepExchangeBudgetMaxCents !== null ? (
+              <div className="mt-4 border-l-2 border-app-action/20 pl-3">
+                <p className="text-sm text-slate-700">
+                  深入交流预算 最高 ¥
+                  {formatBudgetCents(question.deepExchangeBudgetMaxCents)}
+                </p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">
+                  仅表示后续深入交流意愿，公开回答仍然免费。
+                </p>
+              </div>
             ) : null}
-          </div>
-
-          <div className="mt-4 flex items-center gap-1 border-t border-app-border-subtle pt-2">
-            {(!user || !favoriteState.isError) ? (
+            {question.status === 'closed' ? (
+              <p className="mt-4 text-sm leading-6 text-slate-500">
+                问题已关闭，仍可查看已有回答。
+              </p>
+            ) : null}
+            <div className="mt-3 flex items-center justify-end gap-2">
               <Button
-                type="button"
                 variant="ghost"
-                size="sm"
-                className="h-11 rounded-full px-3 text-xs text-slate-600 hover:bg-slate-50"
-                onClick={handleCollect}
-                disabled={toggleFavorite.isPending || (!!user && favoriteState.isLoading)}
-                aria-label={favoriteState.data ? '取消收藏问题' : '收藏问题'}
+                className="h-11 gap-1.5 px-2 text-xs text-slate-500"
+                aria-label="举报问题"
+                disabled={report.isPending}
+                onClick={submitReport}
               >
-                {favoriteState.data ? (
-                  <BookmarkCheck aria-hidden size={15} className="mr-1.5 text-app-action" />
-                ) : (
-                  <Bookmark aria-hidden size={15} className="mr-1.5" />
-                )}
-                {favoriteState.data ? '已收藏' : '收藏问题'}
+                <Flag size={14} />
+                {report.isPending ? '提交中…' : '举报'}
+              </Button>
+              {viewer === question.requesterPersonId &&
+              question.status === 'open' ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="h-11 w-11 p-0 text-slate-500"
+                      aria-label="问题管理"
+                    >
+                      <MoreHorizontal size={18} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      className="min-h-11"
+                      onSelect={() => setCloseOpen(true)}
+                    >
+                      关闭问题
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : null}
+            </div>
+            {actionError && (
+              <p role="alert" className="text-sm text-red-700">
+                {actionError}
+              </p>
+            )}
+          </section>
+          <section className="py-6" aria-label="公开回答">
+            <header className="mb-5 flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-[17px] font-semibold text-slate-900">
+                {question.answerCount} 个回答
+              </h2>
+              <div className="flex" aria-label="回答排序">
+                {(
+                  [
+                    { value: 'comprehensive', label: '综合' },
+                    { value: 'latest', label: '最新' },
+                  ] as const
+                ).map((item) => (
+                  <Button
+                    key={item.value}
+                    variant="ghost"
+                    className={`h-11 px-3 text-xs ${order === item.value ? 'text-app-action' : 'text-slate-500'}`}
+                    aria-pressed={order === item.value}
+                    onClick={() => {
+                      setOrder(item.value);
+                      saveSession(`${stateKey}:order`, item.value);
+                    }}
+                  >
+                    {item.label}
+                  </Button>
+                ))}
+              </div>
+            </header>
+            {answersQuery.isPending ? (
+              <p
+                role="status"
+                className="animate-pulse py-5 text-sm text-slate-500"
+              >
+                正在加载回答…
+              </p>
+            ) : null}
+            {answersQuery.isError ? (
+              <div role="alert" className="mb-4 text-sm text-slate-600">
+                回答暂时无法加载。
+                <Button
+                  variant="ghost"
+                  className="h-11 text-app-action"
+                  onClick={() => void answersQuery.refetch()}
+                >
+                  重试
+                </Button>
+              </div>
+            ) : null}
+            {!answersQuery.isPending &&
+            !answersQuery.isError &&
+            answersQuery.data?.pages[0]?.answers.length === 0 ? (
+              <div className="py-6">
+                <h3 className="font-semibold text-slate-800">还没有回答</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  如果你经历过类似的事，可以分享你的经验。
+                </p>
+                {question.status === 'open' ? (
+                  <Button
+                    variant="ghost"
+                    className="mt-3 h-11 px-0 text-app-action"
+                    onClick={beginAnswer}
+                  >
+                    我来回答
+                  </Button>
+                ) : null}
+              </div>
+            ) : null}
+            <AnswerList
+              answers={
+                answersQuery.data?.pages.flatMap((page) => page.answers) ?? []
+              }
+              viewer={viewer}
+              closed={question.status === 'closed'}
+              onAuth={auth}
+              onOpenPerson={openPerson}
+            />
+            {answersQuery.hasNextPage ? (
+              <Button
+                variant="ghost"
+                className="mt-4 h-11 w-full text-app-action"
+                disabled={answersQuery.isFetchingNextPage}
+                onClick={() => void answersQuery.fetchNextPage()}
+              >
+                {answersQuery.isFetchingNextPage ? '加载中…' : '加载更多回答'}
               </Button>
             ) : null}
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-11 rounded-full px-3 text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-700"
-              onClick={handleReportQuestion}
-              disabled={submitReport.isPending}
-              aria-label="举报问题"
-            >
-              <Flag aria-hidden size={15} className="mr-1.5" />
-              {submitReport.isPending ? '提交中…' : '举报'}
-            </Button>
-          </div>
-        </section>
-
-        <section className="py-6" aria-labelledby="answers-heading">
-          <div className="mb-5">
-            <h2 id="answers-heading" className="text-[17px] font-semibold text-slate-900">
-              {answers.length} 个回答
-            </h2>
-          </div>
-
-          {answerItems.length > 0 ? (
-            <AnswerList
-              answers={answerItems}
-              onOpenPerson={openPerson}
-              onAccept={handleAcceptAnswer}
-              canAccept={isQuestionOwner && !hasAcceptedAnswer && !isDemoQuestion}
-              acceptingAnswerId={acceptingAnswerId}
+          </section>
+          {question.status === 'open' ? (
+            <BottomBar
+              onAnswer={beginAnswer}
+              loading={createAnswer.isPending}
             />
-          ) : (
-            <div className="border-y border-app-border-subtle py-10 text-center">
-              <h3 className="text-base font-semibold text-slate-800">还没有回答</h3>
-              <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-slate-500">
-                如果你经历过类似的事，可以分享你的经验。
-              </p>
-            </div>
-          )}
-        </section>
-      </main>
-
-      <BottomBar
-        onAnswer={() => setIsAnswerDialogOpen(true)}
-        loading={createAnswer.isPending}
-      />
-      <AnswerDialog
-        open={isAnswerDialogOpen}
-        onOpenChange={setIsAnswerDialogOpen}
-        onSubmit={handleAnswerDialogSubmit}
-        submitting={createAnswer.isPending}
-      />
+          ) : null}
+          <AnswerDialog
+            open={answerOpen}
+            onOpenChange={setAnswerOpen}
+            onSubmit={(payload) => void submitAnswer(payload)}
+            submitting={createAnswer.isPending}
+            error={answerError}
+            disabled={question.status === 'closed'}
+          />
+          <QuestionActionConfirm
+            open={closeOpen}
+            onOpenChange={setCloseOpen}
+            title="关闭这个问题？"
+            description="关闭后不能再新增回答或回复，现有内容仍保留。当前版本不支持重新打开。"
+            pending={close.isPending}
+            onConfirm={() => void closeQuestion()}
+          />
+        </main>
+      ) : null}
     </div>
   );
 };
-
+const QuestionDetail = () => {
+  const { id = '' } = useParams();
+  const { viewer, loading } = useQuestionAnswerViewer();
+  if (loading)
+    return (
+      <div className="app-container min-h-screen bg-app-page">
+        <SubPageHeader title="问题详情" variant="content" />
+        <ContentSkeleton />
+      </div>
+    );
+  return (
+    <QuestionContent
+      key={`${id}:${viewer ?? 'anon'}`}
+      id={id}
+      viewer={viewer}
+    />
+  );
+};
 export default QuestionDetail;

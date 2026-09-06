@@ -109,8 +109,9 @@ assert.match(topics, /if \(error\)[\s\S]{0,160}isPresentationFixtureAllowed\(\)[
 assert.match(topics, /topicId\.startsWith\('demo-topic-'\)[\s\S]{0,220}isPresentationFixtureAllowed\(\)/);
 assert.doesNotMatch(topics, /if \(fallbackResult\.error\) return \[\]/);
 
+// Canonical detail no longer consumes presentation fixtures at all.
+assert.doesNotMatch(read('src/pages/QuestionDetail.tsx'), /demoData|demoQuestion|fixture|fallbackResult/);
 for (const path of [
-  'src/pages/QuestionDetail.tsx',
   'src/pages/ExpertProfile.tsx',
   'src/pages/ExpertDetail.tsx',
   'src/pages/ChatDetail.tsx',
