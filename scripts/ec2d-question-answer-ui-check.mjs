@@ -157,6 +157,8 @@ await check('UI only canonical contract, real one-level interactions and server-
   assert.match(answers, /viewer === answer\.authorPersonId/);
   assert.match(answers, /p_is_helpful: !answer\.viewerHasMarkedHelpful/);
   assert.match(answers, /onOpenPerson\(answer\.authorPersonId\)/);
+  assert.match(answers, />\s*问问TA\s*</);
+  assert.doesNotMatch(answers, /看看TA/);
   assert.match(replies, /if \(closed \|\| create\.isPending/);
   assert.match(replies, /await create\.mutateAsync[\s\S]*setBody\(''\)/);
   assert.match(replies, /viewer === reply\.authorPersonId/);

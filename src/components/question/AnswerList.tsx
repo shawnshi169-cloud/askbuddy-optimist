@@ -113,7 +113,7 @@ const AnswerItem = ({
           className="h-11 px-1 text-xs text-app-action"
           onClick={() => onOpenPerson(answer.authorPersonId)}
         >
-          看看TA
+          问问TA
         </Button>
         {viewer === answer.authorPersonId ? (
           <Button
