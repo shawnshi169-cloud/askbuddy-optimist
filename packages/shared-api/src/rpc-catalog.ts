@@ -30,6 +30,11 @@ import type {
   UpdateExperienceTransitionV1Params,
   UpdatePersonExperienceV1Params,
 } from "./experience-v1";
+import type {
+  QuestionAnswerV1RpcName,
+  QuestionAnswerV1RpcParams,
+  QuestionAnswerV1RpcResult,
+} from "./question-answer-v1";
 
 export type JsonPrimitive = string | number | boolean | null;
 export type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
@@ -336,6 +341,17 @@ const rpc = <Request, Response>() => <Name extends string>(
   note,
 });
 
+const questionAnswerRpc = <Name extends QuestionAnswerV1RpcName>(
+  name: Name,
+  authentication: "anon" | "authenticated",
+  note: string,
+) => rpc<QuestionAnswerV1RpcParams<Name>, QuestionAnswerV1RpcResult<Name>>()(
+  name, "canonical", authentication, "questions",
+  `QuestionAnswerV1RpcParams<"${name}">`,
+  `QuestionAnswerV1RpcResult<"${name}">`,
+  "aligned", note,
+);
+
 export const RPC_CATALOG = {
   accept_answer_v2: rpc<AcceptAnswerV2Params, AcceptAnswerV2Result>()(
     "accept_answer_v2", "canonical", "authenticated", "questions",
@@ -355,6 +371,54 @@ export const RPC_CATALOG = {
   create_answer_secure: rpc<CreateAnswerSecureParams, string>()(
     "create_answer_secure", "canonical", "authenticated", "questions",
     "CreateAnswerSecureParams", "UUID", "aligned",
+  ),
+  create_question_v1: questionAnswerRpc(
+    "create_question_v1", "authenticated",
+    "Canonical Person-owned Question create; requester derives from auth.uid() and topicIds remains empty until EC-3.",
+  ),
+  update_question_v1: questionAnswerRpc(
+    "update_question_v1", "authenticated",
+    "Canonical owner update for an open Question; it cannot mutate lifecycle or moderation fields.",
+  ),
+  close_question_v1: questionAnswerRpc(
+    "close_question_v1", "authenticated",
+    "Canonical idempotent close-only lifecycle action; closed is not solved, accepted, paid, or completed.",
+  ),
+  get_question_detail_v1: questionAnswerRpc(
+    "get_question_detail_v1", "anon",
+    "Public safe Question detail projection; authenticated calls preserve caller identity.",
+  ),
+  list_questions_v1: questionAnswerRpc(
+    "list_questions_v1", "anon",
+    "Public deterministic Question listing; this is not EC-3 ranking or personalization.",
+  ),
+  create_answer_v1: questionAnswerRpc(
+    "create_answer_v1", "authenticated",
+    "Canonical free public Person Answer; no Expert, Service, accepted-answer, bounty, or payment gate.",
+  ),
+  delete_answer_v1: questionAnswerRpc(
+    "delete_answer_v1", "authenticated",
+    "Canonical author soft delete; normal projections hide the complete Answer and Reply branch.",
+  ),
+  list_question_answers_v1: questionAnswerRpc(
+    "list_question_answers_v1", "anon",
+    "Public-readable safe Answer projection; viewerHasMarkedHelpful is scoped to the authenticated caller or false for anon.",
+  ),
+  set_answer_helpful_v1: questionAnswerRpc(
+    "set_answer_helpful_v1", "authenticated",
+    "Canonical idempotent Helpful relation; self-helpful is forbidden and Helpful is not Reputation.",
+  ),
+  create_answer_reply_v1: questionAnswerRpc(
+    "create_answer_reply_v1", "authenticated",
+    "Canonical one-level Reply create; it does not create a Conversation, Booking, or Payment fact.",
+  ),
+  delete_answer_reply_v1: questionAnswerRpc(
+    "delete_answer_reply_v1", "authenticated",
+    "Canonical Reply author soft delete.",
+  ),
+  list_answer_replies_v1: questionAnswerRpc(
+    "list_answer_replies_v1", "anon",
+    "Public safe one-level Reply listing ordered by createdAt then replyId.",
   ),
   create_topic_discussion_secure: rpc<CreateTopicDiscussionSecureParams, string>()(
     "create_topic_discussion_secure", "compatibility-only", "service_role", "topics",

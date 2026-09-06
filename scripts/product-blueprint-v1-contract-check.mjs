@@ -123,11 +123,12 @@ try {
   assert.doesNotMatch(enabledService, /Point|points|expertId|commissionRate|15%/);
 
   const domainMap = api.PRODUCT_BLUEPRINT_V1_DOMAIN_MAP;
-  assert.equal(domainMap.questionAnswerReply.runtimeStatus, "contract-approved");
-  assert.equal(domainMap.questionAnswerReply.newCodePolicy, "target-contract-only");
-  assert.match(domainMap.questionAnswerReply.currentRuntime, /not deployed/);
+  assert.equal(domainMap.questionAnswerReply.runtimeStatus, "production-ready");
+  assert.equal(domainMap.questionAnswerReply.newCodePolicy, "may-use-deployed-contract");
   assert.match(domainMap.questionAnswerReply.currentRuntime, /contract approved/);
-  assert.match(domainMap.questionAnswerReply.currentRuntime, /not client consumable/);
+  assert.match(domainMap.questionAnswerReply.currentRuntime, /12 canonical RPCs deployed/);
+  assert.match(domainMap.questionAnswerReply.currentRuntime, /authenticated HTTP consumer-smoke verified/);
+  assert.match(domainMap.questionAnswerReply.currentRuntime, /UI remains legacy and is not wired/);
   assert.equal(domainMap.person, undefined);
   assert.equal(domainMap.publicPersonIdentityAndRead.runtimeStatus, "production-ready");
   assert.equal(
@@ -141,7 +142,6 @@ try {
   assert.equal(domainMap.transition.runtimeStatus, "production-ready");
   assert.equal(domainMap.transition.newCodePolicy, "may-use-deployed-contract");
   for (const key of [
-    "questionAnswerReply",
     "homeSearchMatching",
     "productChannels",
     "canonicalTopic",
@@ -196,6 +196,16 @@ try {
 
   const rpcPolicy = api.PRODUCT_BLUEPRINT_V1_RPC_POLICY;
   assert.equal(rpcPolicy.get_public_person_profile_v1.newBlueprintCodeMayDepend, true);
+  for (const name of [
+    "create_question_v1", "update_question_v1", "close_question_v1",
+    "get_question_detail_v1", "list_questions_v1", "create_answer_v1",
+    "delete_answer_v1", "list_question_answers_v1", "set_answer_helpful_v1",
+    "create_answer_reply_v1", "delete_answer_reply_v1", "list_answer_replies_v1",
+  ]) {
+    assert.equal(rpcPolicy[name].use, "canonical-blueprint", name);
+    assert.equal(rpcPolicy[name].newBlueprintCodeMayDepend, true, name);
+    assert.match(rpcPolicy[name].replacement, /Production deployed|public safe|deterministic public|viewer-scoped/, name);
+  }
   for (const name of [
     "create_experience_claim_v1",
     "update_experience_claim_v1",

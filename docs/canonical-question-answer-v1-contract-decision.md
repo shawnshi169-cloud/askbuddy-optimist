@@ -1,14 +1,16 @@
 # Canonical Question / Answer / Reply v1 合同决策
 
-状态：**EC-2A CONTRACT APPROVED / EC-2C2 PRODUCTION DEPLOYED / NOT CLIENT CONSUMABLE**。
+状态：**EC-2 CONTRACT APPROVED / PRODUCTION BACKEND DEPLOYED / CLIENT CONSUMER GATE PASSED / UI NOT IMPLEMENTED**。
 
 Product + Architecture 已确认下述产品决策，EC-2A 已合入 main。
 批准产品语义不等于 Production 部署或 UI consumer cutover。
 EC-2B 的独立本地实现与执行证据见[本地实现记录](./canonical-question-answer-v1-local-implementation.md)。
 EC-2C1 的 Production 只读证据与部署计划见[Production 预检](./canonical-question-answer-v1-production-preflight.md)。
 EC-2C2 已应用并验证 backend storage/RPC；完整证据见[Production 部署记录](./canonical-question-answer-v1-production-deployment.md)。
-本状态只确认 Production backend capability，不表示 RPC catalog、普通客户端白名单或 UI consumer 已解锁；
-这些边界仍由后续 EC-2C3 单独审查。
+EC-2C3 已使用两个临时隔离 Auth user 完成真实 authenticated PostgREST read/write smoke，且定向清理后
+所有 synthetic row 为 0；证据见[Consumer Gate 记录](./canonical-question-answer-v1-consumer-gate.md)。
+12 个 canonical RPC 的 catalog、普通客户端白名单和 machine runtime truth 已对齐；Shared Core UI
+仍未实现，必须等待本 PR merge 后由 B 在独立任务中接线。
 
 审计 baseline：`57d092166b4165ff27787c4f828281d040c36c84`（PR #37 merge）。
 EC-2A 当时只审计仓库 migration、Production-generated types 和真实 consumer；未重新查询远端数据库，
@@ -117,9 +119,9 @@ open 才可新建 Answer/Reply；closed 保留已有公开内容，只要父链�
 
 | Product Decision | V1 已锁定行为 | 在本 PR 中的状态 |
 | --- | --- | --- |
-| Question reopen | CLOSE ONLY，owner close、重复 close 幂等；不提供 reopen_question_v1，未来 reopen 需新版本 contract | locked，未部署 |
-| 删除有 Reply 的 Answer | HIDE ENTIRE ANSWER BRANCH；底层保留 Answer/Reply，不显示 Public tombstone card；moderation hidden 同样隐藏整个分支 | locked，未部署 |
-| 综合 Answer 排序 | helpfulCount DESC → createdAt DESC → answerId ASC；只统计真实 Helpful | locked，未部署 |
+| Question reopen | CLOSE ONLY，owner close、重复 close 幂等；不提供 reopen_question_v1，未来 reopen 需新版本 contract | locked，Production 已部署验证 |
+| 删除有 Reply 的 Answer | HIDE ENTIRE ANSWER BRANCH；底层保留 Answer/Reply，不显示 Public tombstone card；moderation hidden 同样隐藏整个分支 | locked，Production 已部署验证 |
+| 综合 Answer 排序 | helpfulCount DESC → createdAt DESC → answerId ASC；只统计真实 Helpful | locked，Production 已部署验证 |
 | Topic 接入 | EC-2 只接受 []，非空关联等 EC-3 Canonical root/resolver/FK 后解锁 | locked / 非空关联 BLOCKED |
 
 最新排序锁定 `createdAt DESC, answerId ASC`；Reply 固定 `createdAt ASC, replyId ASC`。
@@ -139,9 +141,10 @@ Answer/Reply storage 留存用于审计、安全、争议与未来治理；autho
 仍是不同 business fact，不能通过同一个状态值合并原因。
 是否允许 Question 作者删除本身不在本轮产品授权内，因此不提出普通 delete_question RPC。
 
-## 六、Additive Storage 提案（非 migration）
+## 六、Canonical Additive Storage
 
-推荐新关系，不在有积分/采纳/通知 trigger 的 legacy questions/answers 上直接切换语义：
+以下关系已由 additive migration `20260904174215_canonical_question_answer_v1.sql` 部署；没有在有
+积分/采纳/通知 trigger 的 legacy questions/answers 上直接切换语义：
 
 | 提议关系 | 最小存储及约束 |
 | --- | --- |
@@ -157,15 +160,16 @@ Topic mapping table/FK 需等 Canonical Topic root 设计后再建；当前不�
 索引覆盖所有 parent/author FK、Question 时间列表、Answer question+createdAt、Reply
 answer+createdAt 及 Helpful unique key；不得为本提案新增任意全站索引。
 
-### Helpful 逻辑已锁定，物理实现仍 gated
+### Helpful 逻辑与物理实现已验证
 
 逻辑不变量：同一 Person/Answer 最多一个 Helpful、禁止 self-helpful、helpfulCount 来自真实
 事实、viewer relationship private、add/remove 幂等、Helpful 不进入 Reputation。这些不可由
 后续 consumer 改写。
 
 直接让 anon 读取带 person_id 的 Helpful 关系，或让 invoker 在 owner-only RLS 上 COUNT
-却宣称得到总数，均不正确。以下双关系仅是推荐的 **implementation-gated candidate**，
-不是已经 Production 证明的唯一 SQL 实现：分离私有 ownership mark 与无身份公开 fact。
+却宣称得到总数，均不正确。Production 已采用并验证双关系实现：分离私有 ownership mark 与
+无身份公开 fact。该事实不代表未来物理结构永不可版本化，但任何替代方案必须保持全部逻辑不变量
+并重新经过 Architecture / Security Review。
 
 1. mark 与 public fact 以 `(mark_id,answer_id)` 建立双向、延迟校验的完整性引用，保证提交时
    一一对应；不能通过只插入 fact 伪造 Helpful，也不能只插入 mark 产生计数漂移。
@@ -177,12 +181,10 @@ answer+createdAt 及 Helpful unique key；不得为本提案新增任意全站�
 4. set_answer_helpful_v1 使用显式 boolean，幂等 add/remove，而非容易被 retry 翻转的 toggle。
    作者不能添加 self Helpful；self false 可安全 no-op，不继承旧 self-like。
 
-双向 FK、RLS、grants 与 invoker 的事务完整性、取消/并发/直接表写必须在 local PostgreSQL、
-concurrency tests 与 rollback smoke 中逐条验证，失败就阻塞部署；不得用宽松 definer 或公开
-person_id 替代。如果候选方案无法安全实现，A 可提出满足相同逻辑不变量的新物理方案，但必须
-重新 Architecture Review。B 不得自行改变 Helpful storage semantics 或自行拼计数。
-机器状态见 `ANSWER_HELPFUL_STORAGE_REVIEW_V1`：逻辑 locked，物理 implementation-gated，
-productionVerified=false。
+双向 FK、RLS、grants、invoker 事务完整性、取消/并发、直接表写和 rollback smoke 已在 EC-2B/C2/C3
+逐层验证；不得用宽松 definer 或公开 person_id 替代。B 不得自行改变 Helpful storage semantics
+或自行拼计数。机器状态见 `ANSWER_HELPFUL_STORAGE_REVIEW_V1`：逻辑 locked，物理
+production-verified，`productionVerified=true`。
 
 ## 七、RLS、grants 与并发安全
 
@@ -215,13 +217,13 @@ Close vs create Answer/Reply 必须串行化：建议以 Question UUID 为 key �
 rate-limit/content moderation 需审计现有 helper 权限与 vocabulary 后接入；本轮不复用旧 definer
 write RPC，也不擅自锁定新产品限额。实现与部署前必须证明 abuse path fail closed。
 
-## 八、Exact RPC Proposal
+## 八、Exact Production RPC Contract
 
-12 个 RPC contract 已获产品批准，EC-2B SQL 本地实现证据单独记录：Production deployed=NO；grant review=pending-deployment；current client
-consumable=NO。只有安全部署、真实 smoke、consumer review 三个 gate 均通过才能解锁。
-签名、参数及 response parser 的唯一机器定义为 `PROPOSED_QUESTION_ANSWER_V1_RPCS`。
-该 registry 保留原标识名；其 runtimeStatus=contract-approved，不再表示产品决策尚未确认。
-不新增 RPC_CATALOG entry、不加白名单、不手改 generated types，不提供网络调用 adapter。
+12 个 RPC contract 已获产品批准、Production 部署和 authenticated HTTP consumer smoke 验证。
+签名、参数及 response parser 的机器定义为 `QUESTION_ANSWER_V1_RPCS`；历史
+`PROPOSED_QUESTION_ANSWER_V1_RPCS` 仅保留 deprecated alias。Product contract 继续是
+contract-approved；runtime 是 production-ready，grant review=aligned，client consumable=true。
+12 个 RPC 已加入 `RPC_CATALOG` 与 `CLIENT_RPC_WHITELIST`，不包含 private helper 或 legacy fallback。
 以下所有参数显式必填；可选业务值传 null/[]，不靠 silent fallback。
 
 `authentication=anon` / `anon/public-read` 表示**最低访问要求**：anonymous 和 authenticated
@@ -246,7 +248,8 @@ consumable=NO。只有安全部署、真实 smoke、consumer review 三个 gate 
 RPC SQL 计划返回 jsonb 与上述 camelCase envelope 一致。Public detail missing/hidden/deleted
 统一 null，不泄露存在性；不可见 parent 的 list 返回真实 []/nextOffset=null。查询失败应传播错误，
 不能伪装 []。write not-found/无权访问统一不可见目标错误；closed/self-helpful/input validation
-使用明确业务 error code（实现 review 时统一 SQLSTATE/adapter mapping），不透出内部 SQL。
+使用 `QUESTION_ANSWER_V1_STABLE_ERRORS` 与 `parseQuestionAnswerV1StableError` 按 SQLSTATE + exact
+message key 映射，不依赖或向 consumer 传播 detail/context/raw backend text。
 anon viewerHasMarkedHelpful=false；authenticated 必须查询真实关系。分页各 list 必须校验 parent
 identity 一致，不能拼入其他 Question/Answer 的记录。Reply list 不内嵌到 Answer 大数组中。
 
@@ -283,22 +286,22 @@ UUID 当新 Question。旧内容导入是单独 reviewed job：核对作者、�
 及原始时间；预算默认 null，采纳/点赞绝不转换为 Helpful/Closed。旧 reward/order reconciliation
 仍由旧链路处理。没有自动 legacy migration。
 
-## 十、实施与 Production Gate
+## 十、实施与 Production Gate 结果
 
-1. 第五节四项产品决策及 Question listing/viewer scope 已锁定，EC-2A 已合并冻结。
-   后续实现须完成 Helpful 物理方案数据库验证，必要的替代方案必须重新 Architecture Review。
-2. EC-2B 独立任务创建 timestamped additive migration，仅允许本地执行，不代表已通过部署 gate。
-3. local PostgreSQL 验证 schema、完整 signature、grants、RLS、跨人写拒绝、self-helpful、并发 close、
-   mark/fact一致性、soft-delete 子链隐藏、safe projection；Static Contract PASS ≠ Database Apply PASS。
-4. re-audit remote dependencies/Advisor，仅在单独部署授权后 dry-run，唯一 reviewed migration 才可 apply。
-5. remote rollback smoke，验证 ordinary non-expert Person、anon/authenticated/service_role 边界、
-   counts、pagination、无敏感字段和 persistent smoke rows=0；新安全 finding 阻塞 consumer。
-6. 实际部署后 regenerate remote types，独立 runtime truth closeout PR；之后 B 才消费。
+1. EC-2A 产品合同已合并冻结，Question listing、viewer scope 和稳定错误语义保持不变。
+2. EC-2B 对 reviewed migration 完成 local PostgreSQL、RLS、grants、并发和 rollback 验证；
+   Static Contract PASS ≠ Database Apply PASS 的边界继续成立。
+3. EC-2C1 只读预检锁定 migration checksum、Production dependency 和 apply/smoke 方案。
+4. EC-2C2 已应用唯一 migration，完成 remote schema/security/rollback smoke、Advisor 与 generated types 对齐。
+5. EC-2C3 已完成真实 authenticated PostgREST read/write、shared parser、viewer scope、stable error 与隐私验证；
+   两个临时 Auth user 及全部内容已定向清理，persistent synthetic rows=0。
+6. 12 RPC backend consumer contract 已对齐；Shared Core UI 仍未实现，B 只能在本 PR merge 后开始接线。
 
 回滚先关闭新的 consumer gate，不破坏 legacy；已应用 migration 不改写，不删除用户内容；需要
 修复时新建 reviewed corrective migration。A 负责 schema/API/security，B 只消费 contract，
 C/D 复用同一 identity/DTO。不得提前开始 EC-3 Matching 或 EC-4 Conversation/Payment。
 
-Production DB mutation = **NO**；Migration applied = **NO**；Edge deployment = **NO**。
-EC-2A contract **APPROVED-NOT-DEPLOYED**。EC-2B 仍需独立本地实现与安全复核，不自动 merge
-或部署。Production 与 Shared Core consumer **NOT READY**。
+EC-2C3 没有新 migration、DDL、RLS/grant mutation 或 Edge deployment。仅按授权创建两个临时 Auth
+user 和 synthetic Question/Answer/Reply/Helpful，通过真实 HTTP 验证后定向清理，持久残留为 0。
+Production backend 与 shared consumer contract **READY**；canonical Question/Answer/Reply UI
+**NOT IMPLEMENTED**。`profiles.phone` Direct Data API Privacy Cutover 继续为 **REMAINS**。

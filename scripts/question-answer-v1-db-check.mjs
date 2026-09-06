@@ -64,14 +64,22 @@ for (const name of ["list_question_answers_v1", "list_answer_replies_v1"]) {
   assert.match(body, /q\.deleted_at IS NULL AND q\.moderation_visibility = 'visible'/);
   assert.doesNotMatch(body, /'phone'|'email'|'markId'|'claims'|'deletedAt'|'moderationVisibility'/);
 }
-for (const code of ["TARGET_NOT_FOUND_OR_INACCESSIBLE", "QUESTION_CLOSED", "SELF_HELPFUL_FORBIDDEN", "CANONICAL_TOPIC_NOT_READY"]) {
+for (const code of [
+  "TARGET_NOT_FOUND_OR_INACCESSIBLE", "QUESTION_CLOSED", "SELF_HELPFUL_FORBIDDEN",
+  "CANONICAL_TOPIC_NOT_READY", "INVALID_INPUT", "AUTHENTICATION_REQUIRED",
+  "IMMUTABLE_FIELD", "UNSUPPORTED_TRANSACTION_ISOLATION",
+]) {
   assert.ok(sql.includes(`MESSAGE = '${code}'`));
 }
 const whitelist = read("packages/shared-api/src/rpc-whitelist.ts");
-for (const [name] of expected) assert.ok(!whitelist.includes(`"${name}"`), `consumer still gated: ${name}`);
-assert.match(source, /runtimeStatus: "contract-approved"/);
-assert.match(source, /productionDeployed: false/);
-assert.match(source, /clientConsumable: false/);
-assert.match(source, /productionGrantReview: "pending-deployment"/);
+const catalog = read("packages/shared-api/src/rpc-catalog.ts");
+for (const [name] of expected) {
+  assert.match(whitelist, new RegExp(`\\b${name}: RPC_CATALOG\\.${name}\\.qualifiedName`), `client whitelist: ${name}`);
+  assert.match(catalog, new RegExp(`\\b${name}: questionAnswerRpc\\(`), `RPC catalog: ${name}`);
+}
+assert.match(source, /runtimeStatus: "production-ready"/);
+assert.match(source, /productionDeployed: true/);
+assert.match(source, /clientConsumable: true/);
+assert.match(source, /productionGrantReview: "aligned"/);
 console.log(`EC-2B static DB contract PASS: ${tables.length} tables, ${publicFunctions.length} approved RPCs, ${functions.length} invoker functions.`);
-console.log("Static checks do not replace the EC-2C2 deployment evidence; consumer machine truth remains gated pending EC-2C3.");
+console.log("Static checks do not replace EC-2C2/C3 Production evidence; exact 12 consumer RPCs are now aligned.");
