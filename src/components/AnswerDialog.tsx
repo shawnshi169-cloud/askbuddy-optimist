@@ -16,6 +16,8 @@ export interface AnswerDialogProps {
   onOpenChange: (open: boolean) => void;
   onSubmit: (payload: { message: string }) => void;
   submitting?: boolean;
+  error?: string;
+  disabled?: boolean;
 }
 
 export const AnswerDialog: React.FC<AnswerDialogProps> = ({
@@ -23,6 +25,8 @@ export const AnswerDialog: React.FC<AnswerDialogProps> = ({
   onOpenChange,
   onSubmit,
   submitting = false,
+  error = '',
+  disabled = false,
 }) => {
   const [message, setMessage] = useState('');
 
@@ -33,12 +37,12 @@ export const AnswerDialog: React.FC<AnswerDialogProps> = ({
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const content = message.trim();
-    if (!content || submitting) return;
+    if (!content || submitting || disabled) return;
     onSubmit({ message: content });
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={(next) => { if (!submitting) onOpenChange(next); }}>
       <SheetContent
         side="bottom"
         className="mx-auto max-h-[85dvh] max-w-md overflow-y-auto rounded-t-[24px] border-app-border-subtle px-4 pb-6 pt-6 shadow-[0_-12px_36px_rgba(15,23,42,0.12)]"
@@ -67,6 +71,8 @@ export const AnswerDialog: React.FC<AnswerDialogProps> = ({
             />
           </div>
 
+          {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
+          {disabled && <p className="text-sm text-slate-500">问题已关闭，不能新增回答。</p>}
           <SheetFooter className="gap-2 sm:space-x-0">
             <SheetClose asChild>
               <Button type="button" variant="outline" className="h-11 rounded-full" disabled={submitting}>
@@ -77,7 +83,7 @@ export const AnswerDialog: React.FC<AnswerDialogProps> = ({
               type="submit"
               variant="action"
               className="h-11 rounded-full"
-              disabled={!message.trim() || submitting}
+              disabled={!message.trim() || submitting || disabled}
             >
               {submitting ? '提交中…' : '提交回答'}
             </Button>

@@ -16,7 +16,7 @@
     "lint": "eslint .",
     "lint:changed": "node scripts/lint-changed.mjs",
     "preview": "vite preview",
-    "test:contracts": "node scripts/schema-contract-check.mjs && node scripts/contract-truth-check.mjs && node scripts/public-person-contract-check.mjs && node scripts/product-blueprint-v1-contract-check.mjs && node scripts/question-answer-v1-contract-check.mjs && node scripts/question-answer-v1-db-check.mjs && node scripts/experience-v1-contract-check.mjs && node scripts/ec1b-experience-ui-check.mjs && node scripts/p1-4b-backend-hardening-check.mjs && node scripts/p1-4c-production-writes-check.mjs && node scripts/p1-4d-demo-fixture-isolation-check.mjs && node scripts/ui-0a-engineering-readiness-check.mjs && node scripts/ui-0b-platform-truth-check.mjs && node scripts/ui-1c-search-truth-check.mjs && node scripts/ui-1b-home-stabilization-check.mjs && node scripts/ui-1d-question-detail-truth-check.mjs && node scripts/wechat-auth-jwk-check.mjs",
+    "test:contracts": "node scripts/schema-contract-check.mjs && node scripts/contract-truth-check.mjs && node scripts/public-person-contract-check.mjs && node scripts/product-blueprint-v1-contract-check.mjs && node scripts/question-answer-v1-contract-check.mjs && node scripts/question-answer-v1-db-check.mjs && node scripts/experience-v1-contract-check.mjs && node scripts/ec1b-experience-ui-check.mjs && node scripts/p1-4b-backend-hardening-check.mjs && node scripts/p1-4c-production-writes-check.mjs && node scripts/p1-4d-demo-fixture-isolation-check.mjs && node scripts/ui-0a-engineering-readiness-check.mjs && node scripts/ui-0b-platform-truth-check.mjs && node scripts/ui-1c-search-truth-check.mjs && node scripts/ui-1b-home-stabilization-check.mjs && node scripts/ui-1d-question-detail-truth-check.mjs && node scripts/wechat-auth-jwk-check.mjs && node scripts/ec2d-question-answer-ui-check.mjs",
     "test:question-answer-v1": "node scripts/question-answer-v1-contract-check.mjs",
     "test:question-answer-v1:db": "node scripts/question-answer-v1-db-check.mjs",
     "test:question-answer-v1:local": "node scripts/question-answer-v1-local-test.mjs --local",
@@ -34,7 +34,8 @@
     "test:home-stabilization": "node scripts/ui-1b-home-stabilization-check.mjs",
     "test:question-detail-truth": "node scripts/ui-1d-question-detail-truth-check.mjs",
     "test:smoke": "node scripts/rpc-smoke-test.mjs",
-    "test:call": "node scripts/call-v1-validation.mjs"
+    "test:call": "node scripts/call-v1-validation.mjs",
+    "test:question-answer-ui-v1": "node scripts/ec2d-question-answer-ui-check.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.0.0",
