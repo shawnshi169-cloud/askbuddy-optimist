@@ -9,10 +9,10 @@ import type {
 } from "../../shared-types/src/question-answer-v1";
 
 export const QUESTION_ANSWER_V1_CONTRACT_STATE = {
-  runtimeStatus: "contract-approved",
-  productionDeployed: false,
-  productionGrantReview: "pending-deployment",
-  clientConsumable: false,
+  runtimeStatus: "production-ready",
+  productionDeployed: true,
+  productionGrantReview: "aligned",
+  clientConsumable: true,
   topicAssociation: "blocked-until-canonical-topic-resolver",
 } as const;
 
@@ -24,7 +24,7 @@ export const QUESTION_ANSWER_V1_ORDERING = {
   replies: ["createdAt ASC", "replyId ASC"],
 } as const;
 
-/** Product + Architecture 已批准；存储/API 尚未部署。 */
+/** Product + Architecture 已批准；存储/API 已部署并通过 authenticated HTTP consumer gate。 */
 export const QUESTION_ANSWER_V1_PRODUCT_REVIEW = {
   questionReopen: { decision: "close-only", status: "locked" },
   deletedAnswerWithReplies: { decision: "hide-entire-answer-branch", status: "locked" },
@@ -55,8 +55,8 @@ export const ANSWER_HELPFUL_VIEWER_SCOPE_V1 = {
 export const ANSWER_HELPFUL_STORAGE_REVIEW_V1 = {
   logicalInvariants: "locked",
   physicalCandidate: "private-owner-mark-and-anonymous-public-fact",
-  physicalStatus: "implementation-gated",
-  productionVerified: false,
+  physicalStatus: "production-verified",
+  productionVerified: true,
   validationRequired: ["local-postgresql", "rls", "grants", "concurrency", "rollback-smoke"],
   alternativeRequiresArchitectureReview: true,
   consumerMayRedefineStorage: false,
@@ -196,7 +196,7 @@ function parseContract<T>(schema: z.ZodType<T, z.ZodTypeDef, unknown>, value: un
   return result.data;
 }
 
-function proposedRpc<P, R>(
+function canonicalRpc<P, R>(
   authentication: "anon" | "authenticated",
   signature: string,
   params: z.ZodType<P, z.ZodTypeDef, unknown>,
@@ -205,12 +205,12 @@ function proposedRpc<P, R>(
 ) {
   return {
     ...QUESTION_ANSWER_V1_CONTRACT_STATE,
-    use: "canonical-blueprint-contract",
+    use: "canonical-blueprint",
     authentication,
     authenticationMeaning: "minimum-access-requirement",
     preserveCallerIdentity: true,
     intendedConsumer: authentication === "anon" ? "public-read" : "authenticated-person",
-    newBlueprintCodeMayDepend: false,
+    newBlueprintCodeMayDepend: true,
     securityMode: "invoker",
     searchPath: "",
     signature,
@@ -233,25 +233,25 @@ function validPage(
     && (next === null || (ids.length > 0 && next === request.p_offset + ids.length));
 }
 
-/** 保留 proposal registry 标识：产品 contract 已批准，仍不加入 deployed catalog/types/whitelist。无网络调用。 */
-export const PROPOSED_QUESTION_ANSWER_V1_RPCS = {
-  create_question_v1: proposedRpc("authenticated", "public.create_question_v1(text,text,text,uuid[],bigint)",
+/** Production 已部署且 consumer gate 已验证的 exact 12 RPC；本 registry 只负责 parser/metadata，不发起网络请求。 */
+export const QUESTION_ANSWER_V1_RPCS = {
+  create_question_v1: canonicalRpc("authenticated", "public.create_question_v1(text,text,text,uuid[],bigint)",
     createQuestionParams.transform(questionInput), questionIdResult),
-  update_question_v1: proposedRpc("authenticated", "public.update_question_v1(uuid,text,text,text,uuid[],bigint)",
+  update_question_v1: canonicalRpc("authenticated", "public.update_question_v1(uuid,text,text,text,uuid[],bigint)",
     z.object({ p_question_id: uuid, ...questionFields }).strict()
       .transform((row) => ({ p_question_id: row.p_question_id, ...questionInput(row) })), questionIdResult,
     (request, response) => request.p_question_id === response.questionId),
-  close_question_v1: proposedRpc("authenticated", "public.close_question_v1(uuid)",
+  close_question_v1: canonicalRpc("authenticated", "public.close_question_v1(uuid)",
     questionIdParams, z.object({ questionId: uuid, status: z.literal("closed") }).strict()
       .transform((row) => ({ questionId: row.questionId, status: row.status })),
     (request, response) => request.p_question_id === response.questionId),
-  get_question_detail_v1: proposedRpc("anon", "public.get_question_detail_v1(uuid)",
+  get_question_detail_v1: canonicalRpc("anon", "public.get_question_detail_v1(uuid)",
     questionIdParams, z.object({ question: canonicalQuestionDetailV1Schema.nullable() }).strict()
       .transform((row) => ({ question: row.question })),
     (request, response) => response.question === null || request.p_question_id === response.question.questionId),
   list_questions_v1: {
     defaultOrdering: QUESTION_ANSWER_V1_ORDERING.questionList,
-    ...proposedRpc("anon", "public.list_questions_v1(text,text,integer,integer)",
+    ...canonicalRpc("anon", "public.list_questions_v1(text,text,integer,integer)",
     z.object({ p_primary_channel: channel.nullable(), p_status: z.enum(QUESTION_BUSINESS_STATUS_V1).nullable(), ...pagination }).strict()
       .transform((row) => ({ p_primary_channel: row.p_primary_channel, p_status: row.p_status, p_limit: row.p_limit, p_offset: row.p_offset })),
     z.object({ questions: z.array(canonicalQuestionDetailV1Schema).max(100), nextOffset }).strict()
@@ -260,10 +260,10 @@ export const PROPOSED_QUESTION_ANSWER_V1_RPCS = {
       && response.questions.every((row) => (request.p_primary_channel === null || row.primaryChannel === request.p_primary_channel)
         && (request.p_status === null || row.status === request.p_status))),
   },
-  create_answer_v1: proposedRpc("authenticated", "public.create_answer_v1(uuid,text)",
+  create_answer_v1: canonicalRpc("authenticated", "public.create_answer_v1(uuid,text)",
     z.object({ p_question_id: uuid, p_body: text }).strict()
       .transform((row) => ({ p_question_id: row.p_question_id, p_body: row.p_body })), answerIdResult),
-  delete_answer_v1: proposedRpc("authenticated", "public.delete_answer_v1(uuid)",
+  delete_answer_v1: canonicalRpc("authenticated", "public.delete_answer_v1(uuid)",
     answerIdParams, answerIdResult,
     (request, response) => request.p_answer_id === response.answerId),
   list_question_answers_v1: {
@@ -272,7 +272,7 @@ export const PROPOSED_QUESTION_ANSWER_V1_RPCS = {
       latest: QUESTION_ANSWER_V1_ORDERING.latestAnswers,
     },
     viewerProjection: ANSWER_HELPFUL_VIEWER_SCOPE_V1,
-    ...proposedRpc("anon", "public.list_question_answers_v1(uuid,text,integer,integer)",
+    ...canonicalRpc("anon", "public.list_question_answers_v1(uuid,text,integer,integer)",
     z.object({ p_question_id: uuid, p_order: z.enum(ANSWER_ORDER_V1), ...pagination }).strict()
       .transform((row) => ({ p_question_id: row.p_question_id, p_order: row.p_order, p_limit: row.p_limit, p_offset: row.p_offset })),
     z.object({ answers: z.array(canonicalAnswerV1Schema).max(100), nextOffset }).strict()
@@ -280,21 +280,21 @@ export const PROPOSED_QUESTION_ANSWER_V1_RPCS = {
     (request, response) => validPage(request, response.answers.map((row) => row.answerId), response.nextOffset)
       && response.answers.every((row) => row.questionId === request.p_question_id)),
   },
-  set_answer_helpful_v1: proposedRpc("authenticated", "public.set_answer_helpful_v1(uuid,boolean)",
+  set_answer_helpful_v1: canonicalRpc("authenticated", "public.set_answer_helpful_v1(uuid,boolean)",
     z.object({ p_answer_id: uuid, p_is_helpful: z.boolean() }).strict()
       .transform((row) => ({ p_answer_id: row.p_answer_id, p_is_helpful: row.p_is_helpful })),
     z.object({ answerId: uuid, helpfulCount: count, viewerHasMarkedHelpful: z.boolean() }).strict()
       .transform((row) => ({ answerId: row.answerId, helpfulCount: row.helpfulCount, viewerHasMarkedHelpful: row.viewerHasMarkedHelpful })),
     (request, response) => request.p_answer_id === response.answerId && request.p_is_helpful === response.viewerHasMarkedHelpful),
-  create_answer_reply_v1: proposedRpc("authenticated", "public.create_answer_reply_v1(uuid,text)",
+  create_answer_reply_v1: canonicalRpc("authenticated", "public.create_answer_reply_v1(uuid,text)",
     z.object({ p_answer_id: uuid, p_body: text }).strict()
       .transform((row) => ({ p_answer_id: row.p_answer_id, p_body: row.p_body })), replyIdResult),
-  delete_answer_reply_v1: proposedRpc("authenticated", "public.delete_answer_reply_v1(uuid)",
+  delete_answer_reply_v1: canonicalRpc("authenticated", "public.delete_answer_reply_v1(uuid)",
     replyIdParams, replyIdResult,
     (request, response) => request.p_reply_id === response.replyId),
   list_answer_replies_v1: {
     defaultOrdering: QUESTION_ANSWER_V1_ORDERING.replies,
-    ...proposedRpc("anon", "public.list_answer_replies_v1(uuid,integer,integer)",
+    ...canonicalRpc("anon", "public.list_answer_replies_v1(uuid,integer,integer)",
     z.object({ p_answer_id: uuid, ...pagination }).strict()
       .transform((row) => ({ p_answer_id: row.p_answer_id, p_limit: row.p_limit, p_offset: row.p_offset })),
     z.object({ replies: z.array(canonicalAnswerReplyV1Schema).max(100), nextOffset }).strict()
@@ -304,11 +304,40 @@ export const PROPOSED_QUESTION_ANSWER_V1_RPCS = {
   },
 } as const;
 
-export type QuestionAnswerV1ProposedRpcName = keyof typeof PROPOSED_QUESTION_ANSWER_V1_RPCS;
-export type QuestionAnswerV1RpcParams<N extends QuestionAnswerV1ProposedRpcName> =
-  ReturnType<(typeof PROPOSED_QUESTION_ANSWER_V1_RPCS)[N]["parseParams"]>;
-export type QuestionAnswerV1RpcResult<N extends QuestionAnswerV1ProposedRpcName> =
-  ReturnType<(typeof PROPOSED_QUESTION_ANSWER_V1_RPCS)[N]["parseResult"]>;
+/** @deprecated 使用 QUESTION_ANSWER_V1_RPCS；保留历史名称避免破坏已编译的 contract consumer。 */
+export const PROPOSED_QUESTION_ANSWER_V1_RPCS = QUESTION_ANSWER_V1_RPCS;
+
+export type QuestionAnswerV1RpcName = keyof typeof QUESTION_ANSWER_V1_RPCS;
+/** @deprecated 使用 QuestionAnswerV1RpcName。 */
+export type QuestionAnswerV1ProposedRpcName = QuestionAnswerV1RpcName;
+export type QuestionAnswerV1RpcParams<N extends QuestionAnswerV1RpcName> =
+  ReturnType<(typeof QUESTION_ANSWER_V1_RPCS)[N]["parseParams"]>;
+export type QuestionAnswerV1RpcResult<N extends QuestionAnswerV1RpcName> =
+  ReturnType<(typeof QUESTION_ANSWER_V1_RPCS)[N]["parseResult"]>;
+
+export const QUESTION_ANSWER_V1_STABLE_ERRORS = [
+  { sqlState: "PT404", messageKey: "TARGET_NOT_FOUND_OR_INACCESSIBLE" },
+  { sqlState: "PT409", messageKey: "QUESTION_CLOSED" },
+  { sqlState: "PT403", messageKey: "SELF_HELPFUL_FORBIDDEN" },
+  { sqlState: "PT422", messageKey: "CANONICAL_TOPIC_NOT_READY" },
+  { sqlState: "PT400", messageKey: "INVALID_INPUT" },
+  { sqlState: "PT401", messageKey: "AUTHENTICATION_REQUIRED" },
+  { sqlState: "PT403", messageKey: "IMMUTABLE_FIELD" },
+  { sqlState: "PT409", messageKey: "UNSUPPORTED_TRANSACTION_ISOLATION" },
+] as const;
+export type QuestionAnswerV1StableError = (typeof QUESTION_ANSWER_V1_STABLE_ERRORS)[number];
+
+const stableErrorEnvelope = z.object({ code: z.string(), message: z.string() }).passthrough();
+
+/** 只信任 SQLSTATE 与稳定 message key；忽略且不向 consumer 传播 backend detail/context。 */
+export function parseQuestionAnswerV1StableError(value: unknown): QuestionAnswerV1StableError | null {
+  const parsed = stableErrorEnvelope.safeParse(value);
+  if (!parsed.success) return null;
+  return QUESTION_ANSWER_V1_STABLE_ERRORS.find(
+    (candidate) => candidate.sqlState === parsed.data.code
+      && candidate.messageKey === parsed.data.message,
+  ) ?? null;
+}
 
 export const parseCanonicalQuestionV1 = (value: unknown): CanonicalQuestionV1 =>
   parseContract(canonicalQuestionV1Schema, value, "question");

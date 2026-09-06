@@ -50,9 +50,9 @@ export const PRODUCT_BLUEPRINT_V1_DOMAIN_MAP = {
   questionAnswerReply: {
     domain: "question-answer-reply",
     target: "free public answers, helpful feedback, one-level replies, no acceptance",
-    currentRuntime: "EC-2A contract approved, not deployed, not client consumable; accepted-answer and point-reward legacy fields/RPCs remain active",
-    runtimeStatus: "contract-approved",
-    newCodePolicy: "target-contract-only",
+    currentRuntime: "EC-2 contract approved; Production storage and 12 canonical RPCs deployed, remote-validated, and authenticated HTTP consumer-smoke verified; Shared Core UI remains legacy and is not wired",
+    runtimeStatus: "production-ready",
+    newCodePolicy: "may-use-deployed-contract",
     phase: "EC-2",
   },
   homeSearchMatching: {
@@ -311,6 +311,66 @@ export const PRODUCT_BLUEPRINT_V1_RPC_POLICY = {
     newBlueprintCodeMayDepend: false,
     replacement: "Production-deployed owner-only Claim infrastructure; client consumption remains gated until the Verification/Claim workflow is explicitly enabled",
   },
+  create_question_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: true,
+    replacement: "none; Production deployed and authenticated HTTP consumer-smoke verified",
+  },
+  update_question_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: true,
+    replacement: "none; Production deployed and authenticated owner HTTP consumer-smoke verified",
+  },
+  close_question_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: true,
+    replacement: "none; Production deployed and idempotent close HTTP consumer-smoke verified",
+  },
+  get_question_detail_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: true,
+    replacement: "none; Production deployed public safe projection",
+  },
+  list_questions_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: true,
+    replacement: "none; Production deployed deterministic public listing",
+  },
+  create_answer_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: true,
+    replacement: "none; Production deployed Person Answer HTTP consumer-smoke verified",
+  },
+  delete_answer_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: true,
+    replacement: "none; Production deployed author soft-delete HTTP consumer-smoke verified",
+  },
+  list_question_answers_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: true,
+    replacement: "none; Production deployed viewer-scoped safe projection",
+  },
+  set_answer_helpful_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: true,
+    replacement: "none; Production deployed Helpful integrity and viewer isolation verified",
+  },
+  create_answer_reply_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: true,
+    replacement: "none; Production deployed one-level Reply HTTP consumer-smoke verified",
+  },
+  delete_answer_reply_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: true,
+    replacement: "none; Production deployed Reply soft-delete HTTP consumer-smoke verified",
+  },
+  list_answer_replies_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: true,
+    replacement: "none; Production deployed safe one-level Reply projection",
+  },
   accept_answer_v2: {
     use: "legacy-compatibility",
     newBlueprintCodeMayDepend: false,
@@ -329,7 +389,7 @@ export const PRODUCT_BLUEPRINT_V1_RPC_POLICY = {
   create_answer_secure: {
     use: "legacy-compatibility",
     newBlueprintCodeMayDepend: false,
-    replacement: "EC-2A create_answer_v1 proposal; ordinary consumer remains gated until deployment and review",
+    replacement: "create_answer_v1; canonical consumer is Production deployed and explicitly whitelisted",
   },
   search_app_content_v2: {
     use: "legacy-compatibility",

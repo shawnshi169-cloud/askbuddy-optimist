@@ -10,6 +10,8 @@ const sources = [
   "packages/shared-types/src/product-channels.ts",
   "packages/shared-types/src/question-answer-v1.ts",
   "packages/shared-api/src/question-answer-v1.ts",
+  "packages/shared-api/src/rpc-catalog.ts",
+  "packages/shared-api/src/rpc-whitelist.ts",
   "packages/shared-api/src/page-contract-map.ts",
 ];
 // Generated CommonJS harness stays under node_modules so the existing Zod resolves.
@@ -45,7 +47,9 @@ try {
   const { PAGE_CONTRACT_MAP: pages } = require(join(temp, "packages/shared-api/src/page-contract-map.js"));
   const types = require(join(temp, "packages/shared-types/src/question-answer-v1.js"));
   const { PRODUCT_CHANNEL_SLUGS: channels } = require(join(temp, "packages/shared-types/src/product-channels.js"));
-  const rpc = api.PROPOSED_QUESTION_ANSWER_V1_RPCS;
+  const rpc = api.QUESTION_ANSWER_V1_RPCS;
+  const { RPC_CATALOG } = require(join(temp, "packages/shared-api/src/rpc-catalog.js"));
+  const { CLIENT_RPC_WHITELIST } = require(join(temp, "packages/shared-api/src/rpc-whitelist.js"));
   const id = (n) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
   const person = { userId: id(1), displayName: null, avatarUrl: null };
   const question = {
@@ -87,28 +91,28 @@ try {
     delete_answer_reply_v1: ["uuid", replyParams, { replyId: id(4) }],
     list_answer_replies_v1: ["uuid,integer,integer", repliesPage, { replies: [reply], nextOffset: null }],
   };
-  check("exact proposal capabilities", () => assert.deepEqual(Object.keys(rpc).sort(), Object.keys(cases).sort()));
-  const consumerGatedSources = [
-    "packages/shared-api/src/rpc-catalog.ts", "packages/shared-api/src/rpc-whitelist.ts",
-  ].map(read);
+  check("exact deployed consumer capabilities", () => assert.deepEqual(Object.keys(rpc).sort(), Object.keys(cases).sort()));
   const generatedTypes = read("src/integrations/supabase/types.ts");
   for (const [name, [signature, input, output]] of Object.entries(cases)) {
-    check(`${name}: gated exact signature and valid round trip`, () => {
+    check(`${name}: aligned exact signature and valid round trip`, () => {
       assert.equal(rpc[name].signature, `public.${name}(${signature})`);
       assert.equal(rpc[name].authentication, /^(get|list)_/.test(name) ? "anon" : "authenticated");
-      assert.equal(rpc[name].runtimeStatus, "contract-approved");
-      assert.equal(rpc[name].use, "canonical-blueprint-contract");
+      assert.equal(rpc[name].runtimeStatus, "production-ready");
+      assert.equal(rpc[name].use, "canonical-blueprint");
       assert.equal(rpc[name].authenticationMeaning, "minimum-access-requirement");
       assert.equal(rpc[name].preserveCallerIdentity, true);
-      assert.equal(rpc[name].productionDeployed, false);
-      assert.equal(rpc[name].productionGrantReview, "pending-deployment");
-      assert.equal(rpc[name].clientConsumable, false);
-      assert.equal(rpc[name].newBlueprintCodeMayDepend, false);
+      assert.equal(rpc[name].productionDeployed, true);
+      assert.equal(rpc[name].productionGrantReview, "aligned");
+      assert.equal(rpc[name].clientConsumable, true);
+      assert.equal(rpc[name].newBlueprintCodeMayDepend, true);
       assert.equal(rpc[name].securityMode, "invoker");
       assert.equal(rpc[name].searchPath, "");
       assert.deepEqual(rpc[name].parseParams(input), input);
       assert.deepEqual(rpc[name].parseResult(output, input), output);
-      for (const source of consumerGatedSources) assert.doesNotMatch(source, new RegExp(`\\b${name}\\b`));
+      assert.equal(RPC_CATALOG[name].status, "canonical");
+      assert.equal(RPC_CATALOG[name].authentication, /^(get|list)_/.test(name) ? "anon" : "authenticated");
+      assert.equal(RPC_CATALOG[name].productionGrantReview, "aligned");
+      assert.equal(CLIENT_RPC_WHITELIST[name], `public.${name}`);
       assert.match(generatedTypes, new RegExp(`\\b${name}\\s*:`));
     });
     check(`${name}: rejects missing and unknown fields, no fallback`, () => {
@@ -131,6 +135,10 @@ try {
       }
     });
   }
+  check("deployed registry keeps only a deprecated proposal-name alias", () => {
+    assert.equal(api.PROPOSED_QUESTION_ANSWER_V1_RPCS, rpc);
+    assert.equal(Object.keys(rpc).length, 12);
+  });
   const dtoCases = [
     [api.parseCanonicalQuestionV1, question], [api.parseCanonicalQuestionDetailV1, detail],
     [api.parseCanonicalAnswerV1, answer], [api.parseCanonicalAnswerReplyV1, reply],
@@ -317,20 +325,42 @@ try {
     assert.match(notes, /public-read 是最低访问要求，不强制 anonymous/);
     assert.match(notes, /authenticated 请求保留 caller identity/);
     assert.match(notes, /viewerHasMarkedHelpful.*caller 自己的关系.*anon=false/);
-    assert.match(notes, /contract-approved.*未部署、不可消费/);
+    assert.match(notes, /backend 已部署.*consumer smoke.*消费授权/);
+    assert.match(notes, /UI 仍是 legacy 实现/);
     assert.equal(page.implementationStatus, "legacy");
     for (const name of Object.keys(rpc)) {
       assert.ok(![...page.currentReadContracts, ...page.currentWriteContracts].includes(`rpc:${name}`));
     }
   });
-  check("Helpful physical candidate remains implementation-gated after logical approval", () => {
+  check("Helpful physical relation is production-verified without changing logical invariants", () => {
     assert.deepEqual(api.ANSWER_HELPFUL_STORAGE_REVIEW_V1, {
       logicalInvariants: "locked",
       physicalCandidate: "private-owner-mark-and-anonymous-public-fact",
-      physicalStatus: "implementation-gated", productionVerified: false,
+      physicalStatus: "production-verified", productionVerified: true,
       validationRequired: ["local-postgresql", "rls", "grants", "concurrency", "rollback-smoke"],
       alternativeRequiresArchitectureReview: true, consumerMayRedefineStorage: false,
     });
+  });
+  check("stable business errors map only SQLSTATE and exact message key", () => {
+    const expectedErrors = [
+      ["PT404", "TARGET_NOT_FOUND_OR_INACCESSIBLE"],
+      ["PT409", "QUESTION_CLOSED"],
+      ["PT403", "SELF_HELPFUL_FORBIDDEN"],
+      ["PT422", "CANONICAL_TOPIC_NOT_READY"],
+      ["PT400", "INVALID_INPUT"],
+      ["PT401", "AUTHENTICATION_REQUIRED"],
+      ["PT403", "IMMUTABLE_FIELD"],
+      ["PT409", "UNSUPPORTED_TRANSACTION_ISOLATION"],
+    ];
+    assert.deepEqual(api.QUESTION_ANSWER_V1_STABLE_ERRORS.map((row) => [row.sqlState, row.messageKey]), expectedErrors);
+    for (const [code, message] of expectedErrors) {
+      assert.deepEqual(
+        api.parseQuestionAnswerV1StableError({ code, message, details: "ignored", context: "ignored" }),
+        { sqlState: code, messageKey: message },
+      );
+    }
+    assert.equal(api.parseQuestionAnswerV1StableError({ code: "PT409", message: "localized text" }), null);
+    assert.equal(api.parseQuestionAnswerV1StableError({ code: "42501", message: "permission denied" }), null);
   });
   check("canonical ID typing and no unsafe casts or network adapter", () => {
     const source = read("packages/shared-types/src/question-answer-v1.ts");
@@ -347,28 +377,44 @@ try {
     };
     visit(ast);
   });
+  check("consumer alignment introduces no legacy fallback or premature UI wiring", () => {
+    const sharedApi = read("packages/shared-api/src/question-answer-v1.ts");
+    assert.doesNotMatch(sharedApi, /create_question_secure|create_answer_secure|accept_answer_v2|answer_likes|bounty_points|reward_points/);
+    for (const path of [
+      "src/pages/NewQuestion.tsx",
+      "src/pages/QuestionDetail.tsx",
+      "src/components/QuestionCard.tsx",
+      "src/hooks/useQuestions.ts",
+    ]) {
+      const ui = read(path);
+      for (const name of Object.keys(rpc)) assert.doesNotMatch(ui, new RegExp(`\\b${name}\\b`), `${path}: ${name}`);
+    }
+  });
   check("decision retains privacy, deployment and direct DML safety gates", () => {
     const doc = read("docs/canonical-question-answer-v1-contract-decision.md");
-    for (const text of ["LEGACY", "SECURITY INVOKER", "search_path = ''", "Direct Data API", "advisory lock", "EC-2C2 PRODUCTION DEPLOYED / NOT CLIENT CONSUMABLE", "REMAINS", "Static Contract PASS ≠ Database Apply PASS"]) {
+    for (const text of ["LEGACY", "SECURITY INVOKER", "search_path = ''", "Direct Data API", "advisory lock", "CLIENT CONSUMER GATE PASSED", "REMAINS", "Static Contract PASS ≠ Database Apply PASS"]) {
       assert.ok(doc.toLowerCase().includes(text.toLowerCase()), `Decision missing ${text}`);
     }
     const deployment = read("docs/canonical-question-answer-v1-production-deployment.md");
     for (const text of ["PRODUCTION MIGRATION APPLIED", "CLIENT NOT CONSUMABLE", "Persistent synthetic rows", "Security | 102 | 102 | 0", "Performance | 323 | 323 | 0", "EC-2C3"]) {
       assert.ok(deployment.toLowerCase().includes(text.toLowerCase()), `Deployment record missing ${text}`);
     }
-    assert.match(doc, /未新增 migration，未部署 RPC，未改 UI/);
+    const consumerGate = read("docs/canonical-question-answer-v1-consumer-gate.md");
+    for (const text of ["AUTHENTICATED HTTP CONSUMER GATE PASSED", "Persistent synthetic rows", "CLIENT_RPC_WHITELIST", "UI NOT IMPLEMENTED", "REMAINS"]) {
+      assert.ok(consumerGate.toLowerCase().includes(text.toLowerCase()), `Consumer gate record missing ${text}`);
+    }
     assert.match(doc, /预算默认 null，采纳\/点赞绝不转换为 Helpful\/Closed/);
     assert.doesNotMatch(doc, /pending-review|CONTRACT-PROPOSED/);
     assert.match(doc, /list_questions_v1.*createdAt DESC, questionId ASC/);
-    assert.match(doc, /不是已经 Production 证明的唯一 SQL 实现/);
+    assert.match(doc, /Production 已采用并验证双关系实现/);
     assert.match(doc, /viewerPersonId \| anon/);
     assert.match(doc, /anonymous 和 authenticated\s+均可调用/);
-    assert.match(doc, /重新 Architecture Review/);
+    assert.match(doc, /重新经过 Architecture \/ Security Review/);
     assert.match(read("package.json"), /"test:question-answer-v1"/);
     assert.ok(JSON.parse(read("package.json")).scripts["test:contracts"].includes("question-answer-v1-contract-check.mjs"));
   });
-  console.log(`EC-2 Question/Answer contract PASS (${assertions} groups; strict TypeScript + runtime parsers + proposal gates).`);
-  console.log("Production generated types are present; client catalog and whitelist remain gated pending EC-2C3.");
+  console.log(`EC-2 Question/Answer contract PASS (${assertions} groups; strict TypeScript + runtime parsers + consumer gates).`);
+  console.log("Production generated types, RPC catalog and exact 12 client whitelist entries are aligned; UI remains unwired.");
 } finally {
   rmSync(temp, { recursive: true, force: true });
 }
