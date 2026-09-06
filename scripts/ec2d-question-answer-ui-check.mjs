@@ -94,6 +94,16 @@ await check('auth switch before/after request cannot enter the wrong viewer cach
   await assert.rejects(api.answers(cases[7][2], A), (e) => e.key === 'VIEWER_CHANGED');
   assert.equal(calls, 1);
 });
+await check('cancellation does not require AbortSignal convenience methods', async () => {
+  const controller = new AbortController();
+  Object.defineProperty(controller.signal, 'throwIfAborted', { value: undefined });
+  let calls = 0;
+  const api = adapter.createQuestionAnswerClient({ viewer: async () => B, run: async () => { calls++; return { data: cases[7][3], error: null }; } });
+  await api.answers(cases[7][2], B, controller.signal);
+  controller.abort();
+  await assert.rejects(api.answers(cases[7][2], B, controller.signal), (error) => error.name === 'AbortError');
+  assert.equal(calls, 1, 'An already cancelled request never reaches the transport');
+});
 await check('viewer/order/question scoped keys + auth retirement cancel cached and pending reads', async () => {
   const keys = cache.questionAnswerKeys;
   assert.notDeepEqual(keys.answerPage(A, Q, 'latest'), keys.answerPage(B, Q, 'latest'));

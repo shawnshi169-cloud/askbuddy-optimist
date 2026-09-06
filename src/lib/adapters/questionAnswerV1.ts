@@ -60,11 +60,14 @@ export const createQuestionAnswerClient = (
       },
     ) =>
     async (input: P, viewer: ViewerScope, signal?: AbortSignal): Promise<R> => {
+      const assertActive = () => {
+        if (signal?.aborted) throw new DOMException('Cancelled', 'AbortError');
+      };
       const assertViewer = async () => {
-        signal?.throwIfAborted();
+        assertActive();
         if ((await transport.viewer()) !== viewer)
           throw new QuestionAnswerUiError('VIEWER_CHANGED');
-        signal?.throwIfAborted();
+        assertActive();
       };
       if (CLIENT_RPC_WHITELIST[name] !== `public.${name}`)
         throw new QuestionAnswerUiError('UNAVAILABLE');
