@@ -2,7 +2,7 @@ import type { Id, ISODateTime } from "./contracts";
 import type { ProductChannelSlug } from "./product-channels";
 import type { PublicPersonId, PublicPersonSummary } from "./public-person";
 
-/** EC-2 已批准并部署的 canonical DTO，不是 legacy row 的别名；Shared Core UI 尚未接线。 */
+/** EC-2 已批准并部署的 canonical DTO，由 EC-2D Shared Core 消费；legacy discovery cutover 留待 EC-3。 */
 export type CanonicalQuestionIdV1 = Id;
 export type CanonicalAnswerIdV1 = Id;
 export type CanonicalAnswerReplyIdV1 = Id;

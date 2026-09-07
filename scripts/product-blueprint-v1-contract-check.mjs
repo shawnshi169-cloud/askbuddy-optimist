@@ -128,7 +128,19 @@ try {
   assert.match(domainMap.questionAnswerReply.currentRuntime, /contract approved/);
   assert.match(domainMap.questionAnswerReply.currentRuntime, /12 canonical RPCs deployed/);
   assert.match(domainMap.questionAnswerReply.currentRuntime, /authenticated HTTP consumer-smoke verified/);
-  assert.match(domainMap.questionAnswerReply.currentRuntime, /UI remains legacy and is not wired/);
+  assert.equal(domainMap.questionAnswerReply.phase, "EC-2");
+  assert.match(domainMap.questionAnswerReply.currentRuntime, /Shared Core NewQuestion and QuestionDetail UI implemented/);
+  assert.match(domainMap.questionAnswerReply.currentRuntime, /canonical Answer\/Helpful\/Reply and owner close, no legacy fallback/);
+  assert.match(domainMap.questionAnswerReply.currentRuntime, /Home\/Search\/Channel question discovery cutover remains deferred to EC-3/);
+  assert.doesNotMatch(domainMap.questionAnswerReply.currentRuntime, /UI remains legacy|not wired/);
+  assert.equal(domainMap.homeSearchMatching.runtimeStatus, "legacy-compatibility");
+  assert.equal(domainMap.productChannels.runtimeStatus, "partial");
+  assert.equal(domainMap.canonicalTopic.runtimeStatus, "not-deployed");
+  assert.equal(domainMap.canonicalTopic.newCodePolicy, "blocked-until-phase");
+  assert.equal(domainMap.dynamicNeedInterestSignals.runtimeStatus, "not-deployed");
+  for (const key of ["homeSearchMatching", "productChannels", "canonicalTopic", "dynamicNeedInterestSignals"]) {
+    assert.equal(domainMap[key].phase, "EC-3");
+  }
   assert.equal(domainMap.person, undefined);
   assert.equal(domainMap.publicPersonIdentityAndRead.runtimeStatus, "production-ready");
   assert.equal(
@@ -219,6 +231,7 @@ try {
     "accept_answer_v2",
     "accept_answer_and_transfer_points",
     "create_question_secure",
+    "create_answer_secure",
     "search_app_content_v2",
     "get_search_suggestions_v2",
     "get_channel_feed",
@@ -249,9 +262,45 @@ try {
 
   assert.deepEqual(page("search").readContracts, ["capability:home-search-v1"]);
   assert.ok(page("search").currentReadContracts.includes("rpc:search_app_content_v2"));
-  assert.ok(page("question-detail").writeContracts.includes("capability:answer-helpful-v1"));
-  assert.ok(!page("question-detail").writeContracts.includes("rpc:accept_answer_v2"));
-  assert.ok(page("question-detail").currentWriteContracts.includes("rpc:accept_answer_v2"));
+  const ask = page("ask");
+  const detail = page("question-detail");
+  assert.equal(ask.implementationStatus, "canonical");
+  assert.deepEqual(ask.currentReadContracts, [
+    "storage:canonical-question-draft-v2", "contract:auth-viewer-state",
+    "contract:product-channel-catalog",
+  ]);
+  assert.deepEqual(ask.currentWriteContracts, ["rpc:create_question_v1"]);
+  assert.match(read("src/components/question/questionForm.ts"), /canonical-question-draft-v2/);
+  assert.equal(detail.implementationStatus, "canonical");
+  assert.deepEqual(detail.currentReadContracts, [
+    "rpc:get_question_detail_v1", "rpc:list_question_answers_v1", "rpc:list_answer_replies_v1",
+  ]);
+  assert.deepEqual(detail.currentWriteContracts, [
+    "rpc:create_answer_v1", "rpc:delete_answer_v1", "rpc:set_answer_helpful_v1",
+    "rpc:create_answer_reply_v1", "rpc:delete_answer_reply_v1", "rpc:close_question_v1",
+    "rpc:submit_content_report",
+  ]);
+  assert.ok(detail.writeContracts.includes("capability:answer-helpful-v1"));
+  assert.ok(!detail.writeContracts.includes("capability:ask-person-v1"), "Person navigation is not an EC-4 write action");
+  for (const entry of [ask, detail]) {
+    for (const forbidden of ["rpc:create_question_secure", "rpc:create_answer_secure", "rpc:accept_answer_v2", "rpc:update_question_v1"]) {
+      assert.ok(![...entry.currentReadContracts, ...entry.currentWriteContracts, ...entry.writeContracts].includes(forbidden), `${entry.pageId}: ${forbidden}`);
+    }
+    const notes = entry.notes.join("\n");
+    assert.match(notes, /Shared Core implementation \(including iOS React\)/);
+    assert.match(notes, /iOS keyboard QA is BLOCKED BY ENVIRONMENT/);
+    assert.match(notes, /Android native verification is PENDING/);
+    assert.match(notes, /WeChat canonical flow is NOT IMPLEMENTED/);
+    assert.doesNotMatch(notes, /UI remains legacy|UI 仍是 legacy|尚未接线/);
+  }
+  assert.match(ask.notes.join("\n"), /topicIds=\[\]/);
+  assert.match(ask.notes.join("\n"), /successful real create_question_v1.*\/question\/:questionId/);
+  assert.match(detail.notes.join("\n"), /问问TA only navigates to \/person\/:authorPersonId/);
+  assert.match(detail.notes.join("\n"), /no Conversation, Chat, Booking, Service or Payment action/);
+  for (const pageId of ["home", "search", "channel"]) {
+    assert.equal(page(pageId).implementationStatus, "legacy", pageId);
+    assert.ok(!page(pageId).currentReadContracts.includes("rpc:list_questions_v1"), `${pageId} discovery not cut over`);
+  }
   assert.equal(page("skill-publish").implementationStatus, "legacy");
   assert.deepEqual(page("skill-publish").writeContracts, [
     "capability:person-service-settings-v1",

@@ -1,6 +1,6 @@
 # Canonical Question / Answer / Reply v1 合同决策
 
-状态：**EC-2 CONTRACT APPROVED / PRODUCTION BACKEND DEPLOYED / CLIENT CONSUMER GATE PASSED / UI NOT IMPLEMENTED**。
+状态：**EC-2 CONTRACT APPROVED / PRODUCTION BACKEND DEPLOYED / CLIENT CONSUMER GATE PASSED / SHARED CORE UI IMPLEMENTED / MERGED**。
 
 Product + Architecture 已确认下述产品决策，EC-2A 已合入 main。
 批准产品语义不等于 Production 部署或 UI consumer cutover。
@@ -9,8 +9,39 @@ EC-2C1 的 Production 只读证据与部署计划见[Production 预检](./canoni
 EC-2C2 已应用并验证 backend storage/RPC；完整证据见[Production 部署记录](./canonical-question-answer-v1-production-deployment.md)。
 EC-2C3 已使用两个临时隔离 Auth user 完成真实 authenticated PostgREST read/write smoke，且定向清理后
 所有 synthetic row 为 0；证据见[Consumer Gate 记录](./canonical-question-answer-v1-consumer-gate.md)。
-12 个 canonical RPC 的 catalog、普通客户端白名单和 machine runtime truth 已对齐；Shared Core UI
-仍未实现，必须等待本 PR merge 后由 B 在独立任务中接线。
+12 个 canonical RPC 的 catalog、普通客户端白名单和 Production consumer truth 已对齐。
+EC-2D 由 B 完成 Shared Core NewQuestion、QuestionDetail、Answer、Helpful、一级 Reply 和 owner close，
+已通过 PR #43 合并：`4f6c04d218b2ed68991e8de8110a23d0d2f63dd8`。
+Approved UI head：`00a2af935e25b30010b52e91458d33ed013cfe96`；merge parents 为
+`c7f635992a76dce67d3ea9b267a31d5fcbbcae0d` 与该 UI head，merge tree 与 UI head tree 一致。
+EC-2E 基于此 main 同步 A-owned page contract、machine truth 和当前状态；不重跑 Production 验证。
+
+当前完成范围为 **EC-2 Backend + Consumer Contract、Shared Core UI、A+B Core Vertical Slice**。
+Home/Search/Channel feed cutover 不属于 EC-2D，继续等待 EC-3；Canonical Topic 非空关联仍被阻断。
+`list_questions_v1` 虽已部署且可消费，Home canonical feed 尚未接线；Ask 的四频道选择也不代表
+Channel feed 已切换。Question Edit UI 尚未实现，即使 adapter 已暴露 `update_question_v1`。
+
+平台范围：Shared Core（含 iOS React shared core）已实现；real iOS keyboard interaction =
+**BLOCKED BY ENVIRONMENT**，compact browser viewport QA 不等于真实 iOS 键盘验证。
+Android native verification = **PENDING**；WeChat EC-2 canonical flow = **NOT IMPLEMENTED / follow-up PENDING**。
+PR #43 没有完成 Android / WeChat 平台工作；EC-2 Cross-platform Rollout 尚未完成。
+
+当前页面依赖与证据：
+
+- Ask：`canonical-question-draft-v2` 的 viewer-scoped 本地草稿、Auth viewer、`PRODUCT_CHANNEL_CATALOG`；
+  title/context 必填、一个频道、topicIds=[]、可选正整数 CNY 分预算。仅 `create_question_v1` 成功后
+  清草稿并导航 `/question/:questionId`；无 bounty、fake AI tags、Expert consultation 或附件能力。
+- QuestionDetail：经 `useQuestionAnswerV1` / `questionAnswerV1` adapter 读取 `get_question_detail_v1`、
+  `list_question_answers_v1`、`list_answer_replies_v1`，不直读 legacy 表或 fallback fixture。
+  页面 mutation 为 Answer create/delete、Helpful add/remove、Reply create/delete、Question close。
+- 通用举报仍调用 `useSubmitContentReport` → `submit_content_report`：仓库中的实现将 UUID
+  `target_id` 和 `target_type=question` 写入 `content_reports`，无 legacy Question FK 或旧表查找，
+  可接收 canonical questionId。该事实只表示 report intake，不宣称 moderation 管理流程已切换。
+- Answer CTA **问问TA** 仅导航 `/person/:authorPersonId`；不会创建 Conversation/Chat/Booking，
+  也不执行 Service/Payment。Accepted Answer、bounty、Expert gate 均不属于当前 canonical flow。
+
+独立文档债务：Public Person/Experience 的旧 page/domain/current-status 文案仍需单独同步；
+本 EC-2E 不修改这些 domain。EC-2 Person navigation 以实际 `/person/:userId` route 为证据。
 
 审计 baseline：`57d092166b4165ff27787c4f828281d040c36c84`（PR #37 merge）。
 EC-2A 当时只审计仓库 migration、Production-generated types 和真实 consumer；未重新查询远端数据库，
@@ -31,7 +62,8 @@ Reply 直接属于 Answer，仅一层，不产生 Conversation，也没有 Helpf
 
 ## 二、Legacy → Canonical Gap Map
 
-以下是审计证据，不是本轮执行的迁移：
+以下保留 EC-2A baseline 的历史审计证据，表内“当前/本轮”均指当时；不是 EC-2E 当前页面状态。
+EC-2D 已完成的 NewQuestion/QuestionDetail cutover 见顶部 Current Status，旧 discovery consumers 仍保留。
 
 | 现有对象与证据 | Current Runtime Usage | 分类 | Canonical 方向 / 兼容约束 |
 | --- | --- | --- | --- |
@@ -270,7 +302,8 @@ Person A logout → anon → Person B login 时必须切换 scope，不能复用
 不得跨 viewer 共享完整 Answer list。这是关系状态正确性边界，不是 Service Reputation。
 
 此要求由 `ANSWER_HELPFUL_VIEWER_SCOPE_V1`、Page Contract consumer note 和 EC-2 guard
-保护；本轮只写 contract，不修改 AuthContext、React Query 或 UI。
+保护。EC-2D 的 `questionAnswerV1Cache.ts` 已采用 viewer-scoped key、page size 与 offset pageParams，
+切换账号时取消并移除其他 viewer 的 cache，adapter 在请求前后检查 caller；本 EC-2E 只同步 truth。
 
 ## 九、隐私与 Legacy Cutover
 
@@ -279,8 +312,9 @@ JSON/deletedAt/moderation evidence。Parser 拒绝未知字段、缺字段、错
 非法 Channel/Topic；不采用 blind cast、any、fallback 或“第一个 Expert”补齐。
 `profiles.phone direct Data API Privacy Cutover = REMAINS`。新 safe projection不代表旧表已安全。
 
-后续迁移建议：新 canonical storage → 新 safe RPC → local/remote 验证 → explicit consumer
-whitelist → B 新 vertical slice。旧表、旧 RPC、旧 routes 原样兼容，不跨写新旧两套事实。
+已完成路径：新 canonical storage → 新 safe RPC → local/remote 验证 → explicit consumer
+whitelist → B Shared Core vertical slice。旧 discovery consumers 与其表/RPC 保留；当前 canonical
+页面不跨写新旧两套事实，也不恢复旧路由行为。
 新旧 Question ID 来源必须显式区分；不能通过新 RPC 报错再 fallback legacy，也不能把任意旧
 UUID 当新 Question。旧内容导入是单独 reviewed job：核对作者、非空 Context、频道、moderation
 及原始时间；预算默认 null，采纳/点赞绝不转换为 Helpful/Closed。旧 reward/order reconciliation
@@ -295,7 +329,8 @@ UUID 当新 Question。旧内容导入是单独 reviewed job：核对作者、�
 4. EC-2C2 已应用唯一 migration，完成 remote schema/security/rollback smoke、Advisor 与 generated types 对齐。
 5. EC-2C3 已完成真实 authenticated PostgREST read/write、shared parser、viewer scope、stable error 与隐私验证；
    两个临时 Auth user 及全部内容已定向清理，persistent synthetic rows=0。
-6. 12 RPC backend consumer contract 已对齐；Shared Core UI 仍未实现，B 只能在本 PR merge 后开始接线。
+6. EC-2D 的 Shared Core publish/detail/Answer/Helpful/Reply/owner close 已由 PR #43 合入 main；
+   EC-2E 对齐当前 page/runtime truth，Home/Search/Channel 与 Canonical Topic 保持 EC-3 边界。
 
 回滚先关闭新的 consumer gate，不破坏 legacy；已应用 migration 不改写，不删除用户内容；需要
 修复时新建 reviewed corrective migration。A 负责 schema/API/security，B 只消费 contract，
@@ -303,5 +338,5 @@ C/D 复用同一 identity/DTO。不得提前开始 EC-3 Matching 或 EC-4 Conver
 
 EC-2C3 没有新 migration、DDL、RLS/grant mutation 或 Edge deployment。仅按授权创建两个临时 Auth
 user 和 synthetic Question/Answer/Reply/Helpful，通过真实 HTTP 验证后定向清理，持久残留为 0。
-Production backend 与 shared consumer contract **READY**；canonical Question/Answer/Reply UI
-**NOT IMPLEMENTED**。`profiles.phone` Direct Data API Privacy Cutover 继续为 **REMAINS**。
+Production backend 与 shared consumer contract **READY**；canonical Question/Answer/Reply Shared Core UI
+**IMPLEMENTED / MERGED**，平台验证边界见顶部。`profiles.phone` Direct Data API Privacy Cutover 继续为 **REMAINS**。

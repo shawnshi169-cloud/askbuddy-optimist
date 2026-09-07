@@ -117,7 +117,8 @@ const messagesContract = pageContracts.match(/pageId: "messages"[\s\S]*?\n  },/)
 assert.match(messagesContract, /fallback:legacyReadFallback:table:messages/);
 assert.match(messagesContract, /unavailable in production\/unknown runtime/);
 const questionDetailContract = pageContracts.match(/pageId: "question-detail"[\s\S]*?\n  },/)?.[0] || '';
-assert.match(questionDetailContract, /create_answer_secure/);
-assert.match(questionDetailContract, /no asker\/answerer scheduling or availability contract/);
+assert.match(questionDetailContract, /rpc:create_answer_v1/);
+assert.doesNotMatch(questionDetailContract, /create_answer_secure|accept_answer_v2/);
+assert.match(questionDetailContract, /no scheduling or availability capability/);
 
 console.log('UI-0a engineering readiness guards passed.');

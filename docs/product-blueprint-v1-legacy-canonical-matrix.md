@@ -3,6 +3,11 @@
 本矩阵是 EC-0 的依赖裁决表。`Current Runtime Usage` 记录真实运行事实；
 `Canonical Replacement` 记录目标，不表示已经部署。
 
+EC-2 当前状态补注：以下 EC-2 legacy 行保留当时审计，不再代表 Ask/QuestionDetail 的当前调用。
+PR #43（`4f6c04d218b2ed68991e8de8110a23d0d2f63dd8`）已完成这两页及 Answer/Helpful/Reply
+Shared Core cutover；当前依赖见[EC-2 合同决策](./canonical-question-answer-v1-contract-decision.md)。
+Home/Search/Channel discovery 仍待 EC-3；旧 RPC 兼容 policy 与历史证据继续保留。
+
 | Legacy Entity / Field / Enum / RPC / Route | Current Runtime Usage | Canonical Replacement | Compatibility Strategy | Migration Phase | Owner | Can new code depend on it? |
 | --- | --- | --- | --- | --- | --- | --- |
 | `profiles.user_id` | Public Person RPC 与内容 author identity | `PublicPersonId` | 继续使用 | EC-1 | A | YES |

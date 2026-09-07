@@ -300,7 +300,11 @@ try {
   );
   assert.ok(questionDetail.writeContracts.includes("capability:answer-helpful-v1"));
   assert.ok(!questionDetail.writeContracts.includes("rpc:accept_answer_v2"));
-  assert.ok(questionDetail.currentWriteContracts.includes("rpc:accept_answer_v2"));
+  assert.equal(questionDetail.implementationStatus, "canonical");
+  assert.ok(questionDetail.currentWriteContracts.includes("rpc:create_answer_v1"));
+  assert.ok(questionDetail.currentWriteContracts.includes("rpc:close_question_v1"));
+  assert.ok(!questionDetail.currentWriteContracts.includes("rpc:accept_answer_v2"));
+  assert.ok(!questionDetail.currentWriteContracts.includes("rpc:create_answer_secure"));
   assert.ok(!questionDetail.currentWriteContracts.includes("rpc:accept_answer_and_transfer_points"));
   assert.equal(
     pageMap.PAGE_CONTRACT_MAP.find((entry) => entry.pageId === "skill-publish")
