@@ -310,7 +310,7 @@ try {
     }
     rejected(() => rpc.list_question_answers_v1.parseParams({ ...answersPage, p_viewer_person_id: id(99) }));
   });
-  check("future consumer cache governance includes viewer identity and anon scope", () => {
+  check("Shared Core consumer cache governance includes viewer identity and anon scope", () => {
     assert.deepEqual(api.ANSWER_HELPFUL_VIEWER_SCOPE_V1.futureConsumerCache, {
       minimumKeyParts: ["question-answers", "questionId", "order", "viewerScope"],
       viewerScope: "viewerPersonId-or-anon", includePaginationParams: true,
@@ -326,11 +326,15 @@ try {
     assert.match(notes, /authenticated 请求保留 caller identity/);
     assert.match(notes, /viewerHasMarkedHelpful.*caller 自己的关系.*anon=false/);
     assert.match(notes, /backend 已部署.*consumer smoke.*消费授权/);
-    assert.match(notes, /UI 仍是 legacy 实现/);
-    assert.equal(page.implementationStatus, "legacy");
-    for (const name of Object.keys(rpc)) {
-      assert.ok(![...page.currentReadContracts, ...page.currentWriteContracts].includes(`rpc:${name}`));
+    assert.match(notes, /Shared Core QuestionDetail、Answer、Helpful、Reply 和 owner close 已通过 EC-2D 接线/);
+    assert.equal(page.implementationStatus, "canonical");
+    assert.deepEqual(page.currentReadContracts, [
+      "rpc:get_question_detail_v1", "rpc:list_question_answers_v1", "rpc:list_answer_replies_v1",
+    ]);
+    for (const name of ["create_answer_v1", "delete_answer_v1", "set_answer_helpful_v1", "create_answer_reply_v1", "delete_answer_reply_v1", "close_question_v1"]) {
+      assert.ok(page.currentWriteContracts.includes(`rpc:${name}`));
     }
+    assert.ok(!page.currentWriteContracts.includes("rpc:update_question_v1"));
   });
   check("Helpful physical relation is production-verified without changing logical invariants", () => {
     assert.deepEqual(api.ANSWER_HELPFUL_STORAGE_REVIEW_V1, {
@@ -377,7 +381,7 @@ try {
     };
     visit(ast);
   });
-  check("consumer alignment introduces no legacy fallback or premature UI wiring", () => {
+  check("Shared Core pages delegate to the adapter; legacy discovery remains separate", () => {
     const sharedApi = read("packages/shared-api/src/question-answer-v1.ts");
     assert.doesNotMatch(sharedApi, /create_question_secure|create_answer_secure|accept_answer_v2|answer_likes|bounty_points|reward_points/);
     for (const path of [
@@ -388,6 +392,9 @@ try {
     ]) {
       const ui = read(path);
       for (const name of Object.keys(rpc)) assert.doesNotMatch(ui, new RegExp(`\\b${name}\\b`), `${path}: ${name}`);
+    }
+    for (const path of ["src/pages/NewQuestion.tsx", "src/pages/QuestionDetail.tsx"]) {
+      assert.match(read(path), /@\/hooks\/useQuestionAnswerV1/);
     }
   });
   check("decision retains privacy, deployment and direct DML safety gates", () => {
@@ -400,9 +407,17 @@ try {
       assert.ok(deployment.toLowerCase().includes(text.toLowerCase()), `Deployment record missing ${text}`);
     }
     const consumerGate = read("docs/canonical-question-answer-v1-consumer-gate.md");
-    for (const text of ["AUTHENTICATED HTTP CONSUMER GATE PASSED", "Persistent synthetic rows", "CLIENT_RPC_WHITELIST", "UI NOT IMPLEMENTED", "REMAINS"]) {
+    for (const text of ["AUTHENTICATED HTTP CONSUMER GATE PASSED", "Persistent synthetic rows", "CLIENT_RPC_WHITELIST", "SHARED CORE UI IMPLEMENTED / MERGED", "REMAINS"]) {
       assert.ok(consumerGate.toLowerCase().includes(text.toLowerCase()), `Consumer gate record missing ${text}`);
     }
+    const currentStatus = doc.split("## 一、")[0];
+    assert.match(currentStatus, /SHARED CORE UI IMPLEMENTED \/ MERGED/);
+    assert.match(currentStatus, /PR #43/);
+    assert.match(currentStatus, /4f6c04d218b2ed68991e8de8110a23d0d2f63dd8/);
+    assert.match(currentStatus, /Android native verification.*PENDING/);
+    assert.match(currentStatus, /WeChat.*NOT IMPLEMENTED/);
+    assert.match(currentStatus, /iOS keyboard interaction =\s*\*\*BLOCKED BY ENVIRONMENT/);
+    assert.doesNotMatch(currentStatus, /UI NOT IMPLEMENTED|Shared Core UI\s*仍未实现/);
     assert.match(doc, /预算默认 null，采纳\/点赞绝不转换为 Helpful\/Closed/);
     assert.doesNotMatch(doc, /pending-review|CONTRACT-PROPOSED/);
     assert.match(doc, /list_questions_v1.*createdAt DESC, questionId ASC/);
@@ -414,7 +429,7 @@ try {
     assert.ok(JSON.parse(read("package.json")).scripts["test:contracts"].includes("question-answer-v1-contract-check.mjs"));
   });
   console.log(`EC-2 Question/Answer contract PASS (${assertions} groups; strict TypeScript + runtime parsers + consumer gates).`);
-  console.log("Production generated types, RPC catalog and exact 12 client whitelist entries are aligned; UI remains unwired.");
+  console.log("Production contracts and EC-2D Shared Core UI are aligned; EC-3 discovery and platform follow-up remain deferred.");
 } finally {
   rmSync(temp, { recursive: true, force: true });
 }

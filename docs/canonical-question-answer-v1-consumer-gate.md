@@ -1,6 +1,10 @@
 # EC-2C3 Question / Answer Consumer Gate 记录
 
-状态：**AUTHENTICATED HTTP CONSUMER GATE PASSED / CLIENT CONTRACT ALIGNED / UI NOT IMPLEMENTED**。
+当前状态：**AUTHENTICATED HTTP CONSUMER GATE PASSED / CLIENT CONTRACT ALIGNED / SHARED CORE UI IMPLEMENTED / MERGED**。
+
+下述 Production 证据保留 EC-2C3 当时的执行记录；后续 EC-2D Shared Core 已通过 PR #43
+（`4f6c04d218b2ed68991e8de8110a23d0d2f63dd8`）合并。当前页面与平台边界见
+[合同决策 Current Status](./canonical-question-answer-v1-contract-decision.md)，本次 truth sync 未重跑 smoke。
 
 本阶段基于 PR #41 merge commit
 `469120e27d9dd3d39cc3e619b36abb37a6667cd8`，只对齐已部署 backend 的应用层消费真值。
@@ -97,9 +101,11 @@ HTTP read/write、viewer isolation、stable errors、隐私、清理与 Advisor 
 - `clientConsumable=true`；
 - Product contract 仍为 `contract-approved`。
 
-这只表示 Shared Core 可以在本 PR merge 后消费 canonical backend contract。Ask、Question Detail、
-Question Card 当前实现仍是 legacy；本阶段没有 React hook、页面、导航或 cache 实现。后续 B 必须按
-`questionId + order + viewerPersonId|anon + pagination` 隔离 Answer list cache，禁止 canonical RPC
-失败后 fallback 到 legacy Question/Answer/accepted/bounty/like 路径。
+EC-2C3 完成时只批准 backend 消费，Ask、Question Detail、Question Card 在当时仍是 legacy；
+该阶段没有 React hook、页面、导航或 cache 实现。EC-2D 后续已完成 Ask/QuestionDetail canonical
+cutover，并按 `questionId + order + viewerPersonId|anon + pagination` 隔离 Answer list cache，
+不在 canonical RPC 失败后 fallback 到 legacy Question/Answer/accepted/bounty/like 路径。
+Question Card 所属 Home/Search/Channel discovery 仍待 EC-3；Question Edit UI 未实现。
+Android/WeChat follow-up 和真实 iOS keyboard QA 缺口继续保留，不代表跨平台 rollout 完成。
 
 `profiles.phone` Direct Data API Privacy Cutover 继续为 **REMAINS**。

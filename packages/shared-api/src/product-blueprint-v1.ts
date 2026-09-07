@@ -50,7 +50,7 @@ export const PRODUCT_BLUEPRINT_V1_DOMAIN_MAP = {
   questionAnswerReply: {
     domain: "question-answer-reply",
     target: "free public answers, helpful feedback, one-level replies, no acceptance",
-    currentRuntime: "EC-2 contract approved; Production storage and 12 canonical RPCs deployed, remote-validated, and authenticated HTTP consumer-smoke verified; Shared Core UI remains legacy and is not wired",
+    currentRuntime: "EC-2 contract approved; Production storage and 12 canonical RPCs deployed, remote-validated, and authenticated HTTP consumer-smoke verified; Shared Core NewQuestion and QuestionDetail UI implemented with canonical Answer/Helpful/Reply and owner close, no legacy fallback; Home/Search/Channel question discovery cutover remains deferred to EC-3; real iOS keyboard QA blocked by environment, Android native verification pending, WeChat canonical flow not implemented",
     runtimeStatus: "production-ready",
     newCodePolicy: "may-use-deployed-contract",
     phase: "EC-2",
