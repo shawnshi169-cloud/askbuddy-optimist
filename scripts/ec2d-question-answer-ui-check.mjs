@@ -172,4 +172,10 @@ await check('UI only canonical contract, real one-level interactions and server-
   assert.match(api, /contract\.parseParams\(input\)/);
   assert.match(api, /contract\.parseResult\(data, params\)/);
 });
+await check('BottomBar prefers Capacitor inset, retains env fallback and visual spacing', () => {
+  const bottomBar = read('src/components/question/BottomBar.tsx');
+  const padding = bottomBar.match(/paddingBottom:\s*['"]([^'"]+)['"]/)?.[1];
+  assert.equal(padding, 'calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom)) + 12px)');
+  assert.doesNotMatch(padding, /\b24px\b/, 'System inset must not be a hard-coded device value');
+});
 console.log(`EC-2D Question/Answer/Reply UI PASS (${groups} groups; no network or Production mutation).`);
