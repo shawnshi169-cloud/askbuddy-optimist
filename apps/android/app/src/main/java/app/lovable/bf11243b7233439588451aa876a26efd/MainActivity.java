@@ -9,7 +9,7 @@ import com.getcapacitor.BridgeActivity;
 public class MainActivity extends BridgeActivity {
     private static final String HANDLE_WEB_BACK =
         "(function(){" +
-        "var dialog=document.querySelector('[role=\"dialog\"][data-state=\"open\"]');" +
+        "var dialog=document.querySelector('[role=\"dialog\"][data-state=\"open\"],[role=\"alertdialog\"][data-state=\"open\"]');" +
         "if(dialog){" +
         "document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',code:'Escape',bubbles:true,cancelable:true}));" +
         "return true;" +
@@ -28,7 +28,11 @@ public class MainActivity extends BridgeActivity {
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                if (handlingWebBack || getBridge() == null || getBridge().getWebView() == null) {
+                if (handlingWebBack) {
+                    return;
+                }
+
+                if (getBridge() == null || getBridge().getWebView() == null) {
                     runDefaultBack(this);
                     return;
                 }
