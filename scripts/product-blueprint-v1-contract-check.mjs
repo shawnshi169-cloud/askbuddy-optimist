@@ -133,6 +133,8 @@ try {
   assert.match(domainMap.questionAnswerReply.currentRuntime, /canonical Answer\/Helpful\/Reply and owner close, no legacy fallback/);
   assert.match(domainMap.questionAnswerReply.currentRuntime, /Home\/Search\/Channel question discovery cutover remains deferred to EC-3/);
   assert.doesNotMatch(domainMap.questionAnswerReply.currentRuntime, /UI remains legacy|not wired/);
+  assert.match(domainMap.questionAnswerReply.currentRuntime, /iOS keyboard QA blocked by environment/);
+  assert.match(domainMap.questionAnswerReply.currentRuntime, /WeChat canonical flow not implemented/);
   assert.equal(domainMap.homeSearchMatching.runtimeStatus, "legacy-compatibility");
   assert.equal(domainMap.productChannels.runtimeStatus, "partial");
   assert.equal(domainMap.canonicalTopic.runtimeStatus, "not-deployed");
@@ -289,10 +291,24 @@ try {
     const notes = entry.notes.join("\n");
     assert.match(notes, /Shared Core implementation \(including iOS React\)/);
     assert.match(notes, /iOS keyboard QA is BLOCKED BY ENVIRONMENT/);
-    assert.match(notes, /Android native verification is PENDING/);
     assert.match(notes, /WeChat canonical flow is NOT IMPLEMENTED/);
     assert.doesNotMatch(notes, /UI remains legacy|UI 仍是 legacy|尚未接线/);
   }
+  for (const platformTruth of [
+    domainMap.questionAnswerReply.currentRuntime,
+    ask.notes.join("\n"),
+    detail.notes.join("\n"),
+  ]) {
+    assert.match(platformTruth, /Android native\/platform verification is VERIFIED/);
+    assert.match(platformTruth, /Pixel 7 \/ Android 16 API 36 with gesture navigation/);
+    assert.match(platformTruth, /LOCAL ISOLATED QA/);
+    assert.match(platformTruth, /not Production backend re-verification/);
+    assert.match(platformTruth, /PR #45\/#46/);
+    assert.match(platformTruth, /docs\/ec2f-android-native-verification\.md/);
+    assert.match(platformTruth, /EC-2 cross-platform rollout is NOT COMPLETE/);
+    assert.doesNotMatch(platformTruth, /Android[^;\n]*(?:PENDING|pending|not verified)/);
+  }
+  assert.match(read("docs/ec2f-android-native-verification.md"), /LOCAL ISOLATED QA/);
   assert.match(ask.notes.join("\n"), /topicIds=\[\]/);
   assert.match(ask.notes.join("\n"), /successful real create_question_v1.*\/question\/:questionId/);
   assert.match(detail.notes.join("\n"), /问问TA only navigates to \/person\/:authorPersonId/);

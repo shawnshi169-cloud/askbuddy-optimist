@@ -414,7 +414,20 @@ try {
     assert.match(currentStatus, /SHARED CORE UI IMPLEMENTED \/ MERGED/);
     assert.match(currentStatus, /PR #43/);
     assert.match(currentStatus, /4f6c04d218b2ed68991e8de8110a23d0d2f63dd8/);
-    assert.match(currentStatus, /Android native verification.*PENDING/);
+    assert.match(currentStatus, /Android native\/platform verification = \*\*VERIFIED \/ COMPLETE\*\*/);
+    assert.match(currentStatus, /Pixel 7 Emulator \/ Android 16 API 36 \/ gesture navigation/);
+    assert.match(currentStatus, /PR #45 safe-area/);
+    assert.match(currentStatus, /aa7d17549d100b32ef7cd70e44b2c1886f8a8040/);
+    assert.match(currentStatus, /PR #46 Back handling/);
+    assert.match(currentStatus, /d85db2a4351d4a70a91225b6cbf5bfe36bb6d088/);
+    for (const record of [currentStatus, consumerGate]) {
+      assert.match(record, /ec2f-android-native-verification\.md/);
+      assert.match(record, /LOCAL ISOLATED QA/);
+      assert.match(record, /不是 Production backend re-verification|不代表 Production backend re-verification/);
+      assert.match(record, /[Cc]ross-platform [Rr]ollout[^\n]*NOT COMPLETE/);
+    }
+    assert.match(currentStatus, /EC-3 \*\*NOT STARTED\*\*/);
+    assert.match(currentStatus, /历史范围说明：EC-2D \/ EC-2E 当时 Android verification = \*\*PENDING\*\*/);
     assert.match(currentStatus, /WeChat.*NOT IMPLEMENTED/);
     assert.match(currentStatus, /iOS keyboard interaction =\s*\*\*BLOCKED BY ENVIRONMENT/);
     assert.doesNotMatch(currentStatus, /UI NOT IMPLEMENTED|Shared Core UI\s*仍未实现/);

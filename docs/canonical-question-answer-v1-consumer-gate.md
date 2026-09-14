@@ -106,6 +106,9 @@ EC-2C3 完成时只批准 backend 消费，Ask、Question Detail、Question Card
 cutover，并按 `questionId + order + viewerPersonId|anon + pagination` 隔离 Answer list cache，
 不在 canonical RPC 失败后 fallback 到 legacy Question/Answer/accepted/bounty/like 路径。
 Question Card 所属 Home/Search/Channel discovery 仍待 EC-3；Question Edit UI 未实现。
-Android/WeChat follow-up 和真实 iOS keyboard QA 缺口继续保留，不代表跨平台 rollout 完成。
+EC-2F Android native/platform verification 已通过 PR #45/#46 完成：Pixel 7 / Android 16 API 36 / gesture navigation，
+证据见[Android device evidence](./ec2f-android-native-verification.md)。这是 LOCAL ISOLATED QA 的平台验证，
+不替代上文 EC-2C3 Production consumer gate，不代表 Production backend re-verification。
+WeChat follow-up 仍 PENDING，真实 iOS keyboard QA 仍 BLOCKED BY ENVIRONMENT；EC-2 cross-platform rollout 仍 NOT COMPLETE。
 
 `profiles.phone` Direct Data API Privacy Cutover 继续为 **REMAINS**。
