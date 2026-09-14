@@ -20,6 +20,8 @@ export type BlueprintPhase = "EC-1" | "EC-2" | "EC-3" | "EC-4" | "EC-5";
 export interface BlueprintDomainContract {
   domain: string;
   target: string;
+  /** Product freeze is independent from storage/API deployment and consumer cutover. */
+  contractStatus?: "approved-frozen";
   currentRuntime: string;
   runtimeStatus: BlueprintRuntimeStatus;
   newCodePolicy: BlueprintNewCodePolicy;
@@ -57,15 +59,17 @@ export const PRODUCT_BLUEPRINT_V1_DOMAIN_MAP = {
   },
   homeSearchMatching: {
     domain: "home-search-matching",
-    target: "all/person/question search with Experience match reasons",
-    currentRuntime: "search_app_content_v2 returns question/expert/skill/post",
+    target: "EC-3A separate Question/Person Home feeds; all/person/question search with independently ranked sections and factual Person evidence",
+    contractStatus: "approved-frozen",
+    currentRuntime: "search_app_content_v2 returns question/expert/skill/post; canonical Home/Person discovery, Search and Matching V0 are not implemented; Shared Core Home/Search not cut over",
     runtimeStatus: "legacy-compatibility",
     newCodePolicy: "blocked-until-phase",
     phase: "EC-3",
   },
   productChannels: {
     domain: "product-channels",
-    target: "stable four-channel navigation with Person/Question discovery",
+    target: "stable four-channel navigation; temporary domain focus with separate Question/Person discovery modes",
+    contractStatus: "approved-frozen",
     currentRuntime: "PRODUCT_CHANNEL_CATALOG is stable; current feed still returns experts",
     runtimeStatus: "partial",
     newCodePolicy: "target-contract-only",
@@ -73,8 +77,18 @@ export const PRODUCT_BLUEPRINT_V1_DOMAIN_MAP = {
   },
   canonicalTopic: {
     domain: "canonical-topic",
-    target: "cross-module semantic layer distinct from Discover social topics/hashtags",
-    currentRuntime: "no canonical cross-module topic storage or API",
+    target: "platform-governed cross-module semantic entity shared by Question/Experience/Editorial/Search/Matching; not a hashtag or Article",
+    contractStatus: "approved-frozen",
+    currentRuntime: "no canonical cross-module topic storage or API; EC-2 Question topicIds remains empty-only until EC-3B runtime review/deployment",
+    runtimeStatus: "not-deployed",
+    newCodePolicy: "blocked-until-phase",
+    phase: "EC-3",
+  },
+  editorialFeature: {
+    domain: "editorial-feature",
+    target: "问问热榜: admin-managed published structured Article, related real Topic/Question/Person; not an algorithmic ranking list",
+    contractStatus: "approved-frozen",
+    currentRuntime: "no canonical Editorial Feature storage/API/page; legacy hot_topics is not this entity; comments planned/not-runtime",
     runtimeStatus: "not-deployed",
     newCodePolicy: "blocked-until-phase",
     phase: "EC-3",
@@ -90,6 +104,7 @@ export const PRODUCT_BLUEPRINT_V1_DOMAIN_MAP = {
   location: {
     domain: "location",
     target: "city-level discovery dimension independent from Topic",
+    contractStatus: "approved-frozen",
     currentRuntime: "city/city_code exist across legacy relations without one canonical contract",
     runtimeStatus: "partial",
     newCodePolicy: "target-contract-only",
@@ -106,6 +121,7 @@ export const PRODUCT_BLUEPRINT_V1_DOMAIN_MAP = {
   dynamicNeedInterestSignals: {
     domain: "dynamic-need-interest-signals",
     target: "decaying current Need/Interest signals distinct from accumulated Experience",
+    contractStatus: "approved-frozen",
     currentRuntime: "no canonical dynamic Person model or signal store",
     runtimeStatus: "not-deployed",
     newCodePolicy: "blocked-until-phase",

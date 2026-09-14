@@ -24,7 +24,8 @@ Channel feed 已切换。Question Edit UI 尚未实现，即使 adapter 已暴�
 平台范围：Shared Core（含 iOS React shared core）已实现；real iOS keyboard interaction =
 **BLOCKED BY ENVIRONMENT**，compact browser viewport QA 不等于真实 iOS 键盘验证。
 Android native/platform verification = **VERIFIED / COMPLETE**；WeChat EC-2 canonical flow = **NOT IMPLEMENTED / follow-up PENDING**。
-EC-2 Cross-platform Rollout = **NOT COMPLETE**；WeChat follow-up 和真实 iOS keyboard QA 缺口仍保留，EC-3 **NOT STARTED**。
+EC-2 Cross-platform Rollout = **NOT COMPLETE**；WeChat follow-up 和真实 iOS keyboard QA 缺口仍保留，EC-3 implementation **NOT STARTED**。
+EC-3A 仅开始 [Discovery contract freeze](./ec3-discovery-contract-decision.md)，不改变本页 EC-2 runtime 或解除 Topic 空数组限制。
 
 EC-2F 已完成 Pixel 7 Emulator / Android 16 API 36 / gesture navigation 平台验证，详见
 [Android device evidence](./ec2f-android-native-verification.md)。PR #45 safe-area 已合并

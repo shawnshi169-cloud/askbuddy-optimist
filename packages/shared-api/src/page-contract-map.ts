@@ -26,6 +26,7 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     readContracts: [
       "contract:product-channel-catalog", "capability:home-person-discovery-v1",
       "capability:home-question-feed-v1", "capability:home-action-attention-v1",
+      "capability:editorial-feature-list-v1",
     ],
     writeContracts: [],
     implementationStatus: "legacy",
@@ -35,6 +36,9 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     ],
     currentWriteContracts: [],
     notes: [
+      "EC-3A target contract frozen, runtime not cut over: Brand/City/actionable Bell, Search, four Channels, editorial 问问热榜, 大家都在问|找TA问问, separate mode feed, Bottom Navigation. First mode Questions; remember last-used light preference, never a persona.",
+      "Target 问问热榜 is admin-managed Editorial Feature/Article, not Topic or heat ranking; horizontal poster intent 1.15-1.3 visible cards. Hide the entire module without real published features; no fixture fallback. Existing hot_topics rendering is legacy, not the frozen Editorial runtime.",
+      "Target City is optional city-level focus, never GPS/Topic/Experience inference; Bell is priority/actionable only, ordinary unread belongs to Messages. Target + offers 我有问题 / 我有经验 / 技能, never editorial publishing.",
       "Blueprint v1 target recommends Person and Question; Expert/Skill rows remain current compatibility data only.",
       "Presentation fixtures require the explicit development-only runtime gate; production empty/error states never merge or fall back to fixtures.",
     ],
@@ -52,6 +56,8 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     ],
     currentWriteContracts: ["rpc:upsert_search_history"],
     notes: [
+      "EC-3A target contract frozen, runtime not cut over: 搜问题、找经历过的人; 综合|人|问题. 综合 has independent 相关问题 and 相关的人 sections, never forced cross-entity score interleaving; no Discover Post, Community or standalone Experience result.",
+      "Target empty state has no fake/AI-generated result or fixture fallback; 去问一个问题 enters the central + Question flow, query is only a draft idea and cannot invent Context. 问问TA ends at /person/:userId, not EC-4 actions.",
       "Blueprint v1 Home Search target domains are all/person/question; current V2 expert/skill/post results are legacy compatibility.",
       "Production uses no fixture merge or read fallback, while real legacy reads remain capability-gated outside production.",
     ],
@@ -182,6 +188,19 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     ],
   },
   {
+    pageId: "editorial-feature-detail",
+    page: "Editorial Feature Detail",
+    readContracts: ["capability:editorial-feature-detail-v1"],
+    writeContracts: [],
+    implementationStatus: "blocked",
+    currentReadContracts: [],
+    currentWriteContracts: [],
+    notes: [
+      "EC-3A target contract frozen, runtime not cut over: published structured Article with real related Canonical Topics/Questions/Persons, not the legacy TopicDetail page. Heading/paragraph/image/quote only, no arbitrary raw HTML or fabricated Answer quote.",
+      "Comments are planned/not-runtime; public-link sharing is target-only. Publishing/editing/unpublishing/placement require authorized Admin/editorial operator; no ordinary Person write capability or current CMS API.",
+    ],
+  },
+  {
     pageId: "channel",
     page: "Channel",
     readContracts: ["contract:product-channel-catalog", "capability:channel-person-question-feed-v1"],
@@ -190,6 +209,7 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     currentReadContracts: ["rpc:get_channel_feed", "fixture:development-only"],
     currentWriteContracts: [],
     notes: [
+      "EC-3A target contract frozen, runtime not cut over: temporary domain focus preserves 大家都在问|找TA问问. Questions filter by exactly one primaryChannel; Persons use relevant public Experience/contribution. Exit restores global Home personalization, never a permanent persona.",
       "Four Product Channel slugs remain canonical; the current RPC experts collection is legacy compatibility output.",
       "Production renders the RPC result, empty, or error directly; presentation feed fixtures require the explicit development-only gate.",
     ],
