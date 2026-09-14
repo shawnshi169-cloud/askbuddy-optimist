@@ -16,15 +16,28 @@ Approved UI head：`00a2af935e25b30010b52e91458d33ed013cfe96`；merge parents �
 `c7f635992a76dce67d3ea9b267a31d5fcbbcae0d` 与该 UI head，merge tree 与 UI head tree 一致。
 EC-2E 基于此 main 同步 A-owned page contract、machine truth 和当前状态；不重跑 Production 验证。
 
-当前完成范围为 **EC-2 Backend + Consumer Contract、Shared Core UI、A+B Core Vertical Slice**。
+当前完成范围为 **EC-2 Backend + Consumer Contract、Shared Core UI、Android platform verification、A+B+C APP Core Vertical Slice**。
 Home/Search/Channel feed cutover 不属于 EC-2D，继续等待 EC-3；Canonical Topic 非空关联仍被阻断。
 `list_questions_v1` 虽已部署且可消费，Home canonical feed 尚未接线；Ask 的四频道选择也不代表
 Channel feed 已切换。Question Edit UI 尚未实现，即使 adapter 已暴露 `update_question_v1`。
 
 平台范围：Shared Core（含 iOS React shared core）已实现；real iOS keyboard interaction =
 **BLOCKED BY ENVIRONMENT**，compact browser viewport QA 不等于真实 iOS 键盘验证。
-Android native verification = **PENDING**；WeChat EC-2 canonical flow = **NOT IMPLEMENTED / follow-up PENDING**。
-PR #43 没有完成 Android / WeChat 平台工作；EC-2 Cross-platform Rollout 尚未完成。
+Android native/platform verification = **VERIFIED / COMPLETE**；WeChat EC-2 canonical flow = **NOT IMPLEMENTED / follow-up PENDING**。
+EC-2 Cross-platform Rollout = **NOT COMPLETE**；WeChat follow-up 和真实 iOS keyboard QA 缺口仍保留，EC-3 **NOT STARTED**。
+
+EC-2F 已完成 Pixel 7 Emulator / Android 16 API 36 / gesture navigation 平台验证，详见
+[Android device evidence](./ec2f-android-native-verification.md)。PR #45 safe-area 已合并
+（`aa7d17549d100b32ef7cd70e44b2c1886f8a8040`）；PR #46 Back handling 已合并
+（`d85db2a4351d4a70a91225b6cbf5bfe36bb6d088`），其 parents 为 PR #45 merge 与 approved head
+`11f7dc895a467f1fd643b96034249fe5b63336e1`，merge tree 与 approved head tree 一致。
+Safe-area、IME-first Back、Dialog/AlertDialog Back、SPA history、rapid-Back reentrancy、root Back、
+lifecycle、rotation、scroll restoration、system bars 和 Question/Person return flow 均已验证。
+这些是 **LOCAL ISOLATED QA** 的 Android native/platform 证据，**不是 Production backend re-verification**，
+不替代 EC-2C3 已建立的 Production consumer gate，也不宣称重新验证业务写入。EC-2G 仅同步已有证据，未重跑 QA。
+
+历史范围说明：EC-2D / EC-2E 当时 Android verification = **PENDING**；PR #43 没有完成 Android / WeChat
+平台工作。该历史状态保留，当前 Android 状态由后续 PR #45/#46 的 EC-2F 证据取代；不改写旧设备记录。
 
 当前页面依赖与证据：
 
