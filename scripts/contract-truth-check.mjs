@@ -276,7 +276,7 @@ try {
 
   const requiredPages = [
     "home", "search", "ask", "discover", "messages", "profile", "public-person",
-    "question-detail", "channel", "topic-detail", "expert-detail",
+    "question-detail", "editorial-feature-detail", "channel", "topic-detail", "expert-detail",
     "skill-publish", "chat-detail", "post-editor", "call",
   ];
   assert.deepEqual(
