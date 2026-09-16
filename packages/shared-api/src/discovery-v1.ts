@@ -11,6 +11,8 @@ export const DISCOVERY_V1_CONTRACT = {
   contractStatus: "approved-frozen",
   productionDeployed: false,
   clientConsumable: false,
+  // Topic foundation has its own LOCAL-only state; these pipelines remain unimplemented.
+  implementationScope: "home-search-matching-editorial",
   implementationStarted: false,
   rpcNamesFrozen: false,
   home: {

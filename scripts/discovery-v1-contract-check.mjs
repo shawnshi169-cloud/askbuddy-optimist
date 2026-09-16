@@ -82,6 +82,7 @@ const missingChannel: Q = { questionId: "q", title: "q", topicIds: [], contextEx
   const page = (id) => { const p = pages.find((item) => item.pageId === id); assert.ok(p, id); return p; };
   assert.equal(c.contractStatus, "approved-frozen");
   for (const field of ["productionDeployed", "clientConsumable", "implementationStarted", "rpcNamesFrozen"]) assert.equal(c[field], false);
+  assert.equal(c.implementationScope, "home-search-matching-editorial");
   assert.deepEqual(types.DISCOVERY_MODE_V1, ["questions", "persons"]);
   assert.deepEqual(c.home.structure, ["brand-city-action-bell", "search", "four-channels", "editorial-features", "discovery-mode", "mode-feed", "bottom-navigation"]);
   assert.deepEqual(c.home.bottomNavigation, ["首页", "发现", "＋", "消息", "我的"]);

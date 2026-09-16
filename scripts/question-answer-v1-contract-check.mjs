@@ -426,8 +426,9 @@ try {
       assert.match(record, /不是 Production backend re-verification|不代表 Production backend re-verification/);
       assert.match(record, /[Cc]ross-platform [Rr]ollout[^\n]*NOT COMPLETE/);
     }
-    assert.match(currentStatus, /EC-3 implementation \*\*NOT STARTED\*\*/);
-    assert.match(currentStatus, /EC-3A 仅开始.*Discovery contract freeze/);
+    assert.match(currentStatus, /Home\/Search\/Matching\/Editorial implementation \*\*NOT STARTED\*\*/);
+    assert.match(currentStatus, /EC-3A .*Discovery contract freeze/);
+    assert.match(currentStatus, /EC-3B1 .*仅本地实现、等待 review/);
     assert.match(currentStatus, /历史范围说明：EC-2D \/ EC-2E 当时 Android verification = \*\*PENDING\*\*/);
     assert.match(currentStatus, /WeChat.*NOT IMPLEMENTED/);
     assert.match(currentStatus, /iOS keyboard interaction =\s*\*\*BLOCKED BY ENVIRONMENT/);
