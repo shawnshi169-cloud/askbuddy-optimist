@@ -28,7 +28,8 @@ assert.doesNotMatch(migration, /GRANT SELECT\s+ON/i, "SELECT must enumerate colu
 assert.match(migration, /normalized_term text GENERATED ALWAYS AS .* STORED PRIMARY KEY/);
 assert.match(migration, /FOREIGN KEY \(topic_id, normalized_name\)[\s\S]*?DEFERRABLE INITIALLY DEFERRED/);
 assert.match(migration, /question_id uuid NOT NULL REFERENCES public.questions_v1\(id\) ON DELETE RESTRICT/);
-assert.match(migration, /experience_id uuid NOT NULL REFERENCES public.person_experiences\(id\) ON DELETE RESTRICT/);
+assert.match(migration, /experience_id uuid NOT NULL REFERENCES public.person_experiences\(id\) ON DELETE CASCADE/);
+assert.equal([...migration.matchAll(/topic_id uuid NOT NULL REFERENCES public.canonical_topics_v1\(topic_id\) ON DELETE RESTRICT/g)].length, 3);
 assert.match(migration, /PRIMARY KEY \(question_id, topic_id\)/);
 assert.match(migration, /PRIMARY KEY \(experience_id, topic_id\)/);
 assert.match(migration, /pg_advisory_xact_lock_shared/);
@@ -48,6 +49,11 @@ assert.match(body("ec3_topic_private.lock_question_owner"), /UPDATE public.quest
 assert.doesNotMatch(body("ec3_topic_private.lock_question_owner"), /pg_advisory/,
   "do not reverse row -> existing EC-2 advisory lock order");
 assert.match(body("ec3_topic_private.lock_experience_owner"), /e.person_id = auth.uid\(\) AND e.deleted_at IS NULL FOR NO KEY UPDATE/);
+assert.match(body("ec3_topic_private.guard_experience_link"),
+  /IF TG_OP = 'DELETE' THEN\s*--[^\n]*\n\s*--[^\n]*\n\s*IF CURRENT_USER IN \('postgres', 'supabase_admin', 'service_role'\)\s*AND NOT EXISTS \(SELECT 1 FROM public.person_experiences AS e WHERE e.id = OLD.experience_id\) THEN\s*RETURN OLD;\s*END IF;\s*PERFORM ec3_topic_private.lock_experience_owner\(OLD.experience_id\);/,
+  "only trusted-role deletion of a physically absent parent may skip the owner JWT gate");
+assert.doesNotMatch(body("ec3_topic_private.guard_experience_link"), /current_setting|SESSION_USER|pg_trigger_depth/i);
+assert.doesNotMatch(migration, /GRANT[\s\S]*?DELETE[^;]*ON public.person_experiences/i);
 for (const name of ["ec3_topic_private.replace_question_topics", "public.set_experience_topics_v1"]) {
   assert.match(body(name), /IF NOT EXISTS[\s\S]*?require_active/);
   assert.match(body(name), /ORDER BY input.id/);
@@ -66,6 +72,9 @@ for (const table of tables) assert.ok(read("packages/shared-types/src/generated/
 const runner = read("scripts/canonical-topic-v1-local-test.mjs");
 assert.match(runner, /refuse non-local endpoint/);
 assert.match(runner, /"db","reset","--local","--no-seed"/);
+const localSql = read("scripts/sql/canonical-topic-v1-local.sql");
+for (const name of ["privileged Experience parent hard delete cascades old/new children", "account cascade removes Experience and old/new children",
+  "non-owner association delete changes zero rows", "soft delete retains parent and child storage"]) assert.ok(localSql.includes(name));
 assert.doesNotMatch(runner, /--linked|--db-url|SUPABASE_ACCESS_TOKEN|SUPABASE_SERVICE_ROLE_KEY/);
 assert.match(read("packages/shared-api/src/question-answer-v1.ts"), /const topicIds = z.array\(uuid\).length\(0\)/);
 assert.ok(read("packages/shared-api/src/product-blueprint-v1.ts").includes("EC-3B1 local"));

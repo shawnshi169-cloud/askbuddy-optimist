@@ -7,7 +7,7 @@ EC-3A product contract remains approved-frozen. EC-3B2 has not started.
 ## Storage And Governance
 
 One additive migration: `20260915140330_canonical_topic_local_foundation_v1.sql`.
-SHA-256: `ddb19e481b88e0b783ad30b30aa43ec54e963f35ce79e9cee0cb0b89ad9bf7c9`.
+SHA-256: `2d97c4944228e6bf0150b76c773855c6c1acc417dd8fd270d729adb70142c53a`.
 Historical migrations and all EC-1/EC-2 non-Topic contracts are unchanged. No taxonomy seed, legacy data
 backfill, mandatory association, Topic hierarchy, analytics, Editorial placeholder or polymorphic mapping.
 
@@ -16,7 +16,7 @@ backfill, mandatory association, Topic hierarchy, analytics, Editorial placehold
 | `canonical_topics_v1` | UUID identity, canonical name, generated normalized name, active/deprecated, timestamps |
 | `canonical_topic_terms_v1` | One globally unique normalized-term PK for both canonical names and aliases; real root FK |
 | `question_topics_v1` | Question/Topic typed RESTRICT FKs; composite PK `(question_id, topic_id)` |
-| `experience_topics_v1` | Experience/Topic typed RESTRICT FKs; composite PK `(experience_id, topic_id)` |
+| `experience_topics_v1` | Experience FK CASCADE preserves EC-1 parent lifecycle; Topic FK RESTRICT; composite PK `(experience_id, topic_id)` |
 
 Root `(topic_id, normalized_name)` also references its owned resolver term through a deferred composite FK.
 An AFTER root trigger establishes the canonical term. Canonical/alias and alias/alias collisions fail with
@@ -82,6 +82,29 @@ Association INSERT/DELETE require owner + eligible parent; no UPDATE grant can c
 Closed Questions reject Topic changes. Direct DELETE on ineligible rows can affect zero rows under RLS;
 mutation RPCs return the stable inaccessible/closed error rather than reporting success.
 
+### Experience Parent Lifecycle
+
+EC-1 already cascades `auth.users` deletion to `person_experiences`, and physical Experience deletion to
+its dependent Transition/Claim facts. The unmerged B1 Experience-parent FK follows that same CASCADE
+lifecycle; Question-parent and every Topic-root FK remain RESTRICT. No historical migration is changed.
+Topic root hard delete remains forbidden. Normal `delete_person_experience_v1` remains soft delete:
+parent/link storage is retained, but normal Topic reads/mutations cannot access that deleted parent.
+
+Local rollback-contained execution-context audit found child DELETE `CURRENT_USER=postgres` (the child
+table owner), `auth.uid()=NULL`, and the parent already physically absent for postgres hard parent delete,
+service_role hard parent delete, and privileged auth.users account cascade. PostgreSQL fires the child
+trigger for referential-action DELETE too; changing the FK alone reproduced PT401 in the old owner guard.
+See [PostgreSQL trigger behavior](https://www.postgresql.org/docs/17/trigger-definition.html).
+
+Only the child trigger's DELETE branch permits an already-absent parent when CURRENT_USER is one of the
+repository's existing trusted roles (`postgres`, `supabase_admin`, `service_role`). Both conditions are
+required. An existing parent still invokes the unchanged owner/active-parent lock, even for privileged
+direct child DELETE. Ordinary callers cannot obtain this exception from parent RLS invisibility: their
+CURRENT_USER is not trusted. No SESSION_USER check, trigger-depth shortcut, client flag, GUC bypass,
+SECURITY DEFINER, RLS change or privilege expansion is used. Ordinary parent hard DELETE remains denied.
+
+### Unchanged Function Security
+
 Every added/replaced function is SECURITY INVOKER with empty search_path and no PUBLIC EXECUTE.
 Only required helpers are executable by client roles; trigger functions are not direct client APIs.
 No viewer/owner/requester identity is supplied by the client: actors come from auth.uid().
@@ -124,6 +147,13 @@ or credentials are committed. See the historical EC-2B image incident record for
 - Question atomic create/update, real sorted read IDs, deprecated retention/new-link rejection,
   closed/hidden/deleted/cross-user checks: PASS.
 - Experience owner/private/public/tombstone boundaries and deprecated retention: PASS.
+- Corrective lifecycle regression after a fresh full clean reset: postgres and service_role hard parent
+  delete remove both Topic links and existing Transitions, retaining the Topic root: PASS. Privileged
+  deletion of a dedicated synthetic auth.users parent cascades through Experience and both child types:
+  PASS. No unrelated account FK blocked this fixture. Ordinary owner/non-owner hard parent DELETE is
+  denied; non-owner link DELETE changes zero rows; privileged direct child DELETE with a live parent still
+  requires an owner JWT. Soft delete retains parent/link/Transition storage while hiding normal Topic
+  projections from owner, other user and anon: PASS. No Production account deletion was attempted.
 - RLS, column grants, FK index coverage, INVOKER/empty path/PUBLIC ACL metadata: PASS.
 - Actual SQL resolver/Question/private Experience payloads through local-only strict parsers: PASS.
 - Full EC-2 rollback SQL regression: PASS, with only the two obsolete local Topic-error expectations
@@ -161,6 +191,8 @@ the four new tables and three new RPC definitions into
 verbatim structurally from generator output, not manually inferred from SQL. This local-only projection
 avoids duplicating the full database snapshot or deleting remote PostgREST/GraphQL metadata merely because
 the local CLI output differs. `src/integrations/supabase/types.ts` remains untouched Production truth.
+Re-generated after the lifecycle correction: PASS, no generated TypeScript structural/semantic diff;
+changing the FK delete action does not change the generated relation/type shape.
 
 ## EC-3B2 Gate (Not Started)
 

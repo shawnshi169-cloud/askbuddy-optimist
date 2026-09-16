@@ -39,7 +39,7 @@ CREATE TABLE public.question_topics_v1 (
   PRIMARY KEY (question_id, topic_id)
 );
 CREATE TABLE public.experience_topics_v1 (
-  experience_id uuid NOT NULL REFERENCES public.person_experiences(id) ON DELETE RESTRICT,
+  experience_id uuid NOT NULL REFERENCES public.person_experiences(id) ON DELETE CASCADE,
   topic_id uuid NOT NULL REFERENCES public.canonical_topics_v1(topic_id) ON DELETE RESTRICT,
   PRIMARY KEY (experience_id, topic_id)
 );
@@ -183,6 +183,12 @@ CREATE FUNCTION ec3_topic_private.guard_experience_link()
 RETURNS trigger LANGUAGE plpgsql SECURITY INVOKER SET search_path = '' AS $$
 BEGIN
   IF TG_OP = 'DELETE' THEN
+    -- RI cascades run as the child table owner after parent removal, without an owner JWT.
+    -- Preserve EC-1 lifecycle only; an existing parent still requires the ordinary owner gate.
+    IF CURRENT_USER IN ('postgres', 'supabase_admin', 'service_role')
+      AND NOT EXISTS (SELECT 1 FROM public.person_experiences AS e WHERE e.id = OLD.experience_id) THEN
+      RETURN OLD;
+    END IF;
     PERFORM ec3_topic_private.lock_experience_owner(OLD.experience_id);
     RETURN OLD;
   END IF;

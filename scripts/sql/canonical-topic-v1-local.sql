@@ -150,6 +150,88 @@ SELECT pg_temp.check_true(public.get_question_detail_v1(:'q')->'question'='null'
 SELECT pg_temp.check_true(public.get_experience_topics_v1('e3b10000-0000-4000-8000-000000000021')->'experience'='null'::jsonb,'anon private/deleted Experience absent');
 SELECT pg_temp.check_true(public.get_experience_topics_v1('e3b10000-0000-4000-8000-000000000020')->'experience'->'topicIds'='[]'::jsonb,'anon public Experience readable');
 SELECT pg_temp.check_true((SELECT count(*) FROM public.canonical_topics_v1)=3,'no implicit Topic creation');
+
+-- Preserve the existing EC-1 parent lifecycle; all fixtures and temporary changes roll back.
+RESET ROLE;
+SELECT pg_temp.check_true((SELECT confdeltype='c' FROM pg_constraint
+  WHERE conrelid='public.experience_topics_v1'::regclass AND conname='experience_topics_v1_experience_id_fkey'),
+  'Experience parent FK cascades');
+SELECT pg_temp.check_true((SELECT confdeltype='r' FROM pg_constraint
+  WHERE conrelid='public.experience_topics_v1'::regclass AND conname='experience_topics_v1_topic_id_fkey'),
+  'Topic root FK remains RESTRICT');
+SELECT pg_temp.check_true(NOT has_table_privilege('authenticated','public.person_experiences','DELETE')
+  AND NOT has_table_privilege('anon','public.person_experiences','DELETE'), 'no ordinary parent hard-delete privilege');
+INSERT INTO auth.users(id,email) VALUES ('e3b10000-0000-4000-8000-000000000003','topic-local-cascade@example.invalid');
+INSERT INTO public.person_experiences(id,person_id,title,description,visibility) VALUES
+  ('e3b10000-0000-4000-8000-000000000030','e3b10000-0000-4000-8000-000000000001','hard delete','synthetic','public'),
+  ('e3b10000-0000-4000-8000-000000000031','e3b10000-0000-4000-8000-000000000001','service delete','synthetic','private'),
+  ('e3b10000-0000-4000-8000-000000000032','e3b10000-0000-4000-8000-000000000003','account delete','synthetic','private'),
+  ('e3b10000-0000-4000-8000-000000000033','e3b10000-0000-4000-8000-000000000001','soft delete','synthetic','public');
+INSERT INTO public.experience_transitions(experience_id,person_id,from_label,to_label)
+  SELECT e.id,e.person_id,'local before','local after' FROM public.person_experiences e
+  WHERE e.id IN ('e3b10000-0000-4000-8000-000000000030','e3b10000-0000-4000-8000-000000000031',
+    'e3b10000-0000-4000-8000-000000000032','e3b10000-0000-4000-8000-000000000033');
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claim.sub','e3b10000-0000-4000-8000-000000000001',true);
+SELECT public.set_experience_topics_v1('e3b10000-0000-4000-8000-000000000030',ARRAY['e3b10000-0000-4000-8000-000000000012']::uuid[]);
+SELECT public.set_experience_topics_v1('e3b10000-0000-4000-8000-000000000031',ARRAY['e3b10000-0000-4000-8000-000000000012']::uuid[]);
+SELECT public.set_experience_topics_v1('e3b10000-0000-4000-8000-000000000033',ARRAY['e3b10000-0000-4000-8000-000000000012']::uuid[]);
+SELECT pg_temp.expect_error($s$DELETE FROM public.person_experiences WHERE id='e3b10000-0000-4000-8000-000000000030'$s$,'42501');
+WITH removed AS (DELETE FROM public.experience_topics_v1 WHERE experience_id='e3b10000-0000-4000-8000-000000000031' RETURNING experience_id)
+  SELECT pg_temp.check_true(count(*)=1,'ordinary owner association delete still works') FROM removed;
+SELECT public.set_experience_topics_v1('e3b10000-0000-4000-8000-000000000031',ARRAY['e3b10000-0000-4000-8000-000000000012']::uuid[]);
+SELECT set_config('request.jwt.claim.sub','e3b10000-0000-4000-8000-000000000003',true);
+SELECT public.set_experience_topics_v1('e3b10000-0000-4000-8000-000000000032',ARRAY['e3b10000-0000-4000-8000-000000000012']::uuid[]);
+SELECT set_config('request.jwt.claim.sub','e3b10000-0000-4000-8000-000000000002',true);
+SELECT pg_temp.expect_error($s$DELETE FROM public.person_experiences WHERE id='e3b10000-0000-4000-8000-000000000030'$s$,'42501');
+WITH removed AS (DELETE FROM public.experience_topics_v1 WHERE experience_id IN
+  ('e3b10000-0000-4000-8000-000000000030','e3b10000-0000-4000-8000-000000000031') RETURNING experience_id)
+  SELECT pg_temp.check_true(count(*)=0,'non-owner association delete changes zero rows') FROM removed;
+SELECT pg_temp.check_true(public.get_experience_topics_v1('e3b10000-0000-4000-8000-000000000031')->'experience'='null'::jsonb,
+  'private parent remains hidden from other user');
+SELECT pg_temp.expect_error($s$SELECT public.set_experience_topics_v1('e3b10000-0000-4000-8000-000000000031','{}')$s$,'PT404','TARGET_NOT_FOUND_OR_INACCESSIBLE');
+SELECT set_config('request.jwt.claim.sub','e3b10000-0000-4000-8000-000000000001',true);
+SELECT pg_temp.check_true((SELECT count(*) FROM public.experience_topics_v1 WHERE experience_id IN
+  ('e3b10000-0000-4000-8000-000000000030','e3b10000-0000-4000-8000-000000000031'))=2,'non-owner attempts left both associations intact');
+SELECT public.delete_person_experience_v1('e3b10000-0000-4000-8000-000000000033');
+SELECT pg_temp.check_true(public.get_experience_topics_v1('e3b10000-0000-4000-8000-000000000033')->'experience'='null'::jsonb,
+  'soft-deleted public Experience topics hidden from owner');
+SELECT pg_temp.expect_error($s$SELECT public.set_experience_topics_v1('e3b10000-0000-4000-8000-000000000033','{}')$s$,'PT404','TARGET_NOT_FOUND_OR_INACCESSIBLE');
+SELECT set_config('request.jwt.claim.sub','e3b10000-0000-4000-8000-000000000002',true);
+SELECT pg_temp.check_true(public.get_experience_topics_v1('e3b10000-0000-4000-8000-000000000033')->'experience'='null'::jsonb,
+  'soft-deleted topics hidden from other user');
+SET LOCAL ROLE anon;
+SELECT set_config('request.jwt.claim.sub','',true);
+SELECT pg_temp.check_true(public.get_experience_topics_v1('e3b10000-0000-4000-8000-000000000033')->'experience'='null'::jsonb,
+  'soft-deleted topics hidden from anon');
+RESET ROLE;
+SELECT pg_temp.check_true(auth.uid() IS NULL,'privileged parent lifecycle has no owner JWT');
+-- A privileged direct child DELETE with a still-existing parent must NOT use the cascade exception.
+SELECT pg_temp.expect_error($s$DELETE FROM public.experience_topics_v1 WHERE experience_id='e3b10000-0000-4000-8000-000000000030'$s$,'PT401','AUTHENTICATION_REQUIRED');
+DELETE FROM public.person_experiences WHERE id='e3b10000-0000-4000-8000-000000000030';
+SET LOCAL ROLE service_role;
+DELETE FROM public.person_experiences WHERE id='e3b10000-0000-4000-8000-000000000031';
+RESET ROLE;
+SELECT pg_temp.check_true(NOT EXISTS(SELECT 1 FROM public.person_experiences WHERE id IN
+  ('e3b10000-0000-4000-8000-000000000030','e3b10000-0000-4000-8000-000000000031'))
+  AND NOT EXISTS(SELECT 1 FROM public.experience_topics_v1 WHERE experience_id IN
+  ('e3b10000-0000-4000-8000-000000000030','e3b10000-0000-4000-8000-000000000031'))
+  AND NOT EXISTS(SELECT 1 FROM public.experience_transitions WHERE experience_id IN
+  ('e3b10000-0000-4000-8000-000000000030','e3b10000-0000-4000-8000-000000000031')),
+  'privileged Experience parent hard delete cascades old/new children');
+DELETE FROM auth.users WHERE id='e3b10000-0000-4000-8000-000000000003';
+SELECT pg_temp.check_true(NOT EXISTS(SELECT 1 FROM auth.users WHERE id='e3b10000-0000-4000-8000-000000000003')
+  AND NOT EXISTS(SELECT 1 FROM public.person_experiences WHERE id='e3b10000-0000-4000-8000-000000000032')
+  AND NOT EXISTS(SELECT 1 FROM public.experience_topics_v1 WHERE experience_id='e3b10000-0000-4000-8000-000000000032')
+  AND NOT EXISTS(SELECT 1 FROM public.experience_transitions WHERE experience_id='e3b10000-0000-4000-8000-000000000032'),
+  'account cascade removes Experience and old/new children');
+SELECT pg_temp.check_true(EXISTS(SELECT 1 FROM public.canonical_topics_v1
+  WHERE topic_id='e3b10000-0000-4000-8000-000000000012' AND status='active'),'parent cleanup retains canonical Topic root');
+SELECT pg_temp.check_true(EXISTS(SELECT 1 FROM public.person_experiences
+  WHERE id='e3b10000-0000-4000-8000-000000000033' AND deleted_at IS NOT NULL)
+  AND (SELECT count(*) FROM public.experience_topics_v1 WHERE experience_id='e3b10000-0000-4000-8000-000000000033')=1
+  AND (SELECT count(*) FROM public.experience_transitions WHERE experience_id='e3b10000-0000-4000-8000-000000000033')=1,
+  'soft delete retains parent and child storage');
 ROLLBACK;
 SELECT 'PERSISTENT_TOPIC_SQL_SMOKE_ROWS=' || (SELECT count(*) FROM auth.users WHERE id IN
- ('e3b10000-0000-4000-8000-000000000001','e3b10000-0000-4000-8000-000000000002'));
+ ('e3b10000-0000-4000-8000-000000000001','e3b10000-0000-4000-8000-000000000002','e3b10000-0000-4000-8000-000000000003'));
