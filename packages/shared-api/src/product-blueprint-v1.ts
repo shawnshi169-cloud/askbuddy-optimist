@@ -79,7 +79,7 @@ export const PRODUCT_BLUEPRINT_V1_DOMAIN_MAP = {
     domain: "canonical-topic",
     target: "platform-governed cross-module semantic entity shared by Question/Experience/Editorial/Search/Matching; not a hashtag or Article",
     contractStatus: "approved-frozen",
-    currentRuntime: "no canonical cross-module topic storage or API; EC-2 Question topicIds remains empty-only until EC-3B runtime review/deployment",
+    currentRuntime: "EC-3B1 local migration, exact resolver, typed Question/Experience associations and local parsers implemented; Architecture Review pending; Production Canonical Topic NOT DEPLOYED; EC-2 Production Question topicIds remains empty-only, Experience Topic association not deployed; consumer gate closed until EC-3B2 deployment/verification",
     runtimeStatus: "not-deployed",
     newCodePolicy: "blocked-until-phase",
     phase: "EC-3",
