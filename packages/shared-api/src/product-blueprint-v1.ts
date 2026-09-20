@@ -79,8 +79,8 @@ export const PRODUCT_BLUEPRINT_V1_DOMAIN_MAP = {
     domain: "canonical-topic",
     target: "platform-governed cross-module semantic entity shared by Question/Experience/Editorial/Search/Matching; not a hashtag or Article",
     contractStatus: "approved-frozen",
-    currentRuntime: "EC-3B1 local migration, exact resolver, typed Question/Experience associations and local parsers implemented; Architecture Review pending; Production Canonical Topic NOT DEPLOYED; EC-2 Production Question topicIds remains empty-only, Experience Topic association not deployed; consumer gate closed until EC-3B2 deployment/verification",
-    runtimeStatus: "not-deployed",
+    currentRuntime: "EC-3B1 approved/merged; EC-3B2B Production Canonical Topic storage, exact resolver and typed Question/Experience associations deployed and rollback-smoke verified; backend accepts real active Topic IDs with historical deprecated retention; clientConsumable=false, Shared Core Question parser remains empty-only, Experience Topic UI not connected; EC-3B2C consumer gate pending; Home/Search/Matching/Editorial runtime not implemented; evidence: docs/ec3b2b-canonical-topic-production-deploy.md",
+    runtimeStatus: "production-ready",
     newCodePolicy: "blocked-until-phase",
     phase: "EC-3",
   },
@@ -257,6 +257,21 @@ export interface BlueprintRpcPolicy {
 }
 
 export const PRODUCT_BLUEPRINT_V1_RPC_POLICY = {
+  resolve_canonical_topic_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: false,
+    replacement: "Production-deployed backend; ordinary client consumer gated until EC-3B2C review and authorization",
+  },
+  get_experience_topics_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: false,
+    replacement: "Production-deployed backend; ordinary client consumer gated until EC-3B2C review and authorization",
+  },
+  set_experience_topics_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: false,
+    replacement: "Production-deployed owner-only backend; ordinary client consumer gated until EC-3B2C review and authorization",
+  },
   get_public_person_profile_v1: {
     use: "canonical-blueprint",
     newBlueprintCodeMayDepend: true,

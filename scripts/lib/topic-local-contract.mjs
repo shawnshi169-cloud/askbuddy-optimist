@@ -11,6 +11,9 @@ export async function withTopicLocalContract(check) {
       "packages/shared-types/src/product-channels.ts", "packages/shared-types/src/question-answer-v1.ts",
       "packages/shared-types/src/discovery-v1.ts", "packages/shared-api/src/question-answer-v1.ts",
       "packages/shared-api/src/canonical-topic-v1-local.ts",
+      "packages/shared-api/src/canonical-topic-v1.ts",
+      "packages/shared-api/src/rpc-catalog.ts", "packages/shared-api/src/rpc-whitelist.ts",
+      "packages/shared-api/src/product-blueprint-v1.ts",
     ]) {
       const output = join(temp, source.replace(/\.ts$/, ".js"));
       mkdirSync(dirname(output), { recursive: true });
@@ -20,6 +23,10 @@ export async function withTopicLocalContract(check) {
     }
     const require = createRequire(import.meta.url);
     return await check(require(join(temp, "packages/shared-api/src/canonical-topic-v1-local.js")),
-      require(join(temp, "packages/shared-api/src/question-answer-v1.js")));
+      require(join(temp, "packages/shared-api/src/question-answer-v1.js")),
+      require(join(temp, "packages/shared-api/src/canonical-topic-v1.js")), {
+        ...require(join(temp, "packages/shared-api/src/rpc-whitelist.js")),
+        ...require(join(temp, "packages/shared-api/src/product-blueprint-v1.js")),
+      });
   } finally { rmSync(temp, { recursive: true, force: true }); }
 }

@@ -48,7 +48,7 @@ Home/Search/Channel discovery 仍待 EC-3；旧 RPC 兼容 policy 与历史证�
 | `PRODUCT_CHANNEL_CATALOG` | 四个稳定一级导航频道 | Channel navigation/coarse organization | 保留 catalog；不得作为 Person identity 或 Matching profile | EC-3 | A/B/C/D | YES，限导航 |
 | legacy question category/tag | 多套 category/tag string | Primary Channel + Canonical Topic associations | 不直接改名冒充 canonical | EC-2/EC-3 | A | NO |
 | Discover hashtag / `hot_topics` | 用户侧 social topic 内容 | Discover Social Topic mapped to Canonical Topic | 两者不等同，保留 social entity | EC-3 | A/B | YES，限 Discover |
-| Canonical Topic | 当前不存在跨模块 storage/API | shared Question/Experience/Matching/Discover/Community semantic layer | additive design，不复用 hashtag ID | EC-3 | A | NO，直到部署 |
+| Canonical Topic | EC-3B2B storage/exact resolver/Question+Experience associations 已部署验证；见 [部署证据](./ec3b2b-canonical-topic-production-deploy.md) | shared Question/Experience/Matching/Discover/Community semantic layer | 无 seed/backfill，不复用 hashtag ID；Shared Core 仍 empty-only | EC-3 | A | NO，等待 EC-3B2C consumer gate |
 | Transition string/tag | 当前无 canonical directed relation | directed Experience transition | 不得降级成普通 Topic/string tag即视为完成 | EC-1/EC-3 | A | NO |
 | city/city_code | 多 relation 的 legacy location 字段 | independent city-level Location dimension | 与 Topic 分离，不扩展精确实时附近定位 | EC-3 | A | NO，待统一 contract |
 | permanent `user_type` | 不应成为 Blueprint identity | Dynamic Person model | 明确禁止 student/expert/asker/provider 永久类型 | EC-1/EC-3 | A/B/C/D | NO |

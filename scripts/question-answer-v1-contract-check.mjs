@@ -183,7 +183,7 @@ try {
       rejected(() => api.parseCanonicalAnswerReplyV1({ ...reply, body: value }));
     }
   });
-  check("Channel reuse and Topic capability closed until canonical resolver", () => {
+  check("Channel reuse and app-facing Topic capability closed until EC-3B2C", () => {
     assert.deepEqual(channels, ["education-learning", "career-development", "lifestyle-services", "hobbies-skills"]);
     for (const value of channels) assert.equal(api.parseCanonicalQuestionV1({ ...question, primaryChannel: value }).primaryChannel, value);
     for (const value of ["education", "work", "skill", null, []]) rejected(() => rpc.create_question_v1.parseParams({ ...create, p_primary_channel: value }));
@@ -428,7 +428,9 @@ try {
     }
     assert.match(currentStatus, /Home\/Search\/Matching\/Editorial implementation \*\*NOT STARTED\*\*/);
     assert.match(currentStatus, /EC-3A .*Discovery contract freeze/);
-    assert.match(currentStatus, /EC-3B1 .*仅本地实现、等待 review/);
+    assert.match(currentStatus, /EC-3B1 .*已审核合并/);
+    assert.match(currentStatus, /EC-3B2B .*Production backend 已部署并验证/);
+    assert.match(currentStatus, /Shared Core.*empty-only.*EC-3B2C/);
     assert.match(currentStatus, /历史范围说明：EC-2D \/ EC-2E 当时 Android verification = \*\*PENDING\*\*/);
     assert.match(currentStatus, /WeChat.*NOT IMPLEMENTED/);
     assert.match(currentStatus, /iOS keyboard interaction =\s*\*\*BLOCKED BY ENVIRONMENT/);

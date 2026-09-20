@@ -135,4 +135,4 @@ try {
   }
 }
 assert.equal(await sql("SELECT (SELECT count(*) FROM auth.users)+(SELECT count(*) FROM public.questions_v1)+(SELECT count(*) FROM public.person_experiences)+(SELECT count(*) FROM public.canonical_topics_v1)+(SELECT count(*) FROM public.canonical_topic_terms_v1)+(SELECT count(*) FROM public.question_topics_v1)+(SELECT count(*) FROM public.experience_topics_v1);"),"0");
-console.log("PERSISTENT_LOCAL_TOPIC_ROWS=0; LOCAL ONLY / PRODUCTION NOT DEPLOYED / CLIENT NOT CONSUMABLE");
+console.log("PERSISTENT_LOCAL_TOPIC_ROWS=0; LOCAL QA ONLY / CLIENT NOT CONSUMABLE");

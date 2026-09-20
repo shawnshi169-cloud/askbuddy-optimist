@@ -1,8 +1,13 @@
 # EC-3B1 Canonical Topic Local Foundation
 
-Baseline: `2fc4c575299c590bc7da521150d95c3ce9fe9a35` (PR #48).
-Status: **LOCAL IMPLEMENTED / REVIEW PENDING / PRODUCTION NOT DEPLOYED / CLIENT NOT ENABLED**.
-EC-3A product contract remains approved-frozen. EC-3B2 has not started.
+Current: B1 approved/merged in PR #49; B2B backend **PRODUCTION DEPLOYED / VERIFIED**,
+client still gated until EC-3B2C. See [Production deployment evidence](./ec3b2b-canonical-topic-production-deploy.md).
+
+The remainder preserves the **historical B1 local implementation/review snapshot**, including its
+then-current Production gate and local test evidence; it is not current deployment status.
+Historical baseline: `2fc4c575299c590bc7da521150d95c3ce9fe9a35` (PR #48).
+Historical status: **LOCAL IMPLEMENTED / REVIEW PENDING / PRODUCTION NOT DEPLOYED / CLIENT NOT ENABLED**.
+At that time EC-3A was approved-frozen and EC-3B2 had not started.
 
 ## Storage And Governance
 

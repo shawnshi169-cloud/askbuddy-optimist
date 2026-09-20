@@ -1,103 +1,11 @@
-import { z } from "zod";
-import { CANONICAL_TOPIC_STATUS_V1_TARGET } from "../../shared-types/src/discovery-v1";
-import type { CanonicalTopicV1Local, ExperienceTopicsV1Local } from "../../shared-types/src/canonical-topic-v1-local";
-import { canonicalQuestionDetailV1Schema, QUESTION_ANSWER_V1_RPCS } from "./question-answer-v1";
-
-export const CANONICAL_TOPIC_V1_LOCAL_STATE = {
-  contractStatus: "approved-frozen",
-  localRuntimeImplemented: true,
-  migrationPrepared: true,
-  reviewStatus: "pending-review",
-  productionDeployed: false,
-  clientConsumable: false,
-  productionQuestionTopics: "empty-only",
-  productionExperienceTopics: "not-deployed",
-  consumerUnlockPhase: "EC-3B2",
-  duplicateInput: "reject-INVALID_INPUT",
-  associationOrder: "topicId ASC",
-  normalization: "C-whitespace-collapse-trim-ASCII-casefold-preserve-other-characters",
-  deprecated: "retain-existing-links-reject-new-links",
-  rootMutation: "governed-server-only-no-ordinary-client-api",
-  questionConcurrency: "parent-row-then-existing-EC2-advisory-serialized-desired-state",
-} as const;
-
-const uuid = z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
-const ids = z.array(uuid).refine((value) => new Set(value.map((id) => id.toLowerCase())).size === value.length);
-const orderedIds = ids.refine((value) => value.every((id, index) => index === 0 || value[index - 1].toLowerCase() < id.toLowerCase()));
-const normalize = (value: string) => value.replace(/[\t\n\v\f\r ]+/g, " ").replace(/^ | $/g, "")
-  .replace(/[A-Z]/g, (letter) => letter.toLowerCase());
-const term = z.string().refine((value) => normalize(value).length > 0);
-export const canonicalTopicV1LocalSchema = z.object({
-  topicId: uuid, canonicalName: term, aliases: z.array(term), status: z.enum(CANONICAL_TOPIC_STATUS_V1_TARGET),
-}).strict().refine((row) => {
-  const names = [row.canonicalName, ...row.aliases].map(normalize);
-  return new Set(names).size === names.length;
-}).transform((row): CanonicalTopicV1Local => ({
-  topicId: row.topicId, canonicalName: row.canonicalName, aliases: row.aliases, status: row.status,
-}));
-export const experienceTopicsV1LocalSchema = z.object({ experienceId: uuid, topicIds: orderedIds }).strict()
-  .transform((row): ExperienceTopicsV1Local => ({ experienceId: row.experienceId, topicIds: row.topicIds }));
-
-// Validate and retain the real local Topic array, while reusing every non-Topic EC-2 invariant.
-// The deployed EC-2 parser itself remains empty-only and is never changed or used as a fallback.
-export function parseQuestionWithTopicsV1Local(value: unknown) {
-  const topicIds = orderedIds.parse(z.object({ topicIds: z.unknown() }).passthrough().parse(value).topicIds);
-  const object = z.record(z.unknown()).parse(value);
-  const question = canonicalQuestionDetailV1Schema.parse({ ...object, topicIds: [] });
-  return { ...question, topicIds };
-}
-
-function localRpc<P, R>(signature: string, authentication: "anon" | "authenticated",
-  params: z.ZodType<P, z.ZodTypeDef, unknown>, result: z.ZodType<R, z.ZodTypeDef, unknown>,
-  matches: (input: P, output: R) => boolean = () => true) {
-  return {
-    ...CANONICAL_TOPIC_V1_LOCAL_STATE, signature, authentication,
-    securityMode: "invoker", searchPath: "",
-    parseParams: (value: unknown) => params.parse(value),
-    parseResult: (value: unknown, request: unknown) => {
-      const input = params.parse(request); const output = result.parse(value);
-      if (!matches(input, output)) throw new TypeError("Invalid local Topic response/request relationship");
-      return output;
-    },
-  } as const;
-}
-
-const experienceParams = z.object({ p_experience_id: uuid }).strict();
-export const CANONICAL_TOPIC_V1_LOCAL_RPCS = {
-  resolve_canonical_topic_v1: localRpc("public.resolve_canonical_topic_v1(text)", "anon",
-    z.object({ p_term: term }).strict(), z.object({ topic: canonicalTopicV1LocalSchema.nullable() }).strict(),
-    (input, output) => output.topic === null || (output.topic.status === "active"
-      && [output.topic.canonicalName, ...output.topic.aliases].some((name) => normalize(name) === normalize(input.p_term)))),
-  get_experience_topics_v1: localRpc("public.get_experience_topics_v1(uuid)", "anon", experienceParams,
-    z.object({ experience: experienceTopicsV1LocalSchema.nullable() }).strict(),
-    (input, output) => output.experience === null || output.experience.experienceId === input.p_experience_id),
-  set_experience_topics_v1: localRpc("public.set_experience_topics_v1(uuid,uuid[])", "authenticated",
-    experienceParams.extend({ p_topic_ids: ids }).strict(), experienceTopicsV1LocalSchema,
-    (input, output) => output.experienceId === input.p_experience_id
-      && JSON.stringify([...input.p_topic_ids].map((id) => id.toLowerCase()).sort()) === JSON.stringify(output.topicIds)),
-} as const;
-
-/** Exact existing Question transport with only the reserved Topic field locally widened. No network calls. */
-export function parseQuestionTopicWriteV1Local(operation: "create_question_v1" | "update_question_v1", value: unknown) {
-  const object = z.record(z.unknown()).parse(value);
-  const topicIds = ids.parse(object.p_topic_ids);
-  const parsed = QUESTION_ANSWER_V1_RPCS[operation].parseParams({ ...object, p_topic_ids: [] });
-  return { ...parsed, p_topic_ids: topicIds };
-}
-
-export const CANONICAL_TOPIC_V1_LOCAL_ERRORS = {
-  AUTHENTICATION_REQUIRED: "PT401",
-  INVALID_INPUT: "PT400",
-  TARGET_NOT_FOUND_OR_INACCESSIBLE: "PT404",
-  QUESTION_CLOSED: "PT409",
-  TOPIC_INVALID_OR_INACTIVE: "PT422",
-  UNSUPPORTED_TRANSACTION_ISOLATION: "PT409",
-} as const;
-export function parseCanonicalTopicErrorV1Local(error: unknown): keyof typeof CANONICAL_TOPIC_V1_LOCAL_ERRORS | null {
-  const parsed = z.object({ code: z.string(), message: z.string() }).safeParse(error);
-  if (!parsed.success) return null;
-  for (const key of Object.keys(CANONICAL_TOPIC_V1_LOCAL_ERRORS) as (keyof typeof CANONICAL_TOPIC_V1_LOCAL_ERRORS)[]) {
-    if (parsed.data.message === key && parsed.data.code === CANONICAL_TOPIC_V1_LOCAL_ERRORS[key]) return key;
-  }
-  return null;
-}
+/** B1 local QA compatibility aliases, not a separate deployment truth or client authorization. */
+export {
+  CANONICAL_TOPIC_V1_STATE as CANONICAL_TOPIC_V1_LOCAL_STATE,
+  CANONICAL_TOPIC_V1_RPCS as CANONICAL_TOPIC_V1_LOCAL_RPCS,
+  CANONICAL_TOPIC_V1_ERRORS as CANONICAL_TOPIC_V1_LOCAL_ERRORS,
+  canonicalTopicV1Schema as canonicalTopicV1LocalSchema,
+  experienceTopicsV1Schema as experienceTopicsV1LocalSchema,
+  parseQuestionWithTopicsV1 as parseQuestionWithTopicsV1Local,
+  parseQuestionTopicWriteV1 as parseQuestionTopicWriteV1Local,
+  parseCanonicalTopicErrorV1 as parseCanonicalTopicErrorV1Local,
+} from "./canonical-topic-v1";

@@ -17,7 +17,7 @@ Approved UI head：`00a2af935e25b30010b52e91458d33ed013cfe96`；merge parents �
 EC-2E 基于此 main 同步 A-owned page contract、machine truth 和当前状态；不重跑 Production 验证。
 
 当前完成范围为 **EC-2 Backend + Consumer Contract、Shared Core UI、Android platform verification、A+B+C APP Core Vertical Slice**。
-Home/Search/Channel feed cutover 不属于 EC-2D，继续等待 EC-3；Canonical Topic 非空关联仍被阻断。
+Home/Search/Channel feed cutover 不属于 EC-2D，继续等待 EC-3；Shared Core Canonical Topic 非空关联仍被阻断。
 `list_questions_v1` 虽已部署且可消费，Home canonical feed 尚未接线；Ask 的四频道选择也不代表
 Channel feed 已切换。Question Edit UI 尚未实现，即使 adapter 已暴露 `update_question_v1`。
 
@@ -25,7 +25,10 @@ Channel feed 已切换。Question Edit UI 尚未实现，即使 adapter 已暴�
 **BLOCKED BY ENVIRONMENT**，compact browser viewport QA 不等于真实 iOS 键盘验证。
 Android native/platform verification = **VERIFIED / COMPLETE**；WeChat EC-2 canonical flow = **NOT IMPLEMENTED / follow-up PENDING**。
 EC-2 Cross-platform Rollout = **NOT COMPLETE**；WeChat follow-up 和真实 iOS keyboard QA 缺口仍保留。
-EC-3A [Discovery contract freeze](./ec3-discovery-contract-decision.md) 已完成；EC-3B1 [Topic foundation](./ec3b1-canonical-topic-foundation.md) 仅本地实现、等待 review。Home/Search/Matching/Editorial implementation **NOT STARTED**，Production Topic 空数组限制和当前 Shared Core consumer 不变。
+EC-3A [Discovery contract freeze](./ec3-discovery-contract-decision.md) 已完成；EC-3B1 [Topic foundation](./ec3b1-canonical-topic-foundation.md) 已审核合并。
+EC-3B2B [Production backend 已部署并验证](./ec3b2b-canonical-topic-production-deploy.md)：真实 active Topic IDs 已由 backend 支持，保留既有 deprecated 关联。
+Shared Core Topic parser 仍为 empty-only，等待 EC-3B2C；新 Topic RPC 不在 client whitelist，Experience UI 未接入。
+Home/Search/Matching/Editorial implementation **NOT STARTED**。后文 EC-2 冻结的空数组/resolver 前置条件是历史 contract baseline，不代表当前 backend 尚无 resolver。
 
 EC-2F 已完成 Pixel 7 Emulator / Android 16 API 36 / gesture navigation 平台验证，详见
 [Android device evidence](./ec2f-android-native-verification.md)。PR #45 safe-area 已合并

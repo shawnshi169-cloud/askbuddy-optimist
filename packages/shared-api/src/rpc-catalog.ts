@@ -35,6 +35,7 @@ import type {
   QuestionAnswerV1RpcParams,
   QuestionAnswerV1RpcResult,
 } from "./question-answer-v1";
+import type { CanonicalTopicV1RpcParams, CanonicalTopicV1RpcResult } from "./canonical-topic-v1";
 
 export type JsonPrimitive = string | number | boolean | null;
 export type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
@@ -374,7 +375,7 @@ export const RPC_CATALOG = {
   ),
   create_question_v1: questionAnswerRpc(
     "create_question_v1", "authenticated",
-    "Canonical Person-owned Question create; requester derives from auth.uid() and topicIds remains empty until EC-3.",
+    "Canonical Person-owned Question create; requester derives from auth.uid(). Backend supports canonical Topics; app-facing topicIds remains empty until EC-3B2C consumer authorization.",
   ),
   update_question_v1: questionAnswerRpc(
     "update_question_v1", "authenticated",
@@ -472,6 +473,21 @@ export const RPC_CATALOG = {
     "get_channel_feed", "canonical", "anon", "channels",
     "GetChannelFeedParams", "ChannelFeedResult", "aligned",
     "The four Product Channel slugs remain stable, but the current experts collection is Blueprint v1 compatibility output.",
+  ),
+  resolve_canonical_topic_v1: rpc<CanonicalTopicV1RpcParams<"resolve_canonical_topic_v1">, CanonicalTopicV1RpcResult<"resolve_canonical_topic_v1">>()(
+    "resolve_canonical_topic_v1", "canonical", "anon", "topics",
+    "CanonicalTopicV1RpcParams<resolve_canonical_topic_v1>", "CanonicalTopicV1RpcResult<resolve_canonical_topic_v1>", "aligned",
+    "Production backend deployed and SQL-smoke verified; ordinary client consumer remains gated until EC-3B2C.",
+  ),
+  get_experience_topics_v1: rpc<CanonicalTopicV1RpcParams<"get_experience_topics_v1">, CanonicalTopicV1RpcResult<"get_experience_topics_v1">>()(
+    "get_experience_topics_v1", "canonical", "anon", "topics",
+    "CanonicalTopicV1RpcParams<get_experience_topics_v1>", "CanonicalTopicV1RpcResult<get_experience_topics_v1>", "aligned",
+    "Production backend deployed and SQL-smoke verified; ordinary client consumer remains gated until EC-3B2C.",
+  ),
+  set_experience_topics_v1: rpc<CanonicalTopicV1RpcParams<"set_experience_topics_v1">, CanonicalTopicV1RpcResult<"set_experience_topics_v1">>()(
+    "set_experience_topics_v1", "canonical", "authenticated", "topics",
+    "CanonicalTopicV1RpcParams<set_experience_topics_v1>", "CanonicalTopicV1RpcResult<set_experience_topics_v1>", "aligned",
+    "Production owner-only backend deployed and SQL-smoke verified; ordinary client consumer remains gated until EC-3B2C.",
   ),
   get_public_person_profile_v1: rpc<
     GetPublicPersonProfileV1Params,

@@ -421,6 +421,67 @@ export type Database = {
           },
         ]
       }
+      canonical_topic_terms_v1: {
+        Row: {
+          normalized_term: string
+          term: string
+          topic_id: string
+        }
+        Insert: {
+          normalized_term?: string
+          term: string
+          topic_id: string
+        }
+        Update: {
+          normalized_term?: string
+          term?: string
+          topic_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "canonical_topic_terms_v1_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "canonical_topics_v1"
+            referencedColumns: ["topic_id"]
+          },
+        ]
+      }
+      canonical_topics_v1: {
+        Row: {
+          canonical_name: string
+          created_at: string
+          normalized_name: string | null
+          status: string
+          topic_id: string
+          updated_at: string
+        }
+        Insert: {
+          canonical_name: string
+          created_at?: string
+          normalized_name?: string | null
+          status?: string
+          topic_id?: string
+          updated_at?: string
+        }
+        Update: {
+          canonical_name?: string
+          created_at?: string
+          normalized_name?: string | null
+          status?: string
+          topic_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "canonical_topics_v1_name_term_fkey"
+            columns: ["topic_id", "normalized_name"]
+            isOneToOne: true
+            referencedRelation: "canonical_topic_terms_v1"
+            referencedColumns: ["topic_id", "normalized_term"]
+          },
+        ]
+      }
       content_moderation_logs: {
         Row: {
           action: string
@@ -739,6 +800,36 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "person_experiences"
             referencedColumns: ["id", "person_id"]
+          },
+        ]
+      }
+      experience_topics_v1: {
+        Row: {
+          experience_id: string
+          topic_id: string
+        }
+        Insert: {
+          experience_id: string
+          topic_id: string
+        }
+        Update: {
+          experience_id?: string
+          topic_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experience_topics_v1_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "person_experiences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experience_topics_v1_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "canonical_topics_v1"
+            referencedColumns: ["topic_id"]
           },
         ]
       }
@@ -1939,6 +2030,36 @@ export type Database = {
           },
         ]
       }
+      question_topics_v1: {
+        Row: {
+          question_id: string
+          topic_id: string
+        }
+        Insert: {
+          question_id: string
+          topic_id: string
+        }
+        Update: {
+          question_id?: string
+          topic_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_topics_v1_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions_v1"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_topics_v1_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "canonical_topics_v1"
+            referencedColumns: ["topic_id"]
+          },
+        ]
+      }
       questions: {
         Row: {
           accepted_answer_id: string | null
@@ -2769,6 +2890,10 @@ export type Database = {
         }
         Returns: Json
       }
+      get_experience_topics_v1: {
+        Args: { p_experience_id: string }
+        Returns: Json
+      }
       get_my_person_experiences_v1: {
         Args: { p_limit?: number; p_offset?: number }
         Returns: Json
@@ -2915,6 +3040,7 @@ export type Database = {
         Args: { p_experience_ids: string[] }
         Returns: number
       }
+      resolve_canonical_topic_v1: { Args: { p_term: string }; Returns: Json }
       review_content_report: {
         Args: {
           p_report_id: string
@@ -2941,6 +3067,10 @@ export type Database = {
       }
       set_answer_helpful_v1: {
         Args: { p_answer_id: string; p_is_helpful: boolean }
+        Returns: Json
+      }
+      set_experience_topics_v1: {
+        Args: { p_experience_id: string; p_topic_ids: string[] }
         Returns: Json
       }
       set_person_experience_visibility_v1: {

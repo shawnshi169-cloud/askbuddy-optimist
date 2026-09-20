@@ -247,6 +247,10 @@ P1.4 当前 runtime/grant truth，Blueprint eligibility 必须查新的 policy m
 
 ## 五、Current Runtime Truth 与 Target Truth
 
+Topic 当前状态补注：EC-3B2B 已部署验证 Canonical Topic backend，client 仍 gated until EC-3B2C；
+见[部署证据](./ec3b2b-canonical-topic-production-deploy.md)。下表 Topic 行保留 Blueprint 初始审计快照，
+不是当前 backend 未部署断言；其他 domain 的独立文档债务不在本次 closeout 展开。
+
 | Domain | Current Runtime | Target | Readiness |
 | --- | --- | --- | --- |
 | Public Person Identity + Read | `PublicPersonId` 与 safe RPC 已部署；`/person` UI 未接线 | Universal Person identity/read | Production ready（仅此 read boundary） |

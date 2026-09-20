@@ -34,7 +34,9 @@ for (const section of ["Tables", "Views", "Functions", "Enums", "CompositeTypes"
   const additions = (localMembers.members ?? []).filter((node) => node.name &&
     !(existingMembers.members ?? []).some((old) => old.name?.getText() === node.name.getText()));
   assert.deepEqual(additions.map((node) => node.name.getText()).sort(),
-    (section === "Tables" ? [...tableNames] : section === "Functions" ? [...rpcNames] : []).sort(), `unexpected additions: ${section}`);
+    (section === "Tables" ? [...tableNames] : section === "Functions" ? [...rpcNames] : [])
+      .filter((name) => !(existingMembers.members ?? []).some((node) => node.name?.getText() === name))
+      .sort(), `unexpected additions: ${section}`);
 }
 const json = generated.statements.find((node) => ts.isTypeAliasDeclaration(node) && node.name.text === "Json");
 assert.ok(json);
@@ -45,4 +47,4 @@ writeFileSync(output, "// Generated from LOCAL Supabase schema by canonical-topi
   + "// Topic additions only; NOT Production Database types or consumer authorization.\n"
   + print.printNode(ts.EmitHint.Unspecified, json, generated) + "\n"
   + `export type CanonicalTopicDatabaseV1Local = { public: { Tables: {\n${select("Tables", tableNames)}\n}; Functions: {\n${select("Functions", rpcNames)}\n}; }; };\n`);
-console.log("PASS: actual LOCAL types generated; only four tables / three RPC additions, existing public schema unchanged");
+console.log("PASS: actual LOCAL four-table / three-RPC projection generated; existing Production public schema unchanged");
