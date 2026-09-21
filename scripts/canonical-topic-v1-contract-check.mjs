@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { withTopicLocalContract } from "./lib/topic-local-contract.mjs";
 import ts from "typescript";
@@ -13,6 +14,8 @@ const program = ts.createProgram([
   module: ts.ModuleKind.ESNext, moduleResolution: ts.ModuleResolutionKind.Bundler });
 assert.equal(ts.getPreEmitDiagnostics(program).length, 0, "local contracts must compile strictly");
 const migration = read("supabase/migrations/20260915140330_canonical_topic_local_foundation_v1.sql");
+assert.equal(createHash("sha256").update(migration).digest("hex"),
+  "2d97c4944228e6bf0150b76c773855c6c1acc417dd8fd270d729adb70142c53a", "deployed B1 migration must not be rewritten");
 assert.equal(createHash("sha256").update(read("supabase/migrations/20260904174215_canonical_question_answer_v1.sql")).digest("hex"),
   "46bdfa8ca8daea8950f98271013da782bc3fe9b9c75612919c8a92f1857557f7", "reviewed EC-2 migration unchanged");
 assert.match(migration, /^BEGIN;/);
@@ -64,11 +67,39 @@ assert.doesNotMatch(resolver, /INSERT|UPDATE|DELETE/);
 const newRpcs = ["resolve_canonical_topic_v1", "get_experience_topics_v1", "set_experience_topics_v1"];
 for (const name of newRpcs) {
   assert.ok(!read("packages/shared-api/src/rpc-whitelist.ts").includes(name));
-  assert.ok(!read("packages/shared-api/src/rpc-catalog.ts").includes(name));
+  assert.ok(read("packages/shared-api/src/rpc-catalog.ts").includes(name));
   assert.ok(read("packages/shared-types/src/generated/canonical-topic-v1-local.ts").includes(name));
-  assert.ok(!read("src/integrations/supabase/types.ts").includes(name));
+  assert.ok(read("src/integrations/supabase/types.ts").includes(name));
 }
 for (const table of tables) assert.ok(read("packages/shared-types/src/generated/canonical-topic-v1-local.ts").includes(table));
+
+// Production generator output must retain the exact approved B1 table/RPC structures.
+const generated = (path, alias) => {
+  const source = ts.createSourceFile(path, read(path), ts.ScriptTarget.Latest, true);
+  const declaration = source.statements.find((node) => ts.isTypeAliasDeclaration(node) && node.name.text === alias);
+  assert.ok(declaration && ts.isTypeLiteralNode(declaration.type));
+  return { source, type: declaration.type };
+};
+const member = (node, name) => {
+  const found = node.members.find((item) => item.name?.getText().replaceAll('"', '') === name);
+  assert.ok(found && found.type, `missing generated member ${name}`); return found.type;
+};
+const actual = generated("src/integrations/supabase/types.ts", "Database");
+const approved = generated("packages/shared-types/src/generated/canonical-topic-v1-local.ts", "CanonicalTopicDatabaseV1Local");
+const printer = ts.createPrinter({ removeComments: true });
+const normalized = (snapshot, section, name) => printer.printNode(ts.EmitHint.Unspecified,
+  member(member(member(snapshot.type, "public"), section), name), snapshot.source).replace(/\s/g, "");
+for (const [section, names] of [["Tables", tables], ["Functions", newRpcs]]) {
+  for (const name of names) assert.equal(normalized(actual, section, name), normalized(approved, section, name), name);
+}
+
+// Catalog presence does not authorize frontend imports, direct table access or RPC use.
+const gatedSymbols = /canonical-topic-v1|CANONICAL_TOPIC_V1_(?:LOCAL_)?(?:RPCS|STATE)|parseQuestion(?:WithTopics|TopicWrite)V1|canonicalTopicV1(?:Local)?Schema|experienceTopicsV1(?:Local)?Schema|resolve_canonical_topic_v1|get_experience_topics_v1|set_experience_topics_v1|canonical_topics_v1|canonical_topic_terms_v1|question_topics_v1|experience_topics_v1/;
+const clientFiles = execFileSync("git", ["ls-files", "--", "src", "apps"], { encoding: "utf8" }).trim().split("\n");
+for (const path of clientFiles.filter((path) => /\.[cm]?[jt]sx?$/.test(path) && path !== "src/integrations/supabase/types.ts")) {
+  assert.doesNotMatch(read(path), gatedSymbols, `${path}: Topic client consumer still gated`);
+}
+assert.doesNotMatch(read("packages/shared-api/src/canonical-topic-v1.ts"), /createClient|\.rpc\(|fetch\(/);
 const runner = read("scripts/canonical-topic-v1-local-test.mjs");
 assert.match(runner, /refuse non-local endpoint/);
 assert.match(runner, /"db","reset","--local","--no-seed"/);
@@ -77,13 +108,35 @@ for (const name of ["privileged Experience parent hard delete cascades old/new c
   "non-owner association delete changes zero rows", "soft delete retains parent and child storage"]) assert.ok(localSql.includes(name));
 assert.doesNotMatch(runner, /--linked|--db-url|SUPABASE_ACCESS_TOKEN|SUPABASE_SERVICE_ROLE_KEY/);
 assert.match(read("packages/shared-api/src/question-answer-v1.ts"), /const topicIds = z.array\(uuid\).length\(0\)/);
-assert.ok(read("packages/shared-api/src/product-blueprint-v1.ts").includes("EC-3B1 local"));
+assert.ok(read("packages/shared-api/src/product-blueprint-v1.ts").includes("EC-3B2B Production"));
 assert.ok(read("docs/ec3b1-canonical-topic-foundation.md").includes("NOT DEPLOYED"));
+const evidence = read("docs/ec3b2b-canonical-topic-production-deploy.md");
+for (const phrase of ["PRODUCTION DEPLOYED / VERIFIED", "CLIENT NOT ENABLED", "EC-3B2C PENDING", "Persistent synthetic rows = 0"]) assert.ok(evidence.includes(phrase));
 assert.ok(JSON.parse(read("package.json")).scripts["test:contracts"].includes("test:canonical-topic-v1"));
 
-await withTopicLocalContract(async (api, production) => {
-  assert.equal(api.CANONICAL_TOPIC_V1_LOCAL_STATE.productionDeployed, false);
+await withTopicLocalContract(async (api, production, backend, contracts) => {
+  assert.equal(api.CANONICAL_TOPIC_V1_LOCAL_STATE, backend.CANONICAL_TOPIC_V1_STATE);
+  assert.equal(api.CANONICAL_TOPIC_V1_LOCAL_RPCS, backend.CANONICAL_TOPIC_V1_RPCS);
+  assert.equal(api.CANONICAL_TOPIC_V1_LOCAL_STATE.productionDeployed, true);
   assert.equal(api.CANONICAL_TOPIC_V1_LOCAL_STATE.clientConsumable, false);
+  assert.equal(backend.CANONICAL_TOPIC_V1_STATE.productionGrantReview, "aligned");
+  assert.equal(backend.CANONICAL_TOPIC_V1_STATE.productionQuestionTopics, "active-canonical-ids-with-historical-deprecated-retention");
+  assert.equal(backend.CANONICAL_TOPIC_V1_STATE.productionExperienceTopics, "deployed");
+  assert.equal(backend.CANONICAL_TOPIC_V1_STATE.productionResolver, "deployed");
+  assert.equal(backend.CANONICAL_TOPIC_V1_STATE.sharedCoreQuestionTopics, "empty-only");
+  assert.equal(backend.CANONICAL_TOPIC_V1_STATE.consumerUnlockPhase, "EC-3B2C");
+  assert.equal(backend.CANONICAL_TOPIC_V1_STATE.consumerGateStatus, "pending");
+  assert.equal(production.QUESTION_ANSWER_V1_CONTRACT_STATE.topicAssociation, "blocked-until-EC-3B2C");
+  for (const name of newRpcs) {
+    assert.equal(contracts.RPC_CATALOG[name].status, "canonical");
+    assert.equal(contracts.RPC_CATALOG[name].productionGrantReview, "aligned");
+    assert.equal(contracts.RPC_CATALOG[name].authentication, name.startsWith("set_") ? "authenticated" : "anon");
+    assert.equal(contracts.CLIENT_RPC_WHITELIST[name], undefined);
+    assert.equal(contracts.PRODUCT_BLUEPRINT_V1_RPC_POLICY[name].use, "canonical-blueprint");
+    assert.equal(contracts.PRODUCT_BLUEPRINT_V1_RPC_POLICY[name].newBlueprintCodeMayDepend, false);
+    assert.match(contracts.PRODUCT_BLUEPRINT_V1_RPC_POLICY[name].replacement, /EC-3B2C/);
+    assert.equal(backend.CANONICAL_TOPIC_V1_RPCS[name].clientConsumable, false);
+  }
   assert.equal(api.CANONICAL_TOPIC_V1_LOCAL_STATE.duplicateInput, "reject-INVALID_INPUT");
   assert.deepEqual(Object.keys(api.CANONICAL_TOPIC_V1_LOCAL_RPCS), newRpcs);
   const a = "e3b10000-0000-4000-8000-000000000010";
@@ -110,4 +163,4 @@ await withTopicLocalContract(async (api, production) => {
   assert.equal(api.parseCanonicalTopicErrorV1Local({ code: "PT422", message: "TOPIC_INVALID_OR_INACTIVE" }), "TOPIC_INVALID_OR_INACTIVE");
   assert.equal(api.parseCanonicalTopicErrorV1Local({ code: "PT400", message: "TOPIC_INVALID_OR_INACTIVE" }), null);
 });
-console.log("PASS: Canonical Topic local schema/contract guard; Production/consumer gate remains closed");
+console.log("PASS: Canonical Topic deployed backend contract/B1 schema; app parser empty-only, whitelist closed, EC-3B2C pending");

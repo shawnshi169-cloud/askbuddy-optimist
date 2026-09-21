@@ -7,7 +7,7 @@ export type CanonicalQuestionIdV1 = Id;
 export type CanonicalAnswerIdV1 = Id;
 export type CanonicalAnswerReplyIdV1 = Id;
 
-/** 预留跨模块 Canonical Topic identity；当前无 resolver，parser 仅接受空 topicIds。 */
+/** Canonical Topic identity；backend resolver 已部署，app-facing parser 仍仅接受空 topicIds，等待 EC-3B2C。 */
 export type CanonicalTopicIdV1 = Id;
 
 export const QUESTION_BUSINESS_STATUS_V1 = ["open", "closed"] as const;

@@ -1,11 +1,6 @@
-import type { CanonicalTopicSummaryV1Target } from "./discovery-v1";
-import type { CanonicalTopicIdV1, CanonicalQuestionDetailV1 } from "./question-answer-v1";
-import type { PublicPersonExperienceV1 } from "./experience-v1";
-
-/** EC-3B1 local payloads only. These names do not authorize Production consumers. */
-export type CanonicalTopicV1Local = CanonicalTopicSummaryV1Target;
-export interface ExperienceTopicsV1Local {
-  experienceId: PublicPersonExperienceV1["experienceId"];
-  topicIds: CanonicalTopicIdV1[];
-}
-export type QuestionWithTopicsV1Local = CanonicalQuestionDetailV1;
+/** B1 local QA compatibility aliases; authoritative backend types live in canonical-topic-v1. */
+export type {
+  CanonicalTopicV1 as CanonicalTopicV1Local,
+  ExperienceTopicsV1 as ExperienceTopicsV1Local,
+  QuestionWithTopicsV1 as QuestionWithTopicsV1Local,
+} from "./canonical-topic-v1";

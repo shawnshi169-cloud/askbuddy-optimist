@@ -11,7 +11,7 @@ export const DISCOVERY_V1_CONTRACT = {
   contractStatus: "approved-frozen",
   productionDeployed: false,
   clientConsumable: false,
-  // Topic foundation has its own LOCAL-only state; these pipelines remain unimplemented.
+  // Topic backend deployment has independent truth; these discovery pipelines remain unimplemented.
   implementationScope: "home-search-matching-editorial",
   implementationStarted: false,
   rpcNamesFrozen: false,
@@ -84,7 +84,9 @@ export const DISCOVERY_V1_CONTRACT = {
     unresolvedAssociation: "zero-allowed",
     confirmation: "user-confirmation-or-real-system-mapping-to-existing-topic",
     currentQuestionTopicIds: "empty-only",
-    runtimeUnlockPhase: "EC-3B",
+    currentQuestionTopicIdsScope: "shared-core-consumer",
+    productionQuestionTopicIds: "active-canonical-ids-with-historical-deprecated-retention",
+    runtimeUnlockPhase: "EC-3B2C",
     transitionIsTopic: false,
     locationIsTopic: false,
   },

@@ -135,7 +135,9 @@ const missingChannel: Q = { questionId: "q", title: "q", topicIds: [], contextEx
   assert.equal(c.topics.experienceChannelRequired, false);
   for (const field of ["userStringCreatesTopic", "aiCreatesTopic", "transitionIsTopic", "locationIsTopic"]) assert.equal(c.topics[field], false);
   assert.equal(c.topics.currentQuestionTopicIds, "empty-only");
-  assert.equal(c.topics.runtimeUnlockPhase, "EC-3B");
+  assert.equal(c.topics.currentQuestionTopicIdsScope, "shared-core-consumer");
+  assert.equal(c.topics.productionQuestionTopicIds, "active-canonical-ids-with-historical-deprecated-retention");
+  assert.equal(c.topics.runtimeUnlockPhase, "EC-3B2C");
   assert.equal(c.personalization.timeDecayRequired, true);
   assert.deepEqual(c.personalization.strong, ["own-question", "active-search", "repeated-topic-view", "ask-person", "future-booking", "real-experience-related-action"]);
   assert.deepEqual(c.personalization.medium, ["save", "deep-answer-read", "follow-relevant-person", "explicit-interest", "future-community-action"]);
@@ -160,7 +162,7 @@ const missingChannel: Q = { questionId: "q", title: "q", topicIds: [], contextEx
   assert.equal(c.pagination.safety, "recheck-public-visibility-on-every-page");
 
   for (const [key, runtime] of Object.entries({
-    homeSearchMatching: "legacy-compatibility", productChannels: "partial", canonicalTopic: "not-deployed",
+    homeSearchMatching: "legacy-compatibility", productChannels: "partial", canonicalTopic: "production-ready",
     editorialFeature: "not-deployed", location: "partial", dynamicNeedInterestSignals: "not-deployed",
   })) {
     assert.equal(domains[key].contractStatus, "approved-frozen", key);

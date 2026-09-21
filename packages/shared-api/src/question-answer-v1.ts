@@ -13,7 +13,7 @@ export const QUESTION_ANSWER_V1_CONTRACT_STATE = {
   productionDeployed: true,
   productionGrantReview: "aligned",
   clientConsumable: true,
-  topicAssociation: "blocked-until-canonical-topic-resolver",
+  topicAssociation: "blocked-until-EC-3B2C",
 } as const;
 
 /** 已锁定的基础顺序，不是 EC-3 ranking，也不代表数据库算法已部署。 */
@@ -32,6 +32,7 @@ export const QUESTION_ANSWER_V1_PRODUCT_REVIEW = {
     decision: QUESTION_ANSWER_V1_ORDERING.comprehensiveAnswers,
     status: "locked",
   },
+  // Historical EC-2 product decision; the current app-facing gate is CONTRACT_STATE.topicAssociation.
   canonicalTopic: { decision: "empty-topicIds-until-resolver", status: "locked" },
 } as const;
 
