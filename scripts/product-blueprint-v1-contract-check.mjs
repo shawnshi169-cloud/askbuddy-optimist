@@ -138,14 +138,16 @@ try {
   assert.equal(domainMap.homeSearchMatching.runtimeStatus, "legacy-compatibility");
   assert.equal(domainMap.productChannels.runtimeStatus, "partial");
   assert.equal(domainMap.canonicalTopic.runtimeStatus, "production-ready");
-  assert.equal(domainMap.canonicalTopic.newCodePolicy, "blocked-until-phase");
+  assert.equal(domainMap.canonicalTopic.newCodePolicy, "may-use-deployed-contract");
   assert.match(domainMap.canonicalTopic.currentRuntime, /EC-3B2B Production.*deployed and rollback-smoke verified/);
-  assert.match(domainMap.canonicalTopic.currentRuntime, /clientConsumable=false.*Shared Core Question parser remains empty-only/);
-  assert.match(domainMap.canonicalTopic.currentRuntime, /EC-3B2C consumer gate pending/);
+  assert.match(domainMap.canonicalTopic.currentRuntime, /clientConsumable=true.*Shared Core Question contract accepts 0\.\.N canonical Topic IDs/);
+  assert.match(domainMap.canonicalTopic.currentRuntime, /EC-3B2C HTTP consumer gate verified/);
+  assert.match(domainMap.canonicalTopic.currentRuntime, /current Question UI still sends \[\].*Topic picker not implemented.*Experience Topic UI not connected.*taxonomy not seeded/);
+  assert.match(domainMap.canonicalTopic.currentRuntime, /Home\/Search\/Matching\/Editorial runtime not implemented/);
   for (const name of ["resolve_canonical_topic_v1", "get_experience_topics_v1", "set_experience_topics_v1"]) {
     assert.equal(api.PRODUCT_BLUEPRINT_V1_RPC_POLICY[name].use, "canonical-blueprint");
-    assert.equal(api.PRODUCT_BLUEPRINT_V1_RPC_POLICY[name].newBlueprintCodeMayDepend, false);
-    assert.match(api.PRODUCT_BLUEPRINT_V1_RPC_POLICY[name].replacement, /gated until EC-3B2C/);
+    assert.equal(api.PRODUCT_BLUEPRINT_V1_RPC_POLICY[name].newBlueprintCodeMayDepend, true);
+    assert.match(api.PRODUCT_BLUEPRINT_V1_RPC_POLICY[name].replacement, /EC-3B2C consumer gate verified/);
   }
   assert.equal(domainMap.dynamicNeedInterestSignals.runtimeStatus, "not-deployed");
   for (const key of ["homeSearchMatching", "productChannels", "canonicalTopic", "dynamicNeedInterestSignals"]) {

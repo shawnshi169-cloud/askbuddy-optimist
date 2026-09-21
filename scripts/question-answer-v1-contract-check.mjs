@@ -183,11 +183,14 @@ try {
       rejected(() => api.parseCanonicalAnswerReplyV1({ ...reply, body: value }));
     }
   });
-  check("Channel reuse and app-facing Topic capability closed until EC-3B2C", () => {
+  check("Channel reuse and B2C canonical Topic input/output boundary", () => {
     assert.deepEqual(channels, ["education-learning", "career-development", "lifestyle-services", "hobbies-skills"]);
     for (const value of channels) assert.equal(api.parseCanonicalQuestionV1({ ...question, primaryChannel: value }).primaryChannel, value);
     for (const value of ["education", "work", "skill", null, []]) rejected(() => rpc.create_question_v1.parseParams({ ...create, p_primary_channel: value }));
-    for (const value of [[id(8)], ["#topic"], ["career-development"], null, "topic"]) {
+    assert.deepEqual(rpc.create_question_v1.parseParams({ ...create, p_topic_ids: [id(9), id(8)] }).p_topic_ids, [id(9), id(8)]);
+    assert.deepEqual(api.parseCanonicalQuestionV1({ ...question, topicIds: [id(8), id(9)] }).topicIds, [id(8), id(9)]);
+    rejected(() => api.parseCanonicalQuestionV1({ ...question, topicIds: [id(9), id(8)] }));
+    for (const value of [[id(8), id(8)], ["#topic"], ["career-development"], null, "topic"]) {
       rejected(() => api.parseCanonicalQuestionV1({ ...question, topicIds: value }));
       rejected(() => rpc.create_question_v1.parseParams({ ...create, p_topic_ids: value }));
       rejected(() => rpc.update_question_v1.parseParams({ ...create, ...questionParams, p_topic_ids: value }));
@@ -274,7 +277,7 @@ try {
     assert.equal(review.questionReopen.decision, "close-only");
     assert.equal(review.deletedAnswerWithReplies.decision, "hide-entire-answer-branch");
     assert.deepEqual(review.comprehensiveOrder.decision, ["helpfulCount DESC", "createdAt DESC", "answerId ASC"]);
-    assert.equal(review.canonicalTopic.decision, "empty-topicIds-until-resolver");
+    assert.equal(review.canonicalTopic.decision, "canonical-topic-ids-0..N");
     assert.equal(rpc.reopen_question_v1, undefined);
   });
   check("locked deterministic listing order without adding a Question order parameter", () => {
@@ -350,7 +353,7 @@ try {
       ["PT404", "TARGET_NOT_FOUND_OR_INACCESSIBLE"],
       ["PT409", "QUESTION_CLOSED"],
       ["PT403", "SELF_HELPFUL_FORBIDDEN"],
-      ["PT422", "CANONICAL_TOPIC_NOT_READY"],
+      ["PT422", "TOPIC_INVALID_OR_INACTIVE"],
       ["PT400", "INVALID_INPUT"],
       ["PT401", "AUTHENTICATION_REQUIRED"],
       ["PT403", "IMMUTABLE_FIELD"],
@@ -430,7 +433,8 @@ try {
     assert.match(currentStatus, /EC-3A .*Discovery contract freeze/);
     assert.match(currentStatus, /EC-3B1 .*已审核合并/);
     assert.match(currentStatus, /EC-3B2B .*Production backend 已部署并验证/);
-    assert.match(currentStatus, /Shared Core.*empty-only.*EC-3B2C/);
+    assert.match(currentStatus, /Shared Core.*0\.\.N.*EC-3B2C/);
+    assert.match(currentStatus, /Topic UI.*未实现/);
     assert.match(currentStatus, /历史范围说明：EC-2D \/ EC-2E 当时 Android verification = \*\*PENDING\*\*/);
     assert.match(currentStatus, /WeChat.*NOT IMPLEMENTED/);
     assert.match(currentStatus, /iOS keyboard interaction =\s*\*\*BLOCKED BY ENVIRONMENT/);

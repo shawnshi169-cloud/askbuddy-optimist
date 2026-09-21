@@ -11,7 +11,7 @@ export const DISCOVERY_V1_CONTRACT = {
   contractStatus: "approved-frozen",
   productionDeployed: false,
   clientConsumable: false,
-  // Topic backend deployment has independent truth; these discovery pipelines remain unimplemented.
+  // Topic deployment/consumer authorization is independent; these discovery pipelines remain unimplemented.
   implementationScope: "home-search-matching-editorial",
   implementationStarted: false,
   rpcNamesFrozen: false,
@@ -83,10 +83,10 @@ export const DISCOVERY_V1_CONTRACT = {
     aiCreatesTopic: false,
     unresolvedAssociation: "zero-allowed",
     confirmation: "user-confirmation-or-real-system-mapping-to-existing-topic",
-    currentQuestionTopicIds: "empty-only",
+    currentQuestionTopicIds: "0..N-canonical-topic-ids",
     currentQuestionTopicIdsScope: "shared-core-consumer",
     productionQuestionTopicIds: "active-canonical-ids-with-historical-deprecated-retention",
-    runtimeUnlockPhase: "EC-3B2C",
+    runtimeUnlockPhase: "EC-3B2C", // Consumer gate completed; not a Discovery runtime or Topic UI unlock.
     transitionIsTopic: false,
     locationIsTopic: false,
   },

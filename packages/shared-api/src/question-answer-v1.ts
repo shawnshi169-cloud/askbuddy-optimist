@@ -13,7 +13,7 @@ export const QUESTION_ANSWER_V1_CONTRACT_STATE = {
   productionDeployed: true,
   productionGrantReview: "aligned",
   clientConsumable: true,
-  topicAssociation: "blocked-until-EC-3B2C",
+  topicAssociation: "canonical-topic-v1-consumable",
 } as const;
 
 /** 已锁定的基础顺序，不是 EC-3 ranking，也不代表数据库算法已部署。 */
@@ -32,8 +32,8 @@ export const QUESTION_ANSWER_V1_PRODUCT_REVIEW = {
     decision: QUESTION_ANSWER_V1_ORDERING.comprehensiveAnswers,
     status: "locked",
   },
-  // Historical EC-2 product decision; the current app-facing gate is CONTRACT_STATE.topicAssociation.
-  canonicalTopic: { decision: "empty-topicIds-until-resolver", status: "locked" },
+  // B2C consumer contract; current UI still submits [] until a separate Topic UI slice.
+  canonicalTopic: { decision: "canonical-topic-ids-0..N", status: "locked" },
 } as const;
 
 /** public-readable 不等于 global-only projection；不得把 authenticated caller 强制降为 anon。 */
@@ -99,8 +99,14 @@ const text = z.string().refine((value) => value.trim().length > 0);
 const timestamp = z.string().datetime({ offset: true });
 const count = z.number().int().nonnegative().safe();
 const budget = z.number().int().positive().safe().nullable();
-// 只验证空关联；UUID 格式不能证明 Canonical Topic 已存在。绝不丢弃非空输入。
-const topicIds = z.array(uuid).length(0);
+// UUID shape is not proof of existence. The backend validates active Topic facts.
+// Preserve caller order; only backend projections must be ordered by topicId ASC.
+export const questionTopicIdsInput = z.array(uuid).refine(
+  (value) => new Set(value.map((id) => id.toLowerCase())).size === value.length,
+);
+export const questionTopicIdsOutput = questionTopicIdsInput.refine(
+  (value) => value.every((id, index) => index === 0 || value[index - 1].toLowerCase() < id.toLowerCase()),
+);
 const channel = z.enum(PRODUCT_CHANNEL_SLUGS);
 const personSummary = z.object({
   userId: uuid,
@@ -115,7 +121,7 @@ const question = z.object({
   title: text,
   context: text,
   primaryChannel: channel,
-  topicIds,
+  topicIds: questionTopicIdsOutput,
   deepExchangeBudgetMaxCents: budget,
   status: z.enum(QUESTION_BUSINESS_STATUS_V1),
   createdAt: timestamp,
@@ -173,7 +179,7 @@ const questionFields = {
   p_title: text,
   p_context: text,
   p_primary_channel: channel,
-  p_topic_ids: topicIds,
+  p_topic_ids: questionTopicIdsInput,
   p_deep_exchange_budget_max_cents: budget,
 };
 // 分页上限是响应体保护，不是业务金额限制。
@@ -320,7 +326,7 @@ export const QUESTION_ANSWER_V1_STABLE_ERRORS = [
   { sqlState: "PT404", messageKey: "TARGET_NOT_FOUND_OR_INACCESSIBLE" },
   { sqlState: "PT409", messageKey: "QUESTION_CLOSED" },
   { sqlState: "PT403", messageKey: "SELF_HELPFUL_FORBIDDEN" },
-  { sqlState: "PT422", messageKey: "CANONICAL_TOPIC_NOT_READY" },
+  { sqlState: "PT422", messageKey: "TOPIC_INVALID_OR_INACTIVE" },
   { sqlState: "PT400", messageKey: "INVALID_INPUT" },
   { sqlState: "PT401", messageKey: "AUTHENTICATION_REQUIRED" },
   { sqlState: "PT403", messageKey: "IMMUTABLE_FIELD" },

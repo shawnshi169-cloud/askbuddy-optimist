@@ -15,7 +15,7 @@ const messages: Record<ErrorKey, string> = {
   TARGET_NOT_FOUND_OR_INACCESSIBLE: '内容不存在或暂时无法访问。',
   QUESTION_CLOSED: '问题已关闭，不能再新增回答或回复。',
   SELF_HELPFUL_FORBIDDEN: '不能为自己的回答标记有帮助。',
-  CANONICAL_TOPIC_NOT_READY: '话题暂不可用，请移除话题后重试。',
+  TOPIC_INVALID_OR_INACTIVE: '所选话题已不可用，请重新选择。',
   INVALID_INPUT: '请检查填写内容后重试。',
   AUTHENTICATION_REQUIRED: '请先登录后再操作。',
   IMMUTABLE_FIELD: '这项信息不支持修改。',

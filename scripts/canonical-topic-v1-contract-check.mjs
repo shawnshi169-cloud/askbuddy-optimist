@@ -66,7 +66,7 @@ assert.match(resolver, /term.normalized_term = ec3_topic_private.normalize_term\
 assert.doesNotMatch(resolver, /INSERT|UPDATE|DELETE/);
 const newRpcs = ["resolve_canonical_topic_v1", "get_experience_topics_v1", "set_experience_topics_v1"];
 for (const name of newRpcs) {
-  assert.ok(!read("packages/shared-api/src/rpc-whitelist.ts").includes(name));
+  assert.ok(read("packages/shared-api/src/rpc-whitelist.ts").includes(`${name}: RPC_CATALOG.${name}.qualifiedName`));
   assert.ok(read("packages/shared-api/src/rpc-catalog.ts").includes(name));
   assert.ok(read("packages/shared-types/src/generated/canonical-topic-v1-local.ts").includes(name));
   assert.ok(read("src/integrations/supabase/types.ts").includes(name));
@@ -93,11 +93,11 @@ for (const [section, names] of [["Tables", tables], ["Functions", newRpcs]]) {
   for (const name of names) assert.equal(normalized(actual, section, name), normalized(approved, section, name), name);
 }
 
-// Catalog presence does not authorize frontend imports, direct table access or RPC use.
+// B2C authorizes contracts only; no Topic feature hookup or direct table access in UI/native code.
 const gatedSymbols = /canonical-topic-v1|CANONICAL_TOPIC_V1_(?:LOCAL_)?(?:RPCS|STATE)|parseQuestion(?:WithTopics|TopicWrite)V1|canonicalTopicV1(?:Local)?Schema|experienceTopicsV1(?:Local)?Schema|resolve_canonical_topic_v1|get_experience_topics_v1|set_experience_topics_v1|canonical_topics_v1|canonical_topic_terms_v1|question_topics_v1|experience_topics_v1/;
 const clientFiles = execFileSync("git", ["ls-files", "--", "src", "apps"], { encoding: "utf8" }).trim().split("\n");
 for (const path of clientFiles.filter((path) => /\.[cm]?[jt]sx?$/.test(path) && path !== "src/integrations/supabase/types.ts")) {
-  assert.doesNotMatch(read(path), gatedSymbols, `${path}: Topic client consumer still gated`);
+  assert.doesNotMatch(read(path), gatedSymbols, `${path}: Topic UI/native hookup is outside B2C`);
 }
 assert.doesNotMatch(read("packages/shared-api/src/canonical-topic-v1.ts"), /createClient|\.rpc\(|fetch\(/);
 const runner = read("scripts/canonical-topic-v1-local-test.mjs");
@@ -107,7 +107,9 @@ const localSql = read("scripts/sql/canonical-topic-v1-local.sql");
 for (const name of ["privileged Experience parent hard delete cascades old/new children", "account cascade removes Experience and old/new children",
   "non-owner association delete changes zero rows", "soft delete retains parent and child storage"]) assert.ok(localSql.includes(name));
 assert.doesNotMatch(runner, /--linked|--db-url|SUPABASE_ACCESS_TOKEN|SUPABASE_SERVICE_ROLE_KEY/);
-assert.match(read("packages/shared-api/src/question-answer-v1.ts"), /const topicIds = z.array\(uuid\).length\(0\)/);
+assert.match(read("packages/shared-api/src/question-answer-v1.ts"), /export const questionTopicIdsInput/);
+assert.match(read("packages/shared-api/src/question-answer-v1.ts"), /export const questionTopicIdsOutput/);
+assert.doesNotMatch(read("packages/shared-api/src/canonical-topic-v1.ts"), /topicIds: \[\]|p_topic_ids: \[\]/, "QA helpers must not strip/reinsert IDs");
 assert.ok(read("packages/shared-api/src/product-blueprint-v1.ts").includes("EC-3B2B Production"));
 assert.ok(read("docs/ec3b1-canonical-topic-foundation.md").includes("NOT DEPLOYED"));
 const evidence = read("docs/ec3b2b-canonical-topic-production-deploy.md");
@@ -118,32 +120,33 @@ await withTopicLocalContract(async (api, production, backend, contracts) => {
   assert.equal(api.CANONICAL_TOPIC_V1_LOCAL_STATE, backend.CANONICAL_TOPIC_V1_STATE);
   assert.equal(api.CANONICAL_TOPIC_V1_LOCAL_RPCS, backend.CANONICAL_TOPIC_V1_RPCS);
   assert.equal(api.CANONICAL_TOPIC_V1_LOCAL_STATE.productionDeployed, true);
-  assert.equal(api.CANONICAL_TOPIC_V1_LOCAL_STATE.clientConsumable, false);
+  assert.equal(api.CANONICAL_TOPIC_V1_LOCAL_STATE.clientConsumable, true);
   assert.equal(backend.CANONICAL_TOPIC_V1_STATE.productionGrantReview, "aligned");
   assert.equal(backend.CANONICAL_TOPIC_V1_STATE.productionQuestionTopics, "active-canonical-ids-with-historical-deprecated-retention");
   assert.equal(backend.CANONICAL_TOPIC_V1_STATE.productionExperienceTopics, "deployed");
   assert.equal(backend.CANONICAL_TOPIC_V1_STATE.productionResolver, "deployed");
-  assert.equal(backend.CANONICAL_TOPIC_V1_STATE.sharedCoreQuestionTopics, "empty-only");
+  assert.equal(backend.CANONICAL_TOPIC_V1_STATE.sharedCoreQuestionTopics, "0..N-canonical-topic-ids");
   assert.equal(backend.CANONICAL_TOPIC_V1_STATE.consumerUnlockPhase, "EC-3B2C");
-  assert.equal(backend.CANONICAL_TOPIC_V1_STATE.consumerGateStatus, "pending");
-  assert.equal(production.QUESTION_ANSWER_V1_CONTRACT_STATE.topicAssociation, "blocked-until-EC-3B2C");
+  assert.equal(backend.CANONICAL_TOPIC_V1_STATE.consumerGateStatus, "verified");
+  assert.equal(production.QUESTION_ANSWER_V1_CONTRACT_STATE.topicAssociation, "canonical-topic-v1-consumable");
   for (const name of newRpcs) {
     assert.equal(contracts.RPC_CATALOG[name].status, "canonical");
     assert.equal(contracts.RPC_CATALOG[name].productionGrantReview, "aligned");
     assert.equal(contracts.RPC_CATALOG[name].authentication, name.startsWith("set_") ? "authenticated" : "anon");
-    assert.equal(contracts.CLIENT_RPC_WHITELIST[name], undefined);
+    assert.equal(contracts.CLIENT_RPC_WHITELIST[name], contracts.RPC_CATALOG[name].qualifiedName);
     assert.equal(contracts.PRODUCT_BLUEPRINT_V1_RPC_POLICY[name].use, "canonical-blueprint");
-    assert.equal(contracts.PRODUCT_BLUEPRINT_V1_RPC_POLICY[name].newBlueprintCodeMayDepend, false);
+    assert.equal(contracts.PRODUCT_BLUEPRINT_V1_RPC_POLICY[name].newBlueprintCodeMayDepend, true);
     assert.match(contracts.PRODUCT_BLUEPRINT_V1_RPC_POLICY[name].replacement, /EC-3B2C/);
-    assert.equal(backend.CANONICAL_TOPIC_V1_RPCS[name].clientConsumable, false);
+    assert.equal(backend.CANONICAL_TOPIC_V1_RPCS[name].clientConsumable, true);
   }
+  assert.deepEqual(Object.keys(contracts.CLIENT_RPC_WHITELIST).filter((name) => contracts.RPC_CATALOG[name].featureOwner === "topics").sort(), [...newRpcs].sort());
   assert.equal(api.CANONICAL_TOPIC_V1_LOCAL_STATE.duplicateInput, "reject-INVALID_INPUT");
   assert.deepEqual(Object.keys(api.CANONICAL_TOPIC_V1_LOCAL_RPCS), newRpcs);
   const a = "e3b10000-0000-4000-8000-000000000010";
   const b = "e3b10000-0000-4000-8000-000000000011";
   const request = { p_title: "title", p_context: "context", p_primary_channel: "education-learning", p_topic_ids: [a], p_deep_exchange_budget_max_cents: null };
   assert.deepEqual(api.parseQuestionTopicWriteV1Local("create_question_v1", request).p_topic_ids, [a]);
-  assert.throws(() => production.QUESTION_ANSWER_V1_RPCS.create_question_v1.parseParams(request));
+  assert.deepEqual(production.QUESTION_ANSWER_V1_RPCS.create_question_v1.parseParams(request), request);
   for (const invalid of [null, [null], [a, a], ["bad"], [[a]]]) {
     assert.throws(() => api.parseQuestionTopicWriteV1Local("create_question_v1", { ...request, p_topic_ids: invalid }));
   }
@@ -163,4 +166,5 @@ await withTopicLocalContract(async (api, production, backend, contracts) => {
   assert.equal(api.parseCanonicalTopicErrorV1Local({ code: "PT422", message: "TOPIC_INVALID_OR_INACTIVE" }), "TOPIC_INVALID_OR_INACTIVE");
   assert.equal(api.parseCanonicalTopicErrorV1Local({ code: "PT400", message: "TOPIC_INVALID_OR_INACTIVE" }), null);
 });
-console.log("PASS: Canonical Topic deployed backend contract/B1 schema; app parser empty-only, whitelist closed, EC-3B2C pending");
+await import("./canonical-topic-consumer-check.mjs");
+console.log("PASS: Canonical Topic B2C consumer contract verified; exact three RPCs authorized, no Topic UI or seed");

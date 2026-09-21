@@ -1,6 +1,10 @@
 # EC-3B2B Canonical Topic Production Deployment
 
-Status: **PRODUCTION DEPLOYED / VERIFIED; CLIENT NOT ENABLED; EC-3B2C PENDING**.
+Current: B2B approved/merged in PR #50. [B2C consumer gate](./ec3b2c-canonical-topic-consumer-gate.md)
+is now verified; Topic UI remains unimplemented and taxonomy unseeded.
+The remainder is the historical B2B deployment/review snapshot, including its then-closed client gate.
+
+B2B snapshot status: **PRODUCTION DEPLOYED / VERIFIED; CLIENT NOT ENABLED; EC-3B2C PENDING**.
 Repository baseline: `b7662dfed927873527ac1a31c719f8ea3fb12257` (PR #49 merge).
 EC-3A frozen, EC-3B1 approved/merged, EC-3B2A preflight complete. This closeout needs Product Owner review;
 it does not authorize B2C, consumer use, Topic seed or UI work.

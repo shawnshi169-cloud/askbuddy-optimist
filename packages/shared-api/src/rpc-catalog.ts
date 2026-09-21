@@ -375,7 +375,7 @@ export const RPC_CATALOG = {
   ),
   create_question_v1: questionAnswerRpc(
     "create_question_v1", "authenticated",
-    "Canonical Person-owned Question create; requester derives from auth.uid(). Backend supports canonical Topics; app-facing topicIds remains empty until EC-3B2C consumer authorization.",
+    "Canonical Person-owned Question create; requester derives from auth.uid(). EC-3B2C authorizes 0..N canonical Topic IDs in the app contract; current Question UI still submits [] without a Topic picker.",
   ),
   update_question_v1: questionAnswerRpc(
     "update_question_v1", "authenticated",
@@ -477,17 +477,17 @@ export const RPC_CATALOG = {
   resolve_canonical_topic_v1: rpc<CanonicalTopicV1RpcParams<"resolve_canonical_topic_v1">, CanonicalTopicV1RpcResult<"resolve_canonical_topic_v1">>()(
     "resolve_canonical_topic_v1", "canonical", "anon", "topics",
     "CanonicalTopicV1RpcParams<resolve_canonical_topic_v1>", "CanonicalTopicV1RpcResult<resolve_canonical_topic_v1>", "aligned",
-    "Production backend deployed and SQL-smoke verified; ordinary client consumer remains gated until EC-3B2C.",
+    "Production backend verified; EC-3B2C HTTP resolver consumer gate verified. Public minimum access preserves authenticated caller identity; no Topic UI or seed.",
   ),
   get_experience_topics_v1: rpc<CanonicalTopicV1RpcParams<"get_experience_topics_v1">, CanonicalTopicV1RpcResult<"get_experience_topics_v1">>()(
     "get_experience_topics_v1", "canonical", "anon", "topics",
     "CanonicalTopicV1RpcParams<get_experience_topics_v1>", "CanonicalTopicV1RpcResult<get_experience_topics_v1>", "aligned",
-    "Production backend deployed and SQL-smoke verified; ordinary client consumer remains gated until EC-3B2C.",
+    "Production backend verified; EC-3B2C HTTP private Experience visibility gate verified. Public minimum access preserves caller identity; no Experience Topic UI.",
   ),
   set_experience_topics_v1: rpc<CanonicalTopicV1RpcParams<"set_experience_topics_v1">, CanonicalTopicV1RpcResult<"set_experience_topics_v1">>()(
     "set_experience_topics_v1", "canonical", "authenticated", "topics",
     "CanonicalTopicV1RpcParams<set_experience_topics_v1>", "CanonicalTopicV1RpcResult<set_experience_topics_v1>", "aligned",
-    "Production owner-only backend deployed and SQL-smoke verified; ordinary client consumer remains gated until EC-3B2C.",
+    "Production owner-only backend verified; EC-3B2C authenticated HTTP empty replacement, nonempty invalid-Topic transport and cross-person denial verified. No Experience Topic UI.",
   ),
   get_public_person_profile_v1: rpc<
     GetPublicPersonProfileV1Params,
