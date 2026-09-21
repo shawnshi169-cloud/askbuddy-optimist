@@ -1,0 +1,18 @@
+{
+  "title": "EC3B2B synthetic question",
+  "status": "open",
+  "context": "Rollback-only context",
+  "topicIds": ["e3b2b000-0000-4000-8000-000000000010"],
+  "createdAt": "2026-09-18T16:57:22.354523+00:00",
+  "requester": {
+    "userId": "e3b2b000-0000-4000-8000-000000000001",
+    "avatarUrl": null,
+    "displayName": "新用户"
+  },
+  "updatedAt": "2026-09-18T16:57:22.3712+00:00",
+  "questionId": "0bf477ee-639c-43e0-a7c1-e95580978567",
+  "answerCount": 0,
+  "primaryChannel": "education-learning",
+  "requesterPersonId": "e3b2b000-0000-4000-8000-000000000001",
+  "deepExchangeBudgetMaxCents": 6900
+}

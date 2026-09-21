@@ -63,10 +63,21 @@ await check('all twelve adapters use exact request/response parsers and preserve
 await check('request validation rejects absent context, invalid channel/topics/budget before network', async () => {
   let calls = 0;
   const api = adapter.createQuestionAnswerClient({ viewer: async () => A, run: async () => { calls++; throw new Error('must not run'); } });
-  for (const patch of [{ p_title: '' }, { p_context: '  ' }, { p_primary_channel: 'other' }, { p_topic_ids: [id(6)] }, { p_deep_exchange_budget_max_cents: 0 }, { p_deep_exchange_budget_max_cents: 1.1 }]) {
+  for (const patch of [{ p_title: '' }, { p_context: '  ' }, { p_primary_channel: 'other' }, { p_topic_ids: [id(6), id(6)] }, { p_topic_ids: ['malformed'] }, { p_deep_exchange_budget_max_cents: 0 }, { p_deep_exchange_budget_max_cents: 1.1 }]) {
     await assert.rejects(api.createQuestion({ ...createInput, ...patch }, A), (e) => e.key === 'INVALID_INPUT');
   }
   assert.equal(calls, 0);
+});
+await check('B2C nonempty Topic contract preserves input order through the existing adapter', async () => {
+  let calls = 0;
+  const params = { ...createInput, p_topic_ids: [id(7), id(6)] };
+  const api = adapter.createQuestionAnswerClient({ viewer: async () => A, run: async (name, actual) => {
+    calls++; assert.equal(name, 'create_question_v1'); assert.deepEqual(actual, params);
+    return { data: null, error: { code: 'PT422', message: 'TOPIC_INVALID_OR_INACTIVE' } };
+  } });
+  await assert.rejects(api.createQuestion(params, A), (error) => error.key === 'TOPIC_INVALID_OR_INACTIVE'
+    && error.message === '所选话题已不可用，请重新选择。');
+  assert.equal(calls, 1, 'No empty-array replacement or legacy retry');
 });
 await check('response mismatch/invalid pagination/network failures never become success', async () => {
   for (const result of [{ answers: [answer], nextOffset: 99 }, { answers: [{ ...answer, questionId: id(9) }], nextOffset: null }, { answers: [{ ...answer, helpfulCount: -1 }], nextOffset: null }]) {

@@ -79,9 +79,9 @@ export const PRODUCT_BLUEPRINT_V1_DOMAIN_MAP = {
     domain: "canonical-topic",
     target: "platform-governed cross-module semantic entity shared by Question/Experience/Editorial/Search/Matching; not a hashtag or Article",
     contractStatus: "approved-frozen",
-    currentRuntime: "EC-3B1 approved/merged; EC-3B2B Production Canonical Topic storage, exact resolver and typed Question/Experience associations deployed and rollback-smoke verified; backend accepts real active Topic IDs with historical deprecated retention; clientConsumable=false, Shared Core Question parser remains empty-only, Experience Topic UI not connected; EC-3B2C consumer gate pending; Home/Search/Matching/Editorial runtime not implemented; evidence: docs/ec3b2b-canonical-topic-production-deploy.md",
+    currentRuntime: "EC-3B1 approved/merged; EC-3B2B Production Canonical Topic storage, exact resolver and typed Question/Experience associations deployed and rollback-smoke verified; backend accepts real active Topic IDs with historical deprecated retention; EC-3B2C HTTP consumer gate verified, clientConsumable=true, Shared Core Question contract accepts 0..N canonical Topic IDs; current Question UI still sends [], Topic picker not implemented, Experience Topic UI not connected, taxonomy not seeded; Home/Search/Matching/Editorial runtime not implemented; evidence: docs/ec3b2c-canonical-topic-consumer-gate.md",
     runtimeStatus: "production-ready",
-    newCodePolicy: "blocked-until-phase",
+    newCodePolicy: "may-use-deployed-contract",
     phase: "EC-3",
   },
   editorialFeature: {
@@ -259,18 +259,18 @@ export interface BlueprintRpcPolicy {
 export const PRODUCT_BLUEPRINT_V1_RPC_POLICY = {
   resolve_canonical_topic_v1: {
     use: "canonical-blueprint",
-    newBlueprintCodeMayDepend: false,
-    replacement: "Production-deployed backend; ordinary client consumer gated until EC-3B2C review and authorization",
+    newBlueprintCodeMayDepend: true,
+    replacement: "EC-3B2C consumer gate verified; public minimum access preserves caller identity; contract only, no resolver UI or Topic seed",
   },
   get_experience_topics_v1: {
     use: "canonical-blueprint",
-    newBlueprintCodeMayDepend: false,
-    replacement: "Production-deployed backend; ordinary client consumer gated until EC-3B2C review and authorization",
+    newBlueprintCodeMayDepend: true,
+    replacement: "EC-3B2C consumer gate verified; caller-aware private visibility; contract only, no Experience Topic UI",
   },
   set_experience_topics_v1: {
     use: "canonical-blueprint",
-    newBlueprintCodeMayDepend: false,
-    replacement: "Production-deployed owner-only backend; ordinary client consumer gated until EC-3B2C review and authorization",
+    newBlueprintCodeMayDepend: true,
+    replacement: "EC-3B2C consumer gate verified; authenticated owner-only desired-state replacement; contract only, no Experience Topic UI",
   },
   get_public_person_profile_v1: {
     use: "canonical-blueprint",

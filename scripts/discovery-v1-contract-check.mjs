@@ -134,7 +134,7 @@ const missingChannel: Q = { questionId: "q", title: "q", topicIds: [], contextEx
   assert.equal(c.topics.questionPrimaryChannelRequired, true);
   assert.equal(c.topics.experienceChannelRequired, false);
   for (const field of ["userStringCreatesTopic", "aiCreatesTopic", "transitionIsTopic", "locationIsTopic"]) assert.equal(c.topics[field], false);
-  assert.equal(c.topics.currentQuestionTopicIds, "empty-only");
+  assert.equal(c.topics.currentQuestionTopicIds, "0..N-canonical-topic-ids");
   assert.equal(c.topics.currentQuestionTopicIdsScope, "shared-core-consumer");
   assert.equal(c.topics.productionQuestionTopicIds, "active-canonical-ids-with-historical-deprecated-retention");
   assert.equal(c.topics.runtimeUnlockPhase, "EC-3B2C");
@@ -161,13 +161,18 @@ const missingChannel: Q = { questionId: "q", title: "q", topicIds: [], contextEx
   assert.equal(c.pagination.expiredOrMismatchedCursor, "explicit-failure-restart-not-silent-reseed");
   assert.equal(c.pagination.safety, "recheck-public-visibility-on-every-page");
 
-  for (const [key, runtime] of Object.entries({
-    homeSearchMatching: "legacy-compatibility", productChannels: "partial", canonicalTopic: "production-ready",
-    editorialFeature: "not-deployed", location: "partial", dynamicNeedInterestSignals: "not-deployed",
+  // Topic is an independent shared capability, not evidence that Discovery runtimes are implemented.
+  for (const [key, [runtime, policy]] of Object.entries({
+    homeSearchMatching: ["legacy-compatibility", "blocked-until-phase"],
+    productChannels: ["partial", "target-contract-only"],
+    canonicalTopic: ["production-ready", "may-use-deployed-contract"],
+    editorialFeature: ["not-deployed", "blocked-until-phase"],
+    location: ["partial", "target-contract-only"],
+    dynamicNeedInterestSignals: ["not-deployed", "blocked-until-phase"],
   })) {
     assert.equal(domains[key].contractStatus, "approved-frozen", key);
     assert.equal(domains[key].runtimeStatus, runtime, key);
-    assert.notEqual(domains[key].newCodePolicy, "may-use-deployed-contract", key);
+    assert.equal(domains[key].newCodePolicy, policy, key);
   }
   for (const id of ["home", "search", "channel"]) {
     assert.equal(page(id).implementationStatus, "legacy");
@@ -191,7 +196,7 @@ const missingChannel: Q = { questionId: "q", title: "q", topicIds: [], contextEx
   const doc = read("docs/ec3-discovery-contract-decision.md");
   for (const phrase of ["fa6acd091468e730991df855f519b82ad6848a01", "Article != Topic", "LOCAL ISOLATED QA", "BLOCKED BY ENVIRONMENT", "REMAINS", "Production EC-2 topicIds=[] remains locked", "DO NOT START EC-3B"]) assert.ok(doc.includes(phrase), phrase);
   assert.ok(JSON.parse(read("package.json")).scripts["test:contracts"].includes("discovery-v1-contract-check.mjs"));
-  console.log("EC-3A Discovery contract PASS: semantic/type boundaries frozen; no runtime, RPC or consumer unlock.");
+  console.log("EC-3A Discovery contract PASS: global runtime remains closed; independent B2C Topic consumer policy verified.");
 } finally {
   rmSync(temp, { recursive: true, force: true });
 }

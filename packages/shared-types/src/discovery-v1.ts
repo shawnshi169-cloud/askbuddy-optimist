@@ -19,7 +19,7 @@ export interface CanonicalTopicSummaryV1Target {
   status: (typeof CANONICAL_TOPIC_STATUS_V1_TARGET)[number];
 }
 
-/** Target associations do not unlock EC-2's app-facing empty-only parser; backend deployment is separate. */
+/** B2C authorizes Topic contracts, not Home/Search/Matching implementation or automatic associations. */
 export interface DiscoveryTopicAssociationsV1Target {
   topicIds: CanonicalTopicIdV1[];
 }

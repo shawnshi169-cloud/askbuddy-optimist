@@ -27,7 +27,8 @@ Android native/platform verification = **VERIFIED / COMPLETE**；WeChat EC-2 can
 EC-2 Cross-platform Rollout = **NOT COMPLETE**；WeChat follow-up 和真实 iOS keyboard QA 缺口仍保留。
 EC-3A [Discovery contract freeze](./ec3-discovery-contract-decision.md) 已完成；EC-3B1 [Topic foundation](./ec3b1-canonical-topic-foundation.md) 已审核合并。
 EC-3B2B [Production backend 已部署并验证](./ec3b2b-canonical-topic-production-deploy.md)：真实 active Topic IDs 已由 backend 支持，保留既有 deprecated 关联。
-Shared Core Topic parser 仍为 empty-only，等待 EC-3B2C；新 Topic RPC 不在 client whitelist，Experience UI 未接入。
+Shared Core Topic contract 已支持 0..N unique UUID，EC-3B2C [HTTP consumer gate 已验证](./ec3b2c-canonical-topic-consumer-gate.md)；输入保留顺序，输出要求 topicId ASC。
+三个 Topic RPC 已进入 client whitelist；当前 Question 页面仍发送 `[]`，Topic UI 仍未实现，Experience UI 未接入。当前稳定错误为 `PT422 / TOPIC_INVALID_OR_INACTIVE`，不再是 `CANONICAL_TOPIC_NOT_READY`。
 Home/Search/Matching/Editorial implementation **NOT STARTED**。后文 EC-2 冻结的空数组/resolver 前置条件是历史 contract baseline，不代表当前 backend 尚无 resolver。
 
 EC-2F 已完成 Pixel 7 Emulator / Android 16 API 36 / gesture navigation 平台验证，详见

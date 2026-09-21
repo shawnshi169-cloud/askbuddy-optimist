@@ -7,7 +7,7 @@ export type CanonicalQuestionIdV1 = Id;
 export type CanonicalAnswerIdV1 = Id;
 export type CanonicalAnswerReplyIdV1 = Id;
 
-/** Canonical Topic identity；backend resolver 已部署，app-facing parser 仍仅接受空 topicIds，等待 EC-3B2C。 */
+/** Canonical Topic identity; B2C app contract accepts 0..N unique IDs. Current UI still submits [] without a picker. */
 export type CanonicalTopicIdV1 = Id;
 
 export const QUESTION_BUSINESS_STATUS_V1 = ["open", "closed"] as const;

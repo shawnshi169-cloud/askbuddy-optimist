@@ -75,6 +75,7 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     currentWriteContracts: ["rpc:create_question_v1"],
     notes: [
       "EC-2D Shared Core NewQuestion is canonical: title and context required, exactly one of the four Product Channels, topicIds=[], optional nullable positive safe-integer CNY deepExchangeBudgetMaxCents; public answers remain free.",
+      "EC-3B2C authorizes 0..N canonical Topic IDs in the shared contract, but this page still submits []: no Topic picker, resolver UI, suggestions or automatic associations.",
       "Local canonical-question-draft-v2 is viewer-scoped with Auth return handoff; only successful real create_question_v1 clears the draft and navigates to /question/:questionId.",
       "No bounty, fake AI tags, Expert consultation, unsupported attachments, or Question Edit UI. update_question_v1 is an adapter capability, not an exposed page action.",
       "Shared Core implementation (including iOS React) is complete; real iOS keyboard QA is BLOCKED BY ENVIRONMENT, and WeChat canonical flow is NOT IMPLEMENTED; EC-2 cross-platform rollout is NOT COMPLETE.",
@@ -184,7 +185,7 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
       "submit_content_report is generic report intake for the canonical questionId (UUID target_id has no legacy Question FK); submission does not imply a canonical moderation-management workflow.",
       "Shared Core implementation (including iOS React) is complete; real iOS keyboard QA is BLOCKED BY ENVIRONMENT, and WeChat canonical flow is NOT IMPLEMENTED; EC-2 cross-platform rollout is NOT COMPLETE.",
       "Android native/platform verification is VERIFIED on Pixel 7 / Android 16 API 36 with gesture navigation (PR #45/#46); LOCAL ISOLATED QA for platform behavior, not Production backend re-verification. Evidence: docs/ec2f-android-native-verification.md.",
-      "Real loading/empty/not-found/error states have no fixture fallback; Home/Search/Channel feed cutover and Canonical Topic association remain deferred to EC-3.",
+      "Real loading/empty/not-found/error states have no fixture fallback; B2C Question reads parse canonical Topic IDs without adding Topic UI. Home/Search/Channel feed cutover remains deferred to EC-3.",
     ],
   },
   {

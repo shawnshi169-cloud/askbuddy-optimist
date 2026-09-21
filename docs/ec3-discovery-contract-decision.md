@@ -1,11 +1,11 @@
 # EC-3 Discovery Contract Decision
 
 当前：**EC-3A PRODUCT DECISIONS LOCKED / CONTRACT FROZEN**；Home/Search/Matching/Editorial **NOT DEPLOYED / NOT CLIENT CONSUMABLE**。
-EC-3B2B Canonical Topic backend 已部署验证，client 仍 gated、Shared Core 仍 empty-only，EC-3B2C PENDING；
-见 [Production deployment](./ec3b2b-canonical-topic-production-deploy.md)。这不代表 Discovery pipeline 已实现。
+EC-3B2B Canonical Topic backend 已部署验证；[EC-3B2C consumer gate](./ec3b2c-canonical-topic-consumer-gate.md) 已验证，Shared Core contract 支持 0..N canonical Topic IDs，当前 UI 仍发送 `[]`。
+Topic picker / Experience Topic UI 均未接入，taxonomy 未 seed。这不代表 Discovery pipeline 已实现。
 
 以下为 EC-3A 冻结时的历史审计、产品语义及 gate snapshot；其中“本轮/当前/未部署”指 EC-3A 当时，
-Topic 后续部署事实以上述 B2B 记录为准，不改写当时无 SQL/RPC/consumer 授权的证据。
+Topic 后续部署及 consumer 事实以上述 B2B/B2C 记录为准，不改写当时无 SQL/RPC/consumer 授权的证据。
 Architecture owner：A。Baseline：`fa6acd091468e730991df855f519b82ad6848a01`，PR #47 merge。
 本 PR 仍需 Product Owner review；`approved-frozen` 表达本指令已锁定的产品语义，不是 merge 或 runtime 授权。
 EC-3 implementation **NOT STARTED**；本轮没有 SQL、RPC、网络 adapter、CMS、UI 或 Production 变更。

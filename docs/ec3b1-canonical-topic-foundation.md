@@ -1,7 +1,8 @@
 # EC-3B1 Canonical Topic Local Foundation
 
 Current: B1 approved/merged in PR #49; B2B backend **PRODUCTION DEPLOYED / VERIFIED**,
-client still gated until EC-3B2C. See [Production deployment evidence](./ec3b2b-canonical-topic-production-deploy.md).
+EC-3B2C [consumer contract / HTTP gate verified](./ec3b2c-canonical-topic-consumer-gate.md), pending closeout review.
+No Topic UI or taxonomy seed. See [Production deployment evidence](./ec3b2b-canonical-topic-production-deploy.md).
 
 The remainder preserves the **historical B1 local implementation/review snapshot**, including its
 then-current Production gate and local test evidence; it is not current deployment status.
