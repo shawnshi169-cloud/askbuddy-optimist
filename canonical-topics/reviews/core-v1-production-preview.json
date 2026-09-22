@@ -1,0 +1,1331 @@
+{
+  "manifestSha256": "fe1591a81323092d745e08cd9fa024808033c5c95dcc0ca89bd41f8739deda6f",
+  "plan": {
+    "applyAuthorized": false,
+    "collisionCount": 0,
+    "counts": {
+      "ADD_ALIAS": 0,
+      "CREATE_TOPIC": 79,
+      "DEPRECATE_TOPIC": 0,
+      "NO_CHANGE": 0,
+      "PRODUCTION_ONLY_UNMANAGED": 0,
+      "REACTIVATE_TOPIC": 0,
+      "REMOVE_ALIAS": 0,
+      "RENAME_TOPIC": 0
+    },
+    "effectiveChangeCount": 79,
+    "governanceSensitiveCount": 0,
+    "highRiskCount": 0,
+    "informationalOnly": true,
+    "manifestId": "core-v1",
+    "manifestStateHash": "3d7346fba782ed488983d35defd439824e2d521760606df41e7802612c4f035e",
+    "operations": [
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "旅游行程规划"
+          ],
+          "canonicalName": "旅行规划",
+          "status": "active",
+          "topicId": "0e5766a1-5544-4e10-8a52-ebcd7433bbd4"
+        },
+        "risk": "STANDARD",
+        "topicId": "0e5766a1-5544-4e10-8a52-ebcd7433bbd4",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "换工作"
+          ],
+          "canonicalName": "跳槽",
+          "status": "active",
+          "topicId": "10c5e378-2387-4c6d-b576-60cda4c67bfa"
+        },
+        "risk": "STANDARD",
+        "topicId": "10c5e378-2387-4c6d-b576-60cda4c67bfa",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Management Consulting"
+          ],
+          "canonicalName": "管理咨询",
+          "status": "active",
+          "topicId": "1108cded-5504-4214-b4c2-f4aa9a8d1de7"
+        },
+        "risk": "STANDARD",
+        "topicId": "1108cded-5504-4214-b4c2-f4aa9a8d1de7",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "英国硕士",
+            "英研"
+          ],
+          "canonicalName": "英国研究生",
+          "status": "active",
+          "topicId": "126b14f5-bfec-46c2-8cf6-00c93bcb85c6"
+        },
+        "risk": "STANDARD",
+        "topicId": "126b14f5-bfec-46c2-8cf6-00c93bcb85c6",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "申请奖学金"
+          ],
+          "canonicalName": "奖学金申请",
+          "status": "active",
+          "topicId": "1637002a-07bb-4540-b8a7-d8dec9afd10b"
+        },
+        "risk": "STANDARD",
+        "topicId": "1637002a-07bb-4540-b8a7-d8dec9afd10b",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "研究生留学申请"
+          ],
+          "canonicalName": "海外研究生申请",
+          "status": "active",
+          "topicId": "1c8c7d8a-43be-4052-8a7b-1e85ee073a19"
+        },
+        "risk": "STANDARD",
+        "topicId": "1c8c7d8a-43be-4052-8a7b-1e85ee073a19",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "工作面试",
+            "求职面试"
+          ],
+          "canonicalName": "面试",
+          "status": "active",
+          "topicId": "2165e78a-4569-4048-a034-da7e65bc0ef0"
+        },
+        "risk": "STANDARD",
+        "topicId": "2165e78a-4569-4048-a034-da7e65bc0ef0",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Startup工作",
+            "创业公司工作"
+          ],
+          "canonicalName": "初创公司工作",
+          "status": "active",
+          "topicId": "27640e1a-2d2f-4754-8955-e840ecc56fcc"
+        },
+        "risk": "STANDARD",
+        "topicId": "27640e1a-2d2f-4754-8955-e840ecc56fcc",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "养狗经验",
+            "狗狗饲养"
+          ],
+          "canonicalName": "养狗",
+          "status": "active",
+          "topicId": "280efb7b-ac7f-47c2-a7ab-eadb8935310e"
+        },
+        "risk": "STANDARD",
+        "topicId": "280efb7b-ac7f-47c2-a7ab-eadb8935310e",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "升职",
+            "晋升"
+          ],
+          "canonicalName": "职级晋升",
+          "status": "active",
+          "topicId": "2b1e78d6-2670-468c-bcb0-cb97de543491"
+        },
+        "risk": "STANDARD",
+        "topicId": "2b1e78d6-2670-468c-bcb0-cb97de543491",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "离职决定",
+            "辞职"
+          ],
+          "canonicalName": "离职",
+          "status": "active",
+          "topicId": "2d488b2e-319d-4d39-9e8d-884dc408723f"
+        },
+        "risk": "STANDARD",
+        "topicId": "2d488b2e-319d-4d39-9e8d-884dc408723f",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Piano"
+          ],
+          "canonicalName": "钢琴",
+          "status": "active",
+          "topicId": "2f5e4b35-4772-4034-aba3-9162604f5d31"
+        },
+        "risk": "STANDARD",
+        "topicId": "2f5e4b35-4772-4034-aba3-9162604f5d31",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "社会招聘"
+          ],
+          "canonicalName": "社招",
+          "status": "active",
+          "topicId": "31bb4e91-dada-418d-9303-56be3326e997"
+        },
+        "risk": "STANDARD",
+        "topicId": "31bb4e91-dada-418d-9303-56be3326e997",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Camping"
+          ],
+          "canonicalName": "露营",
+          "status": "active",
+          "topicId": "349890bd-9af4-446e-9224-214d92f7bbd3"
+        },
+        "risk": "STANDARD",
+        "topicId": "349890bd-9af4-446e-9224-214d92f7bbd3",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Product Manager"
+          ],
+          "canonicalName": "产品经理",
+          "status": "active",
+          "topicId": "354dee2b-1e7c-467f-b842-5b4fd30df22b"
+        },
+        "risk": "STANDARD",
+        "topicId": "354dee2b-1e7c-467f-b842-5b4fd30df22b",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "租房子"
+          ],
+          "canonicalName": "租房",
+          "status": "active",
+          "topicId": "3d263043-5fc1-4e1b-bcff-4c2c27a6d227"
+        },
+        "risk": "STANDARD",
+        "topicId": "3d263043-5fc1-4e1b-bcff-4c2c27a6d227",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "发学术论文"
+          ],
+          "canonicalName": "学术论文发表",
+          "status": "active",
+          "topicId": "4011f112-6573-4ddc-8561-549419c2204b"
+        },
+        "risk": "STANDARD",
+        "topicId": "4011f112-6573-4ddc-8561-549419c2204b",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "二手买卖",
+            "闲置交易"
+          ],
+          "canonicalName": "二手交易",
+          "status": "active",
+          "topicId": "409bef3d-db2b-4249-a703-e228c10cb316"
+        },
+        "risk": "STANDARD",
+        "topicId": "409bef3d-db2b-4249-a703-e228c10cb316",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Resume",
+            "求职简历"
+          ],
+          "canonicalName": "简历",
+          "status": "active",
+          "topicId": "427ab453-3298-4332-9115-6eabc6a140c9"
+        },
+        "risk": "STANDARD",
+        "topicId": "427ab453-3298-4332-9115-6eabc6a140c9",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Badminton"
+          ],
+          "canonicalName": "羽毛球",
+          "status": "active",
+          "topicId": "448fb822-da4d-4035-b375-d596d0989b54"
+        },
+        "risk": "STANDARD",
+        "topicId": "448fb822-da4d-4035-b375-d596d0989b54",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "留学申请面试"
+          ],
+          "canonicalName": "留学面试",
+          "status": "active",
+          "topicId": "459c0a53-55d2-4d51-9a02-532808947f82"
+        },
+        "risk": "STANDARD",
+        "topicId": "459c0a53-55d2-4d51-9a02-532808947f82",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "出国留学申请",
+            "海外留学申请"
+          ],
+          "canonicalName": "留学申请",
+          "status": "active",
+          "topicId": "4aa8ff1a-1d22-47c5-a7da-6059f5b3dc3b"
+        },
+        "risk": "STANDARD",
+        "topicId": "4aa8ff1a-1d22-47c5-a7da-6059f5b3dc3b",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Running"
+          ],
+          "canonicalName": "跑步",
+          "status": "active",
+          "topicId": "4ac5c7c3-2a39-4b90-919e-d25a5b72e3bc"
+        },
+        "risk": "STANDARD",
+        "topicId": "4ac5c7c3-2a39-4b90-919e-d25a5b72e3bc",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Fitness",
+            "健身训练"
+          ],
+          "canonicalName": "健身",
+          "status": "active",
+          "topicId": "4b0f876b-1aae-459b-b889-99bbfde4c62e"
+        },
+        "risk": "STANDARD",
+        "topicId": "4b0f876b-1aae-459b-b889-99bbfde4c62e",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Guitar"
+          ],
+          "canonicalName": "吉他",
+          "status": "active",
+          "topicId": "50531488-85cb-4301-91bc-985b89c10a74"
+        },
+        "risk": "STANDARD",
+        "topicId": "50531488-85cb-4301-91bc-985b89c10a74",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Basketball"
+          ],
+          "canonicalName": "篮球",
+          "status": "active",
+          "topicId": "543e6234-49f8-4ce4-83a9-e937f3ecbcb9"
+        },
+        "risk": "STANDARD",
+        "topicId": "543e6234-49f8-4ce4-83a9-e937f3ecbcb9",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "备婚"
+          ],
+          "canonicalName": "婚礼筹备",
+          "status": "active",
+          "topicId": "54705119-d955-45e9-b3df-038c31c7872e"
+        },
+        "risk": "STANDARD",
+        "topicId": "54705119-d955-45e9-b3df-038c31c7872e",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Skiing"
+          ],
+          "canonicalName": "滑雪",
+          "status": "active",
+          "topicId": "5e2c200e-ece8-4b4e-8529-649e921ba4ff"
+        },
+        "risk": "STANDARD",
+        "topicId": "5e2c200e-ece8-4b4e-8529-649e921ba4ff",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "二手车交易"
+          ],
+          "canonicalName": "二手车买卖",
+          "status": "active",
+          "topicId": "605c8483-6bf9-49f0-88b6-5628d1babe9a"
+        },
+        "risk": "STANDARD",
+        "topicId": "605c8483-6bf9-49f0-88b6-5628d1babe9a",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "养猫经验",
+            "猫咪饲养"
+          ],
+          "canonicalName": "养猫",
+          "status": "active",
+          "topicId": "6344b4d5-9e8b-4a04-af04-9286b4047902"
+        },
+        "risk": "STANDARD",
+        "topicId": "6344b4d5-9e8b-4a04-af04-9286b4047902",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "办签证",
+            "签证申请"
+          ],
+          "canonicalName": "签证办理",
+          "status": "active",
+          "topicId": "66f93d60-22a4-421a-a626-536e167a13b7"
+        },
+        "risk": "STANDARD",
+        "topicId": "66f93d60-22a4-421a-a626-536e167a13b7",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "留学申请文书"
+          ],
+          "canonicalName": "留学文书",
+          "status": "active",
+          "topicId": "683fa4c4-ca7b-4152-b957-a6c73d91dec4"
+        },
+        "risk": "STANDARD",
+        "topicId": "683fa4c4-ca7b-4152-b957-a6c73d91dec4",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "国外生活",
+            "海外居住"
+          ],
+          "canonicalName": "海外生活",
+          "status": "active",
+          "topicId": "6865bb97-2b6c-4b62-a5d1-a414932bb249"
+        },
+        "risk": "STANDARD",
+        "topicId": "6865bb97-2b6c-4b62-a5d1-a414932bb249",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "推免",
+            "推荐免试研究生"
+          ],
+          "canonicalName": "保研",
+          "status": "active",
+          "topicId": "6941a994-b0d3-43e7-8784-efa6b5ce4acc"
+        },
+        "risk": "STANDARD",
+        "topicId": "6941a994-b0d3-43e7-8784-efa6b5ce4acc",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "IELTS"
+          ],
+          "canonicalName": "雅思",
+          "status": "active",
+          "topicId": "6a61b741-047d-4759-9006-21e338af3968"
+        },
+        "risk": "STANDARD",
+        "topicId": "6a61b741-047d-4759-9006-21e338af3968",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Tennis"
+          ],
+          "canonicalName": "网球",
+          "status": "active",
+          "topicId": "6caa8fe4-c74b-4a6c-8848-32121b7ee107"
+        },
+        "risk": "STANDARD",
+        "topicId": "6caa8fe4-c74b-4a6c-8848-32121b7ee107",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Coffee Brewing"
+          ],
+          "canonicalName": "咖啡冲煮",
+          "status": "active",
+          "topicId": "6f04b425-0938-4075-a755-514250b6e6c3"
+        },
+        "risk": "STANDARD",
+        "topicId": "6f04b425-0938-4075-a755-514250b6e6c3",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "留学专业选择"
+          ],
+          "canonicalName": "留学选专业",
+          "status": "active",
+          "topicId": "6fdada07-7715-4dab-b2b8-0fb576a789e5"
+        },
+        "risk": "STANDARD",
+        "topicId": "6fdada07-7715-4dab-b2b8-0fb576a789e5",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Car Rental",
+            "汽车租赁"
+          ],
+          "canonicalName": "租车",
+          "status": "active",
+          "topicId": "7a34b27b-1210-428d-a459-586f72f2dac7"
+        },
+        "risk": "STANDARD",
+        "topicId": "7a34b27b-1210-428d-a459-586f72f2dac7",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "海外交换"
+          ],
+          "canonicalName": "交换学习",
+          "status": "active",
+          "topicId": "816ecf8e-9aa0-4282-9059-a6b9737e195c"
+        },
+        "risk": "STANDARD",
+        "topicId": "816ecf8e-9aa0-4282-9059-a6b9737e195c",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "自助游"
+          ],
+          "canonicalName": "自由行",
+          "status": "active",
+          "topicId": "82dacded-8d84-4b31-a355-7d9700407bec"
+        },
+        "risk": "STANDARD",
+        "topicId": "82dacded-8d84-4b31-a355-7d9700407bec",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Offer比较",
+            "工作Offer选择"
+          ],
+          "canonicalName": "Offer选择",
+          "status": "active",
+          "topicId": "84c46802-50fd-4820-8e84-770375101db6"
+        },
+        "risk": "STANDARD",
+        "topicId": "84c46802-50fd-4820-8e84-770375101db6",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "驾照考试",
+            "驾驶证考试"
+          ],
+          "canonicalName": "考驾照",
+          "status": "active",
+          "topicId": "860ce3af-477e-4485-8632-334e044b080f"
+        },
+        "risk": "STANDARD",
+        "topicId": "860ce3af-477e-4485-8632-334e044b080f",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "国外求职",
+            "海外找工作"
+          ],
+          "canonicalName": "海外求职",
+          "status": "active",
+          "topicId": "8a0dc20a-91ff-4bbb-a365-ee642bc96722"
+        },
+        "risk": "STANDARD",
+        "topicId": "8a0dc20a-91ff-4bbb-a365-ee642bc96722",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "GRE"
+          ],
+          "canonicalName": "GRE考试",
+          "status": "active",
+          "topicId": "8ee888ca-68ab-49cf-ba03-17f115a56827"
+        },
+        "risk": "STANDARD",
+        "topicId": "8ee888ca-68ab-49cf-ba03-17f115a56827",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Cycling",
+            "自行车骑行"
+          ],
+          "canonicalName": "骑行",
+          "status": "active",
+          "topicId": "915f3866-8764-4293-8043-1fb4456ccc85"
+        },
+        "risk": "STANDARD",
+        "topicId": "915f3866-8764-4293-8043-1fb4456ccc85",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "带娃经验",
+            "育儿"
+          ],
+          "canonicalName": "育儿经验",
+          "status": "active",
+          "topicId": "96d5c49a-11a3-4bb0-90d8-508a756126d6"
+        },
+        "risk": "STANDARD",
+        "topicId": "96d5c49a-11a3-4bb0-90d8-508a756126d6",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "互联网找工作",
+            "互联网行业求职"
+          ],
+          "canonicalName": "互联网求职",
+          "status": "active",
+          "topicId": "9800cbf9-9f31-4a25-896e-17b4a0d901b9"
+        },
+        "risk": "STANDARD",
+        "topicId": "9800cbf9-9f31-4a25-896e-17b4a0d901b9",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Drawing",
+            "画画"
+          ],
+          "canonicalName": "绘画",
+          "status": "active",
+          "topicId": "980c7f8f-2470-4106-b44d-d13f3ae6ea36"
+        },
+        "risk": "STANDARD",
+        "topicId": "980c7f8f-2470-4106-b44d-d13f3ae6ea36",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Diving"
+          ],
+          "canonicalName": "潜水",
+          "status": "active",
+          "topicId": "9adedce4-a2ad-4e1a-9b76-ba227eec57dc"
+        },
+        "risk": "STANDARD",
+        "topicId": "9adedce4-a2ad-4e1a-9b76-ba227eec57dc",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "家装",
+            "房屋装修"
+          ],
+          "canonicalName": "装修",
+          "status": "active",
+          "topicId": "9d8ca39d-d2e5-4e87-86aa-6da291113ef0"
+        },
+        "risk": "STANDARD",
+        "topicId": "9d8ca39d-d2e5-4e87-86aa-6da291113ef0",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "毕业第一份工作",
+            "首份工作"
+          ],
+          "canonicalName": "第一份工作",
+          "status": "active",
+          "topicId": "9dad2111-2d5f-4d1b-8214-4fb28ebd6fe3"
+        },
+        "risk": "STANDARD",
+        "topicId": "9dad2111-2d5f-4d1b-8214-4fb28ebd6fe3",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "海外大学转学",
+            "留学转学"
+          ],
+          "canonicalName": "海外转学",
+          "status": "active",
+          "topicId": "a37a0438-7f25-44c4-b7f1-21567be9f19d"
+        },
+        "risk": "STANDARD",
+        "topicId": "a37a0438-7f25-44c4-b7f1-21567be9f19d",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Hiking"
+          ],
+          "canonicalName": "徒步",
+          "status": "active",
+          "topicId": "ab042b90-c68f-41dc-95cc-e0cfc0a318c2"
+        },
+        "risk": "STANDARD",
+        "topicId": "ab042b90-c68f-41dc-95cc-e0cfc0a318c2",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "薪酬谈判",
+            "谈薪"
+          ],
+          "canonicalName": "薪资谈判",
+          "status": "active",
+          "topicId": "b493498f-546c-4e17-9eed-43222a8a4e6c"
+        },
+        "risk": "STANDARD",
+        "topicId": "b493498f-546c-4e17-9eed-43222a8a4e6c",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Baking"
+          ],
+          "canonicalName": "烘焙",
+          "status": "active",
+          "topicId": "b58eabaf-41da-41d1-a0f0-056043c38cfe"
+        },
+        "risk": "STANDARD",
+        "topicId": "b58eabaf-41da-41d1-a0f0-056043c38cfe",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [],
+          "canonicalName": "大厂求职",
+          "status": "active",
+          "topicId": "ba997da7-ec22-4c7a-a6df-0a66c2a9bfde"
+        },
+        "risk": "STANDARD",
+        "topicId": "ba997da7-ec22-4c7a-a6df-0a66c2a9bfde",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [],
+          "canonicalName": "搬家",
+          "status": "active",
+          "topicId": "bbc6699a-3392-4d07-8715-a52551c7bf56"
+        },
+        "risk": "STANDARD",
+        "topicId": "bbc6699a-3392-4d07-8715-a52551c7bf56",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "留学学校选择",
+            "留学择校"
+          ],
+          "canonicalName": "留学选校",
+          "status": "active",
+          "topicId": "be28a512-2132-4117-b801-803394ceb83e"
+        },
+        "risk": "STANDARD",
+        "topicId": "be28a512-2132-4117-b801-803394ceb83e",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "学习编程",
+            "学编程"
+          ],
+          "canonicalName": "编程学习",
+          "status": "active",
+          "topicId": "c8ae264d-31fc-4667-abc4-43df37e57609"
+        },
+        "risk": "STANDARD",
+        "topicId": "c8ae264d-31fc-4667-abc4-43df37e57609",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "购房"
+          ],
+          "canonicalName": "买房",
+          "status": "active",
+          "topicId": "cbb90fab-fcd6-42e8-ab34-0341bd77cfce"
+        },
+        "risk": "STANDARD",
+        "topicId": "cbb90fab-fcd6-42e8-ab34-0341bd77cfce",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Swimming"
+          ],
+          "canonicalName": "游泳",
+          "status": "active",
+          "topicId": "cc7c4241-c0ff-4a56-8f9f-8dce0013e85d"
+        },
+        "risk": "STANDARD",
+        "topicId": "cc7c4241-c0ff-4a56-8f9f-8dce0013e85d",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "职业转型",
+            "跨行业转行"
+          ],
+          "canonicalName": "转行",
+          "status": "active",
+          "topicId": "d1fbb58c-6b96-4f34-bbad-45d4a5d810f2"
+        },
+        "risk": "STANDARD",
+        "topicId": "d1fbb58c-6b96-4f34-bbad-45d4a5d810f2",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [],
+          "canonicalName": "实习",
+          "status": "active",
+          "topicId": "d3fe9e73-a420-4758-975a-e2536093a343"
+        },
+        "risk": "STANDARD",
+        "topicId": "d3fe9e73-a420-4758-975a-e2536093a343",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "城市迁居",
+            "异地搬家"
+          ],
+          "canonicalName": "搬到新城市",
+          "status": "active",
+          "topicId": "d461cf10-c472-4da4-9662-8a1df6026749"
+        },
+        "risk": "STANDARD",
+        "topicId": "d461cf10-c472-4da4-9662-8a1df6026749",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Photography",
+            "拍照"
+          ],
+          "canonicalName": "摄影",
+          "status": "active",
+          "topicId": "d7e4410b-ebc5-4971-9b22-04db5ea046f2"
+        },
+        "risk": "STANDARD",
+        "topicId": "d7e4410b-ebc5-4971-9b22-04db5ea046f2",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "跨专业留学申请"
+          ],
+          "canonicalName": "跨专业申请",
+          "status": "active",
+          "topicId": "d95ee4a2-8688-4cf5-8eec-88bfdca203b6"
+        },
+        "risk": "STANDARD",
+        "topicId": "d95ee4a2-8688-4cf5-8eec-88bfdca203b6",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Research Experience",
+            "科研项目经历"
+          ],
+          "canonicalName": "科研经历",
+          "status": "active",
+          "topicId": "db58677f-35a6-480b-b11d-9f0261f9081f"
+        },
+        "risk": "STANDARD",
+        "topicId": "db58677f-35a6-480b-b11d-9f0261f9081f",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "职业方向选择"
+          ],
+          "canonicalName": "职业选择",
+          "status": "active",
+          "topicId": "dc8195a9-4adb-4709-9bb0-f88a6861bb02"
+        },
+        "risk": "STANDARD",
+        "topicId": "dc8195a9-4adb-4709-9bb0-f88a6861bb02",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "买车"
+          ],
+          "canonicalName": "购车",
+          "status": "active",
+          "topicId": "e1648a87-86e8-4f48-8dac-5a95e16a647d"
+        },
+        "risk": "STANDARD",
+        "topicId": "e1648a87-86e8-4f48-8dac-5a95e16a647d",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "本科留学申请",
+            "海外本科留学"
+          ],
+          "canonicalName": "海外本科申请",
+          "status": "active",
+          "topicId": "e3282e2a-faa2-4cac-880f-c7dc2b921c55"
+        },
+        "risk": "STANDARD",
+        "topicId": "e3282e2a-faa2-4cac-880f-c7dc2b921c55",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "校园招聘"
+          ],
+          "canonicalName": "校招",
+          "status": "active",
+          "topicId": "e6430144-9519-4d56-b39a-752a813f0cf7"
+        },
+        "risk": "STANDARD",
+        "topicId": "e6430144-9519-4d56-b39a-752a813f0cf7",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "保险赔付",
+            "理赔申请"
+          ],
+          "canonicalName": "保险理赔",
+          "status": "active",
+          "topicId": "e75d8410-74c1-468c-a948-dae65c6b116d"
+        },
+        "risk": "STANDARD",
+        "topicId": "e75d8410-74c1-468c-a948-dae65c6b116d",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "TOEFL"
+          ],
+          "canonicalName": "托福",
+          "status": "active",
+          "topicId": "e90f5031-eff6-45e5-88a0-aab3f19107cf"
+        },
+        "risk": "STANDARD",
+        "topicId": "e90f5031-eff6-45e5-88a0-aab3f19107cf",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "租房退房",
+            "退租"
+          ],
+          "canonicalName": "租房退租",
+          "status": "active",
+          "topicId": "ea0e5dfb-439f-4216-ac70-0c7c1de5939f"
+        },
+        "risk": "STANDARD",
+        "topicId": "ea0e5dfb-439f-4216-ac70-0c7c1de5939f",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "Video Editing",
+            "剪视频"
+          ],
+          "canonicalName": "视频剪辑",
+          "status": "active",
+          "topicId": "f11a72b3-8053-49f0-b77a-edd3daeefddc"
+        },
+        "risk": "STANDARD",
+        "topicId": "f11a72b3-8053-49f0-b77a-edd3daeefddc",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "美国硕士",
+            "美研"
+          ],
+          "canonicalName": "美国研究生",
+          "status": "active",
+          "topicId": "f37d0823-6e81-4981-9e7b-84eb8012081a"
+        },
+        "risk": "STANDARD",
+        "topicId": "f37d0823-6e81-4981-9e7b-84eb8012081a",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [],
+          "canonicalName": "考研",
+          "status": "active",
+          "topicId": "f394f6ab-6839-46cc-8dcb-2014fbf23f49"
+        },
+        "risk": "STANDARD",
+        "topicId": "f394f6ab-6839-46cc-8dcb-2014fbf23f49",
+        "type": "CREATE_TOPIC"
+      },
+      {
+        "action": "NONE",
+        "explicitFutureApprovalRequired": true,
+        "governanceSensitive": false,
+        "payload": {
+          "aliases": [
+            "公务员考试",
+            "公考"
+          ],
+          "canonicalName": "考公",
+          "status": "active",
+          "topicId": "fd5eada0-492f-44b1-b5a5-86459309cbdd"
+        },
+        "risk": "STANDARD",
+        "topicId": "fd5eada0-492f-44b1-b5a5-86459309cbdd",
+        "type": "CREATE_TOPIC"
+      }
+    ],
+    "planHash": "9319fcf1ae9c7641927760f3a679cd5df74c9a5ab944460fa33dec350ed84cc2",
+    "productionStateHash": "e21ac78d863a8f7854377c04fb28c5d1a6fc624439d4c78728b914e99a76e7c5",
+    "schemaVersion": 1
+  },
+  "projectRef": "fslpvtlavhrnxsygkpvi",
+  "projectStatus": "ACTIVE_HEALTHY",
+  "source": "read-only-snapshot-replay-not-live",
+  "validation": {
+    "aliasCount": 113,
+    "collisionCount": 0,
+    "normalizedTermCount": 192,
+    "topicCount": 79
+  }
+}

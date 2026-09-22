@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { normalizeCanonicalTopicTermV1 as normalize } from "./canonical-topic-normalization-v1";
 import { CANONICAL_TOPIC_STATUS_V1_TARGET } from "../../shared-types/src/discovery-v1";
 import type { CanonicalTopicV1, ExperienceTopicsV1 } from "../../shared-types/src/canonical-topic-v1";
 import { parseCanonicalQuestionDetailV1, questionTopicIdsInput, questionTopicIdsOutput, QUESTION_ANSWER_V1_RPCS } from "./question-answer-v1";
@@ -29,8 +30,6 @@ export const CANONICAL_TOPIC_V1_STATE = {
 const uuid = z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
 const ids = questionTopicIdsInput;
 const orderedIds = questionTopicIdsOutput;
-const normalize = (value: string) => value.replace(/[\t\n\v\f\r ]+/g, " ").replace(/^ | $/g, "")
-  .replace(/[A-Z]/g, (letter) => letter.toLowerCase());
 const term = z.string().refine((value) => normalize(value).length > 0);
 export const canonicalTopicV1Schema = z.object({
   topicId: uuid, canonicalName: term, aliases: z.array(term), status: z.enum(CANONICAL_TOPIC_STATUS_V1_TARGET),
