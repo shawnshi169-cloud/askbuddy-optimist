@@ -12,6 +12,7 @@ export async function withTopicLocalContract(check) {
       "packages/shared-types/src/discovery-v1.ts", "packages/shared-api/src/question-answer-v1.ts",
       "packages/shared-api/src/canonical-topic-v1-local.ts",
       "packages/shared-api/src/canonical-topic-v1.ts",
+      "packages/shared-api/src/canonical-topic-normalization-v1.ts",
       "packages/shared-api/src/rpc-catalog.ts", "packages/shared-api/src/rpc-whitelist.ts",
       "packages/shared-api/src/product-blueprint-v1.ts",
     ]) {

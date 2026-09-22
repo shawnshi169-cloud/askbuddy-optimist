@@ -1,0 +1,506 @@
+[
+  {
+    "canonicalName": "留学申请",
+    "aliases": [
+      "出国留学申请",
+      "海外留学申请"
+    ]
+  },
+  {
+    "canonicalName": "海外本科申请",
+    "aliases": [
+      "本科留学申请",
+      "海外本科留学"
+    ]
+  },
+  {
+    "canonicalName": "海外研究生申请",
+    "aliases": [
+      "研究生留学申请"
+    ]
+  },
+  {
+    "canonicalName": "美国研究生",
+    "aliases": [
+      "美国硕士",
+      "美研"
+    ]
+  },
+  {
+    "canonicalName": "英国研究生",
+    "aliases": [
+      "英国硕士",
+      "英研"
+    ]
+  },
+  {
+    "canonicalName": "跨专业申请",
+    "aliases": [
+      "跨专业留学申请"
+    ]
+  },
+  {
+    "canonicalName": "留学选校",
+    "aliases": [
+      "留学学校选择",
+      "留学择校"
+    ]
+  },
+  {
+    "canonicalName": "留学选专业",
+    "aliases": [
+      "留学专业选择"
+    ]
+  },
+  {
+    "canonicalName": "海外转学",
+    "aliases": [
+      "海外大学转学",
+      "留学转学"
+    ]
+  },
+  {
+    "canonicalName": "交换学习",
+    "aliases": [
+      "海外交换"
+    ]
+  },
+  {
+    "canonicalName": "奖学金申请",
+    "aliases": [
+      "申请奖学金"
+    ]
+  },
+  {
+    "canonicalName": "留学文书",
+    "aliases": [
+      "留学申请文书"
+    ]
+  },
+  {
+    "canonicalName": "留学面试",
+    "aliases": [
+      "留学申请面试"
+    ]
+  },
+  {
+    "canonicalName": "雅思",
+    "aliases": [
+      "IELTS"
+    ]
+  },
+  {
+    "canonicalName": "托福",
+    "aliases": [
+      "TOEFL"
+    ]
+  },
+  {
+    "canonicalName": "GRE考试",
+    "aliases": [
+      "GRE"
+    ]
+  },
+  {
+    "canonicalName": "考研",
+    "aliases": []
+  },
+  {
+    "canonicalName": "保研",
+    "aliases": [
+      "推免",
+      "推荐免试研究生"
+    ]
+  },
+  {
+    "canonicalName": "科研经历",
+    "aliases": [
+      "Research Experience",
+      "科研项目经历"
+    ]
+  },
+  {
+    "canonicalName": "学术论文发表",
+    "aliases": [
+      "发学术论文"
+    ]
+  },
+  {
+    "canonicalName": "校招",
+    "aliases": [
+      "校园招聘"
+    ]
+  },
+  {
+    "canonicalName": "社招",
+    "aliases": [
+      "社会招聘"
+    ]
+  },
+  {
+    "canonicalName": "实习",
+    "aliases": []
+  },
+  {
+    "canonicalName": "第一份工作",
+    "aliases": [
+      "毕业第一份工作",
+      "首份工作"
+    ]
+  },
+  {
+    "canonicalName": "职业选择",
+    "aliases": [
+      "职业方向选择"
+    ]
+  },
+  {
+    "canonicalName": "转行",
+    "aliases": [
+      "职业转型",
+      "跨行业转行"
+    ]
+  },
+  {
+    "canonicalName": "跳槽",
+    "aliases": [
+      "换工作"
+    ]
+  },
+  {
+    "canonicalName": "简历",
+    "aliases": [
+      "Resume",
+      "求职简历"
+    ]
+  },
+  {
+    "canonicalName": "面试",
+    "aliases": [
+      "工作面试",
+      "求职面试"
+    ]
+  },
+  {
+    "canonicalName": "Offer选择",
+    "aliases": [
+      "Offer比较",
+      "工作Offer选择"
+    ]
+  },
+  {
+    "canonicalName": "薪资谈判",
+    "aliases": [
+      "薪酬谈判",
+      "谈薪"
+    ]
+  },
+  {
+    "canonicalName": "职级晋升",
+    "aliases": [
+      "升职",
+      "晋升"
+    ]
+  },
+  {
+    "canonicalName": "离职",
+    "aliases": [
+      "离职决定",
+      "辞职"
+    ]
+  },
+  {
+    "canonicalName": "海外求职",
+    "aliases": [
+      "国外求职",
+      "海外找工作"
+    ]
+  },
+  {
+    "canonicalName": "考公",
+    "aliases": [
+      "公务员考试",
+      "公考"
+    ]
+  },
+  {
+    "canonicalName": "大厂求职",
+    "aliases": []
+  },
+  {
+    "canonicalName": "产品经理",
+    "aliases": [
+      "Product Manager"
+    ]
+  },
+  {
+    "canonicalName": "管理咨询",
+    "aliases": [
+      "Management Consulting"
+    ]
+  },
+  {
+    "canonicalName": "互联网求职",
+    "aliases": [
+      "互联网找工作",
+      "互联网行业求职"
+    ]
+  },
+  {
+    "canonicalName": "初创公司工作",
+    "aliases": [
+      "Startup工作",
+      "创业公司工作"
+    ]
+  },
+  {
+    "canonicalName": "租房",
+    "aliases": [
+      "租房子"
+    ]
+  },
+  {
+    "canonicalName": "租房退租",
+    "aliases": [
+      "租房退房",
+      "退租"
+    ]
+  },
+  {
+    "canonicalName": "买房",
+    "aliases": [
+      "购房"
+    ]
+  },
+  {
+    "canonicalName": "装修",
+    "aliases": [
+      "家装",
+      "房屋装修"
+    ]
+  },
+  {
+    "canonicalName": "搬家",
+    "aliases": []
+  },
+  {
+    "canonicalName": "购车",
+    "aliases": [
+      "买车"
+    ]
+  },
+  {
+    "canonicalName": "二手车买卖",
+    "aliases": [
+      "二手车交易"
+    ]
+  },
+  {
+    "canonicalName": "租车",
+    "aliases": [
+      "Car Rental",
+      "汽车租赁"
+    ]
+  },
+  {
+    "canonicalName": "考驾照",
+    "aliases": [
+      "驾照考试",
+      "驾驶证考试"
+    ]
+  },
+  {
+    "canonicalName": "旅行规划",
+    "aliases": [
+      "旅游行程规划"
+    ]
+  },
+  {
+    "canonicalName": "自由行",
+    "aliases": [
+      "自助游"
+    ]
+  },
+  {
+    "canonicalName": "签证办理",
+    "aliases": [
+      "办签证",
+      "签证申请"
+    ]
+  },
+  {
+    "canonicalName": "海外生活",
+    "aliases": [
+      "国外生活",
+      "海外居住"
+    ]
+  },
+  {
+    "canonicalName": "搬到新城市",
+    "aliases": [
+      "城市迁居",
+      "异地搬家"
+    ]
+  },
+  {
+    "canonicalName": "婚礼筹备",
+    "aliases": [
+      "备婚"
+    ]
+  },
+  {
+    "canonicalName": "育儿经验",
+    "aliases": [
+      "带娃经验",
+      "育儿"
+    ]
+  },
+  {
+    "canonicalName": "养猫",
+    "aliases": [
+      "养猫经验",
+      "猫咪饲养"
+    ]
+  },
+  {
+    "canonicalName": "养狗",
+    "aliases": [
+      "养狗经验",
+      "狗狗饲养"
+    ]
+  },
+  {
+    "canonicalName": "二手交易",
+    "aliases": [
+      "二手买卖",
+      "闲置交易"
+    ]
+  },
+  {
+    "canonicalName": "保险理赔",
+    "aliases": [
+      "保险赔付",
+      "理赔申请"
+    ]
+  },
+  {
+    "canonicalName": "摄影",
+    "aliases": [
+      "Photography",
+      "拍照"
+    ]
+  },
+  {
+    "canonicalName": "视频剪辑",
+    "aliases": [
+      "Video Editing",
+      "剪视频"
+    ]
+  },
+  {
+    "canonicalName": "跑步",
+    "aliases": [
+      "Running"
+    ]
+  },
+  {
+    "canonicalName": "健身",
+    "aliases": [
+      "Fitness",
+      "健身训练"
+    ]
+  },
+  {
+    "canonicalName": "游泳",
+    "aliases": [
+      "Swimming"
+    ]
+  },
+  {
+    "canonicalName": "滑雪",
+    "aliases": [
+      "Skiing"
+    ]
+  },
+  {
+    "canonicalName": "羽毛球",
+    "aliases": [
+      "Badminton"
+    ]
+  },
+  {
+    "canonicalName": "网球",
+    "aliases": [
+      "Tennis"
+    ]
+  },
+  {
+    "canonicalName": "篮球",
+    "aliases": [
+      "Basketball"
+    ]
+  },
+  {
+    "canonicalName": "徒步",
+    "aliases": [
+      "Hiking"
+    ]
+  },
+  {
+    "canonicalName": "露营",
+    "aliases": [
+      "Camping"
+    ]
+  },
+  {
+    "canonicalName": "骑行",
+    "aliases": [
+      "Cycling",
+      "自行车骑行"
+    ]
+  },
+  {
+    "canonicalName": "潜水",
+    "aliases": [
+      "Diving"
+    ]
+  },
+  {
+    "canonicalName": "吉他",
+    "aliases": [
+      "Guitar"
+    ]
+  },
+  {
+    "canonicalName": "钢琴",
+    "aliases": [
+      "Piano"
+    ]
+  },
+  {
+    "canonicalName": "绘画",
+    "aliases": [
+      "Drawing",
+      "画画"
+    ]
+  },
+  {
+    "canonicalName": "烘焙",
+    "aliases": [
+      "Baking"
+    ]
+  },
+  {
+    "canonicalName": "咖啡冲煮",
+    "aliases": [
+      "Coffee Brewing"
+    ]
+  },
+  {
+    "canonicalName": "编程学习",
+    "aliases": [
+      "学习编程",
+      "学编程"
+    ]
+  }
+]
