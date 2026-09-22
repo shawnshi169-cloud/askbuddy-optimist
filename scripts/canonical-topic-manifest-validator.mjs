@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { pathToFileURL } from "node:url";
 import { normalizeTerm } from "./lib/topic-normalization.mjs";
 
@@ -21,12 +22,14 @@ export function requireTerm(value, label) {
   return normalizeTerm(value);
 }
 
-// Structural validation supports future governed desired-state previews, not automatic authorization.
-// Core v1 entry-point validation additionally locks the initial 79 active Topics.
+// Schema v1 is independent of any curated manifest's identity, size or approved content.
 export function validateManifestShape(manifest) {
   exactKeys(manifest, ["schemaVersion", "manifestId", "topics"], "manifest");
   requireCondition(manifest.schemaVersion === 1, "manifest: schemaVersion must be 1");
-  requireCondition(manifest.manifestId === "core-v1", "manifest: manifestId must be core-v1");
+  requireCondition(typeof manifest.manifestId === "string"
+    && manifest.manifestId.trim() === manifest.manifestId
+    && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(manifest.manifestId),
+  "manifest: manifestId must be a non-empty lowercase ASCII kebab identifier");
   requireCondition(Array.isArray(manifest.topics), "manifest: topics must be array");
   const ids = new Set();
   const terms = new Map();
@@ -43,7 +46,6 @@ export function validateManifestShape(manifest) {
     let previousAlias = null;
     for (const [index, term] of [topic.canonicalName, ...topic.aliases].entries()) {
       const normalized = requireTerm(term, "topic");
-      requireCondition(normalized !== "人像摄影", "topic: deferred term forbidden");
       requireCondition(!terms.has(normalized), `manifest term collision: ${normalized}`);
       terms.set(normalized, topic.topicId);
       if (index > 0) {
@@ -57,8 +59,16 @@ export function validateManifestShape(manifest) {
 
 export function validateCoreV1Manifest(manifest) {
   const result = validateManifestShape(manifest);
+  requireCondition(manifest.manifestId === "core-v1", "core-v1: manifestId must be core-v1");
   requireCondition(result.topicCount === 79, "core-v1: exactly 79 Topics required");
   requireCondition(manifest.topics.every((topic) => topic.status === "active"), "core-v1: initial status must be active");
+  requireCondition(manifest.topics.every((topic) => [topic.canonicalName, ...topic.aliases]
+    .every((term) => normalizeTerm(term) !== "人像摄影")), "core-v1: deferred term forbidden");
+  // Bind exact approved names, aliases, identities and order independently of object-key order.
+  const content = manifest.topics.map(({ topicId, canonicalName, aliases, status }) => [topicId, canonicalName, aliases, status]);
+  requireCondition(createHash("sha256").update(JSON.stringify(content)).digest("hex")
+    === "00c967ca204c51fe3a9104af959d9cee422e4d7861f40b30bea69d7078395a35",
+  "core-v1: approved content/UUID freeze mismatch");
   return result;
 }
 

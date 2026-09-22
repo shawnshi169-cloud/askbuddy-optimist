@@ -42,6 +42,36 @@ check("79 exact approved names/aliases, fixed once-only v4 identities, no extra 
   for (const omitted of ["人像摄影", "PM", "手冲咖啡", "旅行攻略", "海外硕士申请", "Personal Statement", "学校面试", "路跑", "自驾租车"]) assert.ok(!all.includes(omitted));
 });
 
+check("schema v1 accepts future manifest IDs, sizes and statuses without Core v1 authorization", () => {
+  // Test-only copies of existing Core identities; no future content or UUID is generated.
+  const future = changed((m) => { m.manifestId = "core-v2"; });
+  assert.equal(validateManifestShape(future).topicCount, 79);
+  assert.throws(() => validateCoreV1Manifest(future), /manifestId must be core-v1/);
+  const plan = planManifest(future, empty);
+  assert.equal(plan.manifestId, "core-v2");
+  assert.equal(plan.counts.CREATE_TOPIC, 79);
+  assert.equal(plan.applyAuthorized, false);
+  const subset = { ...future, topics: [{ ...future.topics[0], status: "deprecated" }] };
+  assert.equal(validateManifestShape(subset).topicCount, 1);
+  assert.equal(validateManifestShape({ ...future, topics: [] }).topicCount, 0);
+  for (const manifestId of ["", " ", " core-v2", "core-v2\n", "Core-V2", "core/v2", "core--v2", 42, null]) {
+    assert.throws(() => validateManifestShape({ ...future, manifestId }), /manifestId/);
+  }
+});
+
+check("Core v1 validator itself rejects exact-content and identity drift", () => {
+  expectInvalid((m) => { m.topics[0].canonicalName += " changed"; }, /freeze mismatch/);
+  expectInvalid((m) => { m.topics.find((t) => t.aliases.length > 0).aliases.pop(); }, /freeze mismatch/);
+  expectInvalid((m) => {
+    m.topics[0].aliases.push("Unapproved alias"); m.topics[0].aliases.sort(byAlias);
+  }, /freeze mismatch/);
+  expectInvalid((m) => {
+    // Swap existing IDs instead of generating any new one; sorted valid UUIDs must still fail.
+    [m.topics[0].topicId, m.topics[1].topicId] = [m.topics[1].topicId, m.topics[0].topicId];
+    m.topics.sort((a, b) => compareText(a.topicId, b.topicId));
+  }, /freeze mismatch/);
+});
+
 check("strict invalid fields, values, counts and stable ordering fail closed", () => {
   expectInvalid((m) => { m.extra = true; }, /fields/);
   expectInvalid((m) => { delete m.manifestId; }, /fields/);
@@ -162,6 +192,15 @@ check("deprecated -> active is HIGH risk with explicit future approval", () => {
 });
 
 const unmanaged = { topicId: "f0000000-0000-4000-8000-000000000001", canonicalName: "Existing governed root", aliases: [], status: "active" };
+check("generic schema/planner have no 79-Topic namespace ceiling", () => {
+  // Reuse the existing unmanaged unit fixture; this is not a new governed Topic or manifest file.
+  const future = { ...manifest, manifestId: "core-v2", topics: [...manifest.topics, unmanaged]
+    .sort((a, b) => compareText(a.topicId, b.topicId)) };
+  assert.equal(validateManifestShape(future).topicCount, 80);
+  assert.equal(planManifest(future, empty).counts.CREATE_TOPIC, 80);
+  assert.throws(() => validateCoreV1Manifest(future), /manifestId must be core-v1/);
+  assert.throws(() => validateCoreV1Manifest({ ...future, manifestId: "core-v1" }), /exactly 79/);
+});
 check("Production-only unmanaged -> NONE, never omission-based deprecation", () => {
   const before = snapshotFor({ topics: [...manifest.topics, unmanaged] });
   const plan = planManifest(manifest, before);
