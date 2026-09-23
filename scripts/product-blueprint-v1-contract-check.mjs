@@ -142,7 +142,11 @@ try {
   assert.match(domainMap.canonicalTopic.currentRuntime, /EC-3B2B Production.*deployed and rollback-smoke verified/);
   assert.match(domainMap.canonicalTopic.currentRuntime, /clientConsumable=true.*Shared Core Question contract accepts 0\.\.N canonical Topic IDs/);
   assert.match(domainMap.canonicalTopic.currentRuntime, /EC-3B2C HTTP consumer gate verified/);
-  assert.match(domainMap.canonicalTopic.currentRuntime, /current Question UI still sends \[\].*Topic picker not implemented.*Experience Topic UI not connected.*taxonomy not seeded/);
+  assert.match(domainMap.canonicalTopic.currentRuntime, /current Question UI still sends \[\].*Topic picker not implemented.*Experience Topic UI not connected/);
+  assert.match(domainMap.canonicalTopic.currentRuntime, /Core Seed v1 Production applied and exact-state verified: 79 active Core Seed Topics, 113 aliases, 192 resolver terms/);
+  assert.match(domainMap.canonicalTopic.currentRuntime, /namespace remains extensible beyond Core Seed v1/);
+  assert.doesNotMatch(domainMap.canonicalTopic.currentRuntime, /taxonomy not seeded/);
+  assert.match(api.PRODUCT_BLUEPRINT_V1_RPC_POLICY.resolve_canonical_topic_v1.replacement, /Core Seed v1 Production applied and resolver verified; no resolver UI or Discovery runtime unlock/);
   assert.match(domainMap.canonicalTopic.currentRuntime, /Home\/Search\/Matching\/Editorial runtime not implemented/);
   for (const name of ["resolve_canonical_topic_v1", "get_experience_topics_v1", "set_experience_topics_v1"]) {
     assert.equal(api.PRODUCT_BLUEPRINT_V1_RPC_POLICY[name].use, "canonical-blueprint");

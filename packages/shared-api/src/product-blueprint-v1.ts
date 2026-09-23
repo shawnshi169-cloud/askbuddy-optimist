@@ -79,7 +79,7 @@ export const PRODUCT_BLUEPRINT_V1_DOMAIN_MAP = {
     domain: "canonical-topic",
     target: "platform-governed cross-module semantic entity shared by Question/Experience/Editorial/Search/Matching; not a hashtag or Article",
     contractStatus: "approved-frozen",
-    currentRuntime: "EC-3B1 approved/merged; EC-3B2B Production Canonical Topic storage, exact resolver and typed Question/Experience associations deployed and rollback-smoke verified; backend accepts real active Topic IDs with historical deprecated retention; EC-3B2C HTTP consumer gate verified, clientConsumable=true, Shared Core Question contract accepts 0..N canonical Topic IDs; current Question UI still sends [], Topic picker not implemented, Experience Topic UI not connected, taxonomy not seeded; Home/Search/Matching/Editorial runtime not implemented; evidence: docs/ec3b2c-canonical-topic-consumer-gate.md",
+    currentRuntime: "EC-3B1 approved/merged; EC-3B2B Production Canonical Topic storage, exact resolver and typed Question/Experience associations deployed and rollback-smoke verified; backend accepts real active Topic IDs with historical deprecated retention; EC-3B2C HTTP consumer gate verified, clientConsumable=true, Shared Core Question contract accepts 0..N canonical Topic IDs; EC-3C0D Core Seed v1 Production applied and exact-state verified: 79 active Core Seed Topics, 113 aliases, 192 resolver terms; namespace remains extensible beyond Core Seed v1; current Question UI still sends [], Topic picker not implemented, Experience Topic UI not connected; Home/Search/Matching/Editorial runtime not implemented; evidence: docs/ec3b2c-canonical-topic-consumer-gate.md and docs/ec3c0d-canonical-topic-core-seed-production-apply.md",
     runtimeStatus: "production-ready",
     newCodePolicy: "may-use-deployed-contract",
     phase: "EC-3",
@@ -260,7 +260,7 @@ export const PRODUCT_BLUEPRINT_V1_RPC_POLICY = {
   resolve_canonical_topic_v1: {
     use: "canonical-blueprint",
     newBlueprintCodeMayDepend: true,
-    replacement: "EC-3B2C consumer gate verified; public minimum access preserves caller identity; contract only, no resolver UI or Topic seed",
+    replacement: "EC-3B2C consumer gate verified; public minimum access preserves caller identity; EC-3C0D Core Seed v1 Production applied and resolver verified; no resolver UI or Discovery runtime unlock",
   },
   get_experience_topics_v1: {
     use: "canonical-blueprint",

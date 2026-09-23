@@ -477,7 +477,7 @@ export const RPC_CATALOG = {
   resolve_canonical_topic_v1: rpc<CanonicalTopicV1RpcParams<"resolve_canonical_topic_v1">, CanonicalTopicV1RpcResult<"resolve_canonical_topic_v1">>()(
     "resolve_canonical_topic_v1", "canonical", "anon", "topics",
     "CanonicalTopicV1RpcParams<resolve_canonical_topic_v1>", "CanonicalTopicV1RpcResult<resolve_canonical_topic_v1>", "aligned",
-    "Production backend verified; EC-3B2C HTTP resolver consumer gate verified. Public minimum access preserves authenticated caller identity; no Topic UI or seed.",
+    "Production backend verified; EC-3B2C HTTP resolver consumer gate verified. Public minimum access preserves authenticated caller identity; EC-3C0D Core Seed v1 applied and resolver verified; no Topic UI or Discovery runtime unlock.",
   ),
   get_experience_topics_v1: rpc<CanonicalTopicV1RpcParams<"get_experience_topics_v1">, CanonicalTopicV1RpcResult<"get_experience_topics_v1">>()(
     "get_experience_topics_v1", "canonical", "anon", "topics",
