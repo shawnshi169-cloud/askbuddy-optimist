@@ -116,8 +116,16 @@ await withTopicLocalContract(async (_local, _question, backend) => {
   backend.CANONICAL_TOPIC_V1_RPCS.resolve_canonical_topic_v1.parseResult({ topic }, { p_term: " \tResearch\nExperience " });
   assert.throws(() => backend.canonicalTopicV1Schema.parse({ ...topic, aliases: ["research\tEXPERIENCE"] }));
   assert.equal(backend.CANONICAL_TOPIC_V1_STATE.clientConsumable, true);
+  const state = backend.CANONICAL_TOPIC_V1_STATE;
+  assert.equal(state.reviewStatus, "EC-3C0D-core-seed-production-verified");
+  assert.equal(state.coreSeedManifestId, manifest.manifestId);
+  assert.equal(state.coreSeedManifestSha256, sha(bytes));
+  assert.equal(state.coreSeedStatus, "production-applied-verified");
+  assert.equal(state.coreSeedTopicCount, manifest.topics.length);
+  assert.equal(state.coreSeedAliasCount, manifest.topics.reduce((count, topic) => count + topic.aliases.length, 0));
+  assert.equal(state.coreSeedResolverTermCount, matching.terms.length);
 });
-console.log("PASS: normalization is shared with current app-facing Topic parser");
+console.log("PASS: shared normalization and Core Seed-only Production truth; no global namespace cap");
 
 check("empty Production -> 79 CREATE with complete alias payload", () => {
   const plan = planManifest(manifest, empty);
@@ -135,6 +143,11 @@ check("empty Production -> 79 CREATE with complete alias payload", () => {
 check("exact same state -> NO_CHANGE, zero effective changes", () => {
   const plan = planManifest(manifest, matching);
   assert.equal(plan.counts.NO_CHANGE, 79); assert.equal(plan.effectiveChangeCount, 0);
+  assert.equal(plan.productionStateHash, "71d9f4eb3638e6e7c2058b7176d8892fa4b1484741c78df583e4e7c957b60971");
+  assert.equal(plan.planHash, "0246219678657738b473d5ce15cf81c41e3439a4d85e6bdf0b8fcd823b88aa2d");
+  assert.equal(plan.highRiskCount + plan.governanceSensitiveCount + plan.collisionCount, 0);
+  const evidence = read("docs/ec3c0d-canonical-topic-core-seed-production-apply.md");
+  for (const hash of [sha(bytes), plan.productionStateHash, plan.planHash]) assert.ok(evidence.includes(hash));
 });
 
 check("rename same ID, no automatic old-name alias, trigger retention explicitly removed", () => {

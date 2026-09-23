@@ -4,12 +4,18 @@ import { CANONICAL_TOPIC_STATUS_V1_TARGET } from "../../shared-types/src/discove
 import type { CanonicalTopicV1, ExperienceTopicsV1 } from "../../shared-types/src/canonical-topic-v1";
 import { parseCanonicalQuestionDetailV1, questionTopicIdsInput, questionTopicIdsOutput, QUESTION_ANSWER_V1_RPCS } from "./question-answer-v1";
 
-/** B2C HTTP consumer gate verified. Contract authorization does not implement Topic UI or seed facts. */
+/** B2C consumer gate and C0D Core Seed verified. Seed counts are not a namespace limit or UI capability. */
 export const CANONICAL_TOPIC_V1_STATE = {
   contractStatus: "approved-frozen",
   localRuntimeImplemented: true,
   migrationPrepared: true,
-  reviewStatus: "B2C-consumer-closeout-pending-review",
+  reviewStatus: "EC-3C0D-core-seed-production-verified",
+  coreSeedManifestId: "core-v1",
+  coreSeedManifestSha256: "fe1591a81323092d745e08cd9fa024808033c5c95dcc0ca89bd41f8739deda6f",
+  coreSeedStatus: "production-applied-verified",
+  coreSeedTopicCount: 79,
+  coreSeedAliasCount: 113,
+  coreSeedResolverTermCount: 192,
   productionDeployed: true,
   productionGrantReview: "aligned",
   clientConsumable: true,

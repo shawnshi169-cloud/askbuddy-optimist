@@ -167,4 +167,4 @@ await withTopicLocalContract(async (api, production, backend, contracts) => {
   assert.equal(api.parseCanonicalTopicErrorV1Local({ code: "PT400", message: "TOPIC_INVALID_OR_INACTIVE" }), null);
 });
 await import("./canonical-topic-consumer-check.mjs");
-console.log("PASS: Canonical Topic B2C consumer contract verified; exact three RPCs authorized, no Topic UI or seed");
+console.log("PASS: Canonical Topic B2C consumer contract verified; exact three RPCs authorized, C0D Core Seed verified, no Topic UI");
