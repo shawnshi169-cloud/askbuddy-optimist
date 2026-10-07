@@ -163,7 +163,13 @@ try {
     domainMap.publicPersonIdentityAndRead.newCodePolicy,
     "may-use-deployed-contract",
   );
-  assert.match(domainMap.publicPersonIdentityAndRead.currentRuntime, /route is not wired/);
+  const publicPersonRuntime = domainMap.publicPersonIdentityAndRead.currentRuntime;
+  assert.match(publicPersonRuntime, /safe public projection deployed/);
+  assert.match(publicPersonRuntime, /owner-private profile contract and direct profiles privacy cutover Production deployed\/verified/);
+  assert.match(publicPersonRuntime, /\/person\/:userId Shared Core route is wired to canonical Public Person and public Experience reads/);
+  assert.match(publicPersonRuntime, /Production database-role \/ contract verification passed/);
+  assert.match(publicPersonRuntime, /authenticated HTTP owner-private transport not repeated/);
+  assert.doesNotMatch(publicPersonRuntime, /route is not wired/);
   assert.equal(domainMap.experience.runtimeStatus, "production-ready");
   assert.equal(domainMap.experience.newCodePolicy, "may-use-deployed-contract");
   assert.match(domainMap.experience.currentRuntime, /Shared Core UI is not wired/);
@@ -335,8 +341,16 @@ try {
     "capability:person-service-settings-v1",
   ]);
   assert.ok(page("skill-publish").currentWriteContracts.includes("table:skill_offers"));
-  assert.equal(page("public-person").implementationStatus, "blocked");
-  assert.deepEqual(page("public-person").currentReadContracts, []);
+  const publicPersonPage = page("public-person");
+  assert.equal(publicPersonPage.implementationStatus, "canonical");
+  assert.deepEqual(publicPersonPage.currentReadContracts, [
+    "rpc:get_public_person_profile_v1", "rpc:get_public_person_experiences_v1",
+  ]);
+  assert.deepEqual(publicPersonPage.currentWriteContracts, []);
+  assert.deepEqual(publicPersonPage.writeContracts, []);
+  assert.match(publicPersonPage.notes.join("\n"), /\/person\/:userId Shared Core route is wired/);
+  assert.match(publicPersonPage.notes.join("\n"), /no Chat, Booking, Payment or Service capability/);
+  assert.doesNotMatch(publicPersonPage.notes.join("\n"), /Core UI adoption is not yet implemented|remains a target read contract until/);
 
   const targetContracts = pageMap.flatMap((entry) => [
     ...entry.readContracts,

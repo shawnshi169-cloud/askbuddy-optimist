@@ -21,7 +21,7 @@ export const useUpdateProfile = () => {
     mutationFn: async (data: UpdateProfileData) => {
       if (!user) throw new Error('请先登录');
 
-      const updateData: Record<string, any> = { updated_at: new Date().toISOString() };
+      const updateData: UpdateProfileData = {};
       if (data.nickname !== undefined) updateData.nickname = data.nickname;
       if (data.bio !== undefined) updateData.bio = data.bio;
       if (data.avatar_url !== undefined) updateData.avatar_url = data.avatar_url;
@@ -32,7 +32,7 @@ export const useUpdateProfile = () => {
         .from('profiles')
         .update(updateData)
         .eq('user_id', user.id)
-        .select()
+        .select('user_id,nickname,avatar_url,cover_url,bio,city')
         .single();
 
       if (error) throw error;

@@ -71,6 +71,7 @@ export const CLIENT_RPC_WHITELIST = {
   upsert_search_history: RPC_CATALOG.upsert_search_history.qualifiedName,
   get_channel_feed: RPC_CATALOG.get_channel_feed.qualifiedName,
   get_public_person_profile_v1: RPC_CATALOG.get_public_person_profile_v1.qualifiedName,
+  get_my_private_profile_v1: RPC_CATALOG.get_my_private_profile_v1.qualifiedName,
   get_public_person_experiences_v1:
     RPC_CATALOG.get_public_person_experiences_v1.qualifiedName,
   get_my_person_experiences_v1: RPC_CATALOG.get_my_person_experiences_v1.qualifiedName,

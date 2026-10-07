@@ -2898,6 +2898,7 @@ export type Database = {
         Args: { p_limit?: number; p_offset?: number }
         Returns: Json
       }
+      get_my_private_profile_v1: { Args: never; Returns: Json }
       get_my_unread_message_count: { Args: never; Returns: number }
       get_my_unread_notification_count: { Args: never; Returns: number }
       get_nearby_experts: {

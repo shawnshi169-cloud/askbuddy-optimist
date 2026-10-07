@@ -294,9 +294,10 @@ check("review artifact matches exact manifest and recorded read-only snapshot", 
 
 check("C0C has no migration change, seed SQL, executable mutation path or runtime manifest import", () => {
   const git = (...args) => execFileSync("git", args, { encoding: "utf8" }).trim();
-  const baseline = "c0625b083decfa07437aabc351ba791593a8e56a";
-  assert.equal(git("diff", "--name-only", baseline, "--", "supabase/migrations"), "", "C0C migration freeze");
-  assert.equal(git("ls-files", "--others", "--exclude-standard", "--", "supabase/migrations"), "");
+  const c0cBaseline = "c0625b083decfa07437aabc351ba791593a8e56a";
+  const c0cReviewedHead = "55dc2df070c8f98d3a2f8798c28b6cbc46a5ee6d";
+  // This assertion preserves historical EC-3C0C provenance; it is not a repository-wide future migration ban.
+  assert.equal(git("diff", "--name-only", c0cBaseline, c0cReviewedHead, "--", "supabase/migrations"), "", "C0C historical migration freeze");
   const tooling = ["scripts/canonical-topic-manifest-validator.mjs", "scripts/canonical-topic-manifest-plan.mjs", "scripts/canonical-topic-manifest-preview.mjs", "scripts/lib/topic-normalization.mjs"];
   const allowedImports = new Set(["node:fs", "node:url", "node:crypto", "typescript", "./lib/topic-normalization.mjs", "./canonical-topic-manifest-validator.mjs", "./canonical-topic-manifest-plan.mjs"]);
   for (const path of tooling) {

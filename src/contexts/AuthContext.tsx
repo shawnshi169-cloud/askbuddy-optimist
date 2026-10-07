@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { parseGetMyPrivateProfileV1Result } from '../../packages/shared-api/src/private-profile-v1';
 
 interface Profile {
-  id: string;
   user_id: string;
   nickname: string | null;
   avatar_url: string | null;
@@ -44,13 +44,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchProfile = async (userId: string) => {
     try {
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('id,user_id,nickname,avatar_url,cover_url,bio,phone,city')
-        .eq('user_id', userId)
-        .single();
+      const { data, error: profileError } = await supabase.rpc('get_my_private_profile_v1');
 
-      if (profileError) throw profileError;
+      if (profileError) throw new Error('Owner profile unavailable');
+      const { profile: profileData } = parseGetMyPrivateProfileV1Result(data);
+      if (!profileData || profileData.userId !== userId) {
+        throw new Error('Owner profile unavailable');
+      }
 
       const { data: pointAccount, error: pointError } = await supabase
         .from('point_accounts')
@@ -63,7 +63,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       setProfile({
-        ...profileData,
+        user_id: profileData.userId,
+        nickname: profileData.nickname,
+        avatar_url: profileData.avatarUrl,
+        cover_url: profileData.coverUrl,
+        bio: profileData.bio,
+        phone: profileData.phone,
+        city: profileData.city,
         available_balance: Number(pointAccount?.available_balance ?? 0),
       });
     } catch (error) {
