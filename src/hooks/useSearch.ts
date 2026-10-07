@@ -195,66 +195,8 @@ export const useSearch = (query: string) => {
         throw rpcV2Result.error;
       }
 
-      const rpcLegacyResult = await supabase.rpc('search_app_content', {
-        p_query: query.trim(),
-        p_limit: 10,
-      });
-
-      if (!rpcLegacyResult.error) {
-        const payload = (rpcLegacyResult.data || {}) as {
-          questions?: SearchQuestion[];
-          users?: Array<{
-            id: string;
-            user_id: string;
-            nickname: string | null;
-            avatar_url: string | null;
-            bio: string | null;
-          }>;
-          topics?: Array<{
-            id: string;
-            title: string;
-            description: string | null;
-            discussions_count: number;
-            created_at?: string;
-          }>;
-        };
-
-        const experts = (payload.users || []).map((item) => ({
-          id: item.id,
-          user_id: item.user_id,
-          nickname: item.nickname,
-          avatar_url: item.avatar_url,
-          headline: null,
-          intro: item.bio,
-          verification_status: null,
-          follower_count: 0,
-          service_count: 0,
-        })) as SearchExpert[];
-
-        const posts = (payload.topics || []).map((item) => ({
-          id: item.id,
-          author_id: 'legacy-topic',
-          content: `${item.title}${item.description ? `：${item.description}` : ''}`,
-          created_at: item.created_at || new Date().toISOString(),
-          like_count: 0,
-          favorite_count: 0,
-          comment_count: item.discussions_count || 0,
-          author_nickname: '问问专题',
-          author_avatar: null,
-        })) as SearchPost[];
-
-        return {
-          questions: mergeUniqueById((payload.questions || []) as SearchQuestion[], demoMatchedQuestions),
-          experts: mergeUniqueById(experts, demoMatchedUsers),
-          skills: [],
-          posts: mergeUniqueById(posts, demoMatchedPosts),
-        };
-      }
-
-      if (!isMissingRpcError(rpcLegacyResult.error, 'search_app_content')) {
-        throw rpcLegacyResult.error;
-      }
-
+      // Non-production only: the obsolete RPC requires private profiles columns.
+      // Continue through the existing safe direct-table fallback instead.
       const searchTerm = `%${trimmedQuery}%`;
 
       const [questionsResult, expertsResult, skillsResult, postsResult] = await Promise.all([

@@ -13,6 +13,7 @@ import type {
   GetPublicPersonProfileV1Params,
   GetPublicPersonProfileV1Result,
 } from "./public-person-v1";
+import type { GetMyPrivateProfileV1Params, GetMyPrivateProfileV1Result } from "./private-profile-v1";
 import type {
   CreateExperienceClaimV1Params,
   CreateExperienceTransitionV1Params,
@@ -468,6 +469,7 @@ export const RPC_CATALOG = {
   search_app_content: rpc<SearchAppContentV2Params, JsonObject>()(
     "search_app_content", "deprecated", "anon", "search",
     "SearchAppContentV2Params", "LegacySearchResult", "aligned",
+    "Obsolete client path; no compatibility guarantee after profiles privacy cutover. Definition/grants unchanged; private profile columns are not reopened for it.",
   ),
   get_channel_feed: rpc<GetChannelFeedParams, ChannelFeedResult>()(
     "get_channel_feed", "canonical", "anon", "channels",
@@ -489,13 +491,18 @@ export const RPC_CATALOG = {
     "CanonicalTopicV1RpcParams<set_experience_topics_v1>", "CanonicalTopicV1RpcResult<set_experience_topics_v1>", "aligned",
     "Production owner-only backend verified; EC-3B2C authenticated HTTP empty replacement, nonempty invalid-Topic transport and cross-person denial verified. No Experience Topic UI.",
   ),
+  get_my_private_profile_v1: rpc<GetMyPrivateProfileV1Params, GetMyPrivateProfileV1Result>()(
+    "get_my_private_profile_v1", "canonical", "authenticated", "people",
+    "GetMyPrivateProfileV1Params", "GetMyPrivateProfileV1Result", "aligned",
+    "Production deployed; no arguments, auth.uid-only private projection. Narrow SECURITY DEFINER with empty search_path; no PUBLIC/anon EXECUTE. Role/rollback verified; authenticated HTTP transport not repeated without an isolated identity.",
+  ),
   get_public_person_profile_v1: rpc<
     GetPublicPersonProfileV1Params,
     GetPublicPersonProfileV1Result
   >()(
     "get_public_person_profile_v1", "canonical", "anon", "people",
     "GetPublicPersonProfileV1Params", "GetPublicPersonProfileV1Result", "aligned",
-    "Production uses the SECURITY INVOKER safe public projection with anon/authenticated/service_role EXECUTE; direct profiles Data API privacy remains a separate cutover.",
+    "Production SECURITY INVOKER public projection preserved; profiles column-level privacy/write-integrity cutover verified. Owner phone is available only through get_my_private_profile_v1, not direct Data API reads.",
   ),
   get_public_person_experiences_v1: rpc<
     GetPublicPersonExperiencesV1Params,

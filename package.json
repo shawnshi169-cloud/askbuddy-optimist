@@ -28,6 +28,8 @@
     "test:question-answer-v1:local": "node scripts/question-answer-v1-local-test.mjs --local",
     "test:product-blueprint-v1": "node scripts/product-blueprint-v1-contract-check.mjs",
     "test:public-person-contract": "node scripts/public-person-contract-check.mjs",
+    "test:profile-privacy": "node scripts/profile-privacy-check.mjs",
+    "test:profile-privacy:local": "node scripts/profile-privacy-local-check.mjs --local",
     "test:experience-v1": "node scripts/experience-v1-contract-check.mjs",
     "test:experience-ui-v1": "node scripts/ec1b-experience-ui-check.mjs",
     "test:backend-hardening": "node scripts/p1-4b-backend-hardening-check.mjs",

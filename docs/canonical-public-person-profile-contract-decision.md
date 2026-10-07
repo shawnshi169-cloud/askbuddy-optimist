@@ -9,7 +9,23 @@
 - 核心 Decision：review 通过
 - 本次 Amendment：撤回默认 `SECURITY DEFINER`，改为优先并最终采用 `SECURITY INVOKER`
 - Migration `20260901154746_canonical_public_person_profile_v1.sql`：已部署并验证
-- 旧 `profiles` Data API 隐私风险：`REMAINS`
+- 旧 `profiles` Data API phone 暴露及客户端系统字段写入风险：`CLOSED`（2026-10-07）
+
+## Privacy Cutover 当前收尾（2026-10-07）
+
+`20261007005206_public_person_privacy_cutover.sql` 已通过标准 linked migration 部署。
+anon/authenticated 不再拥有 table-wide SELECT/UPDATE；只保留九个公开安全读取列和
+五个 owner 编辑列。`get_my_private_profile_v1()` 无参数，仅由 `auth.uid()` 选择 owner，
+提供严格私有投影；Public Person 现有 INVOKER RPC 的定义和公开响应未改变。
+
+真实 anon HTTP、authenticated SQL role/rollback smoke 和数据完整快照检查通过。
+未新建账号；无安全隔离 authenticated HTTP 会话，因此没有重跑 authenticated HTTP、
+真实 signup 或 WeChat login。Security Advisor 102 → 103，新增一项预期的 owner-private
+DEFINER 执行提示，不能写成零新增 finding。详细权限、证据与验证边界见
+[Public Person Privacy Cutover](public-person-privacy-cutover.md)。
+
+旧内部 QA build 不是兼容目标；须 rebuild/reload，不能为它恢复宽泛权限。
+以下 2026-09-02 部署记录及第七/八节审计保留为当时历史，不代表当前 exposure。
 
 ## Production 部署验证（2026-09-02）
 
@@ -276,6 +292,9 @@ UI-1E V1 仅以 contribution count 和独立 empty state 开始，不把列表�
 
 ## 七、profiles Reader Inventory
 
+本节是 cutover 前的历史 inventory。当前 AuthContext 已切换 owner-private RPC，
+useUpdateProfile 已移除 updated_at 写入和全列 returning；安全批量公开读保留。
+
 ### Public profile readers
 
 | Consumer | 用途 | 当前字段 |
@@ -318,6 +337,9 @@ UI-1E V1 仅以 contribution count 和独立 empty state 开始，不把列表�
 `profiles.phone` 的 consumer。
 
 ## 八、Direct Profile Access Privacy Hardening Plan
+
+历史计划：本节 OPEN/remaining exposure 描述的是收口前状态。2026-10-07 已完成
+上述 Production cutover；当前状态以文档顶部和新 closeout evidence 为准。
 
 新增 safe RPC 不等于旧 `profiles` Data API 已安全。当前 remaining exposure 为：
 

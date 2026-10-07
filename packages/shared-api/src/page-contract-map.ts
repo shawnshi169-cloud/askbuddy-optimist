@@ -50,7 +50,7 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     writeContracts: ["capability:home-search-history-v1"],
     implementationStatus: "legacy",
     currentReadContracts: [
-      "rpc:search_app_content_v2", "rpc:search_app_content",
+      "rpc:search_app_content_v2",
       "table:questions", "table:experts", "table:skill_offers", "table:posts",
       "fixture:development-only",
     ],
@@ -60,6 +60,7 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
       "Target empty state has no fake/AI-generated result or fixture fallback; 去问一个问题 enters the central + Question flow, query is only a draft idea and cannot invent Context. 问问TA ends at /person/:userId, not EC-4 actions.",
       "Blueprint v1 Home Search target domains are all/person/question; current V2 expert/skill/post results are legacy compatibility.",
       "Production uses no fixture merge or read fallback, while real legacy reads remain capability-gated outside production.",
+      "If V2 is unavailable outside production, the existing direct-table fallback uses only user_id/nickname/avatar_url for profile enrichment. Obsolete search_app_content is no longer a client compatibility boundary.",
     ],
   },
   {
@@ -132,12 +133,13 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     ],
     implementationStatus: "legacy",
     currentReadContracts: [
-      "table:profiles", "table:point_accounts", "table:orders",
+      "rpc:get_my_private_profile_v1", "table:profiles", "table:point_accounts", "table:orders",
       "table:point_transactions", "table:earning_transactions", "fixture:development-only",
     ],
     currentWriteContracts: ["table:profiles", "table:user_settings"],
     notes: [
       "Point accounts and Pack06 orders are current legacy runtime only and cannot define Blueprint v1 Person Service.",
+      "Self profile uses the auth.uid-only private RPC; direct profiles reads are public-safe enrichment only. Owner edits are limited to nickname/avatar_url/cover_url/bio/city, not phone, identity, timestamps or system flags.",
       "Community presentation data is development-only; production shows unavailable until a real Community contract exists.",
     ],
   },
@@ -148,13 +150,15 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
       "rpc:get_public_person_profile_v1", "rpc:get_public_person_experiences_v1",
     ],
     writeContracts: [],
-    implementationStatus: "blocked",
-    currentReadContracts: [],
+    implementationStatus: "canonical",
+    currentReadContracts: [
+      "rpc:get_public_person_profile_v1", "rpc:get_public_person_experiences_v1",
+    ],
     currentWriteContracts: [],
     notes: [
-      "Architecture A owns PublicPersonId and the deployed safe profile projection; Core UI adoption is not yet implemented.",
-      "The EC-1A public Experience RPC is deployed and remote-smoke verified, but it remains a target read contract until the Shared Core consumer is wired.",
-      "Contribution lists and direct profiles Data API privacy hardening are separate contracts.",
+      "The /person/:userId Shared Core route is wired to canonical Public Person and public Experience reads; PublicPersonId remains auth.users.id = profiles.user_id.",
+      "This page is read-only; no Chat, Booking, Payment or Service capability is authorized by this consumer truth.",
+      "Contribution lists remain a separate contract. Direct profiles privacy/write-integrity hardening is deployed; public projection semantics are unchanged.",
     ],
   },
   {

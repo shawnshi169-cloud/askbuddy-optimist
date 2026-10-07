@@ -36,7 +36,7 @@ export const PRODUCT_BLUEPRINT_V1_DOMAIN_MAP = {
   publicPersonIdentityAndRead: {
     domain: "public-person-identity-and-read",
     target: "PublicPersonId + get_public_person_profile_v1",
-    currentRuntime: "safe public projection deployed; /person consumer route is not wired",
+    currentRuntime: "safe public projection deployed; owner-private profile contract and direct profiles privacy cutover Production deployed/verified; /person/:userId Shared Core route is wired to canonical Public Person and public Experience reads; Production database-role / contract verification passed; authenticated HTTP owner-private transport not repeated; no general profile visibility-settings contract or Person UI redesign",
     runtimeStatus: "production-ready",
     newCodePolicy: "may-use-deployed-contract",
     phase: "EC-1",
@@ -276,6 +276,11 @@ export const PRODUCT_BLUEPRINT_V1_RPC_POLICY = {
     use: "canonical-blueprint",
     newBlueprintCodeMayDepend: true,
     replacement: "none",
+  },
+  get_my_private_profile_v1: {
+    use: "canonical-blueprint",
+    newBlueprintCodeMayDepend: true,
+    replacement: "none; Production owner-private projection deployed and role/rollback verified; auth.uid only, no target user parameter",
   },
   get_public_person_experiences_v1: {
     use: "canonical-blueprint",
