@@ -172,7 +172,18 @@ try {
   assert.doesNotMatch(publicPersonRuntime, /route is not wired/);
   assert.equal(domainMap.experience.runtimeStatus, "production-ready");
   assert.equal(domainMap.experience.newCodePolicy, "may-use-deployed-contract");
-  assert.match(domainMap.experience.currentRuntime, /Shared Core UI is not wired/);
+  assert.equal(domainMap.experience.phase, "EC-1");
+  const experienceRuntime = domainMap.experience.currentRuntime;
+  assert.match(experienceRuntime, /Production storage and 13 Experience RPCs deployed and remote-smoke verified/);
+  assert.match(experienceRuntime, /Shared Core canonical Experience consumers are wired/);
+  assert.match(experienceRuntime, /\/person\/:userId reads canonical Public Person and public Experiences/);
+  assert.match(experienceRuntime, /\/profile\/experiences supports owner create\/edit, public\/private visibility, reorder and delete/);
+  assert.match(experienceRuntime, /editor routes \/experience\/new and \/experience\/:experienceId\/edit are wired/);
+  assert.match(experienceRuntime, /Transition management and public rendering are wired/);
+  assert.match(experienceRuntime, /Person\/Experience UX Closure V1 merged via PR #55/);
+  assert.match(experienceRuntime, /Experience Topic UI NOT connected/);
+  assert.match(experienceRuntime, /no WeChat Experience implementation or real native iOS\/Android QA completion claimed/);
+  assert.doesNotMatch(experienceRuntime, /Shared Core UI is not wired/);
   assert.equal(domainMap.transition.runtimeStatus, "production-ready");
   assert.equal(domainMap.transition.newCodePolicy, "may-use-deployed-contract");
   for (const key of [
