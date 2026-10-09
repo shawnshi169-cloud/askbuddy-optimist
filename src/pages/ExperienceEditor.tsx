@@ -30,6 +30,8 @@ import {
   useUpdatePersonExperience,
 } from '@/features/experience';
 import { useToast } from '@/hooks/use-toast';
+import { useEditorExit } from '@/hooks/useEditorExit';
+import { persistExperienceDraft } from '@/components/experience/experienceDraft';
 import { navigateBackOr, navigateToAuthWithReturn } from '@/utils/navigation';
 import {
   EXPERIENCE_KIND_V1,
@@ -127,7 +129,8 @@ const ExperienceEditorForm: React.FC = () => {
   const [form, setForm] = useState<ExperienceFormState>(EMPTY_FORM);
   const [hydrated, setHydrated] = useState(false);
   const [transitionDirty, setTransitionDirty] = useState(false);
-  const [showLeaveDialog, setShowLeaveDialog] = useState(false);
+  const [transitionBusy, setTransitionBusy] = useState(false);
+  const [draftSaved, setDraftSaved] = useState(false);
   const initialSnapshotRef = useRef(serializeForm(EMPTY_FORM));
   const draftKey = user ? `person-experience-draft-v1:${user.id}` : null;
   const existingExperience = experiencesQuery.data?.experiences.find(
@@ -155,9 +158,7 @@ const ExperienceEditorForm: React.FC = () => {
       try {
         const raw = localStorage.getItem(draftKey);
         if (raw) next = parseDraft(JSON.parse(raw)) || EMPTY_FORM;
-      } catch {
-        localStorage.removeItem(draftKey);
-      }
+      } catch { /* Unavailable storage does not prevent editing. */ }
     }
     setForm(next);
     initialSnapshotRef.current = serializeForm(EMPTY_FORM);
@@ -166,34 +167,30 @@ const ExperienceEditorForm: React.FC = () => {
 
   const formDirty = hydrated && serializeForm(form) !== initialSnapshotRef.current;
   const hasUnsavedChanges = formDirty || transitionDirty;
-  const hasDraftContent = Boolean(form.title.trim() || form.description.trim() || form.canShareText.trim());
+  const hasDraftContent = serializeForm(form) !== serializeForm(EMPTY_FORM);
+  const saving = createMutation.isPending || updateMutation.isPending;
+  const saveDraftNow = () => {
+    if (isEdit || !draftKey || !hydrated) return;
+    try {
+      setDraftSaved(persistExperienceDraft(localStorage, draftKey, hasDraftContent ? serializeForm(form) : null));
+    } catch { setDraftSaved(false); }
+  };
+  const exit = useEditorExit({ dirty: hasUnsavedChanges, busy: saving || transitionBusy, prepareExit: saveDraftNow });
 
   useEffect(() => {
     if (!hydrated || isEdit || !draftKey) return;
-    const timer = window.setTimeout(() => {
-      if (hasDraftContent) localStorage.setItem(draftKey, JSON.stringify(form));
-      else localStorage.removeItem(draftKey);
-    }, 400);
-    return () => window.clearTimeout(timer);
+    try {
+      setDraftSaved(persistExperienceDraft(localStorage, draftKey, hasDraftContent ? serializeForm(form) : null));
+    } catch { setDraftSaved(false); }
   }, [draftKey, form, hasDraftContent, hydrated, isEdit]);
 
   useEffect(() => {
     if (typeof document === 'undefined') return;
-    document.body.dataset.swipeBackDisabled = hasUnsavedChanges ? 'true' : 'false';
+    document.body.dataset.swipeBackDisabled = hasUnsavedChanges || saving || transitionBusy ? 'true' : 'false';
     return () => {
       document.body.dataset.swipeBackDisabled = 'false';
     };
-  }, [hasUnsavedChanges]);
-
-  useEffect(() => {
-    if (!hasUnsavedChanges) return;
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = '';
-    };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [hasUnsavedChanges]);
+  }, [hasUnsavedChanges, saving, transitionBusy]);
 
   const validationError = useMemo(() => {
     if (!form.title.trim() || !form.description.trim() || !form.kind) return '请填写标题、经历描述并选择经历类型';
@@ -214,9 +211,13 @@ const ExperienceEditorForm: React.FC = () => {
   }, [form]);
 
   const navigateAway = () => navigateBackOr(navigate, '/profile/experiences', { location: routerLocation });
-  const handleBack = () => hasUnsavedChanges ? setShowLeaveDialog(true) : navigateAway();
+  const handleBack = () => exit.requestExit(navigateAway);
 
   const handleSubmit = async () => {
+    if (transitionDirty || transitionBusy || saving) {
+      toast({ title: '请先保存或取消当前转变编辑，并等待保存完成。' });
+      return;
+    }
     if (validationError || !form.kind || !user) {
       if (validationError) toast({ variant: 'destructive', title: validationError });
       return;
@@ -266,8 +267,13 @@ const ExperienceEditorForm: React.FC = () => {
           p_visibility: form.visibility,
           p_sort_order: null,
         });
-        if (draftKey) localStorage.removeItem(draftKey);
-        toast({ title: '经历已保存' });
+        let draftCleared = false;
+        try {
+          draftCleared = !draftKey || persistExperienceDraft(localStorage, draftKey, null);
+        } catch { /* The Experience has already been persisted by the RPC. */ }
+        toast({ title: '经历已保存', description: !draftCleared
+          ? '本机草稿未能清除，请勿重复提交；已保存的经历可在列表查看。'
+          : form.visibility === 'public' ? '可在“查看我的公开主页”中确认展示结果。' : '仅自己可见，不会展示在公开主页。' });
       }
       document.body.dataset.swipeBackDisabled = 'false';
       navigate('/profile/experiences', { replace: true });
@@ -323,13 +329,12 @@ const ExperienceEditorForm: React.FC = () => {
     );
   }
 
-  const saving = createMutation.isPending || updateMutation.isPending;
-
   return (
     <div className="min-h-[100dvh] bg-app-page">
       <SubPageHeader title={isEdit ? '编辑经历' : '添加一段经历'} variant="content" onBack={handleBack} />
 
-      <main className="space-y-5 px-4 py-5">
+      <main className="px-4 py-5">
+        <fieldset disabled={saving || transitionBusy} className="min-w-0 space-y-5">
         {!isEdit ? (
           <p className="text-[15px] leading-6 text-slate-600">
             你有什么经历过、做过或者比较熟悉的事情，愿意和别人分享？
@@ -370,17 +375,17 @@ const ExperienceEditorForm: React.FC = () => {
             <p className="mt-1 text-xs leading-5 text-slate-500">选择经历类型，时间和地点可以稍后补充。</p>
           </div>
           <div className="space-y-2 py-4">
-            <Label htmlFor="experience-kind">经历类型</Label>
+            <Label htmlFor="experience-kind">经历类型（必填）</Label>
             <Select
               value={form.kind || undefined}
               onValueChange={(value: ExperienceKindV1) => setForm((current) => ({ ...current, kind: value }))}
             >
-              <SelectTrigger id="experience-kind" className="min-h-11 rounded-xl">
+              <SelectTrigger id="experience-kind" aria-required="true" className="min-h-11 rounded-xl">
                 <SelectValue placeholder="请选择" />
               </SelectTrigger>
               <SelectContent>
                 {EXPERIENCE_KIND_V1.map((kind) => (
-                  <SelectItem key={kind} value={kind}>{EXPERIENCE_KIND_LABELS[kind]}</SelectItem>
+                  <SelectItem key={kind} value={kind} className="min-h-11">{EXPERIENCE_KIND_LABELS[kind]}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -482,23 +487,27 @@ const ExperienceEditorForm: React.FC = () => {
             personId={existingExperience.personId}
             transitions={existingExperience.transitions}
             onDirtyChange={setTransitionDirty}
+            onBusyChange={setTransitionBusy}
           />
         ) : null}
+        </fieldset>
       </main>
 
-      <div className="sticky bottom-0 z-20 border-t border-app-border-subtle bg-white/95 px-4 pt-3 backdrop-blur-sm" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}>
-        <Button className="app-btn-primary min-h-12 w-full" onClick={() => void handleSubmit()} disabled={saving || Boolean(validationError)}>
+      <div className="sticky bottom-0 z-20 border-t border-app-border-subtle bg-white/95 px-4 pt-3 backdrop-blur-sm" style={{ paddingBottom: 'calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom)) + 0.75rem)' }}>
+        {transitionDirty || transitionBusy ? <p role="status" className="mb-2 text-sm text-slate-600">请先保存或取消当前转变编辑，并等待保存完成。</p> : validationError ? <p className="mb-2 text-xs text-slate-500">{validationError}</p> : null}
+        {!isEdit && hasDraftContent && !draftSaved ? <p role="alert" className="mb-2 text-xs text-rose-700">本地草稿暂时无法保存，离开会丢失当前填写内容。</p> : null}
+        <Button className="app-btn-primary min-h-12 w-full" onClick={() => void handleSubmit()} disabled={saving || transitionDirty || transitionBusy || Boolean(validationError)}>
           {saving ? <Loader2 aria-hidden className="mr-2 h-4 w-4 animate-spin" /> : null}
           {saving ? '正在保存…' : isEdit ? '保存修改' : '保存经历'}
         </Button>
       </div>
 
-      <AlertDialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
+      <AlertDialog open={exit.open} onOpenChange={exit.setOpen}>
         <AlertDialogContent className="w-[88%] max-w-sm rounded-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle>离开当前编辑？</AlertDialogTitle>
             <AlertDialogDescription>
-              {isEdit ? '尚未保存的修改会丢失。' : '当前内容已保存在本地草稿中，下次可以继续填写。'}
+              {isEdit ? '尚未保存的经历或转变修改会丢失。' : draftSaved ? '当前内容已保存在本地草稿中，下次可以继续填写。' : '本地草稿未能保存，离开会丢失当前填写内容。'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2 sm:gap-2">
@@ -506,9 +515,8 @@ const ExperienceEditorForm: React.FC = () => {
             <AlertDialogAction
               className="min-h-11 rounded-full bg-slate-800 text-white hover:bg-slate-900"
               onClick={() => {
-                setShowLeaveDialog(false);
                 document.body.dataset.swipeBackDisabled = 'false';
-                navigateAway();
+                exit.confirmExit();
               }}
             >
               离开

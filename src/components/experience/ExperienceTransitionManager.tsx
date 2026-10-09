@@ -27,6 +27,7 @@ interface ExperienceTransitionManagerProps {
   personId: string;
   transitions: ExperienceTransitionV1[];
   onDirtyChange?: (dirty: boolean) => void;
+  onBusyChange?: (busy: boolean) => void;
 }
 
 interface TransitionFormState {
@@ -54,6 +55,7 @@ const ExperienceTransitionManager: React.FC<ExperienceTransitionManagerProps> = 
   personId,
   transitions,
   onDirtyChange,
+  onBusyChange,
 }) => {
   const { toast } = useToast();
   const createMutation = useCreateExperienceTransition(personId);
@@ -72,6 +74,8 @@ const ExperienceTransitionManager: React.FC<ExperienceTransitionManagerProps> = 
     onDirtyChange?.(formDirty);
   }, [formDirty, onDirtyChange]);
 
+  useEffect(() => { onBusyChange?.(busy); }, [busy, onBusyChange]);
+
   const reset = () => {
     setForm(EMPTY_FORM);
     setIsEditing(false);
@@ -83,6 +87,7 @@ const ExperienceTransitionManager: React.FC<ExperienceTransitionManagerProps> = 
   };
 
   const beginEdit = (transition: ExperienceTransitionV1) => {
+    if (formDirty || busy) return;
     setForm({
       transitionId: transition.transitionId,
       fromLabel: transition.fromLabel,
@@ -197,7 +202,7 @@ const ExperienceTransitionManager: React.FC<ExperienceTransitionManagerProps> = 
                   className="flex h-11 w-11 shrink-0 items-center justify-center text-slate-500"
                   onClick={() => beginEdit(transition)}
                   aria-label="编辑这次转变"
-                  disabled={busy}
+                  disabled={busy || formDirty}
                 >
                   <Pencil aria-hidden size={17} />
                 </button>
@@ -206,7 +211,7 @@ const ExperienceTransitionManager: React.FC<ExperienceTransitionManagerProps> = 
                   className="flex h-11 w-11 shrink-0 items-center justify-center text-rose-500"
                   onClick={() => setPendingDeleteId(transition.transitionId)}
                   aria-label="删除这次转变"
-                  disabled={busy}
+                  disabled={busy || formDirty}
                 >
                   <Trash2 aria-hidden size={17} />
                 </button>

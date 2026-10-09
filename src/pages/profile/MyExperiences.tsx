@@ -112,6 +112,9 @@ const MyExperiencesContent: React.FC = () => {
         <p className="text-sm leading-6 text-slate-500">
           记录你经历过、做过或熟悉的事情。公开的经历会展示在你的个人主页。
         </p>
+        <Button variant="link" className="min-h-11 px-0 text-app-action" onClick={() => navigate(`/person/${user.id}`, { state: buildFromState(location) })}>
+          查看我的公开主页
+        </Button>
         {experiencesQuery.isSuccess && experiences.length > 1 ? (
           <div className="mt-3 flex items-center justify-between gap-3">
             <p className="text-xs text-slate-500">{reorderMode ? '使用上移、下移调整展示顺序' : '每一段经历，都可能帮到别人'}</p>

@@ -100,6 +100,7 @@ assert.equal(Object.hasOwn(states[2], "id"), false);
 
 let updatePayload;
 const { useUpdateProfile } = compile("src/hooks/useProfile.ts", {
+  "@/features/experience/experienceCache": compile("src/features/experience/experienceCache.ts"),
   "@tanstack/react-query": { useQueryClient: () => ({}), useMutation: (config) => config },
   "@/contexts/AuthContext": { useAuth: () => ({ user: { id: privateProfile.userId }, refreshProfile: async () => {} }) },
   "@/hooks/use-toast": { useToast: () => ({ toast: () => {} }) },
