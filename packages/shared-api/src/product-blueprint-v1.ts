@@ -44,7 +44,7 @@ export const PRODUCT_BLUEPRINT_V1_DOMAIN_MAP = {
   experience: {
     domain: "experience",
     target: "Person-owned experience records independent from verification and service",
-    currentRuntime: "Production storage and 13 Experience RPCs deployed and remote-smoke verified; Shared Core UI is not wired",
+    currentRuntime: "Production storage and 13 Experience RPCs deployed and remote-smoke verified; Shared Core canonical Experience consumers are wired: /person/:userId reads canonical Public Person and public Experiences; /profile/experiences supports owner create/edit, public/private visibility, reorder and delete; editor routes /experience/new and /experience/:experienceId/edit are wired; Transition management and public rendering are wired; Person/Experience UX Closure V1 merged via PR #55; Experience Topic UI NOT connected; no WeChat Experience implementation or real native iOS/Android QA completion claimed",
     runtimeStatus: "production-ready",
     newCodePolicy: "may-use-deployed-contract",
     phase: "EC-1",
