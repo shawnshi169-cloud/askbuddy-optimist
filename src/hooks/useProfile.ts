@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { personExperienceQueryKeys } from '@/features/experience/experienceCache';
 
 interface UpdateProfileData {
   nickname?: string;
@@ -38,15 +39,20 @@ export const useUpdateProfile = () => {
       if (error) throw error;
       return profile;
     },
-    onSuccess: async () => {
+    onSuccess: async (profile) => {
       await refreshProfile();
-      queryClient.invalidateQueries({ queryKey: ['profile'] });
+      await queryClient.invalidateQueries({
+        queryKey: personExperienceQueryKeys.publicProfile(profile.user_id),
+        exact: true,
+        refetchType: 'all',
+      });
+      await queryClient.invalidateQueries({ queryKey: ['profile'] });
       toast({ title: '保存成功', description: '个人资料已更新' });
     },
-    onError: (error: Error) => {
+    onError: () => {
       toast({ 
         title: '保存失败', 
-        description: error.message,
+        description: '资料暂时无法保存，填写的内容已保留，请稍后重试。',
         variant: 'destructive'
       });
     }
@@ -88,8 +94,8 @@ export const useUploadAvatar = () => {
       if (!user) throw new Error('请先登录');
       return uploadImage(user, file, 'avatar', 2 * 1024 * 1024);
     },
-    onError: (error: Error) => {
-      toast({ title: '上传失败', description: error.message, variant: 'destructive' });
+    onError: () => {
+      toast({ title: '上传失败', description: '请检查图片格式、大小或稍后重试。', variant: 'destructive' });
     }
   });
 };
@@ -104,8 +110,8 @@ export const useUploadCover = () => {
       if (!user) throw new Error('请先登录');
       return uploadImage(user, file, 'cover', 5 * 1024 * 1024);
     },
-    onError: (error: Error) => {
-      toast({ title: '上传失败', description: error.message, variant: 'destructive' });
+    onError: () => {
+      toast({ title: '上传失败', description: '请检查图片格式、大小或稍后重试。', variant: 'destructive' });
     }
   });
 };

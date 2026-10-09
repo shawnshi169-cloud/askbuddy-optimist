@@ -97,7 +97,7 @@ assert.equal((editor.match(/p_city_code: cityCodeForSubmit\(form\)/g) || []).len
 assert.doesNotMatch(card, /grid-cols-5/);
 assert.match(card, /ownerMode && reorderMode/);
 assert.match(card, /!reorderMode[\s\S]*<DropdownMenu>/);
-assert.match(card, /ownerMode \? '我可以分享' : '可以和TA聊'/);
+assert.match(card, /ownerMode \? '我可以分享' : 'TA愿意分享'/);
 assert.match(myExperiences, /reorderMode=\{reorderMode\}/);
 assert.match(myExperiences, /reorderMode \? '完成' : '调整顺序'/);
 assert.ok(card.indexOf('{experience.title}') < card.indexOf('EXPERIENCE_KIND_LABELS[experience.kind]'));

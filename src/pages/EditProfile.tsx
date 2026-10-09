@@ -1,748 +1,112 @@
-
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { 
-  Upload, 
-  User, 
-  Building, 
-  GraduationCap, 
-  Tag, 
-  Lock, 
-  Info,
-  Trash,
-  Plus,
-  X,
-  Save,
-  Edit,
-  Calendar,
-  Clock,
-  ChevronRight,
-  Loader2
-} from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { 
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter
-} from '@/components/ui/dialog';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useAuth } from '@/contexts/AuthContext';
-import { useUpdateProfile, useUploadAvatar } from '@/hooks/useProfile';
-import { useToast } from '@/hooks/use-toast';
+import { useUpdateProfile, useUploadAvatar, useUploadCover } from '@/hooks/useProfile';
+import { useEditorExit } from '@/hooks/useEditorExit';
 import SubPageHeader from '@/components/layout/SubPageHeader';
 import PageStateCard from '@/components/common/PageStateCard';
 import { navigateBackOr, navigateToAuthWithReturn } from '@/utils/navigation';
 
-const EditProfile = () => {
+const EditProfileForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, profile, loading: authLoading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const updateProfile = useUpdateProfile();
   const uploadAvatar = useUploadAvatar();
-  const { toast } = useToast();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const tempPreviewUrlRef = useRef<string | null>(null);
-
-  const [avatarType, setAvatarType] = useState('image'); // 'image', 'gif', 'video'
-  const [avatarPreview, setAvatarPreview] = useState('');
-  const [nameEdit, setNameEdit] = useState(false);
-  const [username, setUsername] = useState('');
-  const [bio, setBio] = useState('');
-  const [city, setCity] = useState('');
-  const [hasChanges, setHasChanges] = useState(false);
-  const [addEducationDialog, setAddEducationDialog] = useState(false);
-  const [addWorkDialog, setAddWorkDialog] = useState(false);
-  const [selectedTopics, setSelectedTopics] = useState([
-    '留学申请', '托福备考', '职业规划'
-  ]);
-  const [recommendedTopics, setRecommendedTopics] = useState([
-    '考研经验', '面试技巧', 'AI应用', '英语学习', '数据分析', '自媒体运营'
-  ]);
-
-  // Load profile data
-  useEffect(() => {
-    if (profile) {
-      setUsername(profile.nickname || '');
-      setBio(profile.bio || '');
-      setCity((profile as any).city || '');
-      setAvatarPreview(profile.avatar_url || '');
-    }
-  }, [profile]);
-
-  // Redirect if not logged in
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigateToAuthWithReturn(navigate, location);
-    }
-  }, [authLoading, user, navigate, location]);
-  
-  // Mock data
-  const educationList = [
-    { id: 1, school: '北京大学', degree: '硕士', graduationYear: '2022', verified: true }
-  ];
-  
-  const workList = [
-    { id: 1, company: '阿里巴巴', title: '产品经理', startDate: '2022-01', endDate: '至今', hidden: false }
-  ];
-  
-  const privacySettings = {
-    showEducation: true,
-    showWork: true,
-    showTopics: true,
-    allowFollowers: true
-  };
-
-  const addTopic = (topic: string) => {
-    if (!selectedTopics.includes(topic)) {
-      setSelectedTopics([...selectedTopics, topic]);
-      setRecommendedTopics(recommendedTopics.filter(t => t !== topic));
-    }
-  };
-
-  const removeTopic = (topic: string) => {
-    setSelectedTopics(selectedTopics.filter(t => t !== topic));
-    setRecommendedTopics([...recommendedTopics, topic]);
-  };
-
-  // Handle avatar file selection
-  const handleAvatarClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      // Show preview immediately
-      const previewUrl = URL.createObjectURL(file);
-      if (tempPreviewUrlRef.current) {
-        URL.revokeObjectURL(tempPreviewUrlRef.current);
-      }
-      tempPreviewUrlRef.current = previewUrl;
-      setAvatarPreview(previewUrl);
-
-      // Upload to storage
-      const publicUrl = await uploadAvatar.mutateAsync(file);
-      
-      // Update profile with new avatar URL
-      await updateProfile.mutateAsync({ avatar_url: publicUrl });
-      setAvatarPreview(publicUrl);
-      if (tempPreviewUrlRef.current) {
-        URL.revokeObjectURL(tempPreviewUrlRef.current);
-        tempPreviewUrlRef.current = null;
-      }
-      setHasChanges(false);
-    } catch (error) {
-      // Revert preview on error
-      if (tempPreviewUrlRef.current) {
-        URL.revokeObjectURL(tempPreviewUrlRef.current);
-        tempPreviewUrlRef.current = null;
-      }
-      setAvatarPreview(profile?.avatar_url || '');
-    }
-  };
+  const uploadCover = useUploadCover();
+  const [form, setForm] = useState({ nickname: '', bio: '', city: '', avatar_url: '', cover_url: '' });
+  const [hydrated, setHydrated] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const initial = useRef('');
+  const busy = updateProfile.isPending || uploadAvatar.isPending || uploadCover.isPending;
+  const dirty = hydrated && JSON.stringify(form) !== initial.current;
+  const exit = useEditorExit({ dirty, busy });
+  const back = () => navigateBackOr(navigate, '/profile', { location });
 
   useEffect(() => {
-    return () => {
-      if (tempPreviewUrlRef.current) {
-        URL.revokeObjectURL(tempPreviewUrlRef.current);
-        tempPreviewUrlRef.current = null;
-      }
+    if (!loading && !user) navigateToAuthWithReturn(navigate, location);
+  }, [loading, user, navigate, location]);
+
+  useEffect(() => {
+    if (!profile || hydrated) return;
+    const next = {
+      nickname: profile.nickname || '', bio: profile.bio || '', city: profile.city || '',
+      avatar_url: profile.avatar_url || '', cover_url: profile.cover_url || '',
     };
-  }, []);
+    setForm(next);
+    initial.current = JSON.stringify(next);
+    setHydrated(true);
+  }, [profile, hydrated]);
 
-  // Handle save
   const handleSave = async () => {
+    if (busy) return;
+    setError(null);
     try {
-      const updateData: Record<string, any> = {
-        nickname: username,
-        bio: bio,
-        city: city,
-      };
-      await updateProfile.mutateAsync(updateData);
-      setHasChanges(false);
-      setNameEdit(false);
-    } catch (error) {
-      // Error handled in mutation
+      await updateProfile.mutateAsync(form);
+      initial.current = JSON.stringify(form);
+      back();
+    } catch {
+      setError('资料暂时无法保存，填写的内容已保留，请稍后重试。');
     }
   };
 
-  // Handle complete button
-  const handleComplete = async () => {
-    if (hasChanges) {
-      await handleSave();
+  const upload = async (file: File | undefined, kind: 'avatar_url' | 'cover_url') => {
+    if (!file || busy) return;
+    setError(null);
+    try {
+      const url = await (kind === 'avatar_url' ? uploadAvatar : uploadCover).mutateAsync(file);
+      setForm((current) => ({ ...current, [kind]: url }));
+    } catch {
+      setError('图片暂时无法上传，请检查格式、大小或稍后重试。');
     }
-    navigateBackOr(navigate, '/profile', { location });
   };
 
-  // Track changes
-  const handleNicknameChange = (value: string) => {
-    setUsername(value);
-    setHasChanges(value !== (profile?.nickname || ''));
-  };
-
-  const handleBioChange = (value: string) => {
-    setBio(value);
-    setHasChanges(value !== (profile?.bio || ''));
-  };
-
-  if (authLoading) {
-    return (
-      <div className="min-h-[100dvh] bg-muted pb-6">
-        <SubPageHeader title="编辑个人资料" />
-        <div className="px-4 py-4">
-          <PageStateCard variant="loading" title="正在加载资料…" compact />
-        </div>
-      </div>
-    );
-  }
+  if (loading || !user) return <div className="min-h-[100dvh] bg-app-page"><SubPageHeader title="编辑个人资料" variant="content" /><PageStateCard variant="loading" title="正在加载资料…" compact /></div>;
+  if (!profile) return <div className="min-h-[100dvh] bg-app-page"><SubPageHeader title="编辑个人资料" variant="content" /><PageStateCard variant="error" title="个人资料暂时无法加载" description="请返回后重试。" compact /></div>;
 
   return (
-    <div className="pb-6 min-h-[100dvh] bg-muted">
-      {/* Hidden file input */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        accept="image/jpeg,image/png,image/gif,image/webp"
-        className="hidden"
-      />
-
-      <SubPageHeader
-        title="编辑个人资料"
-        onBack={() => navigateBackOr(navigate, '/profile', { location })}
-        right={
-          <Button 
-            onClick={handleComplete}
-            disabled={updateProfile.isPending || uploadAvatar.isPending}
-            className="rounded-full bg-white/20 text-white shadow-none hover:bg-white/25"
-          >
-            {(updateProfile.isPending || uploadAvatar.isPending) ? (
-              <Loader2 className="mr-1 h-4 w-4 animate-spin" />
-            ) : null}
-            完成
-          </Button>
-        }
-      />
-
-      {/* Basic Information */}
-      <div className="p-4 space-y-4">
-        <Card className="border-none shadow-sm">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold flex items-center">
-                <User size={18} className="text-app-blue mr-2" />
-                基础信息
-              </h2>
-            </div>
-            
-            <div className="space-y-4">
-              {/* Avatar Section */}
-              <div className="flex items-center justify-between">
-                <Label className="font-medium">头像</Label>
-                <div className="flex items-center">
-                  <Avatar className="h-16 w-16 mr-3">
-                    <AvatarImage src={avatarPreview} alt="Profile" />
-                    <AvatarFallback>{username.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col">
-                    <div className="flex space-x-2 mb-1">
-                      <Badge 
-                        variant={avatarType === 'image' ? 'default' : 'outline'}
-                        className="cursor-pointer"
-                        onClick={() => setAvatarType('image')}
-                      >
-                        静态图片
-                      </Badge>
-                      <Badge 
-                        variant={avatarType === 'gif' ? 'default' : 'outline'}
-                        className="cursor-pointer"
-                        onClick={() => setAvatarType('gif')}
-                      >
-                        GIF
-                      </Badge>
-                      <Badge 
-                        variant={avatarType === 'video' ? 'default' : 'outline'}
-                        className="cursor-pointer"
-                        onClick={() => setAvatarType('video')}
-                      >
-                        短视频
-                      </Badge>
-                    </div>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="text-xs"
-                      onClick={handleAvatarClick}
-                      disabled={uploadAvatar.isPending}
-                    >
-                      {uploadAvatar.isPending ? (
-                        <Loader2 size={12} className="mr-1 animate-spin" />
-                      ) : (
-                        <Upload size={12} className="mr-1" />
-                      )}
-                      上传
-                    </Button>
-                  </div>
-                </div>
-              </div>
-              
-              <Separator />
-              
-              {/* Username Section */}
-              <div className="flex items-center justify-between">
-                <Label className="font-medium">昵称</Label>
-                <div className="flex items-center space-x-2">
-                  {nameEdit ? (
-                    <div className="w-52">
-                      <Input 
-                        value={username} 
-                        onChange={(e) => handleNicknameChange(e.target.value)} 
-                        maxLength={20}
-                        className="border-primary text-right" 
-                      />
-                      <div className="flex justify-end mt-1">
-                        <span className="text-xs text-gray-500">
-                          {username.length}/20
-                        </span>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <span>{username}</span>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => setNameEdit(true)}
-                      >
-                        <Edit size={16} />
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
-              
-              <Separator />
-              
-              {/* Bio Section */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <Label className="font-medium">个人简介</Label>
-                  <span className="text-xs text-gray-500">{bio.length}/200</span>
-                </div>
-                <Textarea
-                  placeholder="介绍一下自己吧 (200字以内)"
-                  className="resize-none"
-                  maxLength={200}
-                  value={bio}
-                  onChange={(e) => handleBioChange(e.target.value)}
-                />
-              </div>
-
-              <Separator />
-
-              {/* City Section */}
-              <div className="flex items-center justify-between">
-                <Label className="font-medium">所在城市</Label>
-                <div className="w-52">
-                  <Input
-                    placeholder="请输入城市名称"
-                    value={city}
-                    onChange={(e) => { setCity(e.target.value); setHasChanges(true); }}
-                  />
-                </div>
-              </div>
-              
-              {nameEdit && (
-                <div className="flex justify-end">
-                  <Button variant="ghost" onClick={() => setNameEdit(false)} className="mr-2">
-                    取消
-                  </Button>
-                  <Button 
-                    onClick={handleSave}
-                    disabled={updateProfile.isPending}
-                  >
-                    {updateProfile.isPending && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
-                    保存
-                  </Button>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-        
-        {/* Education Background */}
-        <Card className="border-none shadow-sm">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold flex items-center">
-                <GraduationCap size={18} className="text-app-green mr-2" />
-                教育背景
-              </h2>
-              <Button variant="outline" size="sm" onClick={() => setAddEducationDialog(true)}>
-                <Plus size={16} className="mr-1" /> 添加
-              </Button>
-            </div>
-            
-            <div className="space-y-3">
-              {educationList.map((edu) => (
-                <div key={edu.id} className="flex items-center justify-between py-2">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mr-3">
-                      <GraduationCap className="text-app-green" />
-                    </div>
-                    <div>
-                      <div className="flex items-center">
-                        <h4 className="font-medium">{edu.school}</h4>
-                        {edu.verified && (
-                          <Badge variant="outline" className="ml-2 text-green-600 border-green-200 bg-green-50">
-                            已认证
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-500">{edu.degree} · {edu.graduationYear}年毕业</p>
-                    </div>
-                  </div>
-                  <div className="flex space-x-1">
-                    <Button variant="ghost" size="sm">
-                      <Edit size={16} />
-                    </Button>
-                    <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600">
-                      <Trash size={16} />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-              
-              {educationList.length === 0 && (
-                <div className="text-center py-4 text-gray-500">
-                  <p>还没有添加教育经历</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-        
-        {/* Work Experience */}
-        <Card className="border-none shadow-sm">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold flex items-center">
-                <Building size={18} className="text-app-blue mr-2" />
-                工作经历
-              </h2>
-              <Button variant="outline" size="sm" onClick={() => setAddWorkDialog(true)}>
-                <Plus size={16} className="mr-1" /> 添加
-              </Button>
-            </div>
-            
-            <div className="space-y-3">
-              {workList.map((work) => (
-                <div key={work.id} className="flex items-center justify-between py-2">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mr-3">
-                      <Building className="text-app-blue" />
-                    </div>
-                    <div>
-                      <div className="flex items-center">
-                        <h4 className="font-medium">{work.hidden ? '已隐藏企业' : work.company}</h4>
-                        {work.hidden && (
-                          <Badge variant="outline" className="ml-2 text-gray-600 border-gray-200 bg-gray-50">
-                            隐藏
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-500">{work.title} · {work.startDate} 至 {work.endDate}</p>
-                    </div>
-                  </div>
-                  <div className="flex space-x-1">
-                    <Button variant="ghost" size="sm">
-                      <Edit size={16} />
-                    </Button>
-                    <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600">
-                      <Trash size={16} />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-              
-              {workList.length === 0 && (
-                <div className="text-center py-4 text-gray-500">
-                  <p>还没有添加工作经历</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-        
-        {/* Topics */}
-        <Card className="border-none shadow-sm">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold flex items-center">
-                <Tag size={18} className="text-purple-500 mr-2" />
-                擅长话题
-              </h2>
-            </div>
-            
-            <div className="mb-4">
-              <Label className="mb-2 block font-medium">已选话题</Label>
-              <div className="flex flex-wrap gap-2 min-h-12">
-                {selectedTopics.map((topic) => (
-                  <div 
-                    key={topic}
-                    className="bg-app-blue/10 text-app-blue px-3 py-1.5 rounded-full text-sm flex items-center"
-                  >
-                    {topic}
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-5 w-5 ml-1 hover:bg-transparent hover:text-red-500"
-                      onClick={() => removeTopic(topic)}
-                    >
-                      <X size={14} />
-                    </Button>
-                  </div>
-                ))}
-                {selectedTopics.length === 0 && (
-                  <p className="text-gray-500 text-sm">还没有选择话题，请从下方推荐中添加</p>
-                )}
-              </div>
-            </div>
-            
-            <Separator className="my-4" />
-            
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <Label className="font-medium">推荐话题</Label>
-                <p className="text-xs text-gray-500">点击添加到您的专长</p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {recommendedTopics.map((topic) => (
-                  <div 
-                    key={topic}
-                    onClick={() => addTopic(topic)}
-                    className="bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-full text-sm cursor-pointer transition-colors"
-                  >
-                    {topic}
-                  </div>
-                ))}
-                {recommendedTopics.length === 0 && (
-                  <p className="text-gray-500 text-sm">没有更多推荐话题</p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        {/* Privacy Settings */}
-        <Card className="border-none shadow-sm">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold flex items-center">
-                <Lock size={18} className="text-amber-500 mr-2" />
-                个人隐私
-              </h2>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">展示教育背景</p>
-                  <p className="text-sm text-gray-500">您的学校和学位信息</p>
-                </div>
-                <Checkbox checked={privacySettings.showEducation} />
-              </div>
-
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">展示工作经历</p>
-                  <p className="text-sm text-gray-500">您的公司和职位信息</p>
-                </div>
-                <Checkbox checked={privacySettings.showWork} />
-              </div>
-
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">展示擅长话题</p>
-                  <p className="text-sm text-gray-500">您设置的专长话题标签</p>
-                </div>
-                <Checkbox checked={privacySettings.showTopics} />
-              </div>
-
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">允许被关注</p>
-                  <p className="text-sm text-gray-500">其他用户是否可以关注您</p>
-                </div>
-                <Checkbox checked={privacySettings.allowFollowers} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+    <div className="min-h-[100dvh] bg-app-page pb-6">
+      <SubPageHeader title="编辑个人资料" variant="content" onBack={() => exit.requestExit(back)} />
+      <main className="space-y-6 px-4 py-5">
+        <p className="text-sm leading-6 text-slate-500">这些资料会展示在你的公开主页。经历请在“我的经历”中管理。</p>
+        <fieldset disabled={busy} className="min-w-0 space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="profile-avatar">头像</Label>
+            <Avatar className="h-16 w-16"><AvatarImage src={form.avatar_url} alt="头像预览" /><AvatarFallback>{form.nickname.slice(0, 1) || '我'}</AvatarFallback></Avatar>
+            <Input id="profile-avatar" type="file" accept="image/jpeg,image/png,image/gif,image/webp" onChange={(event) => void upload(event.target.files?.[0], 'avatar_url')} />
+            <p className="text-xs text-slate-500">图片不超过 2MB，点击保存后更新公开资料。</p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="profile-cover">主页封面</Label>
+            {form.cover_url ? <img src={form.cover_url} alt="封面预览" className="h-28 w-full rounded-xl object-cover" /> : null}
+            <Input id="profile-cover" type="file" accept="image/jpeg,image/png,image/gif,image/webp" onChange={(event) => void upload(event.target.files?.[0], 'cover_url')} />
+            <p className="text-xs text-slate-500">图片不超过 5MB。</p>
+          </div>
+          <div className="space-y-2"><Label htmlFor="profile-name">昵称</Label><Input id="profile-name" value={form.nickname} onChange={(event) => setForm({ ...form, nickname: event.target.value })} /></div>
+          <div className="space-y-2"><Label htmlFor="profile-bio">个人简介</Label><Textarea id="profile-bio" className="min-h-28 text-base" value={form.bio} onChange={(event) => setForm({ ...form, bio: event.target.value })} /></div>
+          <div className="space-y-2"><Label htmlFor="profile-city">城市</Label><Input id="profile-city" value={form.city} onChange={(event) => setForm({ ...form, city: event.target.value })} /></div>
+        </fieldset>
+        {error ? <p role="alert" className="text-sm text-rose-700">{error}</p> : null}
+      </main>
+      <div className="sticky bottom-0 border-t border-app-border-subtle bg-app-page px-4 pt-3" style={{ paddingBottom: 'calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom)) + 12px)' }}>
+        <Button className="app-btn-primary min-h-12 w-full" disabled={busy || !hydrated} onClick={() => void handleSave()}>{busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden /> : null}{busy ? '正在保存…' : '保存资料'}</Button>
       </div>
-      
-      {/* Add Education Dialog */}
-      <Dialog open={addEducationDialog} onOpenChange={setAddEducationDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>添加教育经历</DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <Label htmlFor="school">学校</Label>
-              <Input id="school" placeholder="输入学校名称" />
-              <p className="text-xs text-gray-500">添加后可申请学校认证，认证后不可修改</p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="degree">学位</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="选择学位" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="diploma">大专</SelectItem>
-                  <SelectItem value="bachelor">学士学位</SelectItem>
-                  <SelectItem value="master">硕士学位</SelectItem>
-                  <SelectItem value="phd">博士学位</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="gradYear">毕业年份</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="选择毕业年份" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 10 }, (_, i) => {
-                    const year = new Date().getFullYear() - i;
-                    return (
-                      <SelectItem key={year} value={year.toString()}>
-                        {year}
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAddEducationDialog(false)}>
-              取消
-            </Button>
-            <Button onClick={() => setAddEducationDialog(false)}>保存</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Add Work Dialog */}
-      <Dialog open={addWorkDialog} onOpenChange={setAddWorkDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>添加工作经历</DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="company">公司</Label>
-                <div className="flex items-center">
-                  <Checkbox id="hideCompany" className="mr-1.5" />
-                  <Label htmlFor="hideCompany" className="text-xs cursor-pointer">
-                    隐藏公司名称
-                  </Label>
-                </div>
-              </div>
-              <Input id="company" placeholder="输入公司名称" />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="jobTitle">职位</Label>
-              <Input id="jobTitle" placeholder="输入您的职位" />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="startDate">开始日期</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="选择日期" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: 5 }, (_, i) => {
-                      const year = new Date().getFullYear() - i;
-                      return (
-                        <React.Fragment key={year}>
-                          <SelectItem value={`${year}-01`}>{year}年1月</SelectItem>
-                          <SelectItem value={`${year}-07`}>{year}年7月</SelectItem>
-                        </React.Fragment>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="endDate">结束日期</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="选择日期" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="至今">至今</SelectItem>
-                    {Array.from({ length: 5 }, (_, i) => {
-                      const year = new Date().getFullYear() - i;
-                      return (
-                        <React.Fragment key={year}>
-                          <SelectItem value={`${year}-01`}>{year}年1月</SelectItem>
-                          <SelectItem value={`${year}-07`}>{year}年7月</SelectItem>
-                        </React.Fragment>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAddWorkDialog(false)}>
-              取消
-            </Button>
-            <Button onClick={() => setAddWorkDialog(false)}>保存</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AlertDialog open={exit.open} onOpenChange={exit.setOpen}>
+        <AlertDialogContent className="w-[88%] max-w-sm rounded-2xl"><AlertDialogHeader><AlertDialogTitle>放弃未保存的资料修改？</AlertDialogTitle><AlertDialogDescription>尚未保存的修改不会展示在公开主页。</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel className="min-h-11">继续编辑</AlertDialogCancel><AlertDialogAction className="min-h-11" onClick={exit.confirmExit}>放弃并离开</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
 
+const EditProfile = () => {
+  const { user } = useAuth();
+  return <EditProfileForm key={user?.id || 'signed-out'} />;
+};
 export default EditProfile;

@@ -114,7 +114,7 @@ const PersonExperienceCard: React.FC<PersonExperienceCardProps> = ({
         ) : null}
       </div>
 
-      <p className="mt-3 whitespace-pre-wrap text-[14px] leading-6 text-slate-700">
+      <p className="mt-3 whitespace-pre-wrap break-words text-[14px] leading-6 text-slate-700">
         {experience.description}
       </p>
 
@@ -137,7 +137,7 @@ const PersonExperienceCard: React.FC<PersonExperienceCardProps> = ({
 
       {experience.canShare.length > 0 ? (
         <div className="mt-4 border-t border-app-border-subtle pt-3">
-          <p className="text-xs font-medium text-slate-500">{ownerMode ? '我可以分享' : '可以和TA聊'}</p>
+          <p className="text-xs font-medium text-slate-500">{ownerMode ? '我可以分享' : 'TA愿意分享'}</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {experience.canShare.map((item) => (
               <span key={item} className="rounded-full bg-slate-50 px-2.5 py-1 text-xs text-slate-600">

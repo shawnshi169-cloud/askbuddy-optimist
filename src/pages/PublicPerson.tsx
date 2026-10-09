@@ -125,17 +125,6 @@ const PublicPerson: React.FC = () => {
             </div>
           ) : null}
 
-          <div className="mt-5 flex items-center gap-7 border-y border-app-border-subtle py-4">
-            <div>
-              <strong className="text-lg font-semibold text-slate-900">{person.contributionSummary.answerCount}</strong>
-              <span className="ml-1.5 text-xs text-slate-500">回答</span>
-            </div>
-            <div>
-              <strong className="text-lg font-semibold text-slate-900">{person.contributionSummary.postCount}</strong>
-              <span className="ml-1.5 text-xs text-slate-500">分享</span>
-            </div>
-          </div>
-
           {isSelf ? (
             <div className="mt-4 flex gap-3">
               <Button
@@ -156,16 +145,23 @@ const PublicPerson: React.FC = () => {
         </section>
 
         <section className="mt-8">
-          <h2 className="text-[17px] font-semibold text-slate-900">TA的经历</h2>
+          <h2 className="text-[17px] font-semibold text-slate-900">{isSelf ? '我的经历' : 'TA的经历'}</h2>
+          {isSelf ? <p className="mt-2 text-sm text-slate-500">这是别人看到的公开主页，仅展示公开经历。</p> : null}
+          {experiencesQuery.isError && experiencesQuery.data && !experiencesQuery.isFetchNextPageError ? (
+            <div role="alert" className="mt-3 text-sm text-slate-600">
+              暂时无法刷新经历，正在显示已加载内容。
+              <Button variant="ghost" className="min-h-11 text-app-action" onClick={() => experiencesQuery.refetch()}>重试</Button>
+            </div>
+          ) : null}
 
           {experiencesQuery.isLoading ? (
             <div className="mt-4 space-y-3">
               <Skeleton className="h-44 rounded-[20px]" />
               <Skeleton className="h-44 rounded-[20px]" />
             </div>
-          ) : experiencesQuery.isError ? (
+          ) : experiencesQuery.isError && !experiencesQuery.data ? (
             <div className="mt-4 rounded-2xl border border-app-border-subtle bg-white px-4 py-6 text-center">
-              <p className="text-sm font-medium text-slate-800">暂时无法加载TA的经历</p>
+              <p className="text-sm font-medium text-slate-800">暂时无法加载公开经历</p>
               <p className="mt-1 text-xs leading-5 text-slate-500">个人资料仍可正常查看，请稍后再试。</p>
               <Button variant="ghost" className="mt-2 min-h-11 text-app-action" onClick={() => experiencesQuery.refetch()}>
                 重试
@@ -173,13 +169,14 @@ const PublicPerson: React.FC = () => {
             </div>
           ) : experiences.length === 0 ? (
             <p className="mt-4 rounded-2xl border border-app-border-subtle bg-white px-4 py-8 text-center text-sm text-slate-500">
-              TA还没有公开经历。
+              {isSelf ? '你还没有公开经历。仅自己可见的经历可在“管理我的经历”中查看。' : 'TA还没有公开经历。'}
             </p>
           ) : (
             <div className="mt-4 space-y-4">
               {experiences.map((experience) => (
                 <PersonExperienceCard key={experience.experienceId} experience={experience} />
               ))}
+              {experiencesQuery.isFetchNextPageError ? <p role="alert" className="text-sm text-rose-700">暂时无法加载更多经历，已加载内容仍可查看，请重试。</p> : null}
               {experiencesQuery.hasNextPage ? (
                 <Button
                   variant="outline"
@@ -187,7 +184,7 @@ const PublicPerson: React.FC = () => {
                   onClick={() => experiencesQuery.fetchNextPage()}
                   disabled={experiencesQuery.isFetchingNextPage}
                 >
-                  {experiencesQuery.isFetchingNextPage ? '正在加载…' : '查看更多经历'}
+                  {experiencesQuery.isFetchingNextPage ? '正在加载…' : experiencesQuery.isFetchNextPageError ? '重试加载更多' : '查看更多经历'}
                 </Button>
               ) : null}
             </div>
