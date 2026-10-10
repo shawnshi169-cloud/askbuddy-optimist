@@ -124,7 +124,7 @@ for (const [path, names] of Object.entries({
   '@/components/ui/select': ['Select', 'SelectContent', 'SelectItem', 'SelectTrigger', 'SelectValue'], '@/components/ui/switch': ['Switch'],
   'lucide-react': ['Loader2', 'Building2', 'GraduationCap', 'MapPin', 'UserRound'],
 })) common[path] = Object.fromEntries(names.map((name) => [name, name]));
-for (const [path, name] of Object.entries({ '@/components/layout/SubPageHeader': 'Header', '@/components/common/PageStateCard': 'State', '@/components/experience/PersonExperienceCard': 'ExperienceCard', '@/components/experience/ExperienceTransitionManager': 'TransitionManager' })) common[path] = { default: name };
+for (const [path, name] of Object.entries({ '@/components/layout/SubPageHeader': 'Header', '@/components/common/PageStateCard': 'State', '@/components/experience/PersonExperienceCard': 'ExperienceCard', '@/components/experience/ExperienceTransitionManager': 'TransitionManager', '@/components/experience/ExperienceTopicManager': 'TopicManager' })) common[path] = { default: name };
 let navigations = [];
 const navigation = { navigateBackOr: () => navigations.push('back'), navigateToAuthWithReturn: () => navigations.push('auth'), buildFromState: () => ({}) };
 let saveFails = true;
@@ -230,6 +230,22 @@ tree = experienceHarness.render(editorForm);
 assert.equal(exitOptions.busy, true);
 assert.equal(nodes(tree).find((n) => n.type === 'Button' && text(n).includes('保存修改')).props.disabled, true);
 transition.props.onBusyChange(false);
+tree = experienceHarness.render(editorForm);
+const topicManager = nodes(tree).find((n) => n.type === 'TopicManager');
+assert.equal(topicManager.props.personId, personA);
+topicManager.props.onDirtyChange(true);
+tree = experienceHarness.render(editorForm);
+assert.equal(exitOptions.dirty, true);
+nodes(tree).find((n) => n.type === 'Button' && text(n).includes('保存修改')).props.onClick();
+await flush();
+assert.equal(writes, 0, 'Main save must not discard Topic draft or silently save Topics');
+assert.deepEqual(navigations, []);
+topicManager.props.onDirtyChange(false);
+topicManager.props.onBusyChange(true);
+tree = experienceHarness.render(editorForm);
+assert.equal(exitOptions.busy, true);
+assert.equal(nodes(tree).find((n) => n.type === 'Button' && text(n).includes('保存修改')).props.disabled, true);
+topicManager.props.onBusyChange(false);
 tree = experienceHarness.render(editorForm);
 nodes(tree).find((n) => n.type === 'Button' && text(n).includes('保存修改')).props.onClick();
 await flush();
