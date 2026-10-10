@@ -152,8 +152,12 @@ await check('UI only canonical contract, real one-level interactions and server-
     assert.doesNotMatch(source, /create_question_secure|create_answer_secure|accept_answer_v2|answer_likes|bounty_points|reward_points|useQuestions|demoData|mockData|fallbackResult|\.from\(|\/expert(?:-profile)?\//);
     assert.doesNotMatch(source, /已采纳|已核验|已认证|专家回答|预约时段|parentReplyId|p_parent_reply|setQueryData/);
   }
-  assert.match(newPage, /p_topic_ids: \[\]/);
-  assert.match(newPage, /budgetInputToCents/);
+  assert.match(newPage, /input = questionDraftInput\(draft\)/);
+  assert.match(newPage, /create\.mutateAsync\(input\)/);
+  const draft = { ...form.emptyQuestionDraft(), title: '问题', context: '背景', primaryChannel: 'education-learning' };
+  assert.deepEqual(form.questionDraftInput(draft).p_topic_ids, []);
+  assert.deepEqual(form.questionDraftInput({ ...draft, topicIds: [id(9), id(8)] }).p_topic_ids, [id(9), id(8)]);
+  assert.throws(() => form.questionDraftInput({ ...draft, topicIds: [id(9), id(9)] }));
   assert.match(newPage, /!draft\.context\.trim\(\)/);
   assert.match(newPage, /await create\.mutateAsync[\s\S]*localStorage\.removeItem[\s\S]*navigate\(`/);
   assert.match(page, /question\.answerCount/);

@@ -1,54 +1,18 @@
-import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import {
   CANONICAL_TOPIC_V1_RPCS,
-  canonicalTopicV1Schema,
   parseCanonicalTopicErrorV1,
 } from '../../../../packages/shared-api/src/canonical-topic-v1';
 import type { TopicOption } from './topicSelection';
-
-export const TOPIC_PAGE_SIZE = 20;
-const TOPIC_COLUMNS = 'topic_id,canonical_name,status';
-const catalogRows = z.array(z.object({
-  topic_id: z.string(), canonical_name: z.string(), status: z.string(),
-}).strict()).transform((rows): TopicOption[] => rows.map((row) => {
-  const { topicId, canonicalName, status } = canonicalTopicV1Schema.parse({
-    topicId: row.topic_id, canonicalName: row.canonical_name, status: row.status, aliases: [],
-  });
-  return { topicId, canonicalName, status };
-}));
+import { TOPIC_PAGE_SIZE, TOPIC_COLUMNS, catalogRows } from '@/features/topics/topicCatalog';
+export { readTopicCatalog, TOPIC_PAGE_SIZE } from '@/features/topics/topicCatalog';
 
 export async function requireTopicOwner(personId: string) {
   const { data, error } = await supabase.auth.getSession();
   if (error || !personId || data.session?.user.id !== personId) {
     throw new Error('TOPIC_OWNER_CHANGED');
   }
-}
-
-export async function readTopicCatalog(term: string, offset: number) {
-  if (!Number.isSafeInteger(offset) || offset < 0) throw new TypeError('Invalid Topic offset');
-  let query = supabase.from('canonical_topics_v1').select(TOPIC_COLUMNS).eq('status', 'active')
-    .order('canonical_name', { ascending: true }).order('topic_id', { ascending: true });
-  const search = term.trim();
-  if (search) query = query.ilike('canonical_name', `%${search.replace(/[\\%_]/g, '\\$&')}%`);
-  const { data, error } = await query.range(offset, offset + TOPIC_PAGE_SIZE - 1);
-  if (error) throw error;
-  const topics = catalogRows.parse(data);
-  if (topics.some((topic) => topic.status !== 'active')) throw new TypeError('Inactive catalog result');
-  let exact: TopicOption | null = null;
-  if (search && offset === 0) {
-    const contract = CANONICAL_TOPIC_V1_RPCS.resolve_canonical_topic_v1;
-    const params = contract.parseParams({ p_term: search });
-    // Explicit required keys bridge non-strict TS inference; values still come from the strict parser.
-    const args: Database['public']['Functions']['resolve_canonical_topic_v1']['Args'] = {
-      p_term: params.p_term,
-    };
-    const result = await supabase.rpc('resolve_canonical_topic_v1', args);
-    if (result.error) throw result.error;
-    exact = contract.parseResult(result.data, params).topic;
-  }
-  return { topics, exact, nextOffset: topics.length === TOPIC_PAGE_SIZE ? offset + TOPIC_PAGE_SIZE : undefined };
 }
 
 export async function readLinkedTopics(personId: string, experienceId: string) {

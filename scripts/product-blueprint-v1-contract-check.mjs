@@ -142,11 +142,11 @@ try {
   assert.match(domainMap.canonicalTopic.currentRuntime, /EC-3B2B Production.*deployed and rollback-smoke verified/);
   assert.match(domainMap.canonicalTopic.currentRuntime, /clientConsumable=true.*Shared Core Question contract accepts 0\.\.N canonical Topic IDs/);
   assert.match(domainMap.canonicalTopic.currentRuntime, /EC-3B2C HTTP consumer gate verified/);
-  assert.match(domainMap.canonicalTopic.currentRuntime, /current Question UI still sends \[\].*Question Topic picker not implemented.*Experience Topic Owner Linking V1 wired only on existing-owner edit.*Public Experience Topic Display V1 read-only wired on canonical public list/);
+  assert.match(domainMap.canonicalTopic.currentRuntime, /Question Topic Picker V1 wired only on NewQuestion; optional 0\.\.N user-selected canonical IDs, zero selection still sends \[\].*Experience Topic Owner Linking V1 wired only on existing-owner edit.*Public Experience Topic Display V1 read-only wired on canonical public list/);
   assert.match(domainMap.canonicalTopic.currentRuntime, /Core Seed v1 Production applied and exact-state verified: 79 active Core Seed Topics, 113 aliases, 192 resolver terms/);
   assert.match(domainMap.canonicalTopic.currentRuntime, /namespace remains extensible beyond Core Seed v1/);
   assert.doesNotMatch(domainMap.canonicalTopic.currentRuntime, /taxonomy not seeded/);
-  assert.match(api.PRODUCT_BLUEPRINT_V1_RPC_POLICY.resolve_canonical_topic_v1.replacement, /Core Seed v1 Production applied and resolver verified; exact resolver used only by Experience Owner Topic linking; no Discovery runtime unlock/);
+  assert.match(api.PRODUCT_BLUEPRINT_V1_RPC_POLICY.resolve_canonical_topic_v1.replacement, /Core Seed v1 Production applied and resolver verified; exact resolver used only by Experience Owner Topic linking and NewQuestion Topic picker; no Discovery runtime unlock/);
   assert.match(domainMap.canonicalTopic.currentRuntime, /Home\/Search\/Matching\/Editorial runtime not implemented/);
   assert.match(api.PRODUCT_BLUEPRINT_V1_RPC_POLICY.get_experience_topics_v1.replacement, /Public Experience Topic Display V1 caller-aware read only from canonical public list/);
   for (const name of ["resolve_canonical_topic_v1", "get_experience_topics_v1", "set_experience_topics_v1"]) {
@@ -301,6 +301,7 @@ try {
   assert.deepEqual(ask.currentReadContracts, [
     "storage:canonical-question-draft-v2", "contract:auth-viewer-state",
     "contract:product-channel-catalog",
+    "table:canonical_topics_v1", "rpc:resolve_canonical_topic_v1",
   ]);
   assert.deepEqual(ask.currentWriteContracts, ["rpc:create_question_v1"]);
   assert.match(read("src/components/question/questionForm.ts"), /canonical-question-draft-v2/);
@@ -340,7 +341,7 @@ try {
     assert.doesNotMatch(platformTruth, /Android[^;\n]*(?:PENDING|pending|not verified)/);
   }
   assert.match(read("docs/ec2f-android-native-verification.md"), /LOCAL ISOLATED QA/);
-  assert.match(ask.notes.join("\n"), /topicIds=\[\]/);
+  assert.match(ask.notes.join("\n"), /topicIds=0\.\.N user-selected canonical IDs in caller order/);
   assert.match(ask.notes.join("\n"), /successful real create_question_v1.*\/question\/:questionId/);
   assert.match(detail.notes.join("\n"), /问问TA only navigates to \/person\/:authorPersonId/);
   assert.match(detail.notes.join("\n"), /no Conversation, Chat, Booking, Service or Payment action/);
