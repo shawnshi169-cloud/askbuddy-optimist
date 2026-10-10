@@ -8,57 +8,53 @@ import {
   useCreateCanonicalQuestion,
   useQuestionAnswerViewer,
 } from '@/hooks/useQuestionAnswerV1';
-import { questionAnswerErrorText } from '@/lib/adapters/questionAnswerV1';
+import { QuestionAnswerUiError, questionAnswerErrorText } from '@/lib/adapters/questionAnswerV1';
+import QuestionTopicPicker from '@/components/question/QuestionTopicPicker';
 import {
   buildFromState,
   navigateBackOr,
   navigateToAuthWithReturn,
 } from '@/utils/navigation';
 import {
-  budgetInputToCents,
   emptyQuestionDraft,
-  parseQuestionDraft,
+  questionDraftInput,
+  readQuestionDraft,
   questionDraftKey,
   QUESTION_DRAFT_HANDOFF,
   type QuestionDraft,
 } from '@/components/question/questionForm';
 import { PRODUCT_CHANNEL_CATALOG } from '../../packages/shared-types/src/product-channels';
 
-const readDraft = (viewer: string | null) => {
-  try {
-    if (
-      viewer &&
-      sessionStorage.getItem(QUESTION_DRAFT_HANDOFF) === 'pending'
-    ) {
-      const draft = parseQuestionDraft(
-        localStorage.getItem(questionDraftKey(null)),
-      );
-      localStorage.setItem(questionDraftKey(viewer), JSON.stringify(draft));
-      localStorage.removeItem(questionDraftKey(null));
-      sessionStorage.removeItem(QUESTION_DRAFT_HANDOFF);
-      return draft;
-    }
-    return parseQuestionDraft(localStorage.getItem(questionDraftKey(viewer)));
-  } catch {
-    return emptyQuestionDraft();
-  }
-};
-
 const QuestionComposer = ({ viewer }: { viewer: string | null }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [draft, setDraft] = useState(() => readDraft(viewer));
+  const [draft, setDraft] = useState(emptyQuestionDraft);
+  const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState('');
   const [draftNotice, setDraftNotice] = useState('');
   const create = useCreateCanonicalQuestion(viewer);
   const active = useRef(true);
   const submitted = useRef(false);
+  const initialized = useRef(false);
+  const publishLock = useRef(false);
+  const busy = !loaded || create.isPending;
   useEffect(() => {
     active.current = true;
+    if (!initialized.current) {
+      initialized.current = true;
+      try {
+        const restored = readQuestionDraft(localStorage, sessionStorage, viewer);
+        setDraft(restored.draft);
+        setDraftNotice(restored.notice);
+      } catch {
+        setDraftNotice('当前设备无法读取草稿，请暂时不要离开此页。');
+      }
+      setLoaded(true);
+    }
     return () => {
       active.current = false;
     };
-  }, []);
+  }, [viewer]);
 
   const persist = (next: QuestionDraft) => {
     try {
@@ -74,6 +70,7 @@ const QuestionComposer = ({ viewer }: { viewer: string | null }) => {
     }
   };
   const change = (patch: Partial<QuestionDraft>) => {
+    if (busy || publishLock.current || submitted.current) return;
     const next = { ...draft, ...patch };
     setDraft(next);
     setError('');
@@ -81,14 +78,14 @@ const QuestionComposer = ({ viewer }: { viewer: string | null }) => {
   };
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (create.isPending || submitted.current) return;
+    if (busy || publishLock.current || submitted.current || draft.publishUncertain) return;
     if (!draft.title.trim() || !draft.context.trim() || !draft.primaryChannel) {
       setError('请填写问题标题、具体背景，并选择一个频道。');
       return;
     }
-    let budget: number | null;
+    let input: ReturnType<typeof questionDraftInput>;
     try {
-      budget = budgetInputToCents(draft.budgetInput);
+      input = questionDraftInput(draft);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : '请检查预算金额。');
       return;
@@ -107,15 +104,12 @@ const QuestionComposer = ({ viewer }: { viewer: string | null }) => {
       navigateToAuthWithReturn(navigate, location);
       return;
     }
+    publishLock.current = true;
     setError('');
+    // A lost response must not turn a restored draft into an automatic second publication.
+    persist({ ...draft, publishUncertain: true });
     try {
-      const result = await create.mutateAsync({
-        p_title: draft.title.trim(),
-        p_context: draft.context.trim(),
-        p_primary_channel: draft.primaryChannel,
-        p_topic_ids: [],
-        p_deep_exchange_budget_max_cents: budget,
-      });
+      const result = await create.mutateAsync(input);
       if (!active.current) return;
       submitted.current = true;
       try {
@@ -128,7 +122,15 @@ const QuestionComposer = ({ viewer }: { viewer: string | null }) => {
         state: buildFromState({ pathname: '/', search: '', hash: '' }),
       });
     } catch (cause) {
-      if (active.current) setError(questionAnswerErrorText(cause));
+      if (active.current) {
+        const uncertain = !(cause instanceof QuestionAnswerUiError) || cause.key === 'UNAVAILABLE' || cause.key === 'VIEWER_CHANGED';
+        const retained = { ...draft, publishUncertain: uncertain };
+        setDraft(retained);
+        persist(retained);
+        setError(questionAnswerErrorText(cause));
+      }
+    } finally {
+      publishLock.current = false;
     }
   };
 
@@ -153,7 +155,7 @@ const QuestionComposer = ({ viewer }: { viewer: string | null }) => {
               id="question-title"
               value={draft.title}
               onChange={(e) => change({ title: e.target.value })}
-              disabled={create.isPending}
+              disabled={busy}
               required
               placeholder="用一句话说清你的问题"
               className="mt-3 h-12 rounded-xl border-app-border-subtle bg-white text-base"
@@ -170,7 +172,7 @@ const QuestionComposer = ({ viewer }: { viewer: string | null }) => {
               id="question-context"
               value={draft.context}
               onChange={(e) => change({ context: e.target.value })}
-              disabled={create.isPending}
+              disabled={busy}
               required
               placeholder="你遇到了什么？尝试过什么？希望听到哪方面的经验？"
               className="mt-2 min-h-48 rounded-xl border-app-border-subtle bg-white text-base leading-7"
@@ -179,7 +181,7 @@ const QuestionComposer = ({ viewer }: { viewer: string | null }) => {
         </section>
         <fieldset
           className="border-t border-app-border-subtle py-6"
-          disabled={create.isPending}
+          disabled={busy}
         >
           <legend className="sr-only">选择一个频道</legend>
           <p className="mb-3 text-sm font-medium text-slate-700">
@@ -205,6 +207,8 @@ const QuestionComposer = ({ viewer }: { viewer: string | null }) => {
             ))}
           </div>
         </fieldset>
+        <QuestionTopicPicker viewer={viewer} topicIds={draft.topicIds} restoreError={draft.topicRestoreError}
+          disabled={busy} onChange={topicIds => change({ topicIds, topicRestoreError: false })} />
         <section className="border-t border-app-border-subtle py-6">
           <label
             htmlFor="question-budget"
@@ -230,7 +234,7 @@ const QuestionComposer = ({ viewer }: { viewer: string | null }) => {
               aria-describedby="budget-help"
               value={draft.budgetInput}
               onChange={(e) => change({ budgetInput: e.target.value })}
-              disabled={create.isPending}
+              disabled={busy}
               placeholder="填写最高金额"
               className="h-11 rounded-xl border-app-border-subtle bg-white text-base"
             />
@@ -244,12 +248,18 @@ const QuestionComposer = ({ viewer }: { viewer: string | null }) => {
             {error}
           </p>
         )}
+        {draft.publishUncertain ? (
+          <div role="alert" className="mb-4 text-sm leading-6 text-slate-600">
+            上次发布结果尚未确认。请先确认问题是否已发布，避免重复提交，草稿仍保留。
+            <Button type="button" variant="ghost" className="min-h-11" disabled={busy} onClick={() => change({ publishUncertain: false })}>已确认未发布，允许重试</Button>
+          </div>
+        ) : null}
         <Button
           type="submit"
           variant="action"
           className="h-12 w-full rounded-full"
           disabled={
-            create.isPending ||
+            busy || draft.publishUncertain || draft.topicRestoreError ||
             !draft.title.trim() ||
             !draft.context.trim() ||
             !draft.primaryChannel
