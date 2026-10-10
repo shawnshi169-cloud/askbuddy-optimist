@@ -14,6 +14,10 @@ const load = (file, deps = {}) => {
   return exports;
 };
 const model = load('src/features/experience/topics/topicSelection.ts');
+const publicCache = load('src/features/experience/topics/publicTopicQuery.ts', {
+  '@tanstack/react-query': { queryOptions: (options) => options },
+  './publicTopicApi': {},
+});
 const personA = '11111111-1111-4111-8111-111111111111';
 const personB = '22222222-2222-4222-8222-222222222222';
 const experienceId = '33333333-3333-4333-8333-333333333333';
@@ -142,6 +146,7 @@ const hookHarness = () => {
       useMutation: (options) => ({ mutateAsync: options.mutationFn }),
     },
     './topicSelection': model,
+    './publicTopicQuery': publicCache,
     './topicApi': {
       readLinkedTopics: async (person, experience) => { reads.push([person, experience]); if (failRead) throw Error('read'); return [a]; },
       readTopicCatalog: async () => { throw Error('Not needed by hook harness'); },
@@ -177,6 +182,8 @@ associationState = { isSuccess: true, data: [a, b], isFetching: false };
 const other = hookHarness().render(personB);
 assert.equal(other.dirty, false, 'A draft cannot become B selection');
 assert.deepEqual(hookHarness().render(personA).selection.selected, [a], 'Return to A restores A unsaved choice');
+for (const viewer of [null, personA, personB]) client.setQueryData(publicCache.publicTopicKeys.viewer(experienceId, viewer), [b]);
+client.setQueryData(publicCache.publicTopicKeys.viewer('other-experience', personA), [a]);
 view = harness.render(); failWrite = false; releaseWrite = true;
 const pending = view.save();
 view = harness.render(); assert.equal(view.busy, true);
@@ -195,6 +202,8 @@ assert.equal(oldReadCancelled, true, 'A pre-write background read must not be re
 releaseOldRead([b]);
 await Promise.resolve();
 assert.deepEqual(client.getQueryData(model.ownerTopicKeys.associations(personA, experienceId)), [a]);
+for (const viewer of [null, personA, personB]) assert.equal(client.getQueryState(publicCache.publicTopicKeys.viewer(experienceId, viewer)).isInvalidated, true);
+assert.equal(client.getQueryState(publicCache.publicTopicKeys.viewer('other-experience', personA)).isInvalidated, false);
 assert.equal(harness.render().busy, false);
 assert.equal(reads.length, 1, 'Always refetch owner association after write success');
 assert.deepEqual(reads[0], [personA, experienceId]);

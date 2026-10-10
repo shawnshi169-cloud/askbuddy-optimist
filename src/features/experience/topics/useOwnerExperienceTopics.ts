@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { readLinkedTopics, readTopicCatalog, saveLinkedTopics, topicErrorCopy } from './topicApi';
+import { refreshPublicTopicProjection } from './publicTopicQuery';
 import {
   ownerTopicKeys, restoreTopicSelection, sameTopicIds, selectionDirty, toggleTopic,
   type TopicOption, type TopicSelection,
@@ -71,6 +72,7 @@ export function useOwnerExperienceTopics(personId: string, experienceId: string,
       client.setQueryData(draftKey, null);
       // The write already succeeded. A failed refresh must not be presented as a failed write.
       try {
+        await refreshPublicTopicProjection(client, experienceId);
         await client.fetchQuery({ queryKey: associationKey, queryFn: () => readLinkedTopics(personId, experienceId), staleTime: 0 });
         setNotice('话题关联已保存。');
       } catch {

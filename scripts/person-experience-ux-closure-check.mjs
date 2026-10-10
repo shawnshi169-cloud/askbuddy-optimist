@@ -159,6 +159,7 @@ const publicHarness = harness();
 let viewer = personA;
 let experienceState = { isError: true, data: undefined };
 const publicModule = load('src/pages/PublicPerson.tsx', {
+  '@/components/experience/PublicExperienceTopics': { default: 'PublicExperienceTopics' },
   ...common, react: publicHarness.react,
   'react-router-dom': { useNavigate: () => () => {}, useLocation: () => ({}), useParams: () => ({ userId: personA }) },
   '@/contexts/AuthContext': { useAuth: () => ({ user: { id: viewer } }) },
