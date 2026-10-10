@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import ExperienceTransitionManager from '@/components/experience/ExperienceTransitionManager';
+import ExperienceTopicManager from '@/components/experience/ExperienceTopicManager';
 import { EXPERIENCE_KIND_LABELS } from '@/components/experience/experiencePresentation';
 import { cityCodeForSubmit, withEditedCity } from '@/components/experience/experienceForm';
 import PageStateCard from '@/components/common/PageStateCard';
@@ -130,6 +131,8 @@ const ExperienceEditorForm: React.FC = () => {
   const [hydrated, setHydrated] = useState(false);
   const [transitionDirty, setTransitionDirty] = useState(false);
   const [transitionBusy, setTransitionBusy] = useState(false);
+  const [topicDirty, setTopicDirty] = useState(false);
+  const [topicBusy, setTopicBusy] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
   const initialSnapshotRef = useRef(serializeForm(EMPTY_FORM));
   const draftKey = user ? `person-experience-draft-v1:${user.id}` : null;
@@ -166,7 +169,7 @@ const ExperienceEditorForm: React.FC = () => {
   }, [draftKey, existingExperience, experiencesQuery.isSuccess, hydrated, isEdit, user]);
 
   const formDirty = hydrated && serializeForm(form) !== initialSnapshotRef.current;
-  const hasUnsavedChanges = formDirty || transitionDirty;
+  const hasUnsavedChanges = formDirty || transitionDirty || topicDirty;
   const hasDraftContent = serializeForm(form) !== serializeForm(EMPTY_FORM);
   const saving = createMutation.isPending || updateMutation.isPending;
   const saveDraftNow = () => {
@@ -175,7 +178,7 @@ const ExperienceEditorForm: React.FC = () => {
       setDraftSaved(persistExperienceDraft(localStorage, draftKey, hasDraftContent ? serializeForm(form) : null));
     } catch { setDraftSaved(false); }
   };
-  const exit = useEditorExit({ dirty: hasUnsavedChanges, busy: saving || transitionBusy, prepareExit: saveDraftNow });
+  const exit = useEditorExit({ dirty: hasUnsavedChanges, busy: saving || transitionBusy || topicBusy, prepareExit: saveDraftNow });
 
   useEffect(() => {
     if (!hydrated || isEdit || !draftKey) return;
@@ -186,11 +189,11 @@ const ExperienceEditorForm: React.FC = () => {
 
   useEffect(() => {
     if (typeof document === 'undefined') return;
-    document.body.dataset.swipeBackDisabled = hasUnsavedChanges || saving || transitionBusy ? 'true' : 'false';
+    document.body.dataset.swipeBackDisabled = hasUnsavedChanges || saving || transitionBusy || topicBusy ? 'true' : 'false';
     return () => {
       document.body.dataset.swipeBackDisabled = 'false';
     };
-  }, [hasUnsavedChanges, saving, transitionBusy]);
+  }, [hasUnsavedChanges, saving, transitionBusy, topicBusy]);
 
   const validationError = useMemo(() => {
     if (!form.title.trim() || !form.description.trim() || !form.kind) return '请填写标题、经历描述并选择经历类型';
@@ -214,6 +217,10 @@ const ExperienceEditorForm: React.FC = () => {
   const handleBack = () => exit.requestExit(navigateAway);
 
   const handleSubmit = async () => {
+    if (topicDirty || topicBusy) {
+      toast({ title: '请先保存或取消话题修改，并等待保存完成。' });
+      return;
+    }
     if (transitionDirty || transitionBusy || saving) {
       toast({ title: '请先保存或取消当前转变编辑，并等待保存完成。' });
       return;
@@ -334,7 +341,7 @@ const ExperienceEditorForm: React.FC = () => {
       <SubPageHeader title={isEdit ? '编辑经历' : '添加一段经历'} variant="content" onBack={handleBack} />
 
       <main className="px-4 py-5">
-        <fieldset disabled={saving || transitionBusy} className="min-w-0 space-y-5">
+        <fieldset disabled={saving || transitionBusy || topicBusy} className="min-w-0 space-y-5">
         {!isEdit ? (
           <p className="text-[15px] leading-6 text-slate-600">
             你有什么经历过、做过或者比较熟悉的事情，愿意和别人分享？
@@ -481,6 +488,15 @@ const ExperienceEditorForm: React.FC = () => {
           </div>
         </section>
 
+        {isEdit && existingExperience && existingExperience.personId === user.id ? (
+          <ExperienceTopicManager
+            personId={user.id}
+            experienceId={existingExperience.experienceId}
+            onDirtyChange={setTopicDirty}
+            onBusyChange={setTopicBusy}
+          />
+        ) : null}
+
         {isEdit && existingExperience ? (
           <ExperienceTransitionManager
             experienceId={existingExperience.experienceId}
@@ -494,9 +510,10 @@ const ExperienceEditorForm: React.FC = () => {
       </main>
 
       <div className="sticky bottom-0 z-20 border-t border-app-border-subtle bg-white/95 px-4 pt-3 backdrop-blur-sm" style={{ paddingBottom: 'calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom)) + 0.75rem)' }}>
+        {topicDirty || topicBusy ? <p role="status" className="mb-2 text-sm text-slate-600">请先保存或取消话题修改，并等待保存完成。</p> : null}
         {transitionDirty || transitionBusy ? <p role="status" className="mb-2 text-sm text-slate-600">请先保存或取消当前转变编辑，并等待保存完成。</p> : validationError ? <p className="mb-2 text-xs text-slate-500">{validationError}</p> : null}
         {!isEdit && hasDraftContent && !draftSaved ? <p role="alert" className="mb-2 text-xs text-rose-700">本地草稿暂时无法保存，离开会丢失当前填写内容。</p> : null}
-        <Button className="app-btn-primary min-h-12 w-full" onClick={() => void handleSubmit()} disabled={saving || transitionDirty || transitionBusy || Boolean(validationError)}>
+        <Button className="app-btn-primary min-h-12 w-full" onClick={() => void handleSubmit()} disabled={saving || transitionDirty || transitionBusy || topicDirty || topicBusy || Boolean(validationError)}>
           {saving ? <Loader2 aria-hidden className="mr-2 h-4 w-4 animate-spin" /> : null}
           {saving ? '正在保存…' : isEdit ? '保存修改' : '保存经历'}
         </Button>
@@ -507,7 +524,7 @@ const ExperienceEditorForm: React.FC = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>离开当前编辑？</AlertDialogTitle>
             <AlertDialogDescription>
-              {isEdit ? '尚未保存的经历或转变修改会丢失。' : draftSaved ? '当前内容已保存在本地草稿中，下次可以继续填写。' : '本地草稿未能保存，离开会丢失当前填写内容。'}
+              {isEdit ? '尚未保存的经历或转变修改会丢失。未保存的话题选择仅在当前账号的本次会话中保留，尚未提交。' : draftSaved ? '当前内容已保存在本地草稿中，下次可以继续填写。' : '本地草稿未能保存，离开会丢失当前填写内容。'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2 sm:gap-2">

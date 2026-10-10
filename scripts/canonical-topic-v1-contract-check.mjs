@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { execFileSync } from "node:child_process";
+import { checkOwnerTopicScope } from "./lib/experience-topic-owner-scope.mjs";
 import { readFileSync } from "node:fs";
 import { withTopicLocalContract } from "./lib/topic-local-contract.mjs";
 import ts from "typescript";
@@ -93,12 +93,9 @@ for (const [section, names] of [["Tables", tables], ["Functions", newRpcs]]) {
   for (const name of names) assert.equal(normalized(actual, section, name), normalized(approved, section, name), name);
 }
 
-// B2C authorizes contracts only; no Topic feature hookup or direct table access in UI/native code.
+// B2C provenance stays frozen. The later Owner Linking V1 approval enables only the explicit owner consumer.
 const gatedSymbols = /canonical-topic-v1|CANONICAL_TOPIC_V1_(?:LOCAL_)?(?:RPCS|STATE)|parseQuestion(?:WithTopics|TopicWrite)V1|canonicalTopicV1(?:Local)?Schema|experienceTopicsV1(?:Local)?Schema|resolve_canonical_topic_v1|get_experience_topics_v1|set_experience_topics_v1|canonical_topics_v1|canonical_topic_terms_v1|question_topics_v1|experience_topics_v1/;
-const clientFiles = execFileSync("git", ["ls-files", "--", "src", "apps"], { encoding: "utf8" }).trim().split("\n");
-for (const path of clientFiles.filter((path) => /\.[cm]?[jt]sx?$/.test(path) && path !== "src/integrations/supabase/types.ts")) {
-  assert.doesNotMatch(read(path), gatedSymbols, `${path}: Topic UI/native hookup is outside B2C`);
-}
+checkOwnerTopicScope(gatedSymbols);
 assert.doesNotMatch(read("packages/shared-api/src/canonical-topic-v1.ts"), /createClient|\.rpc\(|fetch\(/);
 const runner = read("scripts/canonical-topic-v1-local-test.mjs");
 assert.match(runner, /refuse non-local endpoint/);
@@ -167,4 +164,4 @@ await withTopicLocalContract(async (api, production, backend, contracts) => {
   assert.equal(api.parseCanonicalTopicErrorV1Local({ code: "PT400", message: "TOPIC_INVALID_OR_INACTIVE" }), null);
 });
 await import("./canonical-topic-consumer-check.mjs");
-console.log("PASS: Canonical Topic B2C consumer contract verified; exact three RPCs authorized, C0D Core Seed verified, no Topic UI");
+console.log("PASS: Canonical Topic B2C consumer contract verified; exact three RPCs authorized, C0D Core Seed verified, Experience Owner-only Topic consumer");
