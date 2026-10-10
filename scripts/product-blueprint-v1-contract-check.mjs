@@ -142,12 +142,13 @@ try {
   assert.match(domainMap.canonicalTopic.currentRuntime, /EC-3B2B Production.*deployed and rollback-smoke verified/);
   assert.match(domainMap.canonicalTopic.currentRuntime, /clientConsumable=true.*Shared Core Question contract accepts 0\.\.N canonical Topic IDs/);
   assert.match(domainMap.canonicalTopic.currentRuntime, /EC-3B2C HTTP consumer gate verified/);
-  assert.match(domainMap.canonicalTopic.currentRuntime, /current Question UI still sends \[\].*Question Topic picker not implemented.*Experience Topic Owner Linking V1 wired only on existing-owner edit.*public Topic display not connected/);
+  assert.match(domainMap.canonicalTopic.currentRuntime, /current Question UI still sends \[\].*Question Topic picker not implemented.*Experience Topic Owner Linking V1 wired only on existing-owner edit.*Public Experience Topic Display V1 read-only wired on canonical public list/);
   assert.match(domainMap.canonicalTopic.currentRuntime, /Core Seed v1 Production applied and exact-state verified: 79 active Core Seed Topics, 113 aliases, 192 resolver terms/);
   assert.match(domainMap.canonicalTopic.currentRuntime, /namespace remains extensible beyond Core Seed v1/);
   assert.doesNotMatch(domainMap.canonicalTopic.currentRuntime, /taxonomy not seeded/);
   assert.match(api.PRODUCT_BLUEPRINT_V1_RPC_POLICY.resolve_canonical_topic_v1.replacement, /Core Seed v1 Production applied and resolver verified; exact resolver used only by Experience Owner Topic linking; no Discovery runtime unlock/);
   assert.match(domainMap.canonicalTopic.currentRuntime, /Home\/Search\/Matching\/Editorial runtime not implemented/);
+  assert.match(api.PRODUCT_BLUEPRINT_V1_RPC_POLICY.get_experience_topics_v1.replacement, /Public Experience Topic Display V1 caller-aware read only from canonical public list/);
   for (const name of ["resolve_canonical_topic_v1", "get_experience_topics_v1", "set_experience_topics_v1"]) {
     assert.equal(api.PRODUCT_BLUEPRINT_V1_RPC_POLICY[name].use, "canonical-blueprint");
     assert.equal(api.PRODUCT_BLUEPRINT_V1_RPC_POLICY[name].newBlueprintCodeMayDepend, true);
@@ -181,7 +182,7 @@ try {
   assert.match(experienceRuntime, /editor routes \/experience\/new and \/experience\/:experienceId\/edit are wired/);
   assert.match(experienceRuntime, /Transition management and public rendering are wired/);
   assert.match(experienceRuntime, /Person\/Experience UX Closure V1 merged via PR #55/);
-  assert.match(experienceRuntime, /Experience Topic Owner Linking V1 wired only on existing-owner edit; new Experience and Public Person Topic UI NOT connected/);
+  assert.match(experienceRuntime, /Experience Topic Owner Linking V1 wired only on existing-owner edit; Public Experience Topic Display V1 read-only wired on canonical public list; new Experience Topic UI NOT connected/);
   assert.match(experienceRuntime, /no WeChat Experience implementation or real native iOS\/Android QA completion claimed/);
   assert.doesNotMatch(experienceRuntime, /Shared Core UI is not wired/);
   assert.equal(domainMap.transition.runtimeStatus, "production-ready");

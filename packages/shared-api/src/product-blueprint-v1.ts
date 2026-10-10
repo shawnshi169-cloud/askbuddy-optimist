@@ -44,7 +44,7 @@ export const PRODUCT_BLUEPRINT_V1_DOMAIN_MAP = {
   experience: {
     domain: "experience",
     target: "Person-owned experience records independent from verification and service",
-    currentRuntime: "Production storage and 13 Experience RPCs deployed and remote-smoke verified; Shared Core canonical Experience consumers are wired: /person/:userId reads canonical Public Person and public Experiences; /profile/experiences supports owner create/edit, public/private visibility, reorder and delete; editor routes /experience/new and /experience/:experienceId/edit are wired; Transition management and public rendering are wired; Person/Experience UX Closure V1 merged via PR #55; Experience Topic Owner Linking V1 wired only on existing-owner edit; new Experience and Public Person Topic UI NOT connected; no WeChat Experience implementation or real native iOS/Android QA completion claimed",
+    currentRuntime: "Production storage and 13 Experience RPCs deployed and remote-smoke verified; Shared Core canonical Experience consumers are wired: /person/:userId reads canonical Public Person and public Experiences; /profile/experiences supports owner create/edit, public/private visibility, reorder and delete; editor routes /experience/new and /experience/:experienceId/edit are wired; Transition management and public rendering are wired; Person/Experience UX Closure V1 merged via PR #55; Experience Topic Owner Linking V1 wired only on existing-owner edit; Public Experience Topic Display V1 read-only wired on canonical public list; new Experience Topic UI NOT connected; no WeChat Experience implementation or real native iOS/Android QA completion claimed",
     runtimeStatus: "production-ready",
     newCodePolicy: "may-use-deployed-contract",
     phase: "EC-1",
@@ -79,7 +79,7 @@ export const PRODUCT_BLUEPRINT_V1_DOMAIN_MAP = {
     domain: "canonical-topic",
     target: "platform-governed cross-module semantic entity shared by Question/Experience/Editorial/Search/Matching; not a hashtag or Article",
     contractStatus: "approved-frozen",
-    currentRuntime: "EC-3B1 approved/merged; EC-3B2B Production Canonical Topic storage, exact resolver and typed Question/Experience associations deployed and rollback-smoke verified; backend accepts real active Topic IDs with historical deprecated retention; EC-3B2C HTTP consumer gate verified, clientConsumable=true, Shared Core Question contract accepts 0..N canonical Topic IDs; EC-3C0D Core Seed v1 Production applied and exact-state verified: 79 active Core Seed Topics, 113 aliases, 192 resolver terms; namespace remains extensible beyond Core Seed v1; current Question UI still sends [], Question Topic picker not implemented; Experience Topic Owner Linking V1 wired only on existing-owner edit; public Topic display not connected; Home/Search/Matching/Editorial runtime not implemented; evidence: docs/ec3b2c-canonical-topic-consumer-gate.md and docs/ec3c0d-canonical-topic-core-seed-production-apply.md",
+    currentRuntime: "EC-3B1 approved/merged; EC-3B2B Production Canonical Topic storage, exact resolver and typed Question/Experience associations deployed and rollback-smoke verified; backend accepts real active Topic IDs with historical deprecated retention; EC-3B2C HTTP consumer gate verified, clientConsumable=true, Shared Core Question contract accepts 0..N canonical Topic IDs; EC-3C0D Core Seed v1 Production applied and exact-state verified: 79 active Core Seed Topics, 113 aliases, 192 resolver terms; namespace remains extensible beyond Core Seed v1; current Question UI still sends [], Question Topic picker not implemented; Experience Topic Owner Linking V1 wired only on existing-owner edit; Public Experience Topic Display V1 read-only wired on canonical public list; Home/Search/Matching/Editorial runtime not implemented; evidence: docs/ec3b2c-canonical-topic-consumer-gate.md and docs/ec3c0d-canonical-topic-core-seed-production-apply.md",
     runtimeStatus: "production-ready",
     newCodePolicy: "may-use-deployed-contract",
     phase: "EC-3",
@@ -265,7 +265,7 @@ export const PRODUCT_BLUEPRINT_V1_RPC_POLICY = {
   get_experience_topics_v1: {
     use: "canonical-blueprint",
     newBlueprintCodeMayDepend: true,
-    replacement: "EC-3B2C consumer gate verified; caller-aware private visibility; Experience Owner Topic linking read only on existing-owner edit",
+    replacement: "EC-3B2C consumer gate verified; caller-aware private visibility; Experience Owner Topic linking read only on existing-owner edit; Public Experience Topic Display V1 caller-aware read only from canonical public list",
   },
   set_experience_topics_v1: {
     use: "canonical-blueprint",

@@ -34,6 +34,7 @@ type ExperienceCardData = PublicPersonExperienceV1 | OwnerPersonExperienceV1;
 interface PersonExperienceCardProps {
   experience: ExperienceCardData;
   ownerMode?: boolean;
+  publicTopics?: React.ReactNode;
   reorderMode?: boolean;
   isFirst?: boolean;
   isLast?: boolean;
@@ -48,6 +49,7 @@ interface PersonExperienceCardProps {
 const PersonExperienceCard: React.FC<PersonExperienceCardProps> = ({
   experience,
   ownerMode = false,
+  publicTopics,
   reorderMode = false,
   isFirst = false,
   isLast = false,
@@ -156,6 +158,8 @@ const PersonExperienceCard: React.FC<PersonExperienceCardProps> = ({
           ))}
         </div>
       ) : null}
+
+      {!ownerMode && visibility === 'public' ? publicTopics : null}
 
       {ownerMode && reorderMode ? (
         <div className="mt-4 flex justify-end gap-3 border-t border-app-border-subtle pt-2" aria-label="调整经历顺序">

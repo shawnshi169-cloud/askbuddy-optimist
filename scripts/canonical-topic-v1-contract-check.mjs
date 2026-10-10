@@ -93,7 +93,7 @@ for (const [section, names] of [["Tables", tables], ["Functions", newRpcs]]) {
   for (const name of names) assert.equal(normalized(actual, section, name), normalized(approved, section, name), name);
 }
 
-// B2C provenance stays frozen. The later Owner Linking V1 approval enables only the explicit owner consumer.
+// B2C provenance stays frozen; later approvals allow owner linking and public Experience read-only display only.
 const gatedSymbols = /canonical-topic-v1|CANONICAL_TOPIC_V1_(?:LOCAL_)?(?:RPCS|STATE)|parseQuestion(?:WithTopics|TopicWrite)V1|canonicalTopicV1(?:Local)?Schema|experienceTopicsV1(?:Local)?Schema|resolve_canonical_topic_v1|get_experience_topics_v1|set_experience_topics_v1|canonical_topics_v1|canonical_topic_terms_v1|question_topics_v1|experience_topics_v1/;
 checkOwnerTopicScope(gatedSymbols);
 assert.doesNotMatch(read("packages/shared-api/src/canonical-topic-v1.ts"), /createClient|\.rpc\(|fetch\(/);
@@ -164,4 +164,4 @@ await withTopicLocalContract(async (api, production, backend, contracts) => {
   assert.equal(api.parseCanonicalTopicErrorV1Local({ code: "PT400", message: "TOPIC_INVALID_OR_INACTIVE" }), null);
 });
 await import("./canonical-topic-consumer-check.mjs");
-console.log("PASS: Canonical Topic B2C consumer contract verified; exact three RPCs authorized, C0D Core Seed verified, Experience Owner-only Topic consumer");
+console.log("PASS: Canonical Topic B2C consumer contract verified; exact three RPCs authorized, C0D Core Seed verified, scoped Experience Owner linking and public read-only display");

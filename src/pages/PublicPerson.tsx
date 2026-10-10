@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import PersonExperienceCard from '@/components/experience/PersonExperienceCard';
+import PublicExperienceTopics from '@/components/experience/PublicExperienceTopics';
 import SubPageHeader from '@/components/layout/SubPageHeader';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -174,7 +175,8 @@ const PublicPerson: React.FC = () => {
           ) : (
             <div className="mt-4 space-y-4">
               {experiences.map((experience) => (
-                <PersonExperienceCard key={experience.experienceId} experience={experience} />
+                <PersonExperienceCard key={experience.experienceId} experience={experience}
+                  publicTopics={<PublicExperienceTopics experience={experience} />} />
               ))}
               {experiencesQuery.isFetchNextPageError ? <p role="alert" className="text-sm text-rose-700">暂时无法加载更多经历，已加载内容仍可查看，请重试。</p> : null}
               {experiencesQuery.hasNextPage ? (
