@@ -137,9 +137,16 @@ const keyA = [...queryKeys.at(-1)]; picker(B); assert.notDeepEqual(queryKeys.at(
 // Actual composer callbacks -> actual canonical adapter, only transport/storage are isolated doubles.
 const flush = async () => { for (let i = 0; i < 20; i++) await Promise.resolve(); };
 let viewer = A, errorKey = 'TOPIC_INVALID_OR_INACTIVE', pending = false, release, calls = [], navigation = [];
+let observeRun = () => {};
+const acceptedCreates = [];
 const api = adapter.createQuestionAnswerClient({ viewer: async () => viewer, run: async (name, input) => {
+  observeRun(name, input);
   calls.push({ name, input }); if (release) await new Promise(resolve => { release = resolve; });
-  return errorKey === 'NETWORK' ? Promise.reject(Error('lost response')) : errorKey ? { data: null, error: { code: 'PT422', message: errorKey } } : { data: { questionId: Q }, error: null };
+  if (errorKey === 'NETWORK') {
+    acceptedCreates.push({ name, input, questionId: Q }); // Server accepted the isolated write; only its response is lost.
+    throw Error('lost response');
+  }
+  return errorKey ? { data: null, error: { code: 'PT422', message: errorKey } } : { data: { questionId: Q }, error: null };
 } });
 const composer = (owner, local = store(), authSession = store()) => {
   globalThis.localStorage = local; globalThis.sessionStorage = authSession;
@@ -154,6 +161,47 @@ const composer = (owner, local = store(), authSession = store()) => {
   const element = Page(), render = () => h.render(() => element.type(element.props)); render();
   return { render, local, authSession, unmount: h.unmount, submit: current => nodes(current).find(node => node.type === 'form').props.onSubmit({ preventDefault() {} }) };
 };
+const componentFields = tree => ({
+  title: nodes(tree).find(node => node.props?.id === 'question-title').props.value,
+  context: nodes(tree).find(node => node.props?.id === 'question-context').props.value,
+  primaryChannel: nodes(tree).find(node => node.props?.name === 'primaryChannel' && node.props.checked).props.value,
+  budgetInput: nodes(tree).find(node => node.props?.id === 'question-budget').props.value,
+  topicIds: nodes(tree).find(node => node.type === 'Picker').props.topicIds,
+});
+const draftFields = value => Object.fromEntries(['title', 'context', 'primaryChannel', 'budgetInput', 'topicIds'].map(key => [key, value[key]]));
+{
+  const durable = store(); durable.setItem(form.questionDraftKey(A), JSON.stringify(draft));
+  let storageUnavailable = true;
+  const failingStorage = { ...durable, setItem: (key, value) => {
+    if (storageUnavailable) throw Error('storage unavailable');
+    durable.setItem(key, value);
+  } };
+  const blocked = composer(A, failingStorage); let current = blocked.render();
+  const edited = { ...draft, title: '尚未保存到设备的最新标题' };
+  nodes(current).find(node => node.props?.id === 'question-title').props.onChange({ target: { value: edited.title } });
+  current = blocked.render();
+  await blocked.submit(current); await blocked.submit(current); await blocked.submit(blocked.render());
+  assert.equal(calls.length, 0, 'No RPC may run without a persisted recovery marker, including repeated clicks');
+  assert.equal(navigation.length, 0);
+  current = blocked.render();
+  assert.match(text(current), /问题尚未提交.*恢复本地存储后重试/);
+  assert.deepEqual(componentFields(current), draftFields(edited), 'Latest in-memory fields and Topic IDs survive storage failure');
+  assert.equal(nodes(current).find(node => node.type === 'Button' && node.props.type === 'submit').props.disabled, false);
+  assert.equal(form.parseQuestionDraft(durable.getItem(form.questionDraftKey(A))).publishUncertain, undefined);
+  storageUnavailable = false; errorKey = null; release = true;
+  const recovered = blocked.submit(current); await flush();
+  assert.equal(calls.length, 1, 'The lock is released so recovery can publish');
+  assert.deepEqual(calls[0].input, form.questionDraftInput(edited));
+  const marker = form.parseQuestionDraft(durable.getItem(form.questionDraftKey(A)));
+  assert.equal(marker.publishUncertain, true); assert.deepEqual(draftFields(marker), draftFields(edited));
+  await blocked.submit(current); assert.equal(calls.length, 1, 'Pending recovery still blocks duplicate publication');
+  assert.equal(navigation.length, 0, 'Persistence alone is not publication success');
+  release(); release = null; await recovered;
+  assert.equal(durable.getItem(form.questionDraftKey(A)), null);
+  assert.equal(navigation.at(-1)[0], `/question/${Q}`);
+  await blocked.submit(blocked.render()); assert.equal(calls.length, 1);
+  blocked.unmount(); calls = []; navigation = []; errorKey = 'TOPIC_INVALID_OR_INACTIVE';
+}
 const local = store(); local.setItem(form.questionDraftKey(A), JSON.stringify(draft)); local.setItem(form.questionDraftKey(B), JSON.stringify({ ...base, title: 'B only' }));
 let c = composer(A, local), t = c.render(); release = true;
 const first = c.submit(t); await flush(); await c.submit(t); assert.equal(calls.length, 1, 'Synchronous lock prevents repeated publish');
@@ -164,12 +212,28 @@ release(); release = null; await first; t = c.render();
 assert.match(text(t), /所选话题已不可用/); assert.equal(navigation.length, 0);
 const retained = form.parseQuestionDraft(local.getItem(form.questionDraftKey(A)));
 for (const field of ['title', 'context', 'primaryChannel', 'budgetInput', 'topicIds']) assert.deepEqual(retained[field], draft[field]);
+assert.equal(retained.publishUncertain, undefined, 'Confirmed PT422 rejection does not require uncertain-outcome confirmation');
+assert.equal(nodes(t).find(node => node.type === 'Button' && node.props.type === 'submit').props.disabled, false);
 errorKey = null; await c.submit(t); assert.equal(local.getItem(form.questionDraftKey(A)), null);
 assert.equal(form.parseQuestionDraft(local.getItem(form.questionDraftKey(B))).title, 'B only');
 assert.equal(navigation.at(-1)[0], `/question/${Q}`); before = calls.length; await c.submit(t); assert.equal(calls.length, before);
 const zeroStorage = store(); zeroStorage.setItem(form.questionDraftKey(A), JSON.stringify(base)); c = composer(A, zeroStorage); await c.submit(c.render()); assert.deepEqual(calls.at(-1).input.p_topic_ids, []);
-errorKey = 'NETWORK'; const failed = store(); failed.setItem(form.questionDraftKey(A), JSON.stringify(draft)); c = composer(A, failed); await c.submit(c.render()); t = c.render();
+errorKey = 'NETWORK'; const failed = store(); failed.setItem(form.questionDraftKey(A), JSON.stringify(draft));
+let failLaterPersistence = false;
+const lostResponseStorage = { ...failed, setItem: (key, value) => {
+  if (failLaterPersistence) throw Error('storage unavailable after request');
+  failed.setItem(key, value);
+} };
+observeRun = () => {
+  assert.equal(form.parseQuestionDraft(failed.getItem(form.questionDraftKey(A))).publishUncertain, true, 'Marker is already durable at transport entry');
+  failLaterPersistence = true;
+};
+c = composer(A, lostResponseStorage); await c.submit(c.render()); t = c.render(); observeRun = () => {};
+assert.equal(acceptedCreates.length, 1);
+assert.deepEqual(acceptedCreates[0].input, form.questionDraftInput(draft));
+assert.equal(form.parseQuestionDraft(failed.getItem(form.questionDraftKey(A))).publishUncertain, true, 'Pre-request marker survives lost response even when later persistence also fails');
 assert.match(text(t), /上次发布结果尚未确认/); before = calls.length; await c.submit(t); assert.equal(calls.length, before);
+assert.deepEqual(componentFields(t), draftFields(draft)); c.unmount();
 c = composer(A, failed); await c.submit(c.render()); assert.equal(calls.length, before, 'Remount cannot automatically repeat ambiguous publish');
 assert.deepEqual(form.parseQuestionDraft(failed.getItem(form.questionDraftKey(A))).topicIds, draft.topicIds);
 viewer = B; const switched = store(); switched.setItem(form.questionDraftKey(A), JSON.stringify(draft)); c = composer(A, switched); before = calls.length; await c.submit(c.render()); assert.equal(calls.length, before, 'Viewer check blocks A input under B');

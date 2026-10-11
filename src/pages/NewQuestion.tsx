@@ -106,9 +106,12 @@ const QuestionComposer = ({ viewer }: { viewer: string | null }) => {
     }
     publishLock.current = true;
     setError('');
-    // A lost response must not turn a restored draft into an automatic second publication.
-    persist({ ...draft, publishUncertain: true });
     try {
+      // The recovery marker must be durable before a request can reach the server.
+      if (!persist({ ...draft, publishUncertain: true })) {
+        setError('当前设备无法保存发布状态，问题尚未提交。请恢复本地存储后重试。');
+        return;
+      }
       const result = await create.mutateAsync(input);
       if (!active.current) return;
       submitted.current = true;
