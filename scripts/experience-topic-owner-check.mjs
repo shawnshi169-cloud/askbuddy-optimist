@@ -67,9 +67,15 @@ await withTopicLocalContract(async (_qa, _question, contracts) => {
     },
     rpc: async (name, params) => { calls.push({ name, params }); return rpcResults.shift() ?? { data: null, error: null }; },
   };
-  const api = load('src/features/experience/topics/topicApi.ts', {
+  const catalog = load('src/features/topics/topicCatalog.ts', {
     zod: { z }, '@/integrations/supabase/client': { supabase },
+    '../../../packages/shared-api/src/canonical-topic-v1': contracts,
+    '../../../packages/shared-api/src/question-answer-v1': _question,
+  });
+  const api = load('src/features/experience/topics/topicApi.ts', {
+    '@/integrations/supabase/client': { supabase },
     '../../../../packages/shared-api/src/canonical-topic-v1': contracts,
+    '@/features/topics/topicCatalog': catalog,
   });
   tableResults = [{ data: [row(a)] }];
   rpcResults = [{ data: { topic: { ...a, aliases: ['完整别名'] } } }];
@@ -224,14 +230,16 @@ assert.equal(harness.queryOptions.at(-3).enabled, false);
 client.clear();
 
 const apiSource = read('src/features/experience/topics/topicApi.ts');
-assert.doesNotMatch(apiSource, /\.select\(['"]\*['"]\)|\.insert\(|\.update\(|\.upsert\(|\.delete\(|\b79\b|core-v1\.json|createClient/);
-assert.match(apiSource, /\.range\(offset, offset \+ TOPIC_PAGE_SIZE - 1\)/);
+const catalogSource = read('src/features/topics/topicCatalog.ts');
+const source = apiSource + catalogSource;
+assert.doesNotMatch(source, /\.select\(['"]\*['"]\)|\.insert\(|\.update\(|\.upsert\(|\.delete\(|\b79\b|core-v1\.json|createClient/);
+assert.match(catalogSource, /\.range\(offset, offset \+ TOPIC_PAGE_SIZE - 1\)/);
 for (const rpc of ['resolve_canonical_topic_v1', 'get_experience_topics_v1', 'set_experience_topics_v1']) {
-  assert.match(apiSource, new RegExp(`CANONICAL_TOPIC_V1_RPCS\\.${rpc}`));
-  assert.ok(apiSource.includes(`Database['public']['Functions']['${rpc}']['Args']`));
+  assert.match(source, new RegExp(`CANONICAL_TOPIC_V1_RPCS\\.${rpc}`));
+  assert.ok(source.includes(`Database['public']['Functions']['${rpc}']['Args']`));
 }
-assert.equal((apiSource.match(/contract\.parseParams/g) ?? []).length, 3);
-assert.equal((apiSource.match(/contract\.parseResult/g) ?? []).length, 3);
+assert.equal((source.match(/contract\.parseParams/g) ?? []).length, 3);
+assert.equal((source.match(/contract\.parseResult/g) ?? []).length, 3);
 const editor = read('src/pages/ExperienceEditor.tsx');
 assert.match(editor, /hasUnsavedChanges = formDirty \|\| transitionDirty \|\| topicDirty/);
 assert.match(editor, /busy: saving \|\| transitionBusy \|\| topicBusy/);

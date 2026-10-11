@@ -72,16 +72,17 @@ export const PAGE_CONTRACT_MAP: PageContract[] = [
     currentReadContracts: [
       "storage:canonical-question-draft-v2", "contract:auth-viewer-state",
       "contract:product-channel-catalog",
+      "table:canonical_topics_v1", "rpc:resolve_canonical_topic_v1",
     ],
     currentWriteContracts: ["rpc:create_question_v1"],
     notes: [
-      "EC-2D Shared Core NewQuestion is canonical: title and context required, exactly one of the four Product Channels, topicIds=[], optional nullable positive safe-integer CNY deepExchangeBudgetMaxCents; public answers remain free.",
-      "EC-3B2C authorizes 0..N canonical Topic IDs in the shared contract, but this page still submits []: no Topic picker, resolver UI, suggestions or automatic associations.",
-      "Local canonical-question-draft-v2 is viewer-scoped with Auth return handoff; only successful real create_question_v1 clears the draft and navigates to /question/:questionId.",
+      "EC-2D Shared Core NewQuestion is canonical: title and context required, exactly one of the four Product Channels, topicIds=0..N user-selected canonical IDs in caller order, optional nullable positive safe-integer CNY deepExchangeBudgetMaxCents; public answers remain free.",
+      "Question Topic Picker V1 uses the real active paginated catalog and exact alias resolver only on NewQuestion; zero selection sends []; no inferred suggestions, Topic creation, Question Edit picker or Question Detail Topic display.",
+      "Local canonical-question-draft-v2 is viewer-scoped and extended with IDs only; old V2 drafts restore with empty selection. Auth handoff preserves existing account drafts rather than overwriting them; only successful real create_question_v1 clears the draft and navigates to /question/:questionId.",
       "No bounty, fake AI tags, Expert consultation, unsupported attachments, or Question Edit UI. update_question_v1 is an adapter capability, not an exposed page action.",
       "Shared Core implementation (including iOS React) is complete; real iOS keyboard QA is BLOCKED BY ENVIRONMENT, and WeChat canonical flow is NOT IMPLEMENTED; EC-2 cross-platform rollout is NOT COMPLETE.",
       "Android native/platform verification is VERIFIED on Pixel 7 / Android 16 API 36 with gesture navigation (PR #45/#46); LOCAL ISOLATED QA for platform behavior, not Production backend re-verification. Evidence: docs/ec2f-android-native-verification.md.",
-      "Home/Search/Channel feed cutover remains deferred to EC-3; canonical channel selection does not imply canonical discovery feeds or non-empty Canonical Topic associations.",
+      "Home/Search/Channel feed cutover remains deferred to EC-3; Topic selection does not activate Discovery/Matching. Native verification of this new picker is not claimed.",
     ],
   },
   {

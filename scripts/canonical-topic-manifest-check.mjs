@@ -322,7 +322,7 @@ check("C0C has no migration change, seed SQL, executable mutation path or runtim
   for (const path of walk("canonical-topics")) assert.doesNotMatch(path, /\.sql$/);
   const discovery = read("packages/shared-api/src/discovery-v1.ts");
   for (const flag of ["productionDeployed", "clientConsumable", "implementationStarted", "rpcNamesFrozen"]) assert.match(discovery, new RegExp(`${flag}: false`));
-  assert.match(read("src/pages/NewQuestion.tsx"), /p_topic_ids: \[\]/);
+  assert.match(git("show", `${c0cReviewedHead}:src/pages/NewQuestion.tsx`), /p_topic_ids: \[\]/);
 });
 
 console.log(`Canonical Topic manifest/planner: ${tests.length} checks PASS; no Production access.`);
