@@ -465,6 +465,23 @@ real PostgreSQL assertions. No existing global Discovery flags were activated.
 The build warned that browsers data is old. Both remain documented follow-up
 risks, not hidden clean-security claims.
 
+### PR #62 review fix: required offline CI coverage
+
+Independent review of `fa9fafe0cad9bc28c2e345b5a67430c6f3fd3aaa` found
+that the D1B offline transport/security test passed locally but was absent
+from the required CI path. `test:contracts` now invokes
+`npm run test:question-discovery-transport-v1` exactly once, after D1A's
+offline check. The existing GitHub `quality-gate` runs this complete chain.
+The Docker/PostgreSQL `:local` integration commands remain opt-in and are
+not added to GitHub-hosted CI. Test implementations and security assertions
+are unchanged; offline evidence still does not verify real Supabase Auth.
+
+Security backlog remains open: the previously recorded 44 dependency audit
+findings (2 low, 7 moderate, 32 high, 3 critical) require separate triage and
+remediation. This CI-only fix does not upgrade dependencies or change the
+lockfile. Historical optional legacy lint debt is reported separately from
+the required quality gate, not suppressed.
+
 ### Functional, security and performance evidence
 
 D1A regression retains anonymous/owner/non-owner parity, open/closed inclusion,
