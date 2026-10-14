@@ -5,6 +5,13 @@ import { withQuestionDiscovery } from "./lib/question-discovery-local.mjs";
 
 const files = dir => readdirSync(dir, { withFileTypes: true }).flatMap(entry =>
   entry.isDirectory() ? files(`${dir}/${entry.name}`) : [`${dir}/${entry.name}`]);
+const localRunner = readFileSync("scripts/question-discovery-v1-local-check.mjs", "utf8");
+assert.match(localRunner, /withDisposablePostgres\(async \(\{ admin: client, systemId, database \}\)/);
+assert.match(localRunner, /await assertDisposableTarget\(client\)/);
+assert.ok(localRunner.indexOf("await assertDisposableTarget(client)") < localRunner.indexOf('await q("BEGIN")'));
+assert.match(localRunner, /\{ profile: "d1a" \}/);
+assert.doesNotMatch(localRunner, /new pg\.(?:Client|Pool)|DATABASE_URL|database:\s*["']postgres["']|SET SESSION AUTHORIZATION/);
+// The focused/local gate proves actual database name/OID/system identity, not just this structural guard.
 for (const file of [...files("src"), ...files("packages")].filter(path => /\.[cm]?[jt]sx?$/.test(path)))
   assert.doesNotMatch(readFileSync(file, "utf8"), /local-backend\/question-discovery|QuestionDiscoveryService|SqlQuestionRepository/,
     `No deployed client/shared runtime import: ${file}`);

@@ -49,7 +49,9 @@
     "test:public-experience-topics": "node scripts/public-experience-topics-check.mjs",
     "test:question-topic-picker": "node scripts/question-topic-picker-check.mjs",
     "test:question-discovery-v1": "node scripts/question-discovery-v1-check.mjs",
-    "test:question-discovery-v1:local": "node scripts/question-discovery-v1-local-check.mjs --local"
+    "test:question-discovery-v1:local": "node scripts/question-discovery-v1-local-check.mjs --local",
+    "test:question-discovery-transport-v1": "node scripts/question-discovery-transport-check.mjs",
+    "test:question-discovery-transport-v1:local": "node scripts/question-discovery-transport-local-check.mjs --local"
   },
   "dependencies": {
     "@capacitor/android": "^8.0.0",
