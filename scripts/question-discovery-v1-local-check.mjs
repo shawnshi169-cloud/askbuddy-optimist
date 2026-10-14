@@ -1,32 +1,12 @@
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
-import pg from "pg";
 import { withQuestionDiscovery } from "./lib/question-discovery-local.mjs";
+import { withDisposablePostgres, assertDisposableTarget } from "./lib/d1b-disposable-postgres.mjs";
+import { regressionCounts } from "./lib/d1a-regression-bootstrap.mjs";
 
 assert.deepEqual(process.argv.slice(2), ["--local"], "Only an explicit local target is accepted");
-const context = "colima-askbuddy-ec2b", container = "supabase_db_askbuddy-ec2b";
-const env = { HOME: process.env.HOME, PATH: process.env.PATH };
-const docker = args => execFileSync("docker", args, { env, encoding: "utf8", timeout: 30000 }).trim();
-assert.equal(docker(["context", "inspect", context, "--format", "{{.Endpoints.docker.Host}}"]),
-  `unix://${process.env.HOME}/.colima/askbuddy-ec2b/docker.sock`);
-assert.equal(docker(["--context", context, "inspect", container, "--format", "{{.Config.Image}}"]),
-  "public.ecr.aws/supabase/postgres:17.6.1.095");
-const ports = JSON.parse(docker(["--context", context, "inspect", container, "--format", "{{json .NetworkSettings.Ports}}"]));
-assert.ok(ports["5432/tcp"].every(port => port.HostPort === "54322"));
-const systemId = docker(["--context", context, "exec", container, "psql", "-X", "-U", "postgres", "-d", "postgres",
-  "-At", "-c", "SELECT system_identifier FROM pg_control_system();"]);
-// This local-only password stays in memory and is never logged, persisted or accepted from a remote URL.
-const password = docker(["--context", context, "exec", container, "printenv", "POSTGRES_PASSWORD"]);
-const client = new pg.Client({ host: "127.0.0.1", port: 54322, user: "postgres", database: "postgres", password,
-  ssl: false, connectionTimeoutMillis: 5000, application_name: "ec3d1a-local-rollback-only" });
-const tables = ["auth.users", "public.profiles", "public.user_settings", "public.point_accounts",
-  "public.canonical_topics_v1", "public.canonical_topic_terms_v1", "public.question_topics_v1",
-  "public.experience_topics_v1", "public.questions_v1", "public.answers_v1", "public.answer_replies_v1",
-  "public.answer_helpful_marks_v1", "public.answer_helpful_public_facts_v1", "public.person_experiences",
-  "public.experience_transitions", "public.experience_claims"];
-const counts = async () => (await client.query(`SELECT jsonb_build_object(${tables.map(table =>
-  `'${table}',(SELECT count(*) FROM ${table})`).join(",")}) AS counts`)).rows[0].counts;
+await withDisposablePostgres(async ({ admin: client, systemId, database }) => {
+const counts = () => regressionCounts(client);
 const id = n => `d1a10000-0000-4000-8000-${String(n).padStart(12, "0")}`;
 const a = id(9001), b = id(9002), c = id(9003), t = id(8001), u = id(8002), deprecated = id(8003);
 const q = (sql, values = []) => client.query(sql, values);
@@ -38,11 +18,12 @@ const as = async (role, userId = null) => {
   assert.deepEqual(actual, { role, id: userId });
 };
 
-await client.connect();
 let before;
 try {
+  await assertDisposableTarget(client);
   assert.equal((await q("SELECT system_identifier::text AS id FROM pg_control_system()")).rows[0].id, systemId);
-  assert.equal((await q("SELECT max(version) AS version FROM supabase_migrations.schema_migrations")).rows[0].version, "20260915140330");
+  assert.equal((await q("SELECT to_regnamespace('supabase_migrations') AS schema")).rows[0].schema, null,
+    "Disposable manifest provenance is not a fabricated applied migration history");
   const triggers = (await q(`SELECT t.tgname,p.proname,p.prosrc FROM pg_trigger t JOIN pg_proc p ON p.oid=t.tgfoid
     WHERE t.tgrelid='auth.users'::regclass AND NOT t.tgisinternal`)).rows;
   assert.equal(triggers.length, 1);
@@ -53,7 +34,7 @@ try {
     ["profiles", "user_settings", "point_accounts"]);
   before = await counts();
   assert.ok(Object.values(before).every(value => value === 0), "Refuse nonempty local database; do not reset or clean it");
-  console.log("LOCAL ONLY: pinned Docker identity + loopback endpoint; Postgres 17.6.1.095; migration head 20260915140330");
+  console.log(`LOCAL DISPOSABLE ONLY: ${database}; 9 tracked tables; reviewed dependency manifest from local foundation 20260915140330, not full migration parity`);
   await q("BEGIN");
   await q("SET LOCAL statement_timeout='2s'");
   await q("SET LOCAL lock_timeout='1s'");
@@ -75,6 +56,8 @@ try {
     const keys = page => page.items.map(item => item.questionId);
     await q("INSERT INTO auth.users(id,email) SELECT x.id,x.email FROM unnest($1::uuid[],$2::text[]) x(id,email)",
       [[a, b, c], ["ec3d1a-local-a@example.invalid", "ec3d1a-local-b@example.invalid", "ec3d1a-local-c@example.invalid"]]);
+    for (const table of ["public.profiles", "public.user_settings", "public.point_accounts"])
+      assert.equal((await q(`SELECT count(*)::int AS n FROM ${table}`)).rows[0].n, 3, "Preserved signup projection chain");
     await q("INSERT INTO public.canonical_topics_v1(topic_id,canonical_name) SELECT x.id,x.name FROM unnest($1::uuid[],$2::text[]) x(id,name)",
       [[t, u, deprecated], ["D1A Local Topic", "D1A Unrelated Topic", "D1A Historical Topic"]]);
     const channels = ["career-development", "career-development", "career-development", "career-development",
@@ -247,12 +230,11 @@ try {
     await q("SET CONSTRAINTS ALL IMMEDIATE");
   });
 } finally {
-  try {
-    await q("ROLLBACK");
-    if (before) {
-      const after = await counts();
-      assert.deepEqual(after, before, "Rollback count mismatch: STOP, no delete/repair");
-      console.log(`ROLLBACK VERIFIED: ${JSON.stringify(after)}`);
-    }
-  } finally { await client.end(); }
+  await q("ROLLBACK");
+  if (before) {
+    const after = await counts();
+    assert.deepEqual(after, before, "Rollback count mismatch: STOP, no delete/repair");
+    console.log(`DISPOSABLE ROLLBACK VERIFIED: ${JSON.stringify(after)}`);
+  }
 }
+}, { profile: "d1a" });

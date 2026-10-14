@@ -71,17 +71,20 @@ function parameters(request: Request, caller: Caller, selection: unknown): unkno
 }
 
 export class SqlQuestionRepository implements QuestionRepository {
-  constructor(private readonly query: BoundQuery) {}
+  constructor(private readonly query: BoundQuery, private readonly candidateLimit: number = LIMITS.candidates) {
+    if (!Number.isInteger(candidateLimit) || candidateLimit < 1 || candidateLimit > 5000)
+      throw new Error("Invalid local candidate budget");
+  }
   async identity(): Promise<Caller> {
     return parseCaller((await this.query(callerSql, [])).rows[0]);
   }
   async recall(request: Request, caller: Caller): Promise<string[]> {
-    const row = (await this.query(CANDIDATE_SQL, parameters(request, caller, LIMITS.candidates + 1))).rows[0];
+    const row = (await this.query(CANDIDATE_SQL, parameters(request, caller, this.candidateLimit + 1))).rows[0];
     assertContext(row, caller);
-    const result = z.array(uuid).max(LIMITS.candidates + 1).safeParse(row.ids);
+    const result = z.array(uuid).max(this.candidateLimit + 1).safeParse(row.ids);
     if (!result.success || new Set(result.data).size !== result.data.length)
       throw new DiscoveryError("DATA_INTEGRITY_ERROR");
-    if (result.data.length > LIMITS.candidates) throw new DiscoveryError("SNAPSHOT_CAPACITY_EXCEEDED");
+    if (result.data.length > this.candidateLimit) throw new DiscoveryError("SNAPSHOT_CAPACITY_EXCEEDED");
     return result.data;
   }
   async hydrate(ids: readonly string[], request: Request, caller: Caller): Promise<QuestionDiscoveryCardV1Target[]> {

@@ -1,19 +1,25 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { DiscoveryError, LIMITS, RANK_VERSION, parsePage, parseRequest, uuid, type Page, type Request } from "./contract";
 import type { QuestionRepository } from "./repository";
-import { CursorCodec, type Snapshot, type SnapshotStore } from "./snapshot";
+import { type CursorPort, type Snapshot, type SnapshotStore } from "./snapshot";
+import type { Caller } from "./repository";
 
 const hash = (value: unknown) => createHash("sha256").update(JSON.stringify(value)).digest("hex");
+export const callerBindingKey = (caller: Caller, anonymousScope: string, sessionBinding = "") =>
+  hash(caller.role === "anon" ? ["anon", anonymousScope] : ["authenticated", caller.userId, sessionBinding]);
 // A future transport must retain this server-generated anonymous scope in a protected session.
 // Losing/rotating it deliberately invalidates old anonymous cursors; clients cannot supply a viewer UUID.
 export const newAnonymousScope = () => randomBytes(32).toString("hex");
 
 export class QuestionDiscoveryService {
   constructor(private readonly repository: QuestionRepository, private readonly store: SnapshotStore,
-    private readonly codec: CursorCodec, private readonly anonymousScope: string,
-    private readonly now: () => number = Date.now, private readonly rank = RANK_VERSION) {
+    private readonly codec: CursorPort, private readonly anonymousScope: string,
+    private readonly now: () => number = Date.now, private readonly rank = RANK_VERSION,
+    private readonly sessionBinding = "", private readonly candidateLimit: number = LIMITS.candidates) {
     if (!/^[a-f0-9]{64}$/.test(anonymousScope) || rank.length < 1 || rank.length > 64)
       throw new Error("Invalid server-side discovery configuration");
+    if (!Number.isInteger(candidateLimit) || candidateLimit < 1 || candidateLimit > 5000)
+      throw new Error("Invalid local candidate budget");
   }
   async page(value: unknown): Promise<Page> {
     const request = parseRequest(value);
@@ -21,7 +27,7 @@ export class QuestionDiscoveryService {
     if (!((caller.role === "anon" && caller.userId === null) ||
       (caller.role === "authenticated" && uuid.safeParse(caller.userId).success)))
       throw new DiscoveryError("UNTRUSTED_CALLER_CONTEXT");
-    const callerKey = hash(caller.role === "anon" ? ["anon", this.anonymousScope] : ["authenticated", caller.userId]);
+    const callerKey = callerBindingKey(caller, this.anonymousScope, this.sessionBinding);
     const binding = hash(["questions", "no-text-query-v1", callerKey, request.scope, request.topicId,
       request.city, request.page.limit]);
     let snapshot: Snapshot;
@@ -40,7 +46,7 @@ export class QuestionDiscoveryService {
       snapshot = found; position = token.p;
     } else {
       const ids = await this.repository.recall(request, caller);
-      if (ids.length > LIMITS.candidates) throw new DiscoveryError("SNAPSHOT_CAPACITY_EXCEEDED");
+      if (ids.length > this.candidateLimit) throw new DiscoveryError("SNAPSHOT_CAPACITY_EXCEEDED");
       if (new Set(ids).size !== ids.length || ids.some(id => !uuid.safeParse(id).success))
         throw new DiscoveryError("DATA_INTEGRITY_ERROR");
       snapshot = { id: randomUUID(), callerKey, binding, rank: this.rank, expiresAt: this.now() + LIMITS.ttlMs, ids };

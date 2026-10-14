@@ -50,12 +50,16 @@ export class MemorySnapshotStore implements SnapshotStore {
   usage() { return { count: this.rows.size, accountedBytes: this.bytes }; }
 }
 
-const tokenSchema = z.object({
-  s: uuid, p: z.number().int().min(1).max(LIMITS.candidates),
+export const cursorTokenSchema = z.object({
+  s: uuid, p: z.number().int().min(1).max(5000),
   b: z.string().regex(/^[a-f0-9]{64}$/), r: z.string().min(1).max(64),
   exp: z.number().int().positive().safe(),
 }).strict();
-export type CursorToken = z.infer<typeof tokenSchema>;
+export type CursorToken = z.infer<typeof cursorTokenSchema>;
+export interface CursorPort {
+  encode(value: CursorToken): string;
+  decode(value: string): CursorToken;
+}
 const aad = Buffer.from("ec3d1a:question-discovery:cursor:v1", "utf8");
 function decodePart(value: string): Buffer {
   if (!/^[A-Za-z0-9_-]+$/.test(value)) throw new DiscoveryError("INVALID_CURSOR");
@@ -71,7 +75,7 @@ export class CursorCodec {
     this.key = Buffer.from(key);
   }
   encode(value: CursorToken): string {
-    const token = tokenSchema.parse(value);
+    const token = cursorTokenSchema.parse(value);
     const nonce = randomBytes(12);
     const cipher = createCipheriv("aes-256-gcm", this.key, nonce);
     cipher.setAAD(aad);
@@ -90,7 +94,7 @@ export class CursorCodec {
       const decipher = createDecipheriv("aes-256-gcm", this.key, nonce);
       decipher.setAAD(aad); decipher.setAuthTag(tag);
       const plaintext = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
-      return tokenSchema.parse(JSON.parse(plaintext.toString("utf8")));
+      return cursorTokenSchema.parse(JSON.parse(plaintext.toString("utf8")));
     } catch { throw new DiscoveryError("INVALID_CURSOR"); }
   }
 }
