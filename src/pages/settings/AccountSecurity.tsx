@@ -1,158 +1,65 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { 
-  Lock, 
-  KeyRound, 
-  Phone, 
-  Trash2,
-  ChevronRight
-} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { Card, CardContent } from '@/components/ui/card';
 import SubPageHeader from '@/components/layout/SubPageHeader';
-import { buildFromState } from '@/utils/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import { buildFromState, navigateToAuthWithReturn } from '@/utils/navigation';
 
 const AccountSecurity = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  
-  const socialAccounts = [
-    { name: 'WeChat', status: '未绑定', icon: '微信' },
-    { name: 'QQ', status: '未绑定', icon: 'QQ' },
-    { name: 'Apple', status: '已绑定', icon: '' },
-  ];
+  const { user, loading } = useAuth();
+
+  const openPasswordChange = () => {
+    if (loading) return;
+    if (!user) {
+      navigateToAuthWithReturn(navigate, location);
+      return;
+    }
+    navigate('/settings/change-password', { state: buildFromState(location) });
+  };
 
   return (
-    <div className="min-h-[100dvh] bg-slate-50">
-      <SubPageHeader title="账号与安全" />
-
+    <main className="min-h-[100dvh] bg-app-page pb-[calc(env(safe-area-inset-bottom)+2rem)]">
+      <SubPageHeader title="账号与安全" variant="content" />
       <div className="space-y-4 p-4">
-        {/* 基本信息 */}
-        <Card className="surface-card rounded-3xl border-none shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center">
-              <Phone className="w-5 h-5 mr-2 text-primary" />
-              基本信息
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div className="space-y-0.5">
-                <span className="text-sm font-medium">手机号</span>
-                <p className="text-xs text-gray-500">183****5678</p>
-              </div>
-              <Button variant="outline" size="sm" onClick={() => navigate('/settings/phone', { state: buildFromState(location) })}>
-                修改
-              </Button>
-            </div>
-            
-            <div className="flex justify-between items-center">
-              <div className="space-y-0.5">
-                <span className="text-sm font-medium">登录密码</span>
-                <p className="text-xs text-gray-500">建议定期更换密码</p>
-              </div>
-              <Button variant="outline" size="sm" onClick={() => navigate('/settings/change-password', { state: buildFromState(location) })}>
-                修改
-              </Button>
-            </div>
+        <Card className="rounded-[20px] border-app-border-subtle shadow-sm">
+          <CardContent className="space-y-3 p-5">
+            <h2 className="text-base font-semibold text-foreground">登录密码</h2>
+            <p className="text-sm leading-6 text-muted-foreground">登录后可前往密码修改页面设置新密码。</p>
+            <Button className="app-btn-primary min-h-11 w-full" disabled={loading} onClick={openPasswordChange}>
+              {loading ? '正在确认登录状态…' : user ? '修改密码' : '登录后修改密码'}
+            </Button>
           </CardContent>
         </Card>
 
-        {/* 社交账号绑定 */}
-        <Card className="surface-card rounded-3xl border-none shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center">
-              <Lock className="w-5 h-5 mr-2 text-primary" />
-              社交账号绑定
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {socialAccounts.map((account, index) => (
-              <div key={index} className="flex justify-between items-center">
-                <div className="space-y-0.5">
-                  <span className="text-sm font-medium">{account.name}</span>
-                  <p className="text-xs text-gray-500">{account.status}</p>
-                </div>
-                <Switch checked={account.status === '已绑定'} />
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-
-        {/* 账号安全 */}
-        <Card className="surface-card rounded-3xl border-none shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center">
-              <KeyRound className="w-5 h-5 mr-2 text-primary" />
-              账号安全
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div 
-              className="flex justify-between items-center cursor-pointer"
-              onClick={() => navigate('/settings/account-recovery', { state: buildFromState(location) })}
-            >
-              <div className="space-y-0.5">
-                <span className="text-sm font-medium">账号找回</span>
-                <p className="text-xs text-gray-500">设置账号找回方式</p>
-              </div>
-              <ChevronRight className="w-5 h-5 text-gray-400" />
-            </div>
-            
-            <div 
-              className="flex justify-between items-center cursor-pointer"
+        <Card className="rounded-[20px] border-app-border-subtle shadow-sm">
+          <CardContent className="space-y-3 p-5">
+            <h2 className="text-base font-semibold text-foreground">暂不可用的账号功能</h2>
+            <p className="text-sm leading-6 text-muted-foreground">
+              本页暂不展示手机号或第三方账号绑定状态，也不提供绑定管理和账号找回设置。
+            </p>
+            <Button
+              variant="outline"
+              className="app-btn-secondary min-h-11 w-full"
               onClick={() => navigate('/settings/login-activity', { state: buildFromState(location) })}
             >
-              <div className="space-y-0.5">
-                <span className="text-sm font-medium">登录活动</span>
-                <p className="text-xs text-gray-500">查看登录设备和位置</p>
-              </div>
-              <ChevronRight className="w-5 h-5 text-gray-400" />
-            </div>
+              查看登录活动功能说明
+            </Button>
           </CardContent>
         </Card>
 
-        {/* 账号注销 */}
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button 
-              variant="outline" 
-              className="w-full border-destructive/30 text-destructive hover:bg-destructive/10"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              注销账号
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>确认注销账号？</AlertDialogTitle>
-              <AlertDialogDescription>
-                此操作不可撤销。注销后，您的所有数据将被永久删除。
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>取消</AlertDialogCancel>
-              <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                确认注销
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <Card className="rounded-[20px] border-app-border-subtle shadow-sm">
+          <CardContent className="space-y-3 p-5">
+            <h2 className="text-base font-semibold text-foreground">账号注销暂不可用</h2>
+            <p className="text-sm leading-6 text-muted-foreground">
+              当前没有可用的账号注销功能，无法在本页删除账号或数据。
+            </p>
+          </CardContent>
+        </Card>
       </div>
-    </div>
+    </main>
   );
 };
 
