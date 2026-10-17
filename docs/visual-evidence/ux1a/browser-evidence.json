@@ -1,0 +1,998 @@
+{
+  "revision": "UX1A-R1",
+  "data": "synthetic presentation only",
+  "browser": "123.0.6312.59",
+  "testedAt": "2026-10-17T16:31:13.710Z",
+  "matrices": [
+    {
+      "width": 320,
+      "path": "/",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 320,
+      "path": "/?mode=people",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 320,
+      "path": "/?state=loading",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 320,
+      "path": "/?state=empty",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 320,
+      "path": "/?state=error",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 320,
+      "path": "/question",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 320,
+      "path": "/question?state=loading",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 320,
+      "path": "/question?state=empty",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 320,
+      "path": "/question?state=error",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 320,
+      "path": "/question?state=missing",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 320,
+      "path": "/question?state=closed",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 320,
+      "path": "/question?state=long",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 320,
+      "path": "/question?state=partial",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 320,
+      "path": "/person",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 320,
+      "path": "/person?state=empty",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 320,
+      "path": "/person?state=loading",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 320,
+      "path": "/person?state=error",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 320,
+      "path": "/person?state=missing",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 320,
+      "path": "/person?state=long",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 320,
+      "path": "/person?state=partial",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 320,
+      "path": "/search",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 320,
+      "path": "/channel/education-learning",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 320,
+      "path": "/channel/career-development",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 320,
+      "path": "/channel/lifestyle-services",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 320,
+      "path": "/channel/hobbies-skills",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/?mode=people",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/?state=loading",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/?state=empty",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/?state=error",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/question",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/question?state=loading",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/question?state=empty",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/question?state=error",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/question?state=missing",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/question?state=closed",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/question?state=long",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/question?state=partial",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/person",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/person?state=empty",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/person?state=loading",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/person?state=error",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/person?state=missing",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/person?state=long",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/person?state=partial",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/search",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/channel/education-learning",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/channel/career-development",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/channel/lifestyle-services",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 375,
+      "path": "/channel/hobbies-skills",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/?mode=people",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/?state=loading",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/?state=empty",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/?state=error",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/question",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/question?state=loading",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/question?state=empty",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/question?state=error",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/question?state=missing",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/question?state=closed",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/question?state=long",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/question?state=partial",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/person",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/person?state=empty",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/person?state=loading",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/person?state=error",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/person?state=missing",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/person?state=long",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/person?state=partial",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/search",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/channel/education-learning",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/channel/career-development",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/channel/lifestyle-services",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 390,
+      "path": "/channel/hobbies-skills",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/?mode=people",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/?state=loading",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/?state=empty",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/?state=error",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/question",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/question?state=loading",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/question?state=empty",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/question?state=error",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/question?state=missing",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/question?state=closed",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/question?state=long",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/question?state=partial",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/person",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/person?state=empty",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/person?state=loading",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/person?state=error",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/person?state=missing",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/person?state=long",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/person?state=partial",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/search",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/channel/education-learning",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/channel/career-development",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/channel/lifestyle-services",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 430,
+      "path": "/channel/hobbies-skills",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/?mode=people",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/?state=loading",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/?state=empty",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/?state=error",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/question",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/question?state=loading",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/question?state=empty",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/question?state=error",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/question?state=missing",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/question?state=closed",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/question?state=long",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/question?state=partial",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/person",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/person?state=empty",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/person?state=loading",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/person?state=error",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/person?state=missing",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/person?state=long",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/person?state=partial",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/search",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/channel/education-learning",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/channel/career-development",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/channel/lifestyle-services",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    },
+    {
+      "width": 1200,
+      "path": "/channel/hobbies-skills",
+      "overflow": 0,
+      "minimumTarget": "44 CSS px"
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "home-questions-320.jpg",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "path": "/",
+      "fullPage": false,
+      "data": "synthetic presentation only",
+      "revision": "UX1A-R1"
+    },
+    {
+      "file": "home-questions-375.jpg",
+      "viewport": {
+        "width": 375,
+        "height": 844
+      },
+      "path": "/",
+      "fullPage": false,
+      "data": "synthetic presentation only",
+      "revision": "UX1A-R1"
+    },
+    {
+      "file": "home-questions-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "/",
+      "fullPage": false,
+      "data": "synthetic presentation only",
+      "revision": "UX1A-R1"
+    },
+    {
+      "file": "home-questions-430.jpg",
+      "viewport": {
+        "width": 430,
+        "height": 844
+      },
+      "path": "/",
+      "fullPage": false,
+      "data": "synthetic presentation only",
+      "revision": "UX1A-R1"
+    },
+    {
+      "file": "home-questions-1200.jpg",
+      "viewport": {
+        "width": 1200,
+        "height": 844
+      },
+      "path": "/",
+      "fullPage": false,
+      "data": "synthetic presentation only",
+      "revision": "UX1A-R1"
+    },
+    {
+      "file": "home-persons-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "/?mode=people",
+      "fullPage": false,
+      "data": "synthetic presentation only",
+      "revision": "UX1A-R1"
+    },
+    {
+      "file": "home-sheet-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "/ (creation sheet)",
+      "fullPage": false,
+      "data": "synthetic presentation only",
+      "revision": "UX1A-R1"
+    },
+    {
+      "file": "question-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "/question",
+      "fullPage": true,
+      "data": "synthetic presentation only",
+      "revision": "UX1A-R1"
+    },
+    {
+      "file": "person-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "/person",
+      "fullPage": true,
+      "data": "synthetic presentation only",
+      "revision": "UX1A-R1"
+    },
+    {
+      "file": "question-loading-375.jpg",
+      "viewport": {
+        "width": 375,
+        "height": 844
+      },
+      "path": "/question?state=loading",
+      "fullPage": true,
+      "data": "synthetic presentation only",
+      "revision": "UX1A-R1"
+    },
+    {
+      "file": "question-error-375.jpg",
+      "viewport": {
+        "width": 375,
+        "height": 844
+      },
+      "path": "/question?state=error",
+      "fullPage": true,
+      "data": "synthetic presentation only",
+      "revision": "UX1A-R1"
+    },
+    {
+      "file": "question-empty-375.jpg",
+      "viewport": {
+        "width": 375,
+        "height": 844
+      },
+      "path": "/question?state=empty",
+      "fullPage": true,
+      "data": "synthetic presentation only",
+      "revision": "UX1A-R1"
+    },
+    {
+      "file": "person-empty-375.jpg",
+      "viewport": {
+        "width": 375,
+        "height": 844
+      },
+      "path": "/person?state=empty",
+      "fullPage": true,
+      "data": "synthetic presentation only",
+      "revision": "UX1A-R1"
+    },
+    {
+      "file": "question-long-320.jpg",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "path": "/question?state=long",
+      "fullPage": true,
+      "data": "synthetic presentation only",
+      "revision": "UX1A-R1"
+    },
+    {
+      "file": "person-long-320.jpg",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "path": "/person?state=long",
+      "fullPage": true,
+      "data": "synthetic presentation only",
+      "revision": "UX1A-R1"
+    }
+  ],
+  "checks": [
+    "Home default; keyboard tabs; distinct cards; card/detail/author/Person navigation; browser Back; Experience expand/collapse",
+    "Replies sample; Helpful unavailable without count; closed publicly readable/disabled; optional budget absent; no-evidence Person; no chat success",
+    "Sheet focus trap/Escape/backdrop/close/trigger restore; overlay z50 above header z20; sheet fits all five widths",
+    "Search only local text; Bell/city truthful; skip link does not mutate HashRouter",
+    "Fresh deep link + replaced state selection: preview Back returns Home, not unrelated history",
+    "Six sampled text/action contrast pairs >=4.5:1; not an exhaustive WCAG certification",
+    "Reduced motion; no external requests; no browser errors; no local/session storage writes; no real API/Auth"
+  ],
+  "requests": [
+    "/",
+    "/@react-refresh",
+    "/@repo/node_modules/.vite-ux1a/deps/@radix-ui_react-dialog.js",
+    "/@repo/node_modules/.vite-ux1a/deps/@radix-ui_react-dropdown-menu.js",
+    "/@repo/node_modules/.vite-ux1a/deps/@radix-ui_react-slot.js",
+    "/@repo/node_modules/.vite-ux1a/deps/chunk-6BKLQ22S.js",
+    "/@repo/node_modules/.vite-ux1a/deps/chunk-6PXSGDAH.js",
+    "/@repo/node_modules/.vite-ux1a/deps/chunk-ANPDO4X3.js",
+    "/@repo/node_modules/.vite-ux1a/deps/chunk-DRWLMN53.js",
+    "/@repo/node_modules/.vite-ux1a/deps/chunk-G3PMV62Z.js",
+    "/@repo/node_modules/.vite-ux1a/deps/chunk-SUFV3WPD.js",
+    "/@repo/node_modules/.vite-ux1a/deps/chunk-U7P2NEEE.js",
+    "/@repo/node_modules/.vite-ux1a/deps/class-variance-authority.js",
+    "/@repo/node_modules/.vite-ux1a/deps/clsx.js",
+    "/@repo/node_modules/.vite-ux1a/deps/lucide-react.js",
+    "/@repo/node_modules/.vite-ux1a/deps/react-dom_client.js",
+    "/@repo/node_modules/.vite-ux1a/deps/react-router-dom.js",
+    "/@repo/node_modules/.vite-ux1a/deps/react.js",
+    "/@repo/node_modules/.vite-ux1a/deps/react_jsx-dev-runtime.js",
+    "/@repo/node_modules/.vite-ux1a/deps/tailwind-merge.js",
+    "/@repo/node_modules/vite/dist/client/env.mjs",
+    "/@repo/packages/shared-types/src/product-channels.ts",
+    "/@repo/src/components/common/PageStateCard.tsx",
+    "/@repo/src/components/experience/ExperienceTransitionPath.tsx",
+    "/@repo/src/components/experience/PersonExperienceCard.tsx",
+    "/@repo/src/components/experience/experiencePresentation.ts",
+    "/@repo/src/components/ui/button.tsx",
+    "/@repo/src/components/ui/dropdown-menu.tsx",
+    "/@repo/src/components/ui/sheet.tsx",
+    "/@repo/src/components/ui2/AppSurface.tsx",
+    "/@repo/src/index.css",
+    "/@repo/src/lib/utils.ts",
+    "/@vite/client",
+    "/main.tsx",
+    "/preview.css",
+    "/samples.ts"
+  ],
+  "contrast": [
+    {
+      "selector": ".ux-question-detail h1",
+      "ratio": 14.628718079350337
+    },
+    {
+      "selector": ".ux-context p",
+      "ratio": 14.628718079350337
+    },
+    {
+      "selector": ".ux-meta",
+      "ratio": 5.903294381434713
+    },
+    {
+      "selector": ".ux-action",
+      "ratio": 4.787931177688272
+    },
+    {
+      "selector": ".ux-topics > span",
+      "ratio": 6.422618332263193
+    },
+    {
+      "selector": ".ux-review-bar strong",
+      "ratio": 11.388554272456956
+    }
+  ]
+}

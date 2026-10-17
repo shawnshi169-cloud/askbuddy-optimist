@@ -1,0 +1,192 @@
+/* Scoped reference styling only; the normal application never imports this file. */
+body[data-ux1a-preview] {
+  --ux-ink: rgb(var(--app-text-rgb));
+  --ux-muted: #536960;
+  --ux-action: rgb(var(--app-action-rgb));
+  --ux-soft: rgb(var(--app-action-soft-rgb));
+  --ux-border: rgb(var(--app-border-subtle-rgb));
+  margin: 0;
+  background: #edf2ef;
+  color: var(--ux-ink);
+  font-family: "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: visible;
+}
+body[data-ux1a-preview] * { box-sizing: border-box; }
+body[data-ux1a-preview] :is(button, a, select, input):focus-visible {
+  outline: 3px solid #166452;
+  outline-offset: 3px;
+}
+body[data-ux1a-preview] :is(button, a) { -webkit-tap-highlight-color: transparent; }
+body[data-ux1a-preview] button { cursor: pointer; }
+body[data-ux1a-preview] button:disabled { cursor: not-allowed; background: #e1e8e5; color: #536960; }
+body[data-ux1a-preview] h1:focus { outline: none; }
+.ux-skip { position: fixed; top: -90px; left: 12px; z-index: 100; padding: 14px; background: white; }
+.ux-skip:focus { top: 8px; }
+.ux-review-bar { background: #183b32; color: #eef9f3; text-align: center; padding: 10px 12px; font-size: 11px; letter-spacing: .03em; }
+.ux-review-bar strong, .ux-review-bar span { display: block; }
+.ux-review-bar span { margin-top: 4px; color: #c1d8ce; font-size: 10px; }
+.ux-workspace { position: relative; padding: 28px 0 0; }
+.ux-phone { width: min(100%, 460px); min-height: 100vh; margin: 0 auto; background: rgb(var(--app-page-rgb)); border: 1px solid var(--ux-border); }
+.ux-review-notes { position: absolute; width: 240px; right: calc(50% + 272px); top: 86px; color: var(--ux-muted); font-size: 13px; line-height: 1.9; }
+.ux-review-notes h2 { font-size: 26px; line-height: 1.5; letter-spacing: -.03em; color: #213c32; margin: 16px 0; font-weight: 600; }
+.ux-review-notes h3 { color: #213c32; margin: 20px 0 8px; }
+.ux-review-notes p { margin: 12px 0; }
+.ux-review-notes hr { margin: 32px 0; border-color: #cbdad2; }
+.ux-lab-controls { padding: 3px 16px; display: flex; align-items: center; justify-content: space-between; gap: 4px; background: #eef3f0; border-bottom: 1px dashed #b8cac0; font-size: 11px; color: #405a4d; }
+.ux-lab-controls label { display: flex; align-items: center; gap: 4px; }
+.ux-lab-controls select { min-height: 44px; max-width: 93px; background: transparent; border: 0; font-size: 11px; }
+.ux-lab-controls nav { display: flex; }
+.ux-lab-controls a { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; }
+.ux-home-header, .ux-subhead { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: #fafcfb; border-bottom: 1px solid #edf1ee; min-height: 64px; }
+.ux-brand { display: flex; gap: 7px; align-items: center; font-size: 20px; font-weight: 650; letter-spacing: -.04em; white-space: nowrap; }
+.ux-brand svg { color: var(--ux-action); }
+.ux-header-actions { display: flex; gap: 5px; align-items: center; }
+.ux-header-actions button { display: flex; align-items: center; gap: 3px; min-height: 44px; font-size: 11px; color: var(--ux-muted); }
+.ux-icon { display: inline-flex; min-width: 44px; min-height: 44px; align-items: center; justify-content: center; }
+.ux-subhead { padding: 5px 12px; font-size: 15px; font-weight: 600; }
+.ux-preview-chip { font-size: 10px; font-weight: 400; color: var(--ux-muted); border: 1px solid var(--ux-border); border-radius: 6px; padding: 3px 6px; }
+.ux-main { min-width: 0; overflow-wrap: anywhere; }
+.ux-main:focus { outline-offset: -3px; }
+.ux-home-intro { padding: 18px 22px 16px; }
+.ux-eyebrow { color: var(--ux-muted); font-size: 11px; font-weight: 500; letter-spacing: .07em; }
+.ux-home-intro h1 { margin: 4px 0 14px; font-size: 27px; line-height: 1.4; font-weight: 650; letter-spacing: -.035em; }
+.ux-search { display: flex; align-items: center; gap: 9px; width: 100%; min-height: 48px; text-align: left; padding: 10px 13px; border-radius: 14px; background: #eef4f0; border: 1px solid #d8e6de; color: #486358; font-size: 13px; }
+.ux-search > svg { flex-shrink: 0; }
+.ux-search-go { margin-left: auto; border-radius: 50%; background: #d6eae0; padding: 5px; }
+.ux-channels { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; padding: 0 20px 16px; }
+.ux-channels a { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 12px; color: #314e42; min-height: 74px; }
+.ux-channels a > span { display: grid; place-items: center; width: 46px; height: 46px; border: 1px solid #d9e8df; border-radius: 16px; background: #e8f3ed; }
+.ux-channels a:nth-child(2) > span { background: #f1f1e6; border-color: #e6e5d4; }
+.ux-channels a:nth-child(3) > span { background: #ecf1f7; border-color: #dde5ed; }
+.ux-channels a:nth-child(4) > span { background: #f6eeea; border-color: #eddfd7; }
+.ux-feed-head { padding: 17px 20px 14px; border-top: 6px solid #edf3ef; }
+.ux-tabs { display: flex; align-items: center; gap: 24px; }
+.ux-tabs button { position: relative; min-height: 48px; min-width: 44px; padding: 5px 0 11px; color: #62756b; font-size: 18px; font-weight: 500; }
+.ux-tabs button[aria-selected=true] { color: #163d30; font-weight: 650; }
+.ux-tabs button[aria-selected=true]::after { content: ""; position: absolute; height: 3px; border-radius: 3px; bottom: 3px; left: 0; width: 26px; background: var(--ux-action); }
+.ux-feed-head > p { margin-top: 9px; font-size: 11px; color: var(--ux-muted); line-height: 1.7; }
+.ux-feed { padding: 0 16px 20px; }
+.ux-question-card { background: white; padding: 18px; border-radius: 20px; border: 1px solid var(--ux-border); }
+.ux-meta { color: var(--ux-muted); font-size: 11px; line-height: 1.8; }
+.ux-question-card > .ux-meta { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; }
+.ux-question-card > .ux-meta > span:first-child { color: #276755; }
+.ux-card-link { width: 100%; text-align: left; min-height: 44px; margin: 10px 0 8px; }
+.ux-card-link h2 { font-size: 18px; font-weight: 600; line-height: 1.65; letter-spacing: -.025em; }
+.ux-question-card > p { font-size: 13px; line-height: 1.9; color: #536359; }
+.ux-card-foot { border-top: 1px solid #eef2ee; padding-top: 13px; margin-top: 17px; display: flex; justify-content: space-between; color: #456e5b; font-size: 11px; }
+.ux-card-foot > span { display: inline-flex; align-items: center; gap: 6px; }
+.ux-endnote { text-align: center; margin: 22px 20px 8px; color: var(--ux-muted); font-size: 10px; line-height: 1.9; }
+.ux-person-card { padding: 18px; }
+.ux-person-line { display: flex; align-items: center; gap: 11px; margin: 12px 0; }
+.ux-avatar { width: 44px; height: 44px; border-radius: 50%; display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; background: #e6eee6; border: 1px solid #d5e4d6; color: #557253; font-size: 18px; }
+.ux-person-line > div { min-width: 0; }
+.ux-name { min-height: 44px; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+.ux-person-line p { color: var(--ux-muted); font-size: 10px; line-height: 1.6; margin-top: -5px; }
+.ux-evidence { display: flex; gap: 10px; margin: 16px 0 12px; padding: 12px; background: #eff6f1; border-radius: 12px; }
+.ux-evidence-line { width: 3px; background: #8dbbaa; border-radius: 4px; flex-shrink: 0; }
+.ux-evidence p { display: flex; flex-direction: column; gap: 6px; }
+.ux-evidence strong { font-size: 14px; font-weight: 500; }
+.ux-evidence p > span { font-size: 10px; color: var(--ux-muted); }
+.ux-body { font-size: 13px; line-height: 1.8; margin: 12px 0 5px; }
+.ux-person-cta { display: flex; justify-content: space-between; align-items: center; min-height: 44px; width: 100%; border-top: 1px solid var(--ux-border); margin-top: 13px; padding-top: 9px; color: var(--ux-action); font-size: 12px; font-weight: 600; }
+.ux-bottom-nav { position: fixed; z-index: 30; left: 50%; transform: translateX(-50%); bottom: 0; display: grid; grid-template-columns: repeat(5, 1fr); align-items: center; width: min(100%, 460px); min-height: 72px; padding: 7px 8px max(7px, env(safe-area-inset-bottom)); border: 1px solid var(--ux-border); border-bottom: 0; border-radius: 20px 20px 0 0; background: #fff; box-shadow: 0 -3px 12px #203c2e05; }
+.ux-bottom-nav > :is(a,button) { min-height: 48px; min-width: 44px; display: flex; flex-direction: column; gap: 4px; align-items: center; justify-content: center; color: #586c61; font-size: 10px; }
+.ux-bottom-nav a[aria-current=page] { color: #206b58; font-weight: 600; }
+.ux-bottom-nav > .ux-create { width: 46px; min-height: 46px; border-radius: 15px; background: var(--ux-action); color: #fff; justify-self: center; }
+.ux-preview-footer { font-size: 10px; line-height: 1.9; text-align: center; color: var(--ux-muted); padding: 28px 18px calc(100px + env(safe-area-inset-bottom)); }
+.ux-sheet { max-width: 460px; margin: auto; border-radius: 26px 26px 0 0; padding: 30px 20px max(24px, env(safe-area-inset-bottom)); background: #fafcfb; max-height: 90dvh; overflow-y: auto; }
+.ux-sheet h2 { text-align: left; padding-right: 20px; font-size: 21px; }
+.ux-sheet [id$=description] { text-align: left; font-size: 11px; }
+.ux-intents { display: grid; gap: 10px; margin: 24px 0 18px; }
+.ux-intents button { display: flex; align-items: center; gap: 12px; text-align: left; background: white; border: 1px solid var(--ux-border); border-radius: 18px; padding: 17px 14px; min-height: 80px; color: #265d4c; }
+.ux-intents button > svg { flex-shrink: 0; }
+.ux-intents button > svg:last-child { margin-left: auto; width: 16px; }
+.ux-intents strong { display: block; font-size: 16px; font-weight: 600; }
+.ux-intents small { display: block; font-size: 11px; margin-top: 6px; color: var(--ux-muted); line-height: 1.7; }
+.ux-copy-decision { color: var(--ux-muted); font-size: 11px; line-height: 1.9; border-left: 2px solid #bacfc3; padding-left: 10px; }
+.ux-notice { position: sticky; top: 64px; z-index: 15; margin: 16px; padding: 14px; background: #edf4ee; border: 1px solid #c5d8cb; border-radius: 14px; color: #2d5944; font-size: 13px; line-height: 1.9; }
+.ux-state { padding: 32px 20px; min-height: 400px; }
+.ux-phone .surface-card button { min-height: 44px; }
+.ux-phone .surface-card > svg { color: #527867; }
+.ux-question-detail { padding: 25px 22px; background: #fff; }
+.ux-question-detail > .ux-meta:first-child { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.ux-question-detail h1 { font-size: 24px; font-weight: 600; line-height: 1.6; letter-spacing: -.02em; margin: 14px 0; }
+.ux-topics { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
+.ux-topics > span { font-size: 11px; border: 1px solid #dae7df; color: #3d6755; border-radius: 6px; padding: 3px 6px; }
+.ux-topics small { color: var(--ux-muted); font-size: 10px; }
+.ux-context { margin: 25px 0 20px; }
+.ux-context h2 { color: #435e50; font-size: 12px; font-weight: 500; margin-bottom: 10px; }
+.ux-context p { white-space: pre-wrap; font-size: 15px; line-height: 2; }
+.ux-budget { background: #f4f6f1; border-left: 2px solid #b0c3ab; padding: 12px; font-size: 12px; color: #4d5b46; line-height: 1.7; margin-bottom: 18px; }
+.ux-budget span { display: block; font-size: 10px; margin-top: 4px; }
+.ux-closed { display: flex; align-items: flex-start; gap: 8px; background: #edf2ef; padding: 12px; border-radius: 12px; font-size: 12px; margin-top: 16px; line-height: 1.8; }
+.ux-closed svg { flex-shrink: 0; margin-top: 3px; }
+.ux-answers { border-top: 6px solid #edf3ef; padding: 22px 20px 0; }
+.ux-section-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
+.ux-section-title h2 { font-size: 18px; font-weight: 600; }
+.ux-section-title > span { font-size: 10px; color: var(--ux-muted); }
+.ux-answer { padding-bottom: 20px; }
+.ux-answer > p { margin: 16px 0; font-size: 15px; line-height: 2; }
+.ux-related { display: flex; align-items: center; gap: 10px; border: 1px solid var(--ux-border); border-radius: 14px; padding: 12px; color: #3b6855; margin: 22px 0 12px; min-height: 60px; }
+.ux-related > svg { flex-shrink: 0; }
+.ux-related > span { font-size: 10px; flex: 1; }
+.ux-related strong { display: block; font-size: 12px; font-weight: 500; margin-top: 4px; }
+.ux-answer-actions { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px; }
+.ux-answer-actions button { display: inline-flex; align-items: center; gap: 5px; color: #4c6658; font-size: 11px; min-height: 44px; }
+.ux-reply { margin-top: 14px; padding: 14px; border-radius: 12px; background: #eef4f0; font-size: 12px; line-height: 1.9; }
+.ux-reply strong { font-weight: 500; }
+.ux-reply p { margin: 7px 0; }
+.ux-reply button { min-height: 44px; color: #27644d; }
+.ux-action { display: inline-flex; min-height: 48px; padding: 12px 18px; align-items: center; justify-content: center; background: var(--ux-action); color: #fff; border-radius: 14px; font-size: 13px; font-weight: 500; }
+.ux-detail-actions { display: flex; gap: 12px; align-items: center; justify-content: space-between; border-top: 1px solid var(--ux-border); padding: 18px 20px; }
+.ux-detail-actions > span { font-size: 11px; color: var(--ux-muted); }
+.ux-person-cover { height: 102px; border-bottom: 1px solid #dce8df; background: #e7f2eb; padding: 23px; color: #4b6b56; font-size: 11px; letter-spacing: .08em; text-align: right; }
+.ux-person-summary { padding: 0 22px 28px; }
+.ux-avatar-large { width: 72px; height: 72px; background: #f8fbf7; border: 4px solid #fafcfb; position: relative; margin-top: -33px; margin-bottom: 13px; }
+.ux-person-summary h1 { font-size: 26px; font-weight: 600; margin: 9px 0 13px; }
+.ux-person-summary > p:not(.ux-eyebrow) { font-size: 14px; line-height: 1.95; margin-bottom: 13px; }
+.ux-experiences { border-top: 6px solid #edf3ef; padding: 22px 20px; }
+.ux-timeline { margin-top: 20px; padding-left: 13px; border-left: 1px solid #c5d9cc; position: relative; }
+.ux-timeline::before { content: ""; position: absolute; left: -4px; top: 7px; width: 7px; height: 7px; border-radius: 50%; background: #5d9279; }
+.ux-timeline-date { display: block; font-size: 13px; color: #41634f; margin-bottom: 14px; }
+.ux-timeline-date small { display: block; font-size: 10px; color: var(--ux-muted); margin-top: 5px; }
+.ux-timeline .truncate { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
+.ux-timeline .text-slate-400 { color: #617468; }
+.ux-timeline .ux-topics { margin-top: 16px; padding-top: 12px; border-top: 1px solid #e3ebe5; }
+.ux-expand { min-height: 44px; display: flex; align-items: center; gap: 5px; color: #32694f; font-size: 12px; padding: 8px 0; }
+.ux-person-question { padding: 0 20px 24px; }
+.ux-person-question h2 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+.ux-person-question p { font-size: 12px; color: var(--ux-muted); }
+.ux-person-question button { width: 100%; min-height: 60px; text-align: left; display: flex; align-items: center; gap: 13px; padding: 15px; margin-top: 15px; border-radius: 14px; background: #f0f5f1; color: #28543f; font-size: 13px; line-height: 1.8; }
+.ux-person-question svg { flex-shrink: 0; }
+.ux-ask-person { border-top: 1px solid var(--ux-border); padding: 22px 20px 10px; }
+.ux-ask-person p { font-size: 14px; }
+.ux-ask-person p > span { display: block; font-size: 11px; color: var(--ux-muted); margin: 6px 0 16px; line-height: 1.8; }
+.ux-ask-person .ux-action { width: 100%; }
+.ux-search-page { padding: 26px 20px; min-height: 500px; }
+.ux-search-page h1 { font-size: 23px; font-weight: 600; margin-bottom: 20px; }
+.ux-search input { min-width: 0; width: 100%; min-height: 44px; background: transparent; outline-offset: 0; }
+.ux-search input::placeholder { color: #486358; }
+.ux-search-page > .ux-meta { margin: 12px 0 22px; }
+.ux-search-page [role=tabpanel] { margin-top: 24px; }
+@media (max-width: 1020px) { .ux-review-notes { display: none; } }
+@media (max-width: 500px) {
+  .ux-workspace { padding-top: 0; }
+  .ux-phone { border: 0; }
+}
+@media (max-width: 340px) {
+  .ux-brand { font-size: 18px; gap: 5px; }
+  .ux-home-header { padding: 8px 14px; }
+  .ux-home-intro { padding: 20px 18px 18px; }
+  .ux-home-intro h1 { font-size: 27px; }
+  .ux-channels { padding-left: 14px; padding-right: 14px; gap: 4px; }
+  .ux-feed-head { padding-left: 18px; padding-right: 18px; }
+  .ux-question-detail, .ux-experiences { padding-left: 18px; padding-right: 18px; }
+  .ux-sheet { padding-left: 16px; padding-right: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body[data-ux1a-preview] *, body[data-ux1a-preview] *::before, body[data-ux1a-preview] *::after {
+    animation: none !important; transition: none !important; scroll-behavior: auto !important;
+  }
+}
