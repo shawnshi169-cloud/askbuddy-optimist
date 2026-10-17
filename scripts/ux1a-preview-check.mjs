@@ -11,15 +11,14 @@ const allowedFiles = new Set([
   preview + 'main.tsx', preview + 'samples.ts', preview + 'preview.css',
   'src/index.css', 'src/lib/utils.ts', 'src/components/ui2/AppSurface.tsx',
   'src/components/common/PageStateCard.tsx', 'src/components/ui/button.tsx',
-  'src/components/ui/sheet.tsx', 'src/components/ui/dropdown-menu.tsx',
-  'src/components/experience/PersonExperienceCard.tsx',
+  'src/components/ui/sheet.tsx',
   'src/components/experience/ExperienceTransitionPath.tsx',
   'src/components/experience/experiencePresentation.ts',
   'packages/shared-types/src/product-channels.ts',
 ]);
 const allowedPackages = new Set([
   'react', 'react-dom/client', 'react-router-dom', 'lucide-react',
-  '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-slot',
+  '@radix-ui/react-dialog', '@radix-ui/react-slot',
   'class-variance-authority', 'clsx', 'tailwind-merge',
 ]);
 const text = path => readFileSync(resolve(root, path), 'utf8');
@@ -104,10 +103,10 @@ if (process.argv.includes('--built')) {
   assert(existsSync(resolve(root, 'dist/index.html')), 'Run the normal production build first');
   for (const path of files('dist')) {
     if (/\.(js|css|html|map|json)$/.test(path)) {
-      assert(!/UX1A-R1|ux-home-intro|UX1A_DEV_ONLY|UX-1A 设计预览/.test(text(path)), 'Preview leaked into build: ' + path);
+      assert(!/UX1A-R[12]|ux-home-intro|UX1A_DEV_ONLY|UX-1A 设计预览/.test(text(path)), 'Preview leaked into build: ' + path);
     }
     assert(!/visual-preview|ux1a/i.test(path), 'No preview artifact in normal build');
   }
   console.log('PASS UX1A normal production bundle exclusion');
 }
-console.log('PASS UX1A: exact 14-file presentation closure; no API/Auth/storage imports; mode/host/CSP boundaries; no production entry import');
+console.log('PASS UX1A: exact 12-file presentation closure; no API/Auth/storage imports; mode/host/CSP boundaries; no production entry import');

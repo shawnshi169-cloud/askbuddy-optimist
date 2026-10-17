@@ -1,5 +1,7 @@
 # UX-1A: Core Visual References and Interactive Preview
 
+**R1 historical record.** The current isolated preview and review decisions are described in [UX-1A-R2 visual specification](ux1a-r2-visual-specification.md). R1 screenshots and machine evidence below remain unchanged.
+
 Date: 2026-10-18 (Asia/Shanghai). Revision: **UX1A-R1**.
 
 **Design approval: PENDING PRODUCT OWNER. Official page implementation: NOT AUTHORIZED.**
