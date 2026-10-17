@@ -281,3 +281,5 @@ await test('T13 anonymous -> A -> B -> anonymous: all observable states are view
 });
 console.log('Auth viewer isolation: T01-T13 PASS using actual provider + parser, controlled hooks, Auth/RPC/balance promises and scheduler.');
 console.log('No network, real credentials, Supabase Auth E2E, DOM/device QA, database, or Production verification.');
+
+await import('./profile-logout-check.mjs');
