@@ -1,0 +1,1822 @@
+{
+  "source": "692987b6f7a44eecd897ea8716568a5a27f65826",
+  "r1Declarations": [
+    {
+      "selector": "body[data-ux1a-preview]",
+      "property": "--ux-ink",
+      "value": "rgb(var(--app-text-rgb))",
+      "line": 3
+    },
+    {
+      "selector": "body[data-ux1a-preview]",
+      "property": "--ux-muted",
+      "value": "#536960",
+      "line": 4
+    },
+    {
+      "selector": "body[data-ux1a-preview]",
+      "property": "--ux-action",
+      "value": "rgb(var(--app-action-rgb))",
+      "line": 5
+    },
+    {
+      "selector": "body[data-ux1a-preview]",
+      "property": "--ux-soft",
+      "value": "rgb(var(--app-action-soft-rgb))",
+      "line": 6
+    },
+    {
+      "selector": "body[data-ux1a-preview]",
+      "property": "--ux-border",
+      "value": "rgb(var(--app-border-subtle-rgb))",
+      "line": 7
+    },
+    {
+      "selector": "body[data-ux1a-preview]",
+      "property": "background",
+      "value": "#edf2ef",
+      "line": 9
+    },
+    {
+      "selector": "body[data-ux1a-preview]",
+      "property": "color",
+      "value": "var(--ux-ink)",
+      "line": 10
+    },
+    {
+      "selector": "body[data-ux1a-preview] :is(button, a, select, input):focus-visible",
+      "property": "outline",
+      "value": "3px solid #166452",
+      "line": 17
+    },
+    {
+      "selector": "body[data-ux1a-preview] button:disabled",
+      "property": "background",
+      "value": "#e1e8e5",
+      "line": 22
+    },
+    {
+      "selector": "body[data-ux1a-preview] button:disabled",
+      "property": "color",
+      "value": "#536960",
+      "line": 22
+    },
+    {
+      "selector": "body[data-ux1a-preview] h1:focus",
+      "property": "outline",
+      "value": "none",
+      "line": 23
+    },
+    {
+      "selector": ".ux-skip",
+      "property": "background",
+      "value": "white",
+      "line": 24
+    },
+    {
+      "selector": ".ux-review-bar",
+      "property": "background",
+      "value": "#183b32",
+      "line": 26
+    },
+    {
+      "selector": ".ux-review-bar",
+      "property": "color",
+      "value": "#eef9f3",
+      "line": 26
+    },
+    {
+      "selector": ".ux-review-bar span",
+      "property": "color",
+      "value": "#c1d8ce",
+      "line": 28
+    },
+    {
+      "selector": ".ux-phone",
+      "property": "background",
+      "value": "rgb(var(--app-page-rgb))",
+      "line": 30
+    },
+    {
+      "selector": ".ux-phone",
+      "property": "border",
+      "value": "1px solid var(--ux-border)",
+      "line": 30
+    },
+    {
+      "selector": ".ux-review-notes",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 31
+    },
+    {
+      "selector": ".ux-review-notes h2",
+      "property": "color",
+      "value": "#213c32",
+      "line": 32
+    },
+    {
+      "selector": ".ux-review-notes h3",
+      "property": "color",
+      "value": "#213c32",
+      "line": 33
+    },
+    {
+      "selector": ".ux-review-notes hr",
+      "property": "border-color",
+      "value": "#cbdad2",
+      "line": 35
+    },
+    {
+      "selector": ".ux-lab-controls",
+      "property": "background",
+      "value": "#eef3f0",
+      "line": 36
+    },
+    {
+      "selector": ".ux-lab-controls",
+      "property": "border-bottom",
+      "value": "1px dashed #b8cac0",
+      "line": 36
+    },
+    {
+      "selector": ".ux-lab-controls",
+      "property": "color",
+      "value": "#405a4d",
+      "line": 36
+    },
+    {
+      "selector": ".ux-lab-controls select",
+      "property": "background",
+      "value": "transparent",
+      "line": 38
+    },
+    {
+      "selector": ".ux-lab-controls select",
+      "property": "border",
+      "value": "0",
+      "line": 38
+    },
+    {
+      "selector": ".ux-home-header, .ux-subhead",
+      "property": "background",
+      "value": "#fafcfb",
+      "line": 41
+    },
+    {
+      "selector": ".ux-home-header, .ux-subhead",
+      "property": "border-bottom",
+      "value": "1px solid #edf1ee",
+      "line": 41
+    },
+    {
+      "selector": ".ux-brand svg",
+      "property": "color",
+      "value": "var(--ux-action)",
+      "line": 43
+    },
+    {
+      "selector": ".ux-header-actions button",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 45
+    },
+    {
+      "selector": ".ux-preview-chip",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 48
+    },
+    {
+      "selector": ".ux-preview-chip",
+      "property": "border",
+      "value": "1px solid var(--ux-border)",
+      "line": 48
+    },
+    {
+      "selector": ".ux-eyebrow",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 52
+    },
+    {
+      "selector": ".ux-search",
+      "property": "background",
+      "value": "#eef4f0",
+      "line": 54
+    },
+    {
+      "selector": ".ux-search",
+      "property": "border",
+      "value": "1px solid #d8e6de",
+      "line": 54
+    },
+    {
+      "selector": ".ux-search",
+      "property": "color",
+      "value": "#486358",
+      "line": 54
+    },
+    {
+      "selector": ".ux-search-go",
+      "property": "background",
+      "value": "#d6eae0",
+      "line": 56
+    },
+    {
+      "selector": ".ux-channels a",
+      "property": "color",
+      "value": "#314e42",
+      "line": 58
+    },
+    {
+      "selector": ".ux-channels a > span",
+      "property": "border",
+      "value": "1px solid #d9e8df",
+      "line": 59
+    },
+    {
+      "selector": ".ux-channels a > span",
+      "property": "background",
+      "value": "#e8f3ed",
+      "line": 59
+    },
+    {
+      "selector": ".ux-channels a:nth-child(2) > span",
+      "property": "background",
+      "value": "#f1f1e6",
+      "line": 60
+    },
+    {
+      "selector": ".ux-channels a:nth-child(2) > span",
+      "property": "border-color",
+      "value": "#e6e5d4",
+      "line": 60
+    },
+    {
+      "selector": ".ux-channels a:nth-child(3) > span",
+      "property": "background",
+      "value": "#ecf1f7",
+      "line": 61
+    },
+    {
+      "selector": ".ux-channels a:nth-child(3) > span",
+      "property": "border-color",
+      "value": "#dde5ed",
+      "line": 61
+    },
+    {
+      "selector": ".ux-channels a:nth-child(4) > span",
+      "property": "background",
+      "value": "#f6eeea",
+      "line": 62
+    },
+    {
+      "selector": ".ux-channels a:nth-child(4) > span",
+      "property": "border-color",
+      "value": "#eddfd7",
+      "line": 62
+    },
+    {
+      "selector": ".ux-feed-head",
+      "property": "border-top",
+      "value": "6px solid #edf3ef",
+      "line": 63
+    },
+    {
+      "selector": ".ux-tabs button",
+      "property": "color",
+      "value": "#62756b",
+      "line": 65
+    },
+    {
+      "selector": ".ux-tabs button[aria-selected=true]",
+      "property": "color",
+      "value": "#163d30",
+      "line": 66
+    },
+    {
+      "selector": ".ux-tabs button[aria-selected=true]::after",
+      "property": "background",
+      "value": "var(--ux-action)",
+      "line": 67
+    },
+    {
+      "selector": ".ux-feed-head > p",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 68
+    },
+    {
+      "selector": ".ux-question-card",
+      "property": "background",
+      "value": "white",
+      "line": 70
+    },
+    {
+      "selector": ".ux-question-card",
+      "property": "border",
+      "value": "1px solid var(--ux-border)",
+      "line": 70
+    },
+    {
+      "selector": ".ux-meta",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 71
+    },
+    {
+      "selector": ".ux-question-card > .ux-meta > span:first-child",
+      "property": "color",
+      "value": "#276755",
+      "line": 73
+    },
+    {
+      "selector": ".ux-question-card > p",
+      "property": "color",
+      "value": "#536359",
+      "line": 76
+    },
+    {
+      "selector": ".ux-card-foot",
+      "property": "border-top",
+      "value": "1px solid #eef2ee",
+      "line": 77
+    },
+    {
+      "selector": ".ux-card-foot",
+      "property": "color",
+      "value": "#456e5b",
+      "line": 77
+    },
+    {
+      "selector": ".ux-endnote",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 79
+    },
+    {
+      "selector": ".ux-avatar",
+      "property": "background",
+      "value": "#e6eee6",
+      "line": 82
+    },
+    {
+      "selector": ".ux-avatar",
+      "property": "border",
+      "value": "1px solid #d5e4d6",
+      "line": 82
+    },
+    {
+      "selector": ".ux-avatar",
+      "property": "color",
+      "value": "#557253",
+      "line": 82
+    },
+    {
+      "selector": ".ux-person-line p",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 85
+    },
+    {
+      "selector": ".ux-evidence",
+      "property": "background",
+      "value": "#eff6f1",
+      "line": 86
+    },
+    {
+      "selector": ".ux-evidence-line",
+      "property": "background",
+      "value": "#8dbbaa",
+      "line": 87
+    },
+    {
+      "selector": ".ux-evidence p > span",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 90
+    },
+    {
+      "selector": ".ux-person-cta",
+      "property": "border-top",
+      "value": "1px solid var(--ux-border)",
+      "line": 92
+    },
+    {
+      "selector": ".ux-person-cta",
+      "property": "color",
+      "value": "var(--ux-action)",
+      "line": 92
+    },
+    {
+      "selector": ".ux-bottom-nav",
+      "property": "border",
+      "value": "1px solid var(--ux-border)",
+      "line": 93
+    },
+    {
+      "selector": ".ux-bottom-nav",
+      "property": "border-bottom",
+      "value": "0",
+      "line": 93
+    },
+    {
+      "selector": ".ux-bottom-nav",
+      "property": "background",
+      "value": "#fff",
+      "line": 93
+    },
+    {
+      "selector": ".ux-bottom-nav",
+      "property": "box-shadow",
+      "value": "0 -3px 12px #203c2e05",
+      "line": 93
+    },
+    {
+      "selector": ".ux-bottom-nav > :is(a,button)",
+      "property": "color",
+      "value": "#586c61",
+      "line": 94
+    },
+    {
+      "selector": ".ux-bottom-nav a[aria-current=page]",
+      "property": "color",
+      "value": "#206b58",
+      "line": 95
+    },
+    {
+      "selector": ".ux-bottom-nav > .ux-create",
+      "property": "background",
+      "value": "var(--ux-action)",
+      "line": 96
+    },
+    {
+      "selector": ".ux-bottom-nav > .ux-create",
+      "property": "color",
+      "value": "#fff",
+      "line": 96
+    },
+    {
+      "selector": ".ux-preview-footer",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 97
+    },
+    {
+      "selector": ".ux-sheet",
+      "property": "background",
+      "value": "#fafcfb",
+      "line": 98
+    },
+    {
+      "selector": ".ux-intents button",
+      "property": "background",
+      "value": "white",
+      "line": 102
+    },
+    {
+      "selector": ".ux-intents button",
+      "property": "border",
+      "value": "1px solid var(--ux-border)",
+      "line": 102
+    },
+    {
+      "selector": ".ux-intents button",
+      "property": "color",
+      "value": "#265d4c",
+      "line": 102
+    },
+    {
+      "selector": ".ux-intents small",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 106
+    },
+    {
+      "selector": ".ux-copy-decision",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 107
+    },
+    {
+      "selector": ".ux-copy-decision",
+      "property": "border-left",
+      "value": "2px solid #bacfc3",
+      "line": 107
+    },
+    {
+      "selector": ".ux-notice",
+      "property": "background",
+      "value": "#edf4ee",
+      "line": 108
+    },
+    {
+      "selector": ".ux-notice",
+      "property": "border",
+      "value": "1px solid #c5d8cb",
+      "line": 108
+    },
+    {
+      "selector": ".ux-notice",
+      "property": "color",
+      "value": "#2d5944",
+      "line": 108
+    },
+    {
+      "selector": ".ux-phone .surface-card > svg",
+      "property": "color",
+      "value": "#527867",
+      "line": 111
+    },
+    {
+      "selector": ".ux-question-detail",
+      "property": "background",
+      "value": "#fff",
+      "line": 112
+    },
+    {
+      "selector": ".ux-topics > span",
+      "property": "border",
+      "value": "1px solid #dae7df",
+      "line": 116
+    },
+    {
+      "selector": ".ux-topics > span",
+      "property": "color",
+      "value": "#3d6755",
+      "line": 116
+    },
+    {
+      "selector": ".ux-topics small",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 117
+    },
+    {
+      "selector": ".ux-context h2",
+      "property": "color",
+      "value": "#435e50",
+      "line": 119
+    },
+    {
+      "selector": ".ux-budget",
+      "property": "background",
+      "value": "#f4f6f1",
+      "line": 121
+    },
+    {
+      "selector": ".ux-budget",
+      "property": "border-left",
+      "value": "2px solid #b0c3ab",
+      "line": 121
+    },
+    {
+      "selector": ".ux-budget",
+      "property": "color",
+      "value": "#4d5b46",
+      "line": 121
+    },
+    {
+      "selector": ".ux-closed",
+      "property": "background",
+      "value": "#edf2ef",
+      "line": 123
+    },
+    {
+      "selector": ".ux-answers",
+      "property": "border-top",
+      "value": "6px solid #edf3ef",
+      "line": 125
+    },
+    {
+      "selector": ".ux-section-title > span",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 128
+    },
+    {
+      "selector": ".ux-related",
+      "property": "border",
+      "value": "1px solid var(--ux-border)",
+      "line": 131
+    },
+    {
+      "selector": ".ux-related",
+      "property": "color",
+      "value": "#3b6855",
+      "line": 131
+    },
+    {
+      "selector": ".ux-answer-actions button",
+      "property": "color",
+      "value": "#4c6658",
+      "line": 136
+    },
+    {
+      "selector": ".ux-reply",
+      "property": "background",
+      "value": "#eef4f0",
+      "line": 137
+    },
+    {
+      "selector": ".ux-reply button",
+      "property": "color",
+      "value": "#27644d",
+      "line": 140
+    },
+    {
+      "selector": ".ux-action",
+      "property": "background",
+      "value": "var(--ux-action)",
+      "line": 141
+    },
+    {
+      "selector": ".ux-action",
+      "property": "color",
+      "value": "#fff",
+      "line": 141
+    },
+    {
+      "selector": ".ux-detail-actions",
+      "property": "border-top",
+      "value": "1px solid var(--ux-border)",
+      "line": 142
+    },
+    {
+      "selector": ".ux-detail-actions > span",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 143
+    },
+    {
+      "selector": ".ux-person-cover",
+      "property": "border-bottom",
+      "value": "1px solid #dce8df",
+      "line": 144
+    },
+    {
+      "selector": ".ux-person-cover",
+      "property": "background",
+      "value": "#e7f2eb",
+      "line": 144
+    },
+    {
+      "selector": ".ux-person-cover",
+      "property": "color",
+      "value": "#4b6b56",
+      "line": 144
+    },
+    {
+      "selector": ".ux-avatar-large",
+      "property": "background",
+      "value": "#f8fbf7",
+      "line": 146
+    },
+    {
+      "selector": ".ux-avatar-large",
+      "property": "border",
+      "value": "4px solid #fafcfb",
+      "line": 146
+    },
+    {
+      "selector": ".ux-experiences",
+      "property": "border-top",
+      "value": "6px solid #edf3ef",
+      "line": 149
+    },
+    {
+      "selector": ".ux-timeline",
+      "property": "border-left",
+      "value": "1px solid #c5d9cc",
+      "line": 150
+    },
+    {
+      "selector": ".ux-timeline::before",
+      "property": "background",
+      "value": "#5d9279",
+      "line": 151
+    },
+    {
+      "selector": ".ux-timeline-date",
+      "property": "color",
+      "value": "#41634f",
+      "line": 152
+    },
+    {
+      "selector": ".ux-timeline-date small",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 153
+    },
+    {
+      "selector": ".ux-timeline .text-slate-400",
+      "property": "color",
+      "value": "#617468",
+      "line": 155
+    },
+    {
+      "selector": ".ux-timeline .ux-topics",
+      "property": "border-top",
+      "value": "1px solid #e3ebe5",
+      "line": 156
+    },
+    {
+      "selector": ".ux-expand",
+      "property": "color",
+      "value": "#32694f",
+      "line": 157
+    },
+    {
+      "selector": ".ux-person-question p",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 160
+    },
+    {
+      "selector": ".ux-person-question button",
+      "property": "background",
+      "value": "#f0f5f1",
+      "line": 161
+    },
+    {
+      "selector": ".ux-person-question button",
+      "property": "color",
+      "value": "#28543f",
+      "line": 161
+    },
+    {
+      "selector": ".ux-ask-person",
+      "property": "border-top",
+      "value": "1px solid var(--ux-border)",
+      "line": 163
+    },
+    {
+      "selector": ".ux-ask-person p > span",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 165
+    },
+    {
+      "selector": ".ux-search input",
+      "property": "background",
+      "value": "transparent",
+      "line": 169
+    },
+    {
+      "selector": ".ux-search input::placeholder",
+      "property": "color",
+      "value": "#486358",
+      "line": 170
+    },
+    {
+      "selector": ".ux-phone",
+      "property": "border",
+      "value": "0",
+      "line": 176
+    }
+  ],
+  "r2Declarations": [
+    {
+      "selector": "body[data-ux1a-preview]",
+      "property": "--ux-mint",
+      "value": "#8adfd6",
+      "line": 3
+    },
+    {
+      "selector": "body[data-ux1a-preview]",
+      "property": "--ux-soft",
+      "value": "#ecf9f7",
+      "line": 4
+    },
+    {
+      "selector": "body[data-ux1a-preview]",
+      "property": "--ux-action",
+      "value": "#207b77",
+      "line": 5
+    },
+    {
+      "selector": "body[data-ux1a-preview]",
+      "property": "--ux-page",
+      "value": "#f7fafa",
+      "line": 6
+    },
+    {
+      "selector": "body[data-ux1a-preview]",
+      "property": "--ux-surface",
+      "value": "#ffffff",
+      "line": 7
+    },
+    {
+      "selector": "body[data-ux1a-preview]",
+      "property": "--ux-ink",
+      "value": "#23313a",
+      "line": 8
+    },
+    {
+      "selector": "body[data-ux1a-preview]",
+      "property": "--ux-muted",
+      "value": "#53666a",
+      "line": 9
+    },
+    {
+      "selector": "body[data-ux1a-preview]",
+      "property": "--ux-border",
+      "value": "#e1ebea",
+      "line": 10
+    },
+    {
+      "selector": "body[data-ux1a-preview]",
+      "property": "--ux-hover",
+      "value": "#196662",
+      "line": 11
+    },
+    {
+      "selector": "body[data-ux1a-preview]",
+      "property": "--ux-pressed",
+      "value": "#135653",
+      "line": 12
+    },
+    {
+      "selector": "body[data-ux1a-preview]",
+      "property": "--ux-error",
+      "value": "#a94736",
+      "line": 13
+    },
+    {
+      "selector": "body[data-ux1a-preview]",
+      "property": "background",
+      "value": "var(--ux-page)",
+      "line": 24
+    },
+    {
+      "selector": "body[data-ux1a-preview]",
+      "property": "color",
+      "value": "var(--ux-ink)",
+      "line": 25
+    },
+    {
+      "selector": "body[data-ux-palette=r1]",
+      "property": "--ux-mint",
+      "value": "#79d5c7",
+      "line": 32
+    },
+    {
+      "selector": "body[data-ux-palette=r1]",
+      "property": "--ux-soft",
+      "value": "#e7f6f2",
+      "line": 33
+    },
+    {
+      "selector": "body[data-ux-palette=r1]",
+      "property": "--ux-action",
+      "value": "#2b7f73",
+      "line": 34
+    },
+    {
+      "selector": "body[data-ux-palette=r1]",
+      "property": "--ux-page",
+      "value": "#fafcfb",
+      "line": 35
+    },
+    {
+      "selector": "body[data-ux-palette=r1]",
+      "property": "--ux-ink",
+      "value": "#1e293b",
+      "line": 36
+    },
+    {
+      "selector": "body[data-ux-palette=r1]",
+      "property": "--ux-muted",
+      "value": "#536960",
+      "line": 37
+    },
+    {
+      "selector": "body[data-ux-palette=r1]",
+      "property": "--ux-border",
+      "value": "#e1eae7",
+      "line": 38
+    },
+    {
+      "selector": "body[data-ux-palette=r1]",
+      "property": "--ux-hover",
+      "value": "#246a60",
+      "line": 39
+    },
+    {
+      "selector": "body[data-ux-palette=r1]",
+      "property": "--ux-pressed",
+      "value": "#1e574f",
+      "line": 40
+    },
+    {
+      "selector": "body[data-ux1a-preview] :is(button, a, select, input):focus-visible",
+      "property": "outline",
+      "value": "3px solid var(--ux-action)",
+      "line": 46
+    },
+    {
+      "selector": "body[data-ux1a-preview] button:disabled",
+      "property": "background",
+      "value": "var(--ux-border)",
+      "line": 49
+    },
+    {
+      "selector": "body[data-ux1a-preview] button:disabled",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 49
+    },
+    {
+      "selector": "body[data-ux1a-preview] h1:focus",
+      "property": "outline",
+      "value": "none",
+      "line": 50
+    },
+    {
+      "selector": "body[data-ux1a-preview] .bg-black\\/80",
+      "property": "background",
+      "value": "color-mix(in srgb, var(--ux-ink) 36%, transparent)",
+      "line": 51
+    },
+    {
+      "selector": ".ux-skip",
+      "property": "background",
+      "value": "var(--ux-surface)",
+      "line": 52
+    },
+    {
+      "selector": ".ux-watermark",
+      "property": "background",
+      "value": "var(--ux-soft)",
+      "line": 54
+    },
+    {
+      "selector": ".ux-watermark",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 54
+    },
+    {
+      "selector": ".ux-watermark button",
+      "property": "color",
+      "value": "var(--ux-action)",
+      "line": 56
+    },
+    {
+      "selector": ".ux-review-bar",
+      "property": "background",
+      "value": "var(--ux-mint)",
+      "line": 57
+    },
+    {
+      "selector": ".ux-review-bar",
+      "property": "color",
+      "value": "var(--ux-ink)",
+      "line": 57
+    },
+    {
+      "selector": ".ux-phone",
+      "property": "background",
+      "value": "var(--ux-page)",
+      "line": 62
+    },
+    {
+      "selector": ".ux-review-notes",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 63
+    },
+    {
+      "selector": ".ux-review-notes h2",
+      "property": "color",
+      "value": "var(--ux-ink)",
+      "line": 64
+    },
+    {
+      "selector": ".ux-lab-controls",
+      "property": "background",
+      "value": "var(--ux-surface)",
+      "line": 66
+    },
+    {
+      "selector": ".ux-lab-controls",
+      "property": "border-bottom",
+      "value": "1px dashed var(--ux-border)",
+      "line": 66
+    },
+    {
+      "selector": ".ux-lab-controls",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 66
+    },
+    {
+      "selector": ".ux-lab-controls select",
+      "property": "background",
+      "value": "var(--ux-page)",
+      "line": 68
+    },
+    {
+      "selector": ".ux-home-header, .ux-subhead",
+      "property": "background",
+      "value": "var(--ux-surface)",
+      "line": 71
+    },
+    {
+      "selector": ".ux-home-header, .ux-subhead",
+      "property": "border-bottom",
+      "value": "1px solid var(--ux-border)",
+      "line": 71
+    },
+    {
+      "selector": ".ux-brand > span",
+      "property": "color",
+      "value": "var(--ux-ink)",
+      "line": 73
+    },
+    {
+      "selector": ".ux-brand > span",
+      "property": "background",
+      "value": "var(--ux-mint)",
+      "line": 73
+    },
+    {
+      "selector": ".ux-header-actions button, .ux-icon",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 75
+    },
+    {
+      "selector": ".ux-preview-chip",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 77
+    },
+    {
+      "selector": ".ux-home-intro",
+      "property": "background",
+      "value": "var(--ux-surface)",
+      "line": 80
+    },
+    {
+      "selector": ".ux-search",
+      "property": "border",
+      "value": "1px solid var(--ux-border)",
+      "line": 82
+    },
+    {
+      "selector": ".ux-search",
+      "property": "background",
+      "value": "var(--ux-page)",
+      "line": 82
+    },
+    {
+      "selector": ".ux-search",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 82
+    },
+    {
+      "selector": ".ux-channels",
+      "property": "background",
+      "value": "var(--ux-surface)",
+      "line": 85
+    },
+    {
+      "selector": ".ux-channels a",
+      "property": "color",
+      "value": "var(--ux-ink)",
+      "line": 86
+    },
+    {
+      "selector": ".ux-channels a > span",
+      "property": "background",
+      "value": "var(--ux-soft)",
+      "line": 87
+    },
+    {
+      "selector": ".ux-channels a > span",
+      "property": "color",
+      "value": "var(--ux-action)",
+      "line": 87
+    },
+    {
+      "selector": ".ux-tabs button",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 90
+    },
+    {
+      "selector": ".ux-tabs button[aria-selected=true]",
+      "property": "color",
+      "value": "var(--ux-ink)",
+      "line": 91
+    },
+    {
+      "selector": ".ux-tabs button[aria-selected=true]::after",
+      "property": "background",
+      "value": "var(--ux-action)",
+      "line": 92
+    },
+    {
+      "selector": ".ux-feed-head > p",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 93
+    },
+    {
+      "selector": ".ux-question-card, .ux-person-card",
+      "property": "background",
+      "value": "var(--ux-surface)",
+      "line": 95
+    },
+    {
+      "selector": ".ux-question-card, .ux-person-card",
+      "property": "border",
+      "value": "1px solid var(--ux-border)",
+      "line": 95
+    },
+    {
+      "selector": ".ux-question-card, .ux-person-card",
+      "property": "box-shadow",
+      "value": "none",
+      "line": 95
+    },
+    {
+      "selector": ".ux-meta",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 96
+    },
+    {
+      "selector": ".ux-question-card > .ux-meta > span:first-child",
+      "property": "color",
+      "value": "var(--ux-action)",
+      "line": 98
+    },
+    {
+      "selector": ".ux-question-card > p, .ux-body",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 101
+    },
+    {
+      "selector": ".ux-card-foot",
+      "property": "border-top",
+      "value": "1px solid var(--ux-border)",
+      "line": 102
+    },
+    {
+      "selector": ".ux-card-foot",
+      "property": "color",
+      "value": "var(--ux-action)",
+      "line": 102
+    },
+    {
+      "selector": ".ux-endnote",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 105
+    },
+    {
+      "selector": ".ux-eyebrow",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 106
+    },
+    {
+      "selector": ".ux-avatar",
+      "property": "background",
+      "value": "var(--ux-page)",
+      "line": 108
+    },
+    {
+      "selector": ".ux-avatar",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 108
+    },
+    {
+      "selector": ".ux-avatar",
+      "property": "border",
+      "value": "1px solid var(--ux-border)",
+      "line": 108
+    },
+    {
+      "selector": ".ux-person-line p",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 111
+    },
+    {
+      "selector": ".ux-evidence",
+      "property": "border-left",
+      "value": "3px solid var(--ux-mint)",
+      "line": 112
+    },
+    {
+      "selector": ".ux-evidence span",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 114
+    },
+    {
+      "selector": ".ux-person-card > .ux-body",
+      "property": "color",
+      "value": "var(--ux-ink)",
+      "line": 115
+    },
+    {
+      "selector": ".ux-person-cta",
+      "property": "border-top",
+      "value": "1px solid var(--ux-border)",
+      "line": 116
+    },
+    {
+      "selector": ".ux-person-cta",
+      "property": "color",
+      "value": "var(--ux-action)",
+      "line": 116
+    },
+    {
+      "selector": ".ux-bottom-nav",
+      "property": "border-top",
+      "value": "1px solid var(--ux-border)",
+      "line": 117
+    },
+    {
+      "selector": ".ux-bottom-nav",
+      "property": "background",
+      "value": "var(--ux-surface)",
+      "line": 117
+    },
+    {
+      "selector": ".ux-bottom-nav > :is(a,button)",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 118
+    },
+    {
+      "selector": ".ux-bottom-nav a[aria-current=page]",
+      "property": "color",
+      "value": "var(--ux-action)",
+      "line": 119
+    },
+    {
+      "selector": ".ux-bottom-nav > .ux-create",
+      "property": "background",
+      "value": "var(--ux-action)",
+      "line": 120
+    },
+    {
+      "selector": ".ux-bottom-nav > .ux-create",
+      "property": "color",
+      "value": "var(--ux-surface)",
+      "line": 120
+    },
+    {
+      "selector": ".ux-preview-footer",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 121
+    },
+    {
+      "selector": ".ux-sheet",
+      "property": "border-color",
+      "value": "var(--ux-border)",
+      "line": 122
+    },
+    {
+      "selector": ".ux-sheet",
+      "property": "background",
+      "value": "var(--ux-surface)",
+      "line": 122
+    },
+    {
+      "selector": ".ux-sheet",
+      "property": "color",
+      "value": "var(--ux-ink)",
+      "line": 122
+    },
+    {
+      "selector": ".ux-sheet",
+      "property": "box-shadow",
+      "value": "none",
+      "line": 122
+    },
+    {
+      "selector": ".ux-sheet-header h2",
+      "property": "color",
+      "value": "var(--ux-ink)",
+      "line": 124
+    },
+    {
+      "selector": ".ux-sheet-header p",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 125
+    },
+    {
+      "selector": ".ux-intents button",
+      "property": "border",
+      "value": "1px solid var(--ux-border)",
+      "line": 127
+    },
+    {
+      "selector": ".ux-intents button",
+      "property": "background",
+      "value": "var(--ux-surface)",
+      "line": 127
+    },
+    {
+      "selector": ".ux-intents button",
+      "property": "color",
+      "value": "var(--ux-action)",
+      "line": 127
+    },
+    {
+      "selector": ".ux-intents strong",
+      "property": "color",
+      "value": "var(--ux-ink)",
+      "line": 130
+    },
+    {
+      "selector": ".ux-intents small",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 131
+    },
+    {
+      "selector": ".ux-skill-note, .ux-copy-decision, .ux-lab-note",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 132
+    },
+    {
+      "selector": ".ux-notice",
+      "property": "background",
+      "value": "var(--ux-soft)",
+      "line": 135
+    },
+    {
+      "selector": ".ux-notice",
+      "property": "border",
+      "value": "1px solid var(--ux-border)",
+      "line": 135
+    },
+    {
+      "selector": ".ux-notice",
+      "property": "color",
+      "value": "var(--ux-ink)",
+      "line": 135
+    },
+    {
+      "selector": ".ux-phone .surface-card",
+      "property": "background",
+      "value": "var(--ux-surface)",
+      "line": 137
+    },
+    {
+      "selector": ".ux-phone .surface-card",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 137
+    },
+    {
+      "selector": ".ux-phone .surface-card",
+      "property": "border",
+      "value": "1px solid var(--ux-border)",
+      "line": 137
+    },
+    {
+      "selector": ".ux-phone .surface-card",
+      "property": "box-shadow",
+      "value": "none",
+      "line": 137
+    },
+    {
+      "selector": ".ux-phone .surface-card > svg",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 138
+    },
+    {
+      "selector": ".ux-state[role=alert] .surface-card > svg",
+      "property": "color",
+      "value": "var(--ux-error)",
+      "line": 139
+    },
+    {
+      "selector": ".ux-phone .surface-card > p:first-of-type",
+      "property": "color",
+      "value": "var(--ux-ink)",
+      "line": 140
+    },
+    {
+      "selector": ".ux-phone .surface-card > p:nth-of-type(2)",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 141
+    },
+    {
+      "selector": ".ux-phone .surface-card button",
+      "property": "color",
+      "value": "var(--ux-surface)",
+      "line": 142
+    },
+    {
+      "selector": ".ux-phone .surface-card button",
+      "property": "background",
+      "value": "var(--ux-action)",
+      "line": 142
+    },
+    {
+      "selector": ".ux-question-detail",
+      "property": "background",
+      "value": "var(--ux-surface)",
+      "line": 143
+    },
+    {
+      "selector": ".ux-question-detail h1",
+      "property": "color",
+      "value": "var(--ux-ink)",
+      "line": 144
+    },
+    {
+      "selector": ".ux-topics > span",
+      "property": "background",
+      "value": "var(--ux-page)",
+      "line": 146
+    },
+    {
+      "selector": ".ux-topics > span",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 146
+    },
+    {
+      "selector": ".ux-context h2",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 148
+    },
+    {
+      "selector": ".ux-budget",
+      "property": "border-top",
+      "value": "1px solid var(--ux-border)",
+      "line": 150
+    },
+    {
+      "selector": ".ux-budget",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 150
+    },
+    {
+      "selector": ".ux-closed",
+      "property": "background",
+      "value": "var(--ux-page)",
+      "line": 152
+    },
+    {
+      "selector": ".ux-closed",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 152
+    },
+    {
+      "selector": ".ux-answers",
+      "property": "background",
+      "value": "var(--ux-surface)",
+      "line": 154
+    },
+    {
+      "selector": ".ux-section-title > span",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 157
+    },
+    {
+      "selector": ".ux-answer + .ux-answer",
+      "property": "border-top",
+      "value": "1px solid var(--ux-border)",
+      "line": 159
+    },
+    {
+      "selector": ".ux-related",
+      "property": "color",
+      "value": "var(--ux-action)",
+      "line": 161
+    },
+    {
+      "selector": ".ux-related",
+      "property": "border-top",
+      "value": "1px solid var(--ux-border)",
+      "line": 161
+    },
+    {
+      "selector": ".ux-related > span",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 163
+    },
+    {
+      "selector": ".ux-related strong",
+      "property": "color",
+      "value": "var(--ux-action)",
+      "line": 164
+    },
+    {
+      "selector": ".ux-answer-actions button",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 166
+    },
+    {
+      "selector": ".ux-reply",
+      "property": "background",
+      "value": "var(--ux-page)",
+      "line": 167
+    },
+    {
+      "selector": ".ux-reply button",
+      "property": "color",
+      "value": "var(--ux-action)",
+      "line": 170
+    },
+    {
+      "selector": ".ux-action",
+      "property": "background",
+      "value": "var(--ux-action)",
+      "line": 171
+    },
+    {
+      "selector": ".ux-action",
+      "property": "color",
+      "value": "var(--ux-surface)",
+      "line": 171
+    },
+    {
+      "selector": ".ux-detail-actions",
+      "property": "border-top",
+      "value": "1px solid var(--ux-border)",
+      "line": 172
+    },
+    {
+      "selector": ".ux-detail-actions",
+      "property": "background",
+      "value": "var(--ux-surface)",
+      "line": 172
+    },
+    {
+      "selector": ".ux-detail-actions > span",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 173
+    },
+    {
+      "selector": ".ux-person-intro",
+      "property": "background",
+      "value": "var(--ux-surface)",
+      "line": 174
+    },
+    {
+      "selector": ".ux-person-intro",
+      "property": "border-top",
+      "value": "4px solid var(--ux-mint)",
+      "line": 174
+    },
+    {
+      "selector": ".ux-experiences",
+      "property": "background",
+      "value": "var(--ux-surface)",
+      "line": 180
+    },
+    {
+      "selector": ".ux-experience-story + .ux-experience-story",
+      "property": "border-top",
+      "value": "1px solid var(--ux-border)",
+      "line": 181
+    },
+    {
+      "selector": ".ux-experience-period",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 182
+    },
+    {
+      "selector": ".ux-expand",
+      "property": "color",
+      "value": "var(--ux-action)",
+      "line": 185
+    },
+    {
+      "selector": ".ux-transition > div",
+      "property": "color",
+      "value": "var(--ux-ink)",
+      "line": 188
+    },
+    {
+      "selector": ".ux-transition .text-slate-400",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 190
+    },
+    {
+      "selector": ".ux-shareable",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 192
+    },
+    {
+      "selector": ".ux-person-question",
+      "property": "background",
+      "value": "var(--ux-surface)",
+      "line": 193
+    },
+    {
+      "selector": ".ux-person-question button",
+      "property": "border-bottom",
+      "value": "1px solid var(--ux-border)",
+      "line": 194
+    },
+    {
+      "selector": ".ux-person-question button",
+      "property": "color",
+      "value": "var(--ux-action)",
+      "line": 194
+    },
+    {
+      "selector": ".ux-ask-person",
+      "property": "background",
+      "value": "var(--ux-surface)",
+      "line": 196
+    },
+    {
+      "selector": ".ux-ask-person p > span",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 198
+    },
+    {
+      "selector": ".ux-search input",
+      "property": "background",
+      "value": "transparent",
+      "line": 202
+    },
+    {
+      "selector": ".ux-search input::placeholder",
+      "property": "color",
+      "value": "var(--ux-muted)",
+      "line": 203
+    },
+    {
+      "selector": ".ux-action:hover, .ux-create:hover, .ux-phone .surface-card button:hover",
+      "property": "background",
+      "value": "var(--ux-hover)",
+      "line": 207
+    },
+    {
+      "selector": ".ux-action:hover, .ux-create:hover, .ux-phone .surface-card button:hover",
+      "property": "color",
+      "value": "var(--ux-surface)",
+      "line": 207
+    },
+    {
+      "selector": ".ux-intents button:hover",
+      "property": "background",
+      "value": "var(--ux-soft)",
+      "line": 208
+    },
+    {
+      "selector": ".ux-action:active, .ux-create:active",
+      "property": "background",
+      "value": "var(--ux-pressed)",
+      "line": 210
+    }
+  ],
+  "interpretation": "Every R1 color declaration audited; R2 consolidates into scoped semantic roles. Controlled R1 palette uses original base roles on identical R2 composition; original R1 captures remain unchanged.",
+  "measuredRoles": [
+    {
+      "palette": "r1",
+      "roles": {
+        "mint": "#79d5c7",
+        "soft": "#e7f6f2",
+        "action": "#2b7f73",
+        "page": "#fafcfb",
+        "surface": "#ffffff",
+        "ink": "#1e293b",
+        "muted": "#536960",
+        "border": "#e1eae7",
+        "hover": "#246a60",
+        "pressed": "#1e574f",
+        "error": "#a94736"
+      },
+      "contrast": [
+        {
+          "selector": ".ux-question-detail h1",
+          "fg": "rgb(30, 41, 59)",
+          "bg": "rgb(255, 255, 255)",
+          "ratio": 14.628718079350337
+        },
+        {
+          "selector": ".ux-context p",
+          "fg": "rgb(30, 41, 59)",
+          "bg": "rgb(255, 255, 255)",
+          "ratio": 14.628718079350337
+        },
+        {
+          "selector": ".ux-meta",
+          "fg": "rgb(83, 105, 96)",
+          "bg": "rgb(255, 255, 255)",
+          "ratio": 5.903294381434713
+        },
+        {
+          "selector": ".ux-action",
+          "fg": "rgb(255, 255, 255)",
+          "bg": "rgb(43, 127, 115)",
+          "ratio": 4.787931177688272
+        },
+        {
+          "selector": ".ux-answer-body",
+          "fg": "rgb(30, 41, 59)",
+          "bg": "rgb(255, 255, 255)",
+          "ratio": 14.628718079350337
+        },
+        {
+          "selector": ".ux-topics > span",
+          "fg": "rgb(83, 105, 96)",
+          "bg": "rgb(250, 252, 251)",
+          "ratio": 5.729559605216872
+        },
+        {
+          "selector": ".ux-watermark",
+          "fg": "rgb(83, 105, 96)",
+          "bg": "rgb(231, 246, 242)",
+          "ratio": 5.302353826864315
+        }
+      ]
+    },
+    {
+      "palette": "r2",
+      "roles": {
+        "mint": "#8adfd6",
+        "soft": "#ecf9f7",
+        "action": "#207b77",
+        "page": "#f7fafa",
+        "surface": "#ffffff",
+        "ink": "#23313a",
+        "muted": "#53666a",
+        "border": "#e1ebea",
+        "hover": "#196662",
+        "pressed": "#135653",
+        "error": "#a94736"
+      },
+      "contrast": [
+        {
+          "selector": ".ux-question-detail h1",
+          "fg": "rgb(35, 49, 58)",
+          "bg": "rgb(255, 255, 255)",
+          "ratio": 13.359732692784618
+        },
+        {
+          "selector": ".ux-context p",
+          "fg": "rgb(35, 49, 58)",
+          "bg": "rgb(255, 255, 255)",
+          "ratio": 13.359732692784618
+        },
+        {
+          "selector": ".ux-meta",
+          "fg": "rgb(83, 102, 106)",
+          "bg": "rgb(255, 255, 255)",
+          "ratio": 6.040610249501943
+        },
+        {
+          "selector": ".ux-action",
+          "fg": "rgb(255, 255, 255)",
+          "bg": "rgb(32, 123, 119)",
+          "ratio": 5.046887189769318
+        },
+        {
+          "selector": ".ux-answer-body",
+          "fg": "rgb(35, 49, 58)",
+          "bg": "rgb(255, 255, 255)",
+          "ratio": 13.359732692784618
+        },
+        {
+          "selector": ".ux-topics > span",
+          "fg": "rgb(83, 102, 106)",
+          "bg": "rgb(247, 250, 250)",
+          "ratio": 5.755694723686291
+        },
+        {
+          "selector": ".ux-watermark",
+          "fg": "rgb(83, 102, 106)",
+          "bg": "rgb(236, 249, 247)",
+          "ratio": 5.597610930023664
+        }
+      ]
+    }
+  ]
+}

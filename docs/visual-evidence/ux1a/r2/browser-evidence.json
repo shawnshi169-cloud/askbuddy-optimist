@@ -1,0 +1,3740 @@
+{
+  "revision": "UX1A-R2",
+  "data": "synthetic presentation only",
+  "browser": "123.0.6312.59",
+  "testedAt": "2026-10-17T17:03:50.838Z",
+  "matrices": [
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/?mode=people",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/question",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/question?state=multiple",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/question?state=long",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/question?state=replies",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/question?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/question?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/question?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/question?state=missing",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/question?state=closed",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/question?state=partial",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/person",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/person?state=multiple",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/person?state=long",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/person?state=short",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/person?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/person?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/person?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/person?state=missing",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/person?state=partial",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/search",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/channel/education-learning",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/channel/career-development",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/channel/lifestyle-services",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "user",
+      "path": "/channel/hobbies-skills",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/?mode=people",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/question",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/question?state=multiple",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/question?state=long",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/question?state=replies",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/question?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/question?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/question?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/question?state=missing",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/question?state=closed",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/question?state=partial",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/person",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/person?state=multiple",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/person?state=long",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/person?state=short",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/person?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/person?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/person?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/person?state=missing",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/person?state=partial",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/search",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/channel/education-learning",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/channel/career-development",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/channel/lifestyle-services",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 320,
+      "view": "lab",
+      "path": "/channel/hobbies-skills",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/?mode=people",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/question",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/question?state=multiple",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/question?state=long",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/question?state=replies",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/question?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/question?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/question?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/question?state=missing",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/question?state=closed",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/question?state=partial",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/person",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/person?state=multiple",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/person?state=long",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/person?state=short",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/person?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/person?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/person?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/person?state=missing",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/person?state=partial",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/search",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/channel/education-learning",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/channel/career-development",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/channel/lifestyle-services",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "user",
+      "path": "/channel/hobbies-skills",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/?mode=people",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/question",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/question?state=multiple",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/question?state=long",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/question?state=replies",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/question?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/question?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/question?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/question?state=missing",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/question?state=closed",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/question?state=partial",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/person",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/person?state=multiple",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/person?state=long",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/person?state=short",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/person?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/person?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/person?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/person?state=missing",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/person?state=partial",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/search",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/channel/education-learning",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/channel/career-development",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/channel/lifestyle-services",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 375,
+      "view": "lab",
+      "path": "/channel/hobbies-skills",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/?mode=people",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/question",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/question?state=multiple",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/question?state=long",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/question?state=replies",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/question?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/question?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/question?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/question?state=missing",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/question?state=closed",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/question?state=partial",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/person",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/person?state=multiple",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/person?state=long",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/person?state=short",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/person?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/person?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/person?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/person?state=missing",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/person?state=partial",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/search",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/channel/education-learning",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/channel/career-development",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/channel/lifestyle-services",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "user",
+      "path": "/channel/hobbies-skills",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/?mode=people",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/question",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/question?state=multiple",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/question?state=long",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/question?state=replies",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/question?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/question?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/question?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/question?state=missing",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/question?state=closed",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/question?state=partial",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/person",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/person?state=multiple",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/person?state=long",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/person?state=short",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/person?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/person?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/person?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/person?state=missing",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/person?state=partial",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/search",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/channel/education-learning",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/channel/career-development",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/channel/lifestyle-services",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 390,
+      "view": "lab",
+      "path": "/channel/hobbies-skills",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/?mode=people",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/question",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/question?state=multiple",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/question?state=long",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/question?state=replies",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/question?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/question?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/question?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/question?state=missing",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/question?state=closed",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/question?state=partial",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/person",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/person?state=multiple",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/person?state=long",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/person?state=short",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/person?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/person?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/person?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/person?state=missing",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/person?state=partial",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/search",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/channel/education-learning",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/channel/career-development",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/channel/lifestyle-services",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "user",
+      "path": "/channel/hobbies-skills",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/?mode=people",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/question",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/question?state=multiple",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/question?state=long",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/question?state=replies",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/question?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/question?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/question?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/question?state=missing",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/question?state=closed",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/question?state=partial",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/person",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/person?state=multiple",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/person?state=long",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/person?state=short",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/person?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/person?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/person?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/person?state=missing",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/person?state=partial",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/search",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/channel/education-learning",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/channel/career-development",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/channel/lifestyle-services",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 430,
+      "view": "lab",
+      "path": "/channel/hobbies-skills",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/?mode=people",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/question",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/question?state=multiple",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/question?state=long",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/question?state=replies",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/question?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/question?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/question?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/question?state=missing",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/question?state=closed",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/question?state=partial",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/person",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/person?state=multiple",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/person?state=long",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/person?state=short",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/person?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/person?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/person?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/person?state=missing",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/person?state=partial",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/search",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/channel/education-learning",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/channel/career-development",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/channel/lifestyle-services",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "user",
+      "path": "/channel/hobbies-skills",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/?mode=people",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/question",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/question?state=multiple",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/question?state=long",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/question?state=replies",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/question?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/question?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/question?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/question?state=missing",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/question?state=closed",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/question?state=partial",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/person",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/person?state=multiple",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/person?state=long",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/person?state=short",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/person?state=empty",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/person?state=loading",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/person?state=error",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/person?state=missing",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/person?state=partial",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/search",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/channel/education-learning",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/channel/career-development",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/channel/lifestyle-services",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    },
+    {
+      "width": 1200,
+      "view": "lab",
+      "path": "/channel/hobbies-skills",
+      "horizontalOverflow": 0,
+      "minimumTarget": 44,
+      "minimumText": 12
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "r1-palette-home-questions-320.jpg",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "path": "#/?view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": false,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-home-questions-320.jpg",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "path": "#/?view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": false,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-home-persons-320.jpg",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "path": "#/?mode=people&view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": false,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-home-persons-320.jpg",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "path": "#/?mode=people&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": false,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-question-multiple-320.jpg",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "path": "#/question?state=multiple&view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-question-multiple-320.jpg",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "path": "#/question?state=multiple&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-person-multiple-320.jpg",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "path": "#/person?state=multiple&view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-person-multiple-320.jpg",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "path": "#/person?state=multiple&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-create-sheet-320.jpg",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "path": "#/?view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": false,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-create-sheet-320.jpg",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "path": "#/?view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": false,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-person-empty-320.jpg",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "path": "#/person?state=empty&view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-person-empty-320.jpg",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "path": "#/person?state=empty&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-question-error-320.jpg",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "path": "#/question?state=error&view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-question-error-320.jpg",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "path": "#/question?state=error&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-home-questions-375.jpg",
+      "viewport": {
+        "width": 375,
+        "height": 844
+      },
+      "path": "#/?view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": false,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-home-questions-375.jpg",
+      "viewport": {
+        "width": 375,
+        "height": 844
+      },
+      "path": "#/?view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": false,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-home-persons-375.jpg",
+      "viewport": {
+        "width": 375,
+        "height": 844
+      },
+      "path": "#/?mode=people&view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": false,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-home-persons-375.jpg",
+      "viewport": {
+        "width": 375,
+        "height": 844
+      },
+      "path": "#/?mode=people&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": false,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-question-multiple-375.jpg",
+      "viewport": {
+        "width": 375,
+        "height": 844
+      },
+      "path": "#/question?state=multiple&view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-question-multiple-375.jpg",
+      "viewport": {
+        "width": 375,
+        "height": 844
+      },
+      "path": "#/question?state=multiple&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-person-multiple-375.jpg",
+      "viewport": {
+        "width": 375,
+        "height": 844
+      },
+      "path": "#/person?state=multiple&view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-person-multiple-375.jpg",
+      "viewport": {
+        "width": 375,
+        "height": 844
+      },
+      "path": "#/person?state=multiple&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-create-sheet-375.jpg",
+      "viewport": {
+        "width": 375,
+        "height": 844
+      },
+      "path": "#/?view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": false,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-create-sheet-375.jpg",
+      "viewport": {
+        "width": 375,
+        "height": 844
+      },
+      "path": "#/?view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": false,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-person-empty-375.jpg",
+      "viewport": {
+        "width": 375,
+        "height": 844
+      },
+      "path": "#/person?state=empty&view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-person-empty-375.jpg",
+      "viewport": {
+        "width": 375,
+        "height": 844
+      },
+      "path": "#/person?state=empty&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-question-error-375.jpg",
+      "viewport": {
+        "width": 375,
+        "height": 844
+      },
+      "path": "#/question?state=error&view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-question-error-375.jpg",
+      "viewport": {
+        "width": 375,
+        "height": 844
+      },
+      "path": "#/question?state=error&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-home-questions-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "#/?view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": false,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-home-questions-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "#/?view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": false,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-home-persons-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "#/?mode=people&view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": false,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-home-persons-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "#/?mode=people&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": false,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-question-multiple-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "#/question?state=multiple&view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-question-multiple-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "#/question?state=multiple&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-person-multiple-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "#/person?state=multiple&view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-person-multiple-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "#/person?state=multiple&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-create-sheet-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "#/?view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": false,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-create-sheet-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "#/?view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": false,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-person-empty-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "#/person?state=empty&view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-person-empty-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "#/person?state=empty&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-question-error-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "#/question?state=error&view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-question-error-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "#/question?state=error&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-home-questions-430.jpg",
+      "viewport": {
+        "width": 430,
+        "height": 844
+      },
+      "path": "#/?view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": false,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-home-questions-430.jpg",
+      "viewport": {
+        "width": 430,
+        "height": 844
+      },
+      "path": "#/?view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": false,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-home-persons-430.jpg",
+      "viewport": {
+        "width": 430,
+        "height": 844
+      },
+      "path": "#/?mode=people&view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": false,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-home-persons-430.jpg",
+      "viewport": {
+        "width": 430,
+        "height": 844
+      },
+      "path": "#/?mode=people&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": false,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-question-multiple-430.jpg",
+      "viewport": {
+        "width": 430,
+        "height": 844
+      },
+      "path": "#/question?state=multiple&view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-question-multiple-430.jpg",
+      "viewport": {
+        "width": 430,
+        "height": 844
+      },
+      "path": "#/question?state=multiple&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-person-multiple-430.jpg",
+      "viewport": {
+        "width": 430,
+        "height": 844
+      },
+      "path": "#/person?state=multiple&view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-person-multiple-430.jpg",
+      "viewport": {
+        "width": 430,
+        "height": 844
+      },
+      "path": "#/person?state=multiple&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-create-sheet-430.jpg",
+      "viewport": {
+        "width": 430,
+        "height": 844
+      },
+      "path": "#/?view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": false,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-create-sheet-430.jpg",
+      "viewport": {
+        "width": 430,
+        "height": 844
+      },
+      "path": "#/?view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": false,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-person-empty-430.jpg",
+      "viewport": {
+        "width": 430,
+        "height": 844
+      },
+      "path": "#/person?state=empty&view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-person-empty-430.jpg",
+      "viewport": {
+        "width": 430,
+        "height": 844
+      },
+      "path": "#/person?state=empty&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r1-palette-question-error-430.jpg",
+      "viewport": {
+        "width": 430,
+        "height": 844
+      },
+      "path": "#/question?state=error&view=user&palette=r1&hero=none",
+      "palette": "r1",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-question-error-430.jpg",
+      "viewport": {
+        "width": 430,
+        "height": 844
+      },
+      "path": "#/question?state=error&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": true,
+      "comparison": "Same R2 content/layout/type/view; palette only",
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-home-questions-compact-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "#/?mode=questions&view=user&palette=r2&hero=compact",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": false,
+      "comparison": null,
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-home-people-compact-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "#/?mode=people&view=user&palette=r2&hero=compact",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": false,
+      "comparison": null,
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-long-answer-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "#/question?state=long&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": true,
+      "comparison": null,
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-replies-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "#/question?state=replies&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": true,
+      "comparison": null,
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-short-experience-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "#/person?state=short&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": true,
+      "comparison": null,
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-partial-person-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "#/person?state=partial&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": true,
+      "comparison": null,
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-loading-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "#/question?state=loading&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": true,
+      "comparison": null,
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-lab-390.jpg",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "path": "#/?view=lab&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "lab",
+      "fullPage": false,
+      "comparison": null,
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-zoom200-home-320.jpg",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "path": "#/?view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": false,
+      "comparison": null,
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    },
+    {
+      "file": "r2-zoom200-question-320.jpg",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "path": "#/question?state=long&view=user&palette=r2&hero=none",
+      "palette": "r2",
+      "view": "user",
+      "fullPage": false,
+      "comparison": null,
+      "revision": "UX1A-R2",
+      "data": "synthetic presentation only"
+    }
+  ],
+  "comparisons": [
+    {
+      "name": "home-questions",
+      "width": 320,
+      "identicalContentAndGeometry": true,
+      "hash": "c9e39de454ffee78dccb61e3ccc5b697897e723785603ddacc5b429e61143a99"
+    },
+    {
+      "name": "home-persons",
+      "width": 320,
+      "identicalContentAndGeometry": true,
+      "hash": "9e44dc89b6a73e83698c47a98ba4ecfa03c0d2607aaa2569654bc5e8ff624512"
+    },
+    {
+      "name": "question-multiple",
+      "width": 320,
+      "identicalContentAndGeometry": true,
+      "hash": "69c1ad34913d01b9f409d297df62360765ae4a3904f19e2ed519f356ac545404"
+    },
+    {
+      "name": "person-multiple",
+      "width": 320,
+      "identicalContentAndGeometry": true,
+      "hash": "a02bfac634cc8b36d22291a5c1408bd371daeda938d58e0430bbaf4c4a00d701"
+    },
+    {
+      "name": "create-sheet",
+      "width": 320,
+      "identicalContentAndGeometry": true,
+      "hash": "07bbf3187b14632c0fc3c679e1d7447548d55f9114391cb2a511e82e9bd09b2a"
+    },
+    {
+      "name": "person-empty",
+      "width": 320,
+      "identicalContentAndGeometry": true,
+      "hash": "4adaa5aefa5d02e699c9e3b4761d8a9b861b25d5ae2140dc2842c0a1551d6934"
+    },
+    {
+      "name": "question-error",
+      "width": 320,
+      "identicalContentAndGeometry": true,
+      "hash": "8c1e60d13e4f4b0c3266273738d2fbff0cd5fd3ca6d792bf65fdce07e0f9a2ce"
+    },
+    {
+      "name": "home-questions",
+      "width": 375,
+      "identicalContentAndGeometry": true,
+      "hash": "65d6bfe6f2952c5398ae183560363bb7ffc2b76f6a64c82a502496cc3a368c09"
+    },
+    {
+      "name": "home-persons",
+      "width": 375,
+      "identicalContentAndGeometry": true,
+      "hash": "62166d7d66924850b4bc98a013110a734e9e88e17a062aa94c9942fcd6a1e0fe"
+    },
+    {
+      "name": "question-multiple",
+      "width": 375,
+      "identicalContentAndGeometry": true,
+      "hash": "638e19b83d1de888e3f3f211a023eae3d9fc17ea89b16b0dd868fdb2af4d81ce"
+    },
+    {
+      "name": "person-multiple",
+      "width": 375,
+      "identicalContentAndGeometry": true,
+      "hash": "144833c5b23568b75e0d3e231e35a6f89eaf6c1954d6e3aa8b22d4dd507bff4d"
+    },
+    {
+      "name": "create-sheet",
+      "width": 375,
+      "identicalContentAndGeometry": true,
+      "hash": "a1a42d80da11c156d0e47c5f1eb07caff6900397dae4a2c1564c561c92cf9f07"
+    },
+    {
+      "name": "person-empty",
+      "width": 375,
+      "identicalContentAndGeometry": true,
+      "hash": "85059a270f9f76814ffa982138715f18e27c96dc760da28650ef00840df39b77"
+    },
+    {
+      "name": "question-error",
+      "width": 375,
+      "identicalContentAndGeometry": true,
+      "hash": "01926d6c52fbec633d4cb6a6c8d0a6f78b84678bcb326f97ef48ec73fb5ee6e4"
+    },
+    {
+      "name": "home-questions",
+      "width": 390,
+      "identicalContentAndGeometry": true,
+      "hash": "1bbd2acfaa4c71591c2f8517ca55bff540bb3c2374abc8ad6244fb42ccbdac46"
+    },
+    {
+      "name": "home-persons",
+      "width": 390,
+      "identicalContentAndGeometry": true,
+      "hash": "895b9581bf7ce6a3328a44d34d3331acdf41ca175bfa7b246cd7f519a5844eb3"
+    },
+    {
+      "name": "question-multiple",
+      "width": 390,
+      "identicalContentAndGeometry": true,
+      "hash": "3b4caa16aba29390a413e74b7bb8bf19aceb6e2a6afa2f4f5549a84260ef16df"
+    },
+    {
+      "name": "person-multiple",
+      "width": 390,
+      "identicalContentAndGeometry": true,
+      "hash": "d8e54ac236b70843d5e82bf0aa24ed2cc0b4b27bdd849f82614f2ad916074391"
+    },
+    {
+      "name": "create-sheet",
+      "width": 390,
+      "identicalContentAndGeometry": true,
+      "hash": "d39a212a0f8e1290c3930e03c4604586d7d827c8ea0e94036e4c297dbe16447c"
+    },
+    {
+      "name": "person-empty",
+      "width": 390,
+      "identicalContentAndGeometry": true,
+      "hash": "4f0183ceb961f09093732dfc7b99a1a60fada781c4f133a98da7861c4be5b2a9"
+    },
+    {
+      "name": "question-error",
+      "width": 390,
+      "identicalContentAndGeometry": true,
+      "hash": "7e1731fa5669c9a1bcf748d0b6c1f40a1ff0da330d53cb467d729130bf03fbf0"
+    },
+    {
+      "name": "home-questions",
+      "width": 430,
+      "identicalContentAndGeometry": true,
+      "hash": "c9565d62404486f54816a2f7e2f73946558569ecbce3dee71e39c79a26068d43"
+    },
+    {
+      "name": "home-persons",
+      "width": 430,
+      "identicalContentAndGeometry": true,
+      "hash": "ead6473c5ca173abe925a2c10af102e859759078996b18ad080197ba1af98b6a"
+    },
+    {
+      "name": "question-multiple",
+      "width": 430,
+      "identicalContentAndGeometry": true,
+      "hash": "7b48d4618b308392daf8cfe56307921c2a2d3e3c040133d535c4ea538dd9afeb"
+    },
+    {
+      "name": "person-multiple",
+      "width": 430,
+      "identicalContentAndGeometry": true,
+      "hash": "d44b9fc0100737b9c75dc5483b04ce45a45e8ffcf8d8c72903ad0bb8ee6b9e1a"
+    },
+    {
+      "name": "create-sheet",
+      "width": 430,
+      "identicalContentAndGeometry": true,
+      "hash": "52b1f0bffb29c3facff200730adbb54439c6ff14e4d5c776779c03db16675a29"
+    },
+    {
+      "name": "person-empty",
+      "width": 430,
+      "identicalContentAndGeometry": true,
+      "hash": "23a5324201e16b1e3ef660f2a2a01c9036059781430f76f8348eecb4b7a20fba"
+    },
+    {
+      "name": "question-error",
+      "width": 430,
+      "identicalContentAndGeometry": true,
+      "hash": "e292e30080c6046ba7108dd899ac230544e53a213d3974bc1b6c5c12e5fa0c8c"
+    }
+  ],
+  "checks": [
+    "290 viewport/state/view cells; no horizontal overflow; visible controls >=44px; meaningful text >=12px",
+    "Question default; keyboard tabs/visible focus; separate cards; card and author navigation; browser Back; Experience expand/collapse",
+    "Multiple/long/free Answers; missing avatar; one-level reply; correct CTA; closed readable/disabled; absent optional budget; matching fictional authors; multiple/short/empty/incomplete Experiences; no chat success",
+    "Sheet fits all widths; backdrop covers header; focus trap/Escape/backdrop/close/restore; two proposed intents; separate unopened Skill Service",
+    "Search exact all/person/question; local text only; Lab/user switch; full controls; truthful City/Bell; safe skip/deep-link Back",
+    "Both comparison palettes text contrast >=4.5:1; hover action readable; 3px keyboard focus; actual CSS colors/type recorded",
+    "200% root-font emulation at 320/390; no overflow/clipped controls; Sheet can scroll; body 16->32px; watermark/header adapt; reduced motion; no persistent storage/API calls"
+  ],
+  "requests": [
+    "/",
+    "/@react-refresh",
+    "/@repo/node_modules/.vite-ux1a/deps/@radix-ui_react-dialog.js",
+    "/@repo/node_modules/.vite-ux1a/deps/@radix-ui_react-slot.js",
+    "/@repo/node_modules/.vite-ux1a/deps/chunk-6BKLQ22S.js",
+    "/@repo/node_modules/.vite-ux1a/deps/chunk-6PXSGDAH.js",
+    "/@repo/node_modules/.vite-ux1a/deps/chunk-ANPDO4X3.js",
+    "/@repo/node_modules/.vite-ux1a/deps/chunk-DRWLMN53.js",
+    "/@repo/node_modules/.vite-ux1a/deps/chunk-G3PMV62Z.js",
+    "/@repo/node_modules/.vite-ux1a/deps/chunk-SUFV3WPD.js",
+    "/@repo/node_modules/.vite-ux1a/deps/chunk-U7P2NEEE.js",
+    "/@repo/node_modules/.vite-ux1a/deps/class-variance-authority.js",
+    "/@repo/node_modules/.vite-ux1a/deps/clsx.js",
+    "/@repo/node_modules/.vite-ux1a/deps/lucide-react.js",
+    "/@repo/node_modules/.vite-ux1a/deps/react-dom_client.js",
+    "/@repo/node_modules/.vite-ux1a/deps/react-router-dom.js",
+    "/@repo/node_modules/.vite-ux1a/deps/react.js",
+    "/@repo/node_modules/.vite-ux1a/deps/react_jsx-dev-runtime.js",
+    "/@repo/node_modules/.vite-ux1a/deps/tailwind-merge.js",
+    "/@repo/node_modules/vite/dist/client/env.mjs",
+    "/@repo/packages/shared-types/src/product-channels.ts",
+    "/@repo/src/components/common/PageStateCard.tsx",
+    "/@repo/src/components/experience/ExperienceTransitionPath.tsx",
+    "/@repo/src/components/experience/experiencePresentation.ts",
+    "/@repo/src/components/ui/button.tsx",
+    "/@repo/src/components/ui/sheet.tsx",
+    "/@repo/src/components/ui2/AppSurface.tsx",
+    "/@repo/src/index.css",
+    "/@repo/src/lib/utils.ts",
+    "/@vite/client",
+    "/main.tsx",
+    "/preview.css",
+    "/samples.ts"
+  ],
+  "typography": [
+    {
+      "selector": ".ux-question-detail h1",
+      "fontSize": "24px",
+      "lineHeight": "38.4px",
+      "weight": "600"
+    },
+    {
+      "selector": ".ux-context p",
+      "fontSize": "16px",
+      "lineHeight": "30.4px",
+      "weight": "400"
+    },
+    {
+      "selector": ".ux-meta",
+      "fontSize": "12px",
+      "lineHeight": "21px",
+      "weight": "400"
+    },
+    {
+      "selector": ".ux-action",
+      "fontSize": "15px",
+      "lineHeight": "24px",
+      "weight": "500"
+    },
+    {
+      "selector": ".ux-answer-body",
+      "fontSize": "16px",
+      "lineHeight": "30.4px",
+      "weight": "400"
+    },
+    {
+      "selector": ".ux-topics > span",
+      "fontSize": "12px",
+      "lineHeight": "18px",
+      "weight": "400"
+    },
+    {
+      "selector": ".ux-watermark",
+      "fontSize": "12px",
+      "lineHeight": "18px",
+      "weight": "400"
+    }
+  ],
+  "colors": [
+    {
+      "palette": "r1",
+      "roles": {
+        "mint": "#79d5c7",
+        "soft": "#e7f6f2",
+        "action": "#2b7f73",
+        "page": "#fafcfb",
+        "surface": "#ffffff",
+        "ink": "#1e293b",
+        "muted": "#536960",
+        "border": "#e1eae7",
+        "hover": "#246a60",
+        "pressed": "#1e574f",
+        "error": "#a94736"
+      },
+      "contrast": [
+        {
+          "selector": ".ux-question-detail h1",
+          "fg": "rgb(30, 41, 59)",
+          "bg": "rgb(255, 255, 255)",
+          "ratio": 14.628718079350337
+        },
+        {
+          "selector": ".ux-context p",
+          "fg": "rgb(30, 41, 59)",
+          "bg": "rgb(255, 255, 255)",
+          "ratio": 14.628718079350337
+        },
+        {
+          "selector": ".ux-meta",
+          "fg": "rgb(83, 105, 96)",
+          "bg": "rgb(255, 255, 255)",
+          "ratio": 5.903294381434713
+        },
+        {
+          "selector": ".ux-action",
+          "fg": "rgb(255, 255, 255)",
+          "bg": "rgb(43, 127, 115)",
+          "ratio": 4.787931177688272
+        },
+        {
+          "selector": ".ux-answer-body",
+          "fg": "rgb(30, 41, 59)",
+          "bg": "rgb(255, 255, 255)",
+          "ratio": 14.628718079350337
+        },
+        {
+          "selector": ".ux-topics > span",
+          "fg": "rgb(83, 105, 96)",
+          "bg": "rgb(250, 252, 251)",
+          "ratio": 5.729559605216872
+        },
+        {
+          "selector": ".ux-watermark",
+          "fg": "rgb(83, 105, 96)",
+          "bg": "rgb(231, 246, 242)",
+          "ratio": 5.302353826864315
+        }
+      ]
+    },
+    {
+      "palette": "r2",
+      "roles": {
+        "mint": "#8adfd6",
+        "soft": "#ecf9f7",
+        "action": "#207b77",
+        "page": "#f7fafa",
+        "surface": "#ffffff",
+        "ink": "#23313a",
+        "muted": "#53666a",
+        "border": "#e1ebea",
+        "hover": "#196662",
+        "pressed": "#135653",
+        "error": "#a94736"
+      },
+      "contrast": [
+        {
+          "selector": ".ux-question-detail h1",
+          "fg": "rgb(35, 49, 58)",
+          "bg": "rgb(255, 255, 255)",
+          "ratio": 13.359732692784618
+        },
+        {
+          "selector": ".ux-context p",
+          "fg": "rgb(35, 49, 58)",
+          "bg": "rgb(255, 255, 255)",
+          "ratio": 13.359732692784618
+        },
+        {
+          "selector": ".ux-meta",
+          "fg": "rgb(83, 102, 106)",
+          "bg": "rgb(255, 255, 255)",
+          "ratio": 6.040610249501943
+        },
+        {
+          "selector": ".ux-action",
+          "fg": "rgb(255, 255, 255)",
+          "bg": "rgb(32, 123, 119)",
+          "ratio": 5.046887189769318
+        },
+        {
+          "selector": ".ux-answer-body",
+          "fg": "rgb(35, 49, 58)",
+          "bg": "rgb(255, 255, 255)",
+          "ratio": 13.359732692784618
+        },
+        {
+          "selector": ".ux-topics > span",
+          "fg": "rgb(83, 102, 106)",
+          "bg": "rgb(247, 250, 250)",
+          "ratio": 5.755694723686291
+        },
+        {
+          "selector": ".ux-watermark",
+          "fg": "rgb(83, 102, 106)",
+          "bg": "rgb(236, 249, 247)",
+          "ratio": 5.597610930023664
+        }
+      ]
+    }
+  ],
+  "zoom": [
+    {
+      "width": 320,
+      "path": "/",
+      "emulation": "Root font-size 200%; rem text doubles; not physical device/browser text-only zoom",
+      "horizontalOverflow": 0
+    },
+    {
+      "width": 320,
+      "path": "/?mode=people",
+      "emulation": "Root font-size 200%; rem text doubles; not physical device/browser text-only zoom",
+      "horizontalOverflow": 0
+    },
+    {
+      "width": 320,
+      "path": "/question?state=long",
+      "emulation": "Root font-size 200%; rem text doubles; not physical device/browser text-only zoom",
+      "horizontalOverflow": 0
+    },
+    {
+      "width": 320,
+      "path": "/person?state=multiple",
+      "emulation": "Root font-size 200%; rem text doubles; not physical device/browser text-only zoom",
+      "horizontalOverflow": 0
+    },
+    {
+      "width": 320,
+      "path": "/search",
+      "emulation": "Root font-size 200%; rem text doubles; not physical device/browser text-only zoom",
+      "horizontalOverflow": 0
+    },
+    {
+      "width": 390,
+      "path": "/",
+      "emulation": "Root font-size 200%; rem text doubles; not physical device/browser text-only zoom",
+      "horizontalOverflow": 0
+    },
+    {
+      "width": 390,
+      "path": "/?mode=people",
+      "emulation": "Root font-size 200%; rem text doubles; not physical device/browser text-only zoom",
+      "horizontalOverflow": 0
+    },
+    {
+      "width": 390,
+      "path": "/question?state=long",
+      "emulation": "Root font-size 200%; rem text doubles; not physical device/browser text-only zoom",
+      "horizontalOverflow": 0
+    },
+    {
+      "width": 390,
+      "path": "/person?state=multiple",
+      "emulation": "Root font-size 200%; rem text doubles; not physical device/browser text-only zoom",
+      "horizontalOverflow": 0
+    },
+    {
+      "width": 390,
+      "path": "/search",
+      "emulation": "Root font-size 200%; rem text doubles; not physical device/browser text-only zoom",
+      "horizontalOverflow": 0
+    }
+  ],
+  "actionStates": {
+    "hover": {
+      "selector": ".ux-action",
+      "fg": "rgb(255, 255, 255)",
+      "bg": "rgb(25, 102, 98)",
+      "ratio": 6.734543435869072
+    },
+    "pressed": {
+      "selector": ".ux-action",
+      "fg": "rgb(255, 255, 255)",
+      "bg": "rgb(19, 86, 83)",
+      "ratio": 8.455088344184881
+    }
+  },
+  "firstScreen": [
+    {
+      "hero": "none",
+      "mode": "questions",
+      "y": 434.75,
+      "bottom": 492.34375,
+      "viewport": "390x844"
+    },
+    {
+      "hero": "none",
+      "mode": "people",
+      "y": 519.75,
+      "bottom": 570.34375,
+      "viewport": "390x844"
+    },
+    {
+      "hero": "compact",
+      "mode": "questions",
+      "y": 483.75,
+      "bottom": 541.34375,
+      "viewport": "390x844"
+    },
+    {
+      "hero": "compact",
+      "mode": "people",
+      "y": 568.75,
+      "bottom": 619.34375,
+      "viewport": "390x844"
+    }
+  ]
+}
