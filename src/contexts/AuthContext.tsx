@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { parseGetMyPrivateProfileV1Result } from '../../packages/shared-api/src/private-profile-v1';
@@ -28,6 +28,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+type AuthState = Pick<AuthContextType, 'user' | 'session' | 'profile' | 'loading'>;
+const initialState: AuthState = { user: null, session: null, profile: null, loading: true };
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
@@ -37,15 +40,40 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [state, setState] = useState<AuthState>(initialState);
+  const runtime = useRef<Pick<AuthContextType, 'refreshProfile' | 'signOut'> | null>(null);
 
-  const fetchProfile = async (userId: string) => {
-    try {
+  useEffect(() => {
+    // Each effect lifetime owns its work, including Strict Mode cleanup/remount.
+    let active = true;
+    let epoch = 0;
+    let request = 0;
+    let authRevision = 0;
+    let snapshot = initialState;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let fetching = false;
+    let signingOut = false;
+
+    const publish = (next: AuthState) => {
+      if (!active) return;
+      snapshot = next;
+      // One update prevents externally visible mixed user/session/profile states.
+      setState(next);
+    };
+    const cancelScheduled = () => {
+      if (timer !== null) clearTimeout(timer);
+      timer = null;
+    };
+    const invalidate = () => {
+      epoch += 1;
+      request += 1;
+      fetching = false;
+      cancelScheduled();
+    };
+
+    const fetchProfile = async (userId: string, isCurrent: () => boolean): Promise<Profile | null> => {
       const { data, error: profileError } = await supabase.rpc('get_my_private_profile_v1');
-
+      if (!isCurrent()) return null;
       if (profileError) throw new Error('Owner profile unavailable');
       const { profile: profileData } = parseGetMyPrivateProfileV1Result(data);
       if (!profileData || profileData.userId !== userId) {
@@ -58,11 +86,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('user_id', userId)
         .maybeSingle();
 
+      if (!isCurrent()) return null;
       if (pointError) {
-        console.warn('Error fetching point account balance:', pointError);
+        console.warn('Error fetching point account balance');
       }
 
-      setProfile({
+      return {
         user_id: profileData.userId,
         nickname: profileData.nickname,
         avatar_url: profileData.avatarUrl,
@@ -71,51 +100,110 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         phone: profileData.phone,
         city: profileData.city,
         available_balance: Number(pointAccount?.available_balance ?? 0),
-      });
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-      setProfile(null);
-    }
-  };
+      };
+    };
 
-  const refreshProfile = async () => {
-    if (user) {
-      await fetchProfile(user.id);
-    }
-  };
-
-  useEffect(() => {
-    // 设置认证状态监听器
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          // 使用 setTimeout 避免死锁
-          setTimeout(() => fetchProfile(session.user.id), 0);
-        } else {
-          setProfile(null);
+    const refreshProfile = async () => {
+      if (!active || signingOut || !snapshot.user) return;
+      cancelScheduled();
+      const userId = snapshot.user.id;
+      const ownedEpoch = epoch;
+      const ownedRequest = ++request;
+      fetching = true;
+      const isCurrent = () => active && !signingOut && epoch === ownedEpoch
+        && request === ownedRequest && snapshot.user?.id === userId;
+      try {
+        const profile = await fetchProfile(userId, isCurrent);
+        if (isCurrent()) publish({ ...snapshot, profile });
+      } catch {
+        if (isCurrent()) {
+          console.error('Error fetching profile');
+          publish({ ...snapshot, profile: null });
         }
-        
-        setLoading(false);
+      } finally {
+        if (isCurrent()) fetching = false;
+      }
+    };
+
+    const scheduleProfile = () => {
+      if (!active || signingOut || fetching || timer !== null || !snapshot.user) return;
+      const ownedEpoch = epoch;
+      const ownedRequest = request;
+      timer = setTimeout(() => {
+        if (!active || epoch !== ownedEpoch || request !== ownedRequest) return;
+        timer = null;
+        void refreshProfile();
+      }, 0);
+    };
+    const acceptSession = (session: Session | null, forceRefresh = false) => {
+      const viewerChanged = snapshot.user?.id !== session?.user?.id;
+      const sessionChanged = viewerChanged || snapshot.session?.access_token !== session?.access_token;
+      const hadPendingRead = fetching || timer !== null;
+      if (sessionChanged || !session || forceRefresh) invalidate();
+      signingOut = false;
+      publish({
+        session,
+        user: session?.user ?? null,
+        profile: viewerChanged || !session ? null : snapshot.profile,
+        loading: false,
+      });
+      if (session && (viewerChanged || !snapshot.profile || forceRefresh || (sessionChanged && hadPendingRead))) {
+        scheduleProfile();
+      }
+    };
+
+    const signOut = async () => {
+      if (!active) throw new Error('Auth provider unavailable');
+      invalidate();
+      signingOut = true;
+      const ownedRevision = ++authRevision;
+      const isCurrent = () => active && authRevision === ownedRevision;
+      try {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+        // SDK events are authoritative; a late completion cannot clear a new login.
+        if (isCurrent()) acceptSession(null);
+      } catch (error) {
+        if (isCurrent()) {
+          signingOut = false;
+          if (snapshot.loading) publish({ ...snapshot, loading: false });
+          if (!snapshot.profile) scheduleProfile();
+        }
+        throw error;
+      }
+    };
+    runtime.current = { refreshProfile, signOut };
+    publish(initialState);
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (!active || (event === 'INITIAL_SESSION' && authRevision > 0)) return;
+        authRevision += 1;
+        acceptSession(event === 'SIGNED_OUT' ? null : session, event === 'USER_UPDATED');
       }
     );
 
-    // 获取初始会话
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        fetchProfile(session.user.id);
+    // Initialization is only a fallback until the first authoritative Auth event.
+    void supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (!active || authRevision > 0) return;
+      if (error) throw error;
+      acceptSession(session);
+    }).catch(() => {
+      if (active && authRevision === 0) {
+        console.warn('Error initializing auth session');
+        publish({ ...initialState, loading: false });
       }
-      
-      setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      active = false;
+      invalidate();
+      runtime.current = null;
+      subscription.unsubscribe();
+    };
   }, []);
+
+  const refreshProfile = async () => { await runtime.current?.refreshProfile(); };
 
   const signUp = async (email: string, password: string, nickname?: string) => {
     try {
@@ -152,17 +240,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
-    setProfile(null);
+    if (!runtime.current) throw new Error('Auth provider unavailable');
+    await runtime.current.signOut();
   };
 
   const value = {
-    user,
-    session,
-    profile,
-    loading,
+    ...state,
     signUp,
     signIn,
     signOut,

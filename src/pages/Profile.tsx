@@ -54,9 +54,14 @@ const Profile = () => {
 
   const handleLogout = async () => {
     setLoggingOut(true);
-    await signOut();
-    setLoggingOut(false);
-    toast({ title: '已退出登录' });
+    try {
+      await signOut();
+      toast({ title: '已退出登录' });
+    } catch {
+      toast({ title: '退出登录失败', description: '未能完成退出登录，请重试。', variant: 'destructive' });
+    } finally {
+      setLoggingOut(false);
+    }
   };
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
