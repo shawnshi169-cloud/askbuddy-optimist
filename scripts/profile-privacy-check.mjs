@@ -4,6 +4,7 @@ import { join } from "node:path";
 import vm from "node:vm";
 import ts from "typescript";
 import { auditProfileReads, PUBLIC_PROFILE_COLUMNS } from "./lib/profile-read-boundary.mjs";
+import { flushPromises, mountAuthProvider } from "./lib/auth-provider-harness.mjs";
 
 const read = (path) => readFileSync(path, "utf8");
 const compile = (path, dependencies = {}) => {
@@ -54,17 +55,7 @@ assert.throws(() => parse({ profile: { ...privateProfile, phone: 123 } }));
 assert.throws(() => parse({ profile: { userId: privateProfile.userId } }));
 
 // Exercise AuthContext's real fetch path: private RPC only, unchanged point-account source.
-const states = [];
 const authCalls = [];
-const react = {
-  createContext: () => ({ Provider: {} }),
-  useContext: () => undefined,
-  useState: (initial) => {
-    const index = states.push(initial) - 1;
-    return [initial, (value) => { states[index] = value; }];
-  },
-  useEffect: (effect) => effect(),
-};
 const profileClient = {
   rpc: async (...args) => {
     assert.deepEqual(args, ["get_my_private_profile_v1"]);
@@ -86,17 +77,15 @@ const profileClient = {
     getSession: async () => ({ data: { session: { user: { id: privateProfile.userId } } } }),
   },
 };
-const { AuthProvider } = compile("src/contexts/AuthContext.tsx", {
-  react: { ...react, default: { createElement: () => null } },
-  "@/integrations/supabase/client": { supabase: profileClient },
-  "../../packages/shared-api/src/private-profile-v1": { parseGetMyPrivateProfileV1Result: parse },
-});
-AuthProvider({ children: null });
-for (let i = 0; i < 8; i++) await Promise.resolve();
+const provider = mountAuthProvider(profileClient);
+await flushPromises();
+provider.runTimers();
+await flushPromises();
 assert.deepEqual(authCalls, ["owner-private"]);
-assert.equal(states[2]?.user_id, privateProfile.userId);
-assert.equal(states[2]?.available_balance, 17);
-assert.equal(Object.hasOwn(states[2], "id"), false);
+assert.equal(provider.value.profile?.user_id, privateProfile.userId);
+assert.equal(provider.value.profile?.available_balance, 17);
+assert.equal(Object.hasOwn(provider.value.profile, "id"), false);
+provider.unmount();
 
 let updatePayload;
 const { useUpdateProfile } = compile("src/hooks/useProfile.ts", {
